@@ -1,0 +1,685 @@
+import { supabase } from './supabase'
+import type { Post as PostType, Comment as CommentType, User } from '../types'
+
+// 使用导入的类型别名
+type Post = PostType;
+type Comment = CommentType;
+
+export interface Like {
+  id: string
+  post_id: string
+  user_id: string
+  created_at: string
+}
+
+export interface Follow {
+  id: string
+  follower_id: string
+  following_id: string
+  created_at: string
+}
+
+class SocialService {
+  // 获取帖子列表
+  async getPosts(page: number = 1, limit: number = 10, category?: string): Promise<Post[]> {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(category && { category })
+      });
+      
+      const response = await fetch(`/api/posts?${params}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.posts || data; // 兼容不同的返回格式
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      throw error;
+    }
+  }
+
+  // 获取帖子列表（带分页信息）
+  async getPostsWithPagination(page: number = 1, limit: number = 10, category?: string): Promise<{ posts: Post[]; total: number }> {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(category && { category })
+      });
+      
+      const response = await fetch(`/api/posts?${params}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      throw error;
+    }
+  }
+
+  // 获取热门帖子
+  async getPopularPosts(limit = 10): Promise<Post[]> {
+    try {
+      const response = await fetch(`/api/posts/popular?limit=${limit}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching popular posts:', error);
+      throw error;
+    }
+  }
+
+  // 获取单个帖子
+  async getPost(id: string): Promise<Post | null> {
+    try {
+      const response = await fetch(`/api/posts/${id}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching post:', error);
+      throw error;
+    }
+  }
+
+  // 创建帖子
+  async createPost(post: Omit<Post, 'id' | 'created_at' | 'updated_at' | 'likes_count' | 'comments_count' | 'status'>): Promise<Post> {
+    try {
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(post),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error creating post:', error);
+      throw error;
+    }
+  }
+
+  // 点赞帖子
+  async likePost(postId: string, userId: string): Promise<void> {
+    try {
+      // 从localStorage获取认证token
+      const sessionData = localStorage.getItem('supabase.auth.token');
+      if (!sessionData) {
+        throw new Error('用户未登录，请先登录');
+      }
+      
+      const session = JSON.parse(sessionData);
+      const accessToken = session.access_token;
+      
+      if (!accessToken) {
+        throw new Error('认证token无效，请重新登录');
+      }
+      
+      const response = await fetch(`/api/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ user_id: userId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error liking post:', error);
+      throw error;
+    }
+  }
+
+  // 检查用户是否已点赞帖子
+  async isPostLiked(postId: string, userId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/posts/${postId}/likes/${userId}`);
+      if (response.status === 404) {
+        return false;
+      }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.isLiked || false;
+    } catch (error) {
+      console.error('Error checking if post is liked:', error);
+      return false;
+    }
+  }
+
+  // 获取帖子点赞数
+  async getPostLikesCount(postId: string): Promise<number> {
+    try {
+      const response = await fetch(`/api/posts/${postId}/likes/count`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.count || 0;
+    } catch (error) {
+      console.error('Error fetching post likes count:', error);
+      return 0;
+    }
+  }
+
+  // 获取帖子评论数量
+  async getPostCommentsCount(postId: string): Promise<number> {
+    try {
+      const response = await fetch(`/api/comments/${postId}/count`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.data?.count || 0;
+    } catch (error) {
+      console.error('Error fetching post comments count:', error);
+      return 0;
+    }
+  }
+
+  // 分享帖子 - 纯前端操作，不需要登录
+  async sharePost(postId: string): Promise<void> {
+    try {
+      // 构建分享链接
+      const shareUrl = `${window.location.origin}/post/${postId}`;
+      
+      // 检查是否支持Web Share API
+      if (navigator.share) {
+        await navigator.share({
+          title: '分享帖子',
+          text: '查看这个有趣的帖子',
+          url: shareUrl
+        });
+      } else {
+        // 降级方案：复制链接到剪贴板
+        await navigator.clipboard.writeText(shareUrl);
+        // 可以在这里添加一个提示，告诉用户链接已复制
+        console.log('分享链接已复制到剪贴板:', shareUrl);
+      }
+    } catch (error) {
+      console.error('Error sharing post:', error);
+      // 如果所有方法都失败，至少提供一个友好的错误信息
+      throw new Error('分享功能暂时不可用，请稍后再试');
+    }
+  }
+
+  // 获取帖子评论
+  async getPostComments(postId: string): Promise<Comment[]> {
+    try {
+      const response = await fetch(`/api/posts/${postId}/comments`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      throw error;
+    }
+  }
+
+  // 添加评论
+  async addComment(comment: {
+    post_id: string
+    user_id: string
+    content: string
+  }): Promise<Comment> {
+    try {
+      // 从localStorage获取认证token
+      const sessionData = localStorage.getItem('supabase.auth.token');
+      if (!sessionData) {
+        throw new Error('用户未登录，请先登录');
+      }
+      
+      const session = JSON.parse(sessionData);
+      const accessToken = session.access_token;
+      
+      if (!accessToken) {
+        throw new Error('认证token无效，请重新登录');
+      }
+      
+      const response = await fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(comment),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error creating comment:', error);
+      throw error;
+    }
+  }
+
+  // 删除评论
+  async deleteComment(commentId: string, userId: string): Promise<void> {
+    try {
+      // 从localStorage获取认证token
+      const sessionData = localStorage.getItem('supabase.auth.token');
+      if (!sessionData) {
+        throw new Error('用户未登录，请先登录');
+      }
+      
+      const session = JSON.parse(sessionData);
+      const accessToken = session.access_token;
+      
+      if (!accessToken) {
+        throw new Error('认证token无效，请重新登录');
+      }
+      
+      const response = await fetch(`/api/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ user_id: userId })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      throw error;
+    }
+  }
+
+  // 关注用户
+  async followUser(followerId: string, followingId: string): Promise<void> {
+    try {
+      // 从localStorage获取认证token
+      const sessionData = localStorage.getItem('supabase.auth.token');
+      if (!sessionData) {
+        throw new Error('用户未登录，请先登录');
+      }
+      
+      const session = JSON.parse(sessionData);
+      const accessToken = session.access_token;
+      
+      if (!accessToken) {
+        throw new Error('认证token无效，请重新登录');
+      }
+      
+      const response = await fetch('/api/follows', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ follower_id: followerId, following_id: followingId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error following user:', error);
+      throw error;
+    }
+  }
+
+  // 取消关注用户
+  async unfollowUser(followerId: string, followingId: string): Promise<void> {
+    try {
+      // 从localStorage获取认证token
+      const sessionData = localStorage.getItem('supabase.auth.token');
+      if (!sessionData) {
+        throw new Error('用户未登录，请先登录');
+      }
+      
+      const session = JSON.parse(sessionData);
+      const accessToken = session.access_token;
+      
+      if (!accessToken) {
+        throw new Error('认证token无效，请重新登录');
+      }
+      
+      const response = await fetch(`/api/follows/${followerId}/${followingId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+      throw error;
+    }
+  }
+
+  // 检查是否已关注用户
+  async isUserFollowed(followerId: string, followingId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/follows/${followerId}/${followingId}/status`);
+      if (response.status === 404) {
+        return false;
+      }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.isFollowing || false;
+    } catch (error) {
+      console.error('Error checking follow status:', error);
+      return false;
+    }
+  }
+
+  // 检查是否关注用户
+  async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/follows/${followerId}/${followingId}/status`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return false;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.isFollowing || false;
+    } catch (error) {
+      console.error('Error checking follow status:', error);
+      return false;
+    }
+  }
+
+  // 获取用户关注数
+  async getUserFollowingCount(userId: string): Promise<number> {
+    try {
+      const response = await fetch(`/api/users/${userId}/following/count`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.count || 0;
+    } catch (error) {
+      console.error('Error fetching following count:', error);
+      return 0;
+    }
+  }
+
+  // 获取用户粉丝数
+  async getUserFollowersCount(userId: string): Promise<number> {
+    try {
+      const response = await fetch(`/api/users/${userId}/followers/count`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.count || 0;
+    } catch (error) {
+      console.error('Error fetching followers count:', error);
+      return 0;
+    }
+  }
+
+  // 获取用户关注的人列表
+  async getUserFollowing(userId: string): Promise<any[]> {
+    try {
+      const response = await fetch(`/api/users/${userId}/following`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching user following:', error);
+      throw error;
+    }
+  }
+
+  // 获取用户粉丝列表
+  async getUserFollowers(userId: string): Promise<any[]> {
+    try {
+      const response = await fetch(`/api/users/${userId}/followers`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching user followers:', error);
+      throw error;
+    }
+  }
+
+  // 获取用户的关注者列表
+  async getFollowers(userId: string): Promise<User[]> {
+    try {
+      const response = await fetch(`/api/users/${userId}/followers`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching followers:', error);
+      throw error;
+    }
+  }
+
+  // 获取用户的关注列表
+  async getFollowing(userId: string): Promise<User[]> {
+    try {
+      const response = await fetch(`/api/users/${userId}/following`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching following:', error);
+      throw error;
+    }
+  }
+
+  // 更新用户资料
+  async updateUserProfile(userId: string, profile: {
+    username?: string;
+    full_name?: string;
+    bio?: string;
+    avatar_url?: string;
+  }): Promise<User> {
+    try {
+      // 从localStorage获取认证token
+      const sessionData = localStorage.getItem('supabase.auth.token');
+      if (!sessionData) {
+        throw new Error('用户未登录，请先登录');
+      }
+      
+      const session = JSON.parse(sessionData);
+      const accessToken = session.access_token;
+      
+      if (!accessToken) {
+        throw new Error('认证token无效，请重新登录');
+      }
+      
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(profile),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  }
+
+  // 删除帖子
+  async deletePost(postId: string): Promise<void> {
+    try {
+      // 从localStorage获取认证token
+      const sessionData = localStorage.getItem('supabase.auth.token');
+      if (!sessionData) {
+        throw new Error('用户未登录，请先登录');
+      }
+      
+      const session = JSON.parse(sessionData);
+      const accessToken = session.access_token;
+      
+      if (!accessToken) {
+        throw new Error('认证token无效，请重新登录');
+      }
+      
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      throw error;
+    }
+  }
+
+  async getUserStats(userId: string): Promise<{
+    postsCount: number;
+    followersCount: number;
+    followingCount: number;
+  }> {
+    try {
+      const response = await fetch(`/api/users/${userId}/stats`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return {
+        postsCount: data.postsCount || 0,
+        followersCount: data.followersCount || 0,
+        followingCount: data.followingCount || 0
+      };
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      throw error;
+    }
+  }
+
+  // 获取热门帖子
+  async getTrendingPosts(limit: number = 20): Promise<Post[]> {
+    try {
+      const response = await fetch(`/api/posts?limit=${limit}&sort=trending`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.posts || data;
+    } catch (error) {
+      console.error('Error fetching trending posts:', error);
+      throw error;
+    }
+  }
+
+  // 获取用户的帖子
+  async getUserPosts(userId: string, page = 1, limit = 10): Promise<{ posts: Post[]; total: number }> {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString()
+      });
+      
+      const response = await fetch(`/api/users/${userId}/posts?${params}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return {
+        posts: data.posts || [],
+        total: data.total || 0
+      };
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+      throw error;
+    }
+  }
+
+  // 获取用户资料
+  async getUserProfile(userId: string): Promise<User | null> {
+    try {
+      const response = await fetch(`/api/users/${userId}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      throw error;
+    }
+  }
+}
+
+export const socialService = new SocialService()
+export default socialService
