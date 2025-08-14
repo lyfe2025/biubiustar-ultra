@@ -1,7 +1,7 @@
 import React from 'react'
 import { User, FileText, Users, Settings, Bell, Plus } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import { useLanguage } from '../../contexts/LanguageContext'
+import { useLanguage } from '../../contexts/language'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import CreatePostModal from '../../components/CreatePostModal'
 import UserProfileCard from './UserProfileCard'

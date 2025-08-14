@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Mail, Eye, EyeOff, CheckCircle } from 'lucide-react'
-import { useLanguage } from '../../../contexts/LanguageContext'
+import { useLanguage } from '../../../contexts/language'
 import { SettingsSectionProps, EmailSettingsData } from './types'
 
 const EmailSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {

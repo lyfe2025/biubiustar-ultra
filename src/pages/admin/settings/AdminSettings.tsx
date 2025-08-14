@@ -1,7 +1,7 @@
 import React from 'react'
 import { Settings, Save, RefreshCw, Download, Upload, Trash2 } from 'lucide-react'
 import AdminLayout from '../../../components/AdminLayout'
-import { useLanguage } from '../../../contexts/LanguageContext'
+import { useLanguage } from '../../../contexts/language'
 import { useSystemSettings } from './hooks/useSystemSettings'
 import BasicSettings from './BasicSettings'
 import UserSettings from './UserSettings'

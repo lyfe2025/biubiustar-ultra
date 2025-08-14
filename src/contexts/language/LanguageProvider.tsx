@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import type { Language, LanguageContextType } from './types'
 import { getTranslation } from './translationLoader'
 
@@ -42,9 +42,9 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   }, [language])
 
   // 翻译函数
-  const t = (key: string): string => {
+  const t = useCallback((key: string) => {
     return getTranslation(key, language)
-  }
+  }, [language])
 
   const value: LanguageContextType = {
     language,

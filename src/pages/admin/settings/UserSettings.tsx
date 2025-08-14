@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Users, Shield, FileText } from 'lucide-react'
-import { useLanguage } from '../../../contexts/LanguageContext'
+import { useLanguage } from '../../../contexts/language'
 import { SettingsSectionProps, UserSettingsData } from './types'
 
 const UserSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {

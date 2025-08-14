@@ -1,320 +1,370 @@
 // 认证相关翻译
 export const authTranslations = {
   zh: {
-    'auth.login': '登录',
-    'auth.register': '注册',
-    'auth.logout': '退出登录',
-    'auth.email': '邮箱',
-    'auth.password': '密码',
-    'auth.confirmPassword': '确认密码',
-    'auth.username': '用户名',
-    'auth.fullName': '全名',
-    'auth.forgotPassword': '忘记密码？',
-    'auth.resetPassword': '重置密码',
-    'auth.loginWithEmail': '使用邮箱登录',
-    'auth.loginWithUsername': '使用用户名登录',
-    'auth.account': '账号',
-    'auth.rememberMe': '记住我',
-    'auth.alreadyHaveAccount': '已有账号？',
-    'auth.noAccount': '没有账号？',
-    'auth.signUpNow': '立即注册',
-    'auth.signInNow': '立即登录',
-    'auth.passwordsDoNotMatch': '密码不匹配',
-    'auth.passwordTooShort': '密码至少6位',
-    'auth.invalidEmail': '邮箱格式无效',
-    'auth.usernameRequired': '用户名必填',
-    'auth.loginSuccess': '登录成功',
-    'auth.loginFailed': '登录失败',
-    'auth.registerSuccess': '注册成功',
-    'auth.registerFailed': '注册失败',
-    'auth.logoutSuccess': '退出成功',
-    'auth.passwordResetSent': '重置密码邮件已发送',
-    'auth.passwordUpdateSuccess': '密码更新成功',
-    'auth.profileUpdateSuccess': '资料更新成功',
-    'auth.or': '或者',
-    'auth.back': '返回',
-    'auth.submit': '提交',
-    'auth.loading': '加载中...',
-    'auth.pleaseWait': '请稍候...',
-    
-    // 占位符文本
-    'auth.emailPlaceholder': '请输入邮箱',
-    'auth.accountPlaceholder': '邮箱或用户名',
-    'auth.passwordPlaceholder': '请输入密码',
-    'auth.confirmPasswordPlaceholder': '请再次输入密码',
-    'auth.usernamePlaceholder': '请输入用户名',
-    'auth.fullNamePlaceholder': '请输入全名',
-    
-    // 验证信息
-    'auth.validation.required': '此字段为必填项',
-    'auth.validation.emailValid': '邮箱格式正确',
-    'auth.validation.emailInvalid': '请输入有效的邮箱地址',
-    'auth.validation.usernameValid': '用户名可用',
-    'auth.validation.usernameInvalid': '用户名格式无效',
-    'auth.validation.accountValid': '账号可用',
-    'auth.validation.accountInvalid': '账号格式无效',
-    'auth.validation.passwordValid': '密码强度合格',
-    'auth.validation.passwordWeak': '密码强度不够',
-    'auth.validation.passwordMismatch': '两次输入的密码不一致',
-    'auth.validation.passwordsMatch': '密码匹配',
-    'auth.validation.passwordsMismatch': '密码不匹配',
-    'auth.validation.usernameTaken': '用户名已被使用',
-    'auth.validation.emailTaken': '邮箱已被注册',
-    'auth.validation.accountRequired': '请输入账号',
-    'auth.validation.emailRequired': '请输入邮箱',
-    
-    // 密码强度和要求
-    'auth.password.strength.weak': '弱',
-    'auth.password.strength.medium': '中等',
-    'auth.password.strength.strong': '强',
-    'auth.password.strength.veryStrong': '很强',
-    'auth.password.requirements': '密码要求',
-    'auth.password.requirement.length': '至少8位字符',
-    'auth.password.requirement.letter': '包含字母',
-    'auth.password.requirement.number': '包含数字',
-    'auth.password.requirement.special': '包含特殊字符',
-    
-    // 欢迎信息
-    'auth.welcomeBack': '欢迎回来',
-    'auth.joinCommunity': '加入我们的社区',
-    
-    // 模式切换
-    'auth.hasAccount': '已有账号？',
-    'auth.signIn': '登录',
-    'auth.signUp': '注册',
-    'auth.rememberedPassword': '想起密码？',
-    'auth.backToLogin': '返回登录',
-    
-    // 加载状态
-    'auth.loggingIn': '登录中...',
-    'auth.registering': '注册中...',
-    'auth.sending': '发送中...',
-    'auth.sendResetEmail': '发送重置邮件',
-    'auth.confirm': '确认'
+    auth: {
+      // 核心翻译键 - 直接对应截图中的键
+      register: '注册',
+      login: '登录',
+      username: '用户名',
+      email: '邮箱',
+      passwordLabel: '密码',
+      confirmPassword: '确认密码',
+      account: '账户',
+      welcomeBack: '欢迎回来',
+      joinCommunity: '加入我们的社区',
+      forgotPassword: '忘记密码？',
+      noAccount: '还没有账户？',
+      hasAccount: '已有账户？',
+      signUp: '注册',
+      signIn: '登录',
+      
+      // Placeholder文本
+      emailPlaceholder: '请输入邮箱地址',
+      passwordPlaceholder: '请输入密码',
+      confirmPasswordPlaceholder: '请再次输入密码',
+      accountPlaceholder: '邮箱或用户名',
+
+      // 登录表单
+      loginForm: {
+        title: '登录',
+        email: '邮箱',
+        password: '密码',
+        submit: '登录',
+        forgotPassword: '忘记密码？',
+        noAccount: '还没有账户？',
+        createAccount: '创建账户'
+      },
+
+      // 注册表单
+      registerForm: {
+        title: '注册',
+        email: '邮箱',
+        password: '密码',
+        confirmPassword: '确认密码',
+        username: '用户名',
+        submit: '注册',
+        hasAccount: '已有账户？',
+        signIn: '立即登录',
+        agreeTerms: '我同意',
+        termsOfService: '服务条款',
+        and: '和',
+        privacyPolicy: '隐私政策'
+      },
+
+      // 密码验证
+      password: {
+        requirements: '密码要求：',
+        minLength: '至少8个字符',
+        hasUppercase: '包含大写字母',
+        hasLowercase: '包含小写字母',
+        hasNumber: '包含数字',
+        hasSpecial: '包含特殊字符',
+        strength: {
+          weak: '弱',
+          medium: '中等',
+          strong: '强'
+        },
+        requirement: {
+          length: '至少8个字符',
+          letter: '包含字母',
+          number: '包含数字',
+          special: '包含特殊字符'
+        }
+      },
+
+      // 表单验证
+      validation: {
+        emailRequired: '请输入邮箱',
+        emailInvalid: '邮箱格式不正确',
+        passwordRequired: '请输入密码',
+        passwordTooShort: '密码至少8个字符',
+        passwordMismatch: '两次密码不一致',
+        passwordValid: '密码格式正确',
+        usernameRequired: '请输入用户名',
+        usernameTooShort: '用户名至少3个字符',
+        usernameInvalid: '用户名格式不正确'
+      },
+
+      // 消息提示
+      messages: {
+        loginSuccess: '登录成功！',
+        loginFailed: '登录失败，请检查邮箱和密码',
+        registerSuccess: '注册成功！',
+        registerFailed: '注册失败，请重试',
+        logoutSuccess: '退出成功',
+        emailExists: '该邮箱已被注册',
+        usernameExists: '该用户名已被使用'
+      }
+    }
   },
   'zh-TW': {
-    'auth.login': '登入',
-    'auth.register': '註冊',
-    'auth.logout': '退出登入',
-    'auth.email': '郵箱',
-    'auth.password': '密碼',
-    'auth.confirmPassword': '確認密碼',
-    'auth.username': '用戶名',
-    'auth.fullName': '全名',
-    'auth.forgotPassword': '忘記密碼？',
-    'auth.resetPassword': '重置密碼',
-    'auth.loginWithEmail': '使用郵箱登入',
-    'auth.loginWithUsername': '使用用戶名登入',
-    'auth.account': '賬號',
-    'auth.rememberMe': '記住我',
-    'auth.alreadyHaveAccount': '已有賬號？',
-    'auth.noAccount': '沒有賬號？',
-    'auth.signUpNow': '立即註冊',
-    'auth.signInNow': '立即登入',
-    'auth.passwordsDoNotMatch': '密碼不匹配',
-    'auth.passwordTooShort': '密碼至少6位',
-    'auth.invalidEmail': '郵箱格式無效',
-    'auth.usernameRequired': '用戶名必填',
-    'auth.loginSuccess': '登入成功',
-    'auth.loginFailed': '登入失敗',
-    'auth.registerSuccess': '註冊成功',
-    'auth.registerFailed': '註冊失敗',
-    'auth.logoutSuccess': '退出成功',
-    'auth.passwordResetSent': '重置密碼郵件已發送',
-    'auth.passwordUpdateSuccess': '密碼更新成功',
-    'auth.profileUpdateSuccess': '資料更新成功',
-    'auth.or': '或者',
-    'auth.back': '返回',
-    'auth.submit': '提交',
-    'auth.loading': '加載中...',
-    'auth.pleaseWait': '請稍候...',
-    
-    // 占位符文本
-    'auth.emailPlaceholder': '請輸入郵箱',
-    'auth.accountPlaceholder': '郵箱或用戶名',
-    'auth.passwordPlaceholder': '請輸入密碼',
-    'auth.confirmPasswordPlaceholder': '請再次輸入密碼',
-    'auth.usernamePlaceholder': '請輸入用戶名',
-    'auth.fullNamePlaceholder': '請輸入全名',
-    
-    // 驗證信息
-    'auth.validation.required': '此字段為必填項',
-    'auth.validation.emailInvalid': '請輸入有效的郵箱地址',
-    'auth.validation.passwordMismatch': '兩次輸入的密碼不一致',
-    'auth.validation.usernameTaken': '用戶名已被使用',
-    'auth.validation.emailTaken': '郵箱已被註冊',
-    
-    // 密碼強度
-    'auth.password.strength.weak': '弱',
-    'auth.password.strength.medium': '中等',
-    'auth.password.strength.strong': '強',
-    
-    // 歡迎信息
-    'auth.welcomeBack': '歡迎回來',
-    'auth.joinCommunity': '加入我們的社區',
-    
-    // 模式切換
-    'auth.hasAccount': '已有賬號？',
-    'auth.signIn': '登入',
-    'auth.signUp': '註冊',
-    'auth.rememberedPassword': '想起密碼？',
-    'auth.backToLogin': '返回登入',
-    
-    // 加載狀態
-    'auth.loggingIn': '登入中...',
-    'auth.registering': '註冊中...',
-    'auth.sending': '發送中...',
-    'auth.sendResetEmail': '發送重置郵件',
-    'auth.confirm': '確認'
+    auth: {
+      register: '註冊',
+      login: '登入',
+      username: '用戶名',
+      email: '郵箱',
+      passwordLabel: '密碼',
+      confirmPassword: '確認密碼',
+      account: '帳戶',
+      welcomeBack: '歡迎回來',
+      joinCommunity: '加入我們的社區',
+      forgotPassword: '忘記密碼？',
+      noAccount: '還沒有帳戶？',
+      hasAccount: '已有帳戶？',
+      signUp: '註冊',
+      signIn: '登入',
+      
+      emailPlaceholder: '請輸入郵箱地址',
+      passwordPlaceholder: '請輸入密碼',
+      confirmPasswordPlaceholder: '請再次輸入密碼',
+      accountPlaceholder: '郵箱或用戶名',
+
+      loginForm: {
+        title: '登入',
+        email: '郵箱',
+        password: '密碼',
+        submit: '登入',
+        forgotPassword: '忘記密碼？',
+        noAccount: '還沒有帳戶？',
+        createAccount: '創建帳戶'
+      },
+
+      registerForm: {
+        title: '註冊',
+        email: '郵箱',
+        password: '密碼',
+        confirmPassword: '確認密碼',
+        username: '用戶名',
+        submit: '註冊',
+        hasAccount: '已有帳戶？',
+        signIn: '立即登入',
+        agreeTerms: '我同意',
+        termsOfService: '服務條款',
+        and: '和',
+        privacyPolicy: '隱私政策'
+      },
+
+      password: {
+        requirements: '密碼要求：',
+        minLength: '至少8個字符',
+        hasUppercase: '包含大寫字母',
+        hasLowercase: '包含小寫字母',
+        hasNumber: '包含數字',
+        hasSpecial: '包含特殊字符',
+        strength: {
+          weak: '弱',
+          medium: '中等',
+          strong: '強'
+        },
+        requirement: {
+          length: '至少8個字符',
+          letter: '包含字母',
+          number: '包含數字',
+          special: '包含特殊字符'
+        }
+      },
+
+      validation: {
+        emailRequired: '請輸入郵箱',
+        emailInvalid: '郵箱格式不正確',
+        passwordRequired: '請輸入密碼',
+        passwordTooShort: '密碼至少8個字符',
+        passwordMismatch: '兩次密碼不一致',
+        passwordValid: '密碼格式正確',
+        usernameRequired: '請輸入用戶名',
+        usernameTooShort: '用戶名至少3個字符',
+        usernameInvalid: '用戶名格式不正確'
+      },
+
+      messages: {
+        loginSuccess: '登入成功！',
+        loginFailed: '登入失敗，請檢查郵箱和密碼',
+        registerSuccess: '註冊成功！',
+        registerFailed: '註冊失敗，請重試',
+        logoutSuccess: '退出成功',
+        emailExists: '該郵箱已被註冊',
+        usernameExists: '該用戶名已被使用'
+      }
+    }
   },
   en: {
-    'auth.login': 'Login',
-    'auth.register': 'Register',
-    'auth.logout': 'Logout',
-    'auth.email': 'Email',
-    'auth.password': 'Password',
-    'auth.confirmPassword': 'Confirm Password',
-    'auth.username': 'Username',
-    'auth.fullName': 'Full Name',
-    'auth.forgotPassword': 'Forgot Password?',
-    'auth.resetPassword': 'Reset Password',
-    'auth.loginWithEmail': 'Login with Email',
-    'auth.loginWithUsername': 'Login with Username',
-    'auth.account': 'Account',
-    'auth.rememberMe': 'Remember Me',
-    'auth.alreadyHaveAccount': 'Already have an account?',
-    'auth.noAccount': 'No account?',
-    'auth.signUpNow': 'Sign Up Now',
-    'auth.signInNow': 'Sign In Now',
-    'auth.passwordsDoNotMatch': 'Passwords do not match',
-    'auth.passwordTooShort': 'Password must be at least 6 characters',
-    'auth.invalidEmail': 'Invalid email format',
-    'auth.usernameRequired': 'Username is required',
-    'auth.loginSuccess': 'Login successful',
-    'auth.loginFailed': 'Login failed',
-    'auth.registerSuccess': 'Registration successful',
-    'auth.registerFailed': 'Registration failed',
-    'auth.logoutSuccess': 'Logout successful',
-    'auth.passwordResetSent': 'Password reset email sent',
-    'auth.passwordUpdateSuccess': 'Password updated successfully',
-    'auth.profileUpdateSuccess': 'Profile updated successfully',
-    'auth.or': 'Or',
-    'auth.back': 'Back',
-    'auth.submit': 'Submit',
-    'auth.loading': 'Loading...',
-    'auth.pleaseWait': 'Please wait...',
-    
-    // Placeholder text
-    'auth.emailPlaceholder': 'Enter your email',
-    'auth.accountPlaceholder': 'Email or username',
-    'auth.passwordPlaceholder': 'Enter your password',
-    'auth.confirmPasswordPlaceholder': 'Confirm your password',
-    'auth.usernamePlaceholder': 'Enter your username',
-    'auth.fullNamePlaceholder': 'Enter your full name',
-    
-    // Validation messages
-    'auth.validation.required': 'This field is required',
-    'auth.validation.emailInvalid': 'Please enter a valid email address',
-    'auth.validation.passwordMismatch': 'Passwords do not match',
-    'auth.validation.usernameTaken': 'Username is already taken',
-    'auth.validation.emailTaken': 'Email is already registered',
-    
-    // Password strength
-    'auth.password.strength.weak': 'Weak',
-    'auth.password.strength.medium': 'Medium',
-    'auth.password.strength.strong': 'Strong',
-    
-    // Welcome messages
-    'auth.welcomeBack': 'Welcome back',
-    'auth.joinCommunity': 'Join our community',
-    
-    // Mode switching
-    'auth.hasAccount': 'Already have an account?',
-    'auth.signIn': 'Sign In',
-    'auth.signUp': 'Sign Up',
-    'auth.rememberedPassword': 'Remembered your password?',
-    'auth.backToLogin': 'Back to login',
-    
-    // Loading states
-    'auth.loggingIn': 'Logging in...',
-    'auth.registering': 'Registering...',
-    'auth.sending': 'Sending...',
-    'auth.sendResetEmail': 'Send reset email',
-    'auth.confirm': 'Confirm'
+    auth: {
+      register: 'Register',
+      login: 'Login',
+      username: 'Username',
+      email: 'Email',
+      passwordLabel: 'Password',
+      confirmPassword: 'Confirm Password',
+      account: 'Account',
+      welcomeBack: 'Welcome Back',
+      joinCommunity: 'Join Our Community',
+      forgotPassword: 'Forgot password?',
+      noAccount: "Don't have an account?",
+      hasAccount: 'Already have an account?',
+      signUp: 'Sign Up',
+      signIn: 'Sign In',
+      
+      emailPlaceholder: 'Enter your email',
+      passwordPlaceholder: 'Enter your password',
+      confirmPasswordPlaceholder: 'Confirm your password',
+      accountPlaceholder: 'Email or username',
+
+      loginForm: {
+        title: 'Login',
+        email: 'Email',
+        password: 'Password',
+        submit: 'Login',
+        forgotPassword: 'Forgot password?',
+        noAccount: "Don't have an account?",
+        createAccount: 'Create account'
+      },
+
+      registerForm: {
+        title: 'Register',
+        email: 'Email',
+        password: 'Password',
+        confirmPassword: 'Confirm Password',
+        username: 'Username',
+        submit: 'Register',
+        hasAccount: 'Already have an account?',
+        signIn: 'Sign in',
+        agreeTerms: 'I agree to the',
+        termsOfService: 'Terms of Service',
+        and: 'and',
+        privacyPolicy: 'Privacy Policy'
+      },
+
+      password: {
+        requirements: 'Password requirements:',
+        minLength: 'At least 8 characters',
+        hasUppercase: 'Contains uppercase letter',
+        hasLowercase: 'Contains lowercase letter',
+        hasNumber: 'Contains number',
+        hasSpecial: 'Contains special character',
+        strength: {
+          weak: 'Weak',
+          medium: 'Medium',
+          strong: 'Strong'
+        },
+        requirement: {
+          length: 'At least 8 characters',
+          letter: 'Contains letter',
+          number: 'Contains number',
+          special: 'Contains special character'
+        }
+      },
+
+      validation: {
+        emailRequired: 'Email is required',
+        emailInvalid: 'Invalid email format',
+        passwordRequired: 'Password is required',
+        passwordTooShort: 'Password must be at least 8 characters',
+        passwordMismatch: 'Passwords do not match',
+        passwordValid: 'Password is valid',
+        usernameRequired: 'Username is required',
+        usernameTooShort: 'Username must be at least 3 characters',
+        usernameInvalid: 'Invalid username format'
+      },
+
+      messages: {
+        loginSuccess: 'Login successful!',
+        loginFailed: 'Login failed, please check your email and password',
+        registerSuccess: 'Registration successful!',
+        registerFailed: 'Registration failed, please try again',
+        logoutSuccess: 'Logout successful',
+        emailExists: 'This email is already registered',
+        usernameExists: 'This username is already taken'
+      }
+    }
   },
   vi: {
-    'auth.login': 'Đăng nhập',
-    'auth.register': 'Đăng ký',
-    'auth.logout': 'Đăng xuất',
-    'auth.email': 'Email',
-    'auth.password': 'Mật khẩu',
-    'auth.confirmPassword': 'Xác nhận mật khẩu',
-    'auth.username': 'Tên người dùng',
-    'auth.fullName': 'Họ và tên',
-    'auth.forgotPassword': 'Quên mật khẩu?',
-    'auth.resetPassword': 'Đặt lại mật khẩu',
-    'auth.loginWithEmail': 'Đăng nhập bằng email',
-    'auth.loginWithUsername': 'Đăng nhập bằng tên người dùng',
-    'auth.account': 'Tài khoản',
-    'auth.rememberMe': 'Ghi nhớ đăng nhập',
-    'auth.alreadyHaveAccount': 'Đã có tài khoản?',
-    'auth.noAccount': 'Chưa có tài khoản?',
-    'auth.signUpNow': 'Đăng ký ngay',
-    'auth.signInNow': 'Đăng nhập ngay',
-    'auth.passwordsDoNotMatch': 'Mật khẩu không khớp',
-    'auth.passwordTooShort': 'Mật khẩu phải có ít nhất 6 ký tự',
-    'auth.invalidEmail': 'Định dạng email không hợp lệ',
-    'auth.usernameRequired': 'Tên người dùng là bắt buộc',
-    'auth.loginSuccess': 'Đăng nhập thành công',
-    'auth.loginFailed': 'Đăng nhập thất bại',
-    'auth.registerSuccess': 'Đăng ký thành công',
-    'auth.registerFailed': 'Đăng ký thất bại',
-    'auth.logoutSuccess': 'Đăng xuất thành công',
-    'auth.passwordResetSent': 'Email đặt lại mật khẩu đã được gửi',
-    'auth.passwordUpdateSuccess': 'Cập nhật mật khẩu thành công',
-    'auth.profileUpdateSuccess': 'Cập nhật hồ sơ thành công',
-    'auth.or': 'Hoặc',
-    'auth.back': 'Quay lại',
-    'auth.submit': 'Gửi',
-    'auth.loading': 'Đang tải...',
-    'auth.pleaseWait': 'Vui lòng đợi...',
-    
-    // Văn bản placeholder
-    'auth.emailPlaceholder': 'Nhập email của bạn',
-    'auth.accountPlaceholder': 'Email hoặc tên người dùng',
-    'auth.passwordPlaceholder': 'Nhập mật khẩu của bạn',
-    'auth.confirmPasswordPlaceholder': 'Xác nhận mật khẩu của bạn',
-    'auth.usernamePlaceholder': 'Nhập tên người dùng của bạn',
-    'auth.fullNamePlaceholder': 'Nhập họ và tên của bạn',
-    
-    // Thông báo xác thực
-    'auth.validation.required': 'Trường này là bắt buộc',
-    'auth.validation.emailInvalid': 'Vui lòng nhập địa chỉ email hợp lệ',
-    'auth.validation.passwordMismatch': 'Mật khẩu không khớp',
-    'auth.validation.usernameTaken': 'Tên người dùng đã được sử dụng',
-    'auth.validation.emailTaken': 'Email đã được đăng ký',
-    
-    // Độ mạnh mật khẩu
-    'auth.password.strength.weak': 'Yếu',
-    'auth.password.strength.medium': 'Trung bình',
-    'auth.password.strength.strong': 'Mạnh',
-    
-    // Thông báo chào mừng
-    'auth.welcomeBack': 'Chào mừng trở lại',
-    'auth.joinCommunity': 'Tham gia cộng đồng của chúng tôi',
-    
-    // Chuyển đổi chế độ
-    'auth.hasAccount': 'Đã có tài khoản?',
-    'auth.signIn': 'Đăng nhập',
-    'auth.signUp': 'Đăng ký',
-    'auth.rememberedPassword': 'Nhớ lại mật khẩu?',
-    'auth.backToLogin': 'Quay lại đăng nhập',
-    
-    // Trạng thái tải
-    'auth.loggingIn': 'Đang đăng nhập...',
-    'auth.registering': 'Đang đăng ký...',
-    'auth.sending': 'Đang gửi...',
-    'auth.sendResetEmail': 'Gửi email đặt lại',
-    'auth.confirm': 'Xác nhận'
+    auth: {
+      register: 'Đăng ký',
+      login: 'Đăng nhập',
+      username: 'Tên người dùng',
+      email: 'Email',
+      passwordLabel: 'Mật khẩu',
+      confirmPassword: 'Xác nhận mật khẩu',
+      account: 'Tài khoản',
+      welcomeBack: 'Chào mừng trở lại',
+      joinCommunity: 'Tham gia cộng đồng',
+      forgotPassword: 'Quên mật khẩu?',
+      noAccount: 'Chưa có tài khoản?',
+      hasAccount: 'Đã có tài khoản?',
+      signUp: 'Đăng ký',
+      signIn: 'Đăng nhập',
+      
+      emailPlaceholder: 'Nhập email của bạn',
+      passwordPlaceholder: 'Nhập mật khẩu',
+      confirmPasswordPlaceholder: 'Xác nhận mật khẩu',
+      accountPlaceholder: 'Email hoặc tên người dùng',
+
+      loginForm: {
+        title: 'Đăng nhập',
+        email: 'Email',
+        password: 'Mật khẩu',
+        submit: 'Đăng nhập',
+        forgotPassword: 'Quên mật khẩu?',
+        noAccount: 'Chưa có tài khoản?',
+        createAccount: 'Tạo tài khoản'
+      },
+
+      registerForm: {
+        title: 'Đăng ký',
+        email: 'Email',
+        password: 'Mật khẩu',
+        confirmPassword: 'Xác nhận mật khẩu',
+        username: 'Tên người dùng',
+        submit: 'Đăng ký',
+        hasAccount: 'Đã có tài khoản?',
+        signIn: 'Đăng nhập ngay',
+        agreeTerms: 'Tôi đồng ý với',
+        termsOfService: 'Điều khoản dịch vụ',
+        and: 'và',
+        privacyPolicy: 'Chính sách bảo mật'
+      },
+
+      password: {
+        requirements: 'Yêu cầu mật khẩu:',
+        minLength: 'Ít nhất 8 ký tự',
+        hasUppercase: 'Chứa chữ cái viết hoa',
+        hasLowercase: 'Chứa chữ cái viết thường',
+        hasNumber: 'Chứa số',
+        hasSpecial: 'Chứa ký tự đặc biệt',
+        strength: {
+          weak: 'Yếu',
+          medium: 'Trung bình',
+          strong: 'Mạnh'
+        },
+        requirement: {
+          length: 'Ít nhất 8 ký tự',
+          letter: 'Chứa chữ cái',
+          number: 'Chứa số',
+          special: 'Chứa ký tự đặc biệt'
+        }
+      },
+
+      validation: {
+        emailRequired: 'Vui lòng nhập email',
+        emailInvalid: 'Định dạng email không hợp lệ',
+        passwordRequired: 'Vui lòng nhập mật khẩu',
+        passwordTooShort: 'Mật khẩu phải có ít nhất 8 ký tự',
+        passwordMismatch: 'Mật khẩu không khớp',
+        passwordValid: 'Mật khẩu hợp lệ',
+        usernameRequired: 'Vui lòng nhập tên người dùng',
+        usernameTooShort: 'Tên người dùng phải có ít nhất 3 ký tự',
+        usernameInvalid: 'Định dạng tên người dùng không hợp lệ'
+      },
+
+      messages: {
+        loginSuccess: 'Đăng nhập thành công!',
+        loginFailed: 'Đăng nhập thất bại, vui lòng kiểm tra email và mật khẩu',
+        registerSuccess: 'Đăng ký thành công!',
+        registerFailed: 'Đăng ký thất bại, vui lòng thử lại',
+        logoutSuccess: 'Đăng xuất thành công',
+        emailExists: 'Email này đã được đăng ký',
+        usernameExists: 'Tên người dùng này đã được sử dụng'
+      }
+    }
   }
 }

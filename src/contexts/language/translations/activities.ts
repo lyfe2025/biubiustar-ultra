@@ -1,239 +1,298 @@
 // 活动页面翻译
 export const activitiesTranslations = {
   zh: {
-    'activities.title': '精彩活动',
-    'activities.subtitle': '发现并参与各种有趣的活动，结识志同道合的朋友',
-    'activities.all': '全部活动',
-    'activities.ongoing': '进行中',
-    'activities.upcoming': '即将开始',
-    'activities.ended': '已结束',
-    'activities.past': '已结束',
-    'activities.searchPlaceholder': '搜索活动...',
-    'activities.createActivity': '创建新活动',
-    'activities.noActivities': '暂无活动',
-    'activities.noActivitiesFor': '暂无',
-    'activities.activities': '活动',
-    'activities.createFirstActivity': '创建第一个活动',
-    'activities.loading': '加载活动中...',
-    'activities.joinNow': '立即参与',
-    'activities.viewDetails': '查看详情',
-    'activities.participants': '参与人数',
-    'activities.timeLeft': '剩余时间',
-    'activities.location': '活动地点',
-    'activities.organizer': '组织者',
-    'activities.startTime': '开始时间',
-    'activities.endTime': '结束时间',
-    'activities.description': '活动描述',
-    'activities.participantsList': '参与者列表',
-    'activities.maxParticipants': '最大参与人数',
-    'activities.currentParticipants': '当前参与人数',
-    'activities.category': '活动分类',
-    'activities.tags': '标签',
-    'activities.share': '分享活动',
-    'activities.report': '举报',
-    'activities.edit': '编辑',
-    'activities.delete': '删除',
-    'activities.cancel': '取消',
-    'activities.save': '保存',
-    'activities.join': '参与',
-    'activities.leave': '退出',
-    'activities.joined': '已参与',
-    'activities.full': '已满员',
-    'activities.joinSuccess': '成功参与活动',
-    'activities.leaveSuccess': '已退出活动',
-    'activities.joinError': '参与失败',
-    'activities.leaveError': '退出失败',
-    'activities.deleteConfirm': '确定要删除这个活动吗？',
-    'activities.deleteSuccess': '活动删除成功',
-    'activities.deleteError': '删除失败',
-    // 活动分类翻译
-    'activities.categories.全部': '全部',
-    'activities.categories.文化交流': '文化交流',
-    'activities.categories.技术分享': '技术分享',
-    'activities.categories.户外运动': '户外运动',
-    'activities.categories.美食聚会': '美食聚会',
-    'activities.categories.学习交流': '学习交流',
-    'activities.categories.娱乐活动': '娱乐活动',
-    'activities.categories.志愿服务': '志愿服务',
-    'activities.categories.商务网络': '商务网络',
-    'activities.categories.艺术创作': '艺术创作',
-    'activities.categories.其他': '其他'
+    activities: {
+      title: '活动',
+      subtitle: '参与精彩活动，结识志同道合的朋友',
+      
+      // 筛选和搜索
+      search: {
+        placeholder: '搜索活动...',
+        noResults: '没有找到相关活动',
+        filters: '筛选',
+        clear: '清除筛选',
+        category: '分类',
+        date: '日期',
+        location: '地点',
+        status: '状态'
+      },
+
+      // 活动状态
+      status: {
+        upcoming: '即将开始',
+        ongoing: '进行中',
+        completed: '已结束',
+        cancelled: '已取消'
+      },
+
+      // 活动分类
+      categories: {
+        全部: '全部',
+        文化交流: '文化交流',
+        技术分享: '技术分享',
+        户外运动: '户外运动',
+        美食聚会: '美食聚会',
+        学习交流: '学习交流',
+        娱乐活动: '娱乐活动',
+        志愿服务: '志愿服务',
+        商务网络: '商务网络',
+        艺术创作: '艺术创作',
+        其他: '其他'
+      },
+
+      noActivities: '暂无活动',
+
+      // 活动详情
+      details: {
+        participants: '参与者',
+        organizer: '主办方',
+        startTime: '开始时间',
+        endTime: '结束时间',
+        location: '地点',
+        description: '活动描述',
+        requirements: '参与要求',
+        contact: '联系方式'
+      },
+
+      // 操作按钮
+      actions: {
+        join: '参加活动',
+        leave: '退出活动',
+        share: '分享活动',
+        edit: '编辑活动',
+        delete: '删除活动',
+        viewDetails: '查看详情',
+        register: '立即报名'
+      },
+
+      // 消息提示
+      messages: {
+        joinSuccess: '成功参加活动！',
+        joinFailed: '参加活动失败',
+        leaveSuccess: '已退出活动',
+        leaveFailed: '退出活动失败',
+        deleteSuccess: '活动删除成功',
+        deleteFailed: '活动删除失败'
+      },
+
+      // 创建活动
+      create: {
+        title: '创建活动',
+        name: '活动名称',
+        description: '活动描述',
+        category: '活动分类',
+        startDate: '开始日期',
+        endDate: '结束日期',
+        location: '活动地点',
+        maxParticipants: '最大参与人数',
+        requirements: '参与要求',
+        submit: '创建活动',
+        cancel: '取消'
+      }
+    }
   },
   'zh-TW': {
-    'activities.title': '精彩活動',
-    'activities.subtitle': '發現並參與各種有趣的活動，結識志同道合的朋友',
-    'activities.all': '全部活動',
-    'activities.ongoing': '進行中',
-    'activities.upcoming': '即將開始',
-    'activities.ended': '已結束',
-    'activities.past': '已結束',
-    'activities.searchPlaceholder': '搜索活動...',
-    'activities.createActivity': '創建新活動',
-    'activities.noActivities': '暫無活動',
-    'activities.noActivitiesFor': '暫無',
-    'activities.activities': '活動',
-    'activities.createFirstActivity': '創建第一個活動',
-    'activities.loading': '加載活動中...',
-    'activities.joinNow': '立即參與',
-    'activities.viewDetails': '查看詳情',
-    'activities.participants': '參與人數',
-    'activities.timeLeft': '剩餘時間',
-    'activities.location': '活動地點',
-    'activities.organizer': '組織者',
-    'activities.startTime': '開始時間',
-    'activities.endTime': '結束時間',
-    'activities.description': '活動描述',
-    'activities.participantsList': '參與者列表',
-    'activities.maxParticipants': '最大參與人數',
-    'activities.currentParticipants': '當前參與人數',
-    'activities.category': '活動分類',
-    'activities.tags': '標簽',
-    'activities.share': '分享活動',
-    'activities.report': '舉報',
-    'activities.edit': '編輯',
-    'activities.delete': '刪除',
-    'activities.cancel': '取消',
-    'activities.save': '保存',
-    'activities.join': '參與',
-    'activities.leave': '退出',
-    'activities.joined': '已參與',
-    'activities.full': '已滿員',
-    'activities.joinSuccess': '成功參與活動',
-    'activities.leaveSuccess': '已退出活動',
-    'activities.joinError': '參與失敗',
-    'activities.leaveError': '退出失敗',
-    'activities.deleteConfirm': '確定要刪除這個活動嗎？',
-    'activities.deleteSuccess': '活動刪除成功',
-    'activities.deleteError': '刪除失敗',
-    // 活動分類翻譯
-    'activities.categories.全部': '全部',
-    'activities.categories.文化交流': '文化交流',
-    'activities.categories.技术分享': '技術分享',
-    'activities.categories.户外运动': '戶外運動',
-    'activities.categories.美食聚会': '美食聚會',
-    'activities.categories.学习交流': '學習交流',
-    'activities.categories.娱乐活动': '娛樂活動',
-    'activities.categories.志愿服务': '志願服務',
-    'activities.categories.商务网络': '商務網絡',
-    'activities.categories.艺术创作': '藝術創作',
-    'activities.categories.其他': '其他'
+    activities: {
+      title: '活動',
+      subtitle: '參與精彩活動，結識志同道合的朋友',
+      
+      search: {
+        placeholder: '搜尋活動...',
+        noResults: '沒有找到相關活動',
+        filters: '篩選',
+        clear: '清除篩選',
+        category: '分類',
+        date: '日期',
+        location: '地點',
+        status: '狀態'
+      },
+
+      status: {
+        upcoming: '即將開始',
+        ongoing: '進行中',
+        completed: '已結束',
+        cancelled: '已取消'
+      },
+
+      details: {
+        participants: '參與者',
+        organizer: '主辦方',
+        startTime: '開始時間',
+        endTime: '結束時間',
+        location: '地點',
+        description: '活動描述',
+        requirements: '參與要求',
+        contact: '聯繫方式'
+      },
+
+      actions: {
+        join: '參加活動',
+        leave: '退出活動',
+        share: '分享活動',
+        edit: '編輯活動',
+        delete: '刪除活動',
+        viewDetails: '查看詳情',
+        register: '立即報名'
+      },
+
+      messages: {
+        joinSuccess: '成功參加活動！',
+        joinFailed: '參加活動失敗',
+        leaveSuccess: '已退出活動',
+        leaveFailed: '退出活動失敗',
+        deleteSuccess: '活動刪除成功',
+        deleteFailed: '活動刪除失敗'
+      },
+
+      create: {
+        title: '創建活動',
+        name: '活動名稱',
+        description: '活動描述',
+        category: '活動分類',
+        startDate: '開始日期',
+        endDate: '結束日期',
+        location: '活動地點',
+        maxParticipants: '最大參與人數',
+        requirements: '參與要求',
+        submit: '創建活動',
+        cancel: '取消'
+      }
+    }
   },
   en: {
-    'activities.title': 'Exciting Activities',
-    'activities.subtitle': 'Discover and participate in various interesting activities, meet like-minded friends',
-    'activities.all': 'All Activities',
-    'activities.ongoing': 'Ongoing',
-    'activities.upcoming': 'Upcoming',
-    'activities.ended': 'Ended',
-    'activities.past': 'Past',
-    'activities.searchPlaceholder': 'Search activities...',
-    'activities.createActivity': 'Create New Activity',
-    'activities.noActivities': 'No activities',
-    'activities.noActivitiesFor': 'No',
-    'activities.activities': 'activities',
-    'activities.createFirstActivity': 'Create your first activity',
-    'activities.loading': 'Loading activities...',
-    'activities.joinNow': 'Join Now',
-    'activities.viewDetails': 'View Details',
-    'activities.participants': 'Participants',
-    'activities.timeLeft': 'Time Left',
-    'activities.location': 'Location',
-    'activities.organizer': 'Organizer',
-    'activities.startTime': 'Start Time',
-    'activities.endTime': 'End Time',
-    'activities.description': 'Description',
-    'activities.participantsList': 'Participants List',
-    'activities.maxParticipants': 'Max Participants',
-    'activities.currentParticipants': 'Current Participants',
-    'activities.category': 'Category',
-    'activities.tags': 'Tags',
-    'activities.share': 'Share',
-    'activities.report': 'Report',
-    'activities.edit': 'Edit',
-    'activities.delete': 'Delete',
-    'activities.cancel': 'Cancel',
-    'activities.save': 'Save',
-    'activities.join': 'Join',
-    'activities.leave': 'Leave',
-    'activities.joined': 'Joined',
-    'activities.full': 'Full',
-    'activities.joinSuccess': 'Successfully joined activity',
-    'activities.leaveSuccess': 'Left activity',
-    'activities.joinError': 'Failed to join',
-    'activities.leaveError': 'Failed to leave',
-    'activities.deleteConfirm': 'Are you sure you want to delete this activity?',
-    'activities.deleteSuccess': 'Activity deleted successfully',
-    'activities.deleteError': 'Delete failed',
-    // Activity categories translation
-    'activities.categories.全部': 'All',
-    'activities.categories.文化交流': 'Cultural Exchange',
-    'activities.categories.技术分享': 'Tech Sharing',
-    'activities.categories.户外运动': 'Outdoor Sports',
-    'activities.categories.美食聚会': 'Food Gathering',
-    'activities.categories.学习交流': 'Learning Exchange',
-    'activities.categories.娱乐活动': 'Entertainment',
-    'activities.categories.志愿服务': 'Volunteer Service',
-    'activities.categories.商务网络': 'Business Network',
-    'activities.categories.艺术创作': 'Art Creation',
-    'activities.categories.其他': 'Others'
+    activities: {
+      title: 'Activities',
+      subtitle: 'Join exciting activities and meet like-minded friends',
+      
+      search: {
+        placeholder: 'Search activities...',
+        noResults: 'No activities found',
+        filters: 'Filters',
+        clear: 'Clear Filters',
+        category: 'Category',
+        date: 'Date',
+        location: 'Location',
+        status: 'Status'
+      },
+
+      status: {
+        upcoming: 'Upcoming',
+        ongoing: 'Ongoing',
+        completed: 'Completed',
+        cancelled: 'Cancelled'
+      },
+
+      details: {
+        participants: 'Participants',
+        organizer: 'Organizer',
+        startTime: 'Start Time',
+        endTime: 'End Time',
+        location: 'Location',
+        description: 'Description',
+        requirements: 'Requirements',
+        contact: 'Contact'
+      },
+
+      actions: {
+        join: 'Join Activity',
+        leave: 'Leave Activity',
+        share: 'Share Activity',
+        edit: 'Edit Activity',
+        delete: 'Delete Activity',
+        viewDetails: 'View Details',
+        register: 'Register Now'
+      },
+
+      messages: {
+        joinSuccess: 'Successfully joined the activity!',
+        joinFailed: 'Failed to join activity',
+        leaveSuccess: 'Left the activity',
+        leaveFailed: 'Failed to leave activity',
+        deleteSuccess: 'Activity deleted successfully',
+        deleteFailed: 'Failed to delete activity'
+      },
+
+      create: {
+        title: 'Create Activity',
+        name: 'Activity Name',
+        description: 'Description',
+        category: 'Category',
+        startDate: 'Start Date',
+        endDate: 'End Date',
+        location: 'Location',
+        maxParticipants: 'Max Participants',
+        requirements: 'Requirements',
+        submit: 'Create Activity',
+        cancel: 'Cancel'
+      }
+    }
   },
   vi: {
-    'activities.title': 'Hoạt động thú vị',
-    'activities.subtitle': 'Khám phá và tham gia các hoạt động thú vị khác nhau, gặp gỡ những người bạn cùng chí hướng',
-    'activities.all': 'Tất cả hoạt động',
-    'activities.ongoing': 'Đang diễn ra',
-    'activities.upcoming': 'Sắp diễn ra',
-    'activities.ended': 'Đã kết thúc',
-    'activities.past': 'Đã kết thúc',
-    'activities.searchPlaceholder': 'Tìm kiếm hoạt động...',
-    'activities.createActivity': 'Tạo hoạt động mới',
-    'activities.noActivities': 'Chưa có hoạt động',
-    'activities.noActivitiesFor': 'Chưa có',
-    'activities.activities': 'hoạt động',
-    'activities.createFirstActivity': 'Tạo hoạt động đầu tiên',
-    'activities.loading': 'Đang tải hoạt động...',
-    'activities.joinNow': 'Tham gia ngay',
-    'activities.viewDetails': 'Xem chi tiết',
-    'activities.participants': 'Người tham gia',
-    'activities.timeLeft': 'Thời gian còn lại',
-    'activities.location': 'Địa điểm',
-    'activities.organizer': 'Người tổ chức',
-    'activities.startTime': 'Thời gian bắt đầu',
-    'activities.endTime': 'Thời gian kết thúc',
-    'activities.description': 'Mô tả',
-    'activities.participantsList': 'Danh sách người tham gia',
-    'activities.maxParticipants': 'Số người tham gia tối đa',
-    'activities.currentParticipants': 'Số người tham gia hiện tại',
-    'activities.category': 'Danh mục',
-    'activities.tags': 'Thẻ',
-    'activities.share': 'Chia sẻ',
-    'activities.report': 'Báo cáo',
-    'activities.edit': 'Chỉnh sửa',
-    'activities.delete': 'Xóa',
-    'activities.cancel': 'Hủy',
-    'activities.save': 'Lưu',
-    'activities.join': 'Tham gia',
-    'activities.leave': 'Rời khỏi',
-    'activities.joined': 'Đã tham gia',
-    'activities.full': 'Đã đầy',
-    'activities.joinSuccess': 'Tham gia hoạt động thành công',
-    'activities.leaveSuccess': 'Đã rời khỏi hoạt động',
-    'activities.joinError': 'Tham gia thất bại',
-    'activities.leaveError': 'Rời khỏi thất bại',
-    'activities.deleteConfirm': 'Bạn có chắc chắn muốn xóa hoạt động này?',
-    'activities.deleteSuccess': 'Xóa hoạt động thành công',
-    'activities.deleteError': 'Xóa thất bại',
-    // Bản dịch danh mục hoạt động
-    'activities.categories.全部': 'Tất cả',
-    'activities.categories.文化交流': 'Giao lưu văn hóa',
-    'activities.categories.技术分享': 'Chia sẻ công nghệ',
-    'activities.categories.户外运动': 'Thể thao ngoài trời',
-    'activities.categories.美食聚会': 'Tụ tập ẩm thực',
-    'activities.categories.学习交流': 'Giao lưu học tập',
-    'activities.categories.娱乐活动': 'Hoạt động giải trí',
-    'activities.categories.志愿服务': 'Dịch vụ tình nguyện',
-    'activities.categories.商务网络': 'Mạng lưới kinh doanh',
-    'activities.categories.艺术创作': 'Sáng tác nghệ thuật',
-    'activities.categories.其他': 'Khác'
+    activities: {
+      title: 'Hoạt động',
+      subtitle: 'Tham gia các hoạt động thú vị và gặp gỡ những người bạn cùng chí hướng',
+      
+      search: {
+        placeholder: 'Tìm kiếm hoạt động...',
+        noResults: 'Không tìm thấy hoạt động',
+        filters: 'Bộ lọc',
+        clear: 'Xóa bộ lọc',
+        category: 'Danh mục',
+        date: 'Ngày',
+        location: 'Địa điểm',
+        status: 'Trạng thái'
+      },
+
+      status: {
+        upcoming: 'Sắp diễn ra',
+        ongoing: 'Đang diễn ra',
+        completed: 'Đã hoàn thành',
+        cancelled: 'Đã hủy'
+      },
+
+      details: {
+        participants: 'Người tham gia',
+        organizer: 'Người tổ chức',
+        startTime: 'Thời gian bắt đầu',
+        endTime: 'Thời gian kết thúc',
+        location: 'Địa điểm',
+        description: 'Mô tả',
+        requirements: 'Yêu cầu',
+        contact: 'Liên hệ'
+      },
+
+      actions: {
+        join: 'Tham gia hoạt động',
+        leave: 'Rời khỏi hoạt động',
+        share: 'Chia sẻ hoạt động',
+        edit: 'Chỉnh sửa hoạt động',
+        delete: 'Xóa hoạt động',
+        viewDetails: 'Xem chi tiết',
+        register: 'Đăng ký ngay'
+      },
+
+      messages: {
+        joinSuccess: 'Tham gia hoạt động thành công!',
+        joinFailed: 'Tham gia hoạt động thất bại',
+        leaveSuccess: 'Đã rời khỏi hoạt động',
+        leaveFailed: 'Rời khỏi hoạt động thất bại',
+        deleteSuccess: 'Xóa hoạt động thành công',
+        deleteFailed: 'Xóa hoạt động thất bại'
+      },
+
+      create: {
+        title: 'Tạo hoạt động',
+        name: 'Tên hoạt động',
+        description: 'Mô tả',
+        category: 'Danh mục',
+        startDate: 'Ngày bắt đầu',
+        endDate: 'Ngày kết thúc',
+        location: 'Địa điểm',
+        maxParticipants: 'Số người tham gia tối đa',
+        requirements: 'Yêu cầu',
+        submit: 'Tạo hoạt động',
+        cancel: 'Hủy'
+      }
+    }
   }
 }

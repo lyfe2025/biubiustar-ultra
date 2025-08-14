@@ -23,10 +23,10 @@ const Navbar: React.FC = () => {
   }
 
   const navItems = [
-    { name: t('nav.home'), path: '/' },
-    { name: t('nav.trending'), path: '/trending' },
-    { name: t('nav.activities'), path: '/activities' },
-    { name: t('nav.about'), path: '/about' },
+    { key: 'nav.home', path: '/' },
+    { key: 'nav.trending', path: '/trending' },
+    { key: 'nav.activities', path: '/activities' },
+    { key: 'nav.about', path: '/about' },
   ]
 
   const isActive = (path: string) => location.pathname === path
@@ -79,7 +79,7 @@ const Navbar: React.FC = () => {
                       : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
                   )}
                 >
-                  {item.name}
+                  {t(item.key)}
                 </Link>
               ))}
             </div>
@@ -149,7 +149,7 @@ const Navbar: React.FC = () => {
                         : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
                     )}
                   >
-                    {item.name}
+                    {t(item.key)}
                   </Link>
                 ))}
                 <div className="pt-2 border-t border-purple-100">

@@ -14,7 +14,7 @@ import {
 } from './translations'
 
 // 合并所有翻译模块
-const mergeTranslations = (...translationModules: any[]): Translations => {
+export const mergeTranslations = (...translationModules: any[]): Translations => {
   const languages: Language[] = ['zh', 'zh-TW', 'en', 'vi']
   const result: any = {}
 
@@ -44,8 +44,19 @@ export const allTranslations = mergeTranslations(
   commonTranslations
 )
 
+
+
 // 获取翻译文本
 export const getTranslation = (key: string, language: Language): string => {
+  // 确保翻译数据存在
+  if (!allTranslations || !allTranslations[language]) {
+    // 尝试回退到英文
+    if (language !== 'en' && allTranslations?.en) {
+      return getTranslation(key, 'en')
+    }
+    return key
+  }
+  
   const keys = key.split('.')
   let translation: any = allTranslations[language]
 
@@ -53,9 +64,11 @@ export const getTranslation = (key: string, language: Language): string => {
     if (translation && typeof translation === 'object' && k in translation) {
       translation = translation[k]
     } else {
-      // 如果找不到翻译，返回key或英文翻译
-      const fallback = language !== 'en' ? getTranslation(key, 'en') : key
-      return fallback
+      // 如果找不到翻译，尝试英文回退
+      if (language !== 'en' && allTranslations?.en) {
+        return getTranslation(key, 'en')
+      }
+      return key
     }
   }
 

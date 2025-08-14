@@ -1,55 +1,63 @@
 // 导航栏翻译
 export const navigationTranslations = {
   zh: {
-    'nav.home': '首页',
-    'nav.trending': '热门',
-    'nav.activities': '活动',
-    'nav.about': '关于我们',
-    'nav.profile': '个人中心',
-    'nav.login': '登录',
-    'nav.register': '注册',
-    'nav.logout': '退出登录',
-    'nav.logoutFailed': '登出失败',
-    'nav.welcome': '欢迎',
-    'nav.admin': '管理后台'
+    nav: {
+      home: '首页',
+      trending: '热门',
+      activities: '活动',
+      about: '关于我们',
+      profile: '个人中心',
+      login: '登录',
+      register: '注册',
+      logout: '退出登录',
+      logoutFailed: '登出失败',
+      welcome: '欢迎',
+      admin: '管理后台'
+    }
   },
   'zh-TW': {
-    'nav.home': '首頁',
-    'nav.trending': '熱門',
-    'nav.activities': '活動',
-    'nav.about': '關於我們',
-    'nav.profile': '個人中心',
-    'nav.login': '登入',
-    'nav.register': '註冊',
-    'nav.logout': '退出登入',
-    'nav.logoutFailed': '登出失敗',
-    'nav.welcome': '歡迎',
-    'nav.admin': '管理後台'
+    nav: {
+      home: '首頁',
+      trending: '熱門',
+      activities: '活動',
+      about: '關於我們',
+      profile: '個人中心',
+      login: '登入',
+      register: '註冊',
+      logout: '退出登入',
+      logoutFailed: '登出失敗',
+      welcome: '歡迎',
+      admin: '管理後台'
+    }
   },
   en: {
-    'nav.home': 'Home',
-    'nav.trending': 'Trending',
-    'nav.activities': 'Activities',
-    'nav.about': 'About',
-    'nav.profile': 'Profile',
-    'nav.login': 'Login',
-    'nav.register': 'Register',
-    'nav.logout': 'Logout',
-    'nav.logoutFailed': 'Logout failed',
-    'nav.welcome': 'Welcome',
-    'nav.admin': 'Admin'
+    nav: {
+      home: 'Home',
+      trending: 'Trending',
+      activities: 'Activities',
+      about: 'About',
+      profile: 'Profile',
+      login: 'Login',
+      register: 'Register',
+      logout: 'Logout',
+      logoutFailed: 'Logout failed',
+      welcome: 'Welcome',
+      admin: 'Admin'
+    }
   },
   vi: {
-    'nav.home': 'Trang chủ',
-    'nav.trending': 'Thịnh hành',
-    'nav.activities': 'Hoạt động',
-    'nav.about': 'Về chúng tôi',
-    'nav.profile': 'Hồ sơ',
-    'nav.login': 'Đăng nhập',
-    'nav.register': 'Đăng ký',
-    'nav.logout': 'Đăng xuất',
-    'nav.logoutFailed': 'Đăng xuất thất bại',
-    'nav.welcome': 'Chào mừng',
-    'nav.admin': 'Quản trị'
+    nav: {
+      home: 'Trang chủ',
+      trending: 'Thịnh hành',
+      activities: 'Hoạt động',
+      about: 'Về chúng tôi',
+      profile: 'Hồ sơ',
+      login: 'Đăng nhập',
+      register: 'Đăng ký',
+      logout: 'Đăng xuất',
+      logoutFailed: 'Đăng xuất thất bại',
+      welcome: 'Chào mừng',
+      admin: 'Quản trị'
+    }
   }
 }

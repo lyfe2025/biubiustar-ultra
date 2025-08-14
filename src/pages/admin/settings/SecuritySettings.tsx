@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Shield, Lock, Clock, Key } from 'lucide-react'
-import { useLanguage } from '../../../contexts/LanguageContext'
+import { useLanguage } from '../../../contexts/language'
 import { SettingsSectionProps, SecuritySettingsData } from './types'
 
 const SecuritySettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {

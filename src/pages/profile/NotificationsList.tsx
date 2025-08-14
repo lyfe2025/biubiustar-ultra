@@ -1,6 +1,6 @@
 import React from 'react'
 import { Bell, Check, X, Clock, User, Heart, MessageCircle, Calendar } from 'lucide-react'
-import { useLanguage } from '../../contexts/LanguageContext'
+import { useLanguage } from '../../contexts/language'
 
 // 模拟的通知数据
 const mockNotifications = [

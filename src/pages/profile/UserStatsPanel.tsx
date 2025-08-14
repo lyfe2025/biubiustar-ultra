@@ -1,6 +1,6 @@
 import React from 'react'
 import { FileText, Users, UserPlus, Heart } from 'lucide-react'
-import { useLanguage } from '../../contexts/LanguageContext'
+import { useLanguage } from '../../contexts/language'
 import { UserStatsPanelProps } from './types'
 
 const UserStatsPanel: React.FC<UserStatsPanelProps> = ({ stats, isLoading }) => {

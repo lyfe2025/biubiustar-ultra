@@ -1,411 +1,450 @@
 // 个人资料翻译
 export const profileTranslations = {
   zh: {
-    // 基本信息
-    'profile.title': '个人中心',
-    'profile.subtitle': '管理您的个人资料和设置',
-    'profile.edit': '编辑资料',
-    'profile.settings': '设置',
-    'profile.posts': '帖子',
-    'profile.followers': '关注者',
-    'profile.following': '关注中',
-    'profile.noProfile': '暂无个人资料',
-    'profile.createProfile': '创建您的个人资料',
-    'profile.userProfile': '用户资料',
-    'profile.notLoggedIn': '未登录',
-    'profile.pleaseLogin': '请先登录以查看个人资料',
-    
-    // 头像和基本信息
-    'profile.changeAvatar': '更换头像',
-    'profile.fullName': '姓名',
-    'profile.bio': '个人简介',
-    'profile.location': '位置',
-    'profile.website': '网站',
-    'profile.joinedOn': '加入时间：{date}',
-    
-    // 标签页
-    'profile.tabs.overview': '概览',
-    'profile.tabs.content': '内容',
-    'profile.tabs.social': '社交',
-    'profile.tabs.settings': '设置',
-    'profile.tabs.notifications': '通知',
-    
-    // 创建内容
-    'profile.createPost': '发布帖子',
-    
-    // 统计信息
-    'profile.statistics': '统计数据',
-    'profile.stats.posts': '帖子',
-    'profile.stats.followers': '粉丝',
-    'profile.stats.following': '关注',
-    'profile.stats.likes': '点赞',
-    
-    // 帖子管理
-    'profile.noPosts': '暂无帖子',
-    'profile.createFirstPost': '发布您的第一篇帖子',
-    'profile.myPosts': '我的帖子',
-    'profile.untitledPost': '无标题帖子',
-    'profile.deletePost': '删除帖子',
-    'profile.confirmDeletePost': '确定要删除这篇帖子吗？',
-    'profile.postStatus.published': '已发布',
-    'profile.postStatus.pending': '待审核',
-    'profile.postStatus.rejected': '已拒绝',
-    'profile.postStatus.draft': '草稿',
-    
-    // 活动
-    'profile.noActivities': '暂无活动',
-    'profile.joinFirstActivity': '参加您的第一个活动',
-    'profile.myActivities': '我的活动',
-    'profile.untitledActivity': '无标题活动',
-    'profile.participants': '参与者',
-    'profile.endsOn': '结束时间',
-    'profile.activityStatus.ended': '已结束',
-    'profile.activityStatus.ongoing': '进行中',
-    'profile.activityStatus.upcoming': '即将开始',
-    
-    // 通知
-    'profile.notifications.title': '通知',
-    'profile.notifications.unread': '未读',
-    'profile.notifications.markAllRead': '全部标记为已读',
-    'profile.notifications.noNotifications': '暂无通知',
-    'profile.notifications.noNotificationsDesc': '当有新的互动时，通知会在这里显示',
-    'profile.notifications.markAsRead': '标记为已读',
-    'profile.notifications.delete': '删除',
-    'profile.notifications.loadMore': '加载更多',
-    
-    // 设置
-    'profile.confirmSignOut': '确定要退出登录吗？',
-    'profile.settings.notifications': '通知设置',
-    'profile.settings.emailNotifications': '邮件通知',
-    'profile.settings.emailNotificationsDesc': '接收重要更新的邮件通知',
-    'profile.settings.pushNotifications': '推送通知',
-    'profile.settings.pushNotificationsDesc': '接收浏览器推送通知',
-    'profile.settings.smsNotifications': '短信通知',
-    'profile.settings.smsNotificationsDesc': '接收重要事件的短信通知',
-    'profile.settings.privacy': '隐私设置',
-    'profile.settings.profileVisibility': '个人资料可见性',
-    'profile.settings.profileVisibilityDesc': '选择谁可以查看您的个人资料',
-    'profile.settings.visibility.public': '公开',
-    'profile.settings.visibility.friends': '仅朋友',
-    'profile.settings.visibility.private': '私密',
-    'profile.settings.activityPrivacy': '活动隐私',
-    'profile.settings.activityPrivacyDesc': '控制活动状态的显示',
-    'profile.settings.showOnlineStatus': '显示在线状态',
-    'profile.settings.language': '语言设置',
-    'profile.settings.preferredLanguage': '首选语言',
-    'profile.settings.preferredLanguageDesc': '选择您的首选显示语言',
-    'profile.settings.languages.chinese': '简体中文',
-    'profile.settings.languages.traditionalChinese': '繁体中文',
-    'profile.settings.languages.english': '英语',
-    'profile.settings.languages.vietnamese': '越南语',
-    'profile.settings.account': '账户操作',
-    'profile.settings.signOut': '退出登录',
-    'profile.settings.accountNote': '退出登录后需要重新输入用户名和密码才能访问您的账户。'
+    profile: {
+      title: '个人资料',
+      subtitle: '管理您的个人信息和设置',
+      editProfile: '编辑资料',
+      viewProfile: '查看资料',
+      createPost: '发布帖子',
+      notLoggedIn: '您尚未登录',
+      pleaseLogin: '请先登录以查看个人资料',
+      
+      // 标签页
+      tabs: {
+        overview: '概览',
+        content: '内容',
+        social: '社交',
+        settings: '设置',
+        notifications: '通知'
+      },
+      
+      // 基本信息
+      basic: {
+        username: '用户名',
+        email: '邮箱',
+        phone: '手机号',
+        birthday: '生日',
+        gender: '性别',
+        location: '所在地',
+        website: '个人网站',
+        bio: '个人简介',
+        avatar: '头像',
+        cover: '封面'
+      },
+
+      // 统计信息
+      stats: {
+        posts: '帖子',
+        followers: '关注者',
+        following: '关注中',
+        likes: '获赞',
+        views: '浏览量',
+        activities: '参与活动',
+        joinedOn: '加入于 {date}'
+      },
+
+      // 帖子管理
+      posts: {
+        title: '我的帖子',
+        published: '已发布',
+        drafts: '草稿',
+        private: '私密',
+        noPosts: '还没有发布任何帖子',
+        createFirst: '发布第一个帖子'
+      },
+
+      // 活动管理
+      activities: {
+        title: '我的活动',
+        created: '创建的',
+        joined: '参与的',
+        completed: '已完成',
+        upcoming: '即将参与',
+        noActivities: '还没有参与任何活动',
+        joinFirst: '参与第一个活动'
+      },
+
+      // 活动相关
+      myActivities: '我的活动',
+      joinFirstActivity: '参与第一个活动',
+      untitledActivity: '未命名活动',
+      participants: '参与者',
+      endsOn: '结束于',
+      confirmSignOut: '确定要退出登录吗？',
+
+      // 设置
+      settings: {
+        notifications: '通知设置'
+      },
+
+      // 通知设置
+      notifications: {
+        title: '通知设置',
+        email: '邮件通知',
+        push: '推送通知',
+        sms: '短信通知',
+        newFollower: '新关注者',
+        newLike: '新点赞',
+        newComment: '新评论',
+        activityReminder: '活动提醒',
+        systemNews: '系统消息'
+      },
+
+      // 隐私设置
+      privacy: {
+        title: '隐私设置',
+        profileVisibility: '资料可见性',
+        public: '公开',
+        friendsOnly: '仅好友',
+        private: '私密',
+        showEmail: '显示邮箱',
+        showPhone: '显示手机号',
+        allowMessages: '允许私信',
+        allowFollow: '允许关注'
+      },
+
+      // 账户设置
+      account: {
+        title: '账户设置',
+        changePassword: '修改密码',
+        twoFactor: '双重认证',
+        loginHistory: '登录历史',
+        connectedAccounts: '关联账户',
+        deleteAccount: '删除账户',
+        downloadData: '下载数据'
+      },
+
+      // 操作
+      actions: {
+        follow: '关注',
+        unfollow: '取消关注',
+        block: '屏蔽',
+        unblock: '取消屏蔽',
+        report: '举报',
+        message: '私信',
+        share: '分享资料'
+      },
+
+      // 消息提示
+      messages: {
+        updateSuccess: '资料更新成功',
+        updateFailed: '资料更新失败',
+        followSuccess: '关注成功',
+        followFailed: '关注失败',
+        unfollowSuccess: '取消关注成功',
+        blockSuccess: '屏蔽成功',
+        reportSuccess: '举报成功'
+      }
+    }
   },
   'zh-TW': {
-    // 基本信息
-    'profile.title': '個人中心',
-    'profile.subtitle': '管理您的個人資料和設置',
-    'profile.edit': '編輯資料',
-    'profile.settings': '設置',
-    'profile.posts': '帖子',
-    'profile.followers': '關注者',
-    'profile.following': '關注中',
-    'profile.noProfile': '暫無個人資料',
-    'profile.createProfile': '創建您的個人資料',
-    'profile.userProfile': '用戶資料',
-    'profile.notLoggedIn': '未登錄',
-    'profile.pleaseLogin': '請先登錄以查看個人資料',
-    
-    // 头像和基本信息
-    'profile.changeAvatar': '更換頭像',
-    'profile.fullName': '姓名',
-    'profile.bio': '個人簡介',
-    'profile.location': '位置',
-    'profile.website': '網站',
-    'profile.joinedOn': '加入時間：{date}',
-    
-    // 标签页
-    'profile.tabs.overview': '概覽',
-    'profile.tabs.content': '內容',
-    'profile.tabs.social': '社交',
-    'profile.tabs.settings': '設置',
-    'profile.tabs.notifications': '通知',
-    
-    // 创建内容
-    'profile.createPost': '發布帖子',
-    
-    // 统计信息
-    'profile.statistics': '統計數據',
-    'profile.stats.posts': '帖子',
-    'profile.stats.followers': '粉絲',
-    'profile.stats.following': '關注',
-    'profile.stats.likes': '點贊',
-    
-    // 帖子管理
-    'profile.noPosts': '暫無帖子',
-    'profile.createFirstPost': '發布您的第一篇帖子',
-    'profile.myPosts': '我的帖子',
-    'profile.untitledPost': '無標題帖子',
-    'profile.deletePost': '刪除帖子',
-    'profile.confirmDeletePost': '確定要刪除這篇帖子嗎？',
-    'profile.postStatus.published': '已發布',
-    'profile.postStatus.pending': '待審核',
-    'profile.postStatus.rejected': '已拒絕',
-    'profile.postStatus.draft': '草稿',
-    
-    // 活动
-    'profile.noActivities': '暫無活動',
-    'profile.joinFirstActivity': '參加您的第一個活動',
-    'profile.myActivities': '我的活動',
-    'profile.untitledActivity': '無標題活動',
-    'profile.participants': '參與者',
-    'profile.endsOn': '結束時間',
-    'profile.activityStatus.ended': '已結束',
-    'profile.activityStatus.ongoing': '進行中',
-    'profile.activityStatus.upcoming': '即將開始',
-    
-    // 通知
-    'profile.notifications.title': '通知',
-    'profile.notifications.unread': '未讀',
-    'profile.notifications.markAllRead': '全部標記為已讀',
-    'profile.notifications.noNotifications': '暫無通知',
-    'profile.notifications.noNotificationsDesc': '當有新的互動時，通知會在這裡顯示',
-    'profile.notifications.markAsRead': '標記為已讀',
-    'profile.notifications.delete': '刪除',
-    'profile.notifications.loadMore': '加載更多',
-    
-    // 设置
-    'profile.confirmSignOut': '確定要退出登錄嗎？',
-    'profile.settings.notifications': '通知設置',
-    'profile.settings.emailNotifications': '郵件通知',
-    'profile.settings.emailNotificationsDesc': '接收重要更新的郵件通知',
-    'profile.settings.pushNotifications': '推送通知',
-    'profile.settings.pushNotificationsDesc': '接收瀏覽器推送通知',
-    'profile.settings.smsNotifications': '短信通知',
-    'profile.settings.smsNotificationsDesc': '接收重要事件的短信通知',
-    'profile.settings.privacy': '隱私設置',
-    'profile.settings.profileVisibility': '個人資料可見性',
-    'profile.settings.profileVisibilityDesc': '選擇誰可以查看您的個人資料',
-    'profile.settings.visibility.public': '公開',
-    'profile.settings.visibility.friends': '僅朋友',
-    'profile.settings.visibility.private': '私密',
-    'profile.settings.activityPrivacy': '活動隱私',
-    'profile.settings.activityPrivacyDesc': '控制活動狀態的顯示',
-    'profile.settings.showOnlineStatus': '顯示在線狀態',
-    'profile.settings.language': '語言設置',
-    'profile.settings.preferredLanguage': '首選語言',
-    'profile.settings.preferredLanguageDesc': '選擇您的首選顯示語言',
-    'profile.settings.languages.chinese': '簡體中文',
-    'profile.settings.languages.traditionalChinese': '繁體中文',
-    'profile.settings.languages.english': '英語',
-    'profile.settings.languages.vietnamese': '越南語',
-    'profile.settings.account': '賬戶操作',
-    'profile.settings.signOut': '退出登錄',
-    'profile.settings.accountNote': '退出登錄後需要重新輸入用戶名和密碼才能訪問您的賬戶。'
+    profile: {
+      title: '個人資料',
+      editProfile: '編輯資料',
+      viewProfile: '查看資料',
+      
+      basic: {
+        username: '用戶名',
+        email: '郵箱',
+        phone: '手機號',
+        birthday: '生日',
+        gender: '性別',
+        location: '所在地',
+        website: '個人網站',
+        bio: '個人簡介',
+        avatar: '頭像',
+        cover: '封面'
+      },
+
+      stats: {
+        posts: '帖子',
+        followers: '關注者',
+        following: '關注中',
+        likes: '獲讚',
+        views: '瀏覽量',
+        activities: '參與活動',
+        joinedOn: '加入於 {date}'
+      },
+
+      posts: {
+        title: '我的帖子',
+        published: '已發布',
+        drafts: '草稿',
+        private: '私密',
+        noPosts: '還沒有發布任何帖子',
+        createFirst: '發布第一個帖子'
+      },
+
+      activities: {
+        title: '我的活動',
+        created: '創建的',
+        joined: '參與的',
+        completed: '已完成',
+        upcoming: '即將參與',
+        noActivities: '還沒有參與任何活動',
+        joinFirst: '參與第一個活動'
+      },
+
+      notifications: {
+        title: '通知設置',
+        email: '郵件通知',
+        push: '推送通知',
+        sms: '短信通知',
+        newFollower: '新關注者',
+        newLike: '新點讚',
+        newComment: '新評論',
+        activityReminder: '活動提醒',
+        systemNews: '系統消息'
+      },
+
+      privacy: {
+        title: '隱私設置',
+        profileVisibility: '資料可見性',
+        public: '公開',
+        friendsOnly: '僅好友',
+        private: '私密',
+        showEmail: '顯示郵箱',
+        showPhone: '顯示手機號',
+        allowMessages: '允許私信',
+        allowFollow: '允許關注'
+      },
+
+      account: {
+        title: '帳戶設置',
+        changePassword: '修改密碼',
+        twoFactor: '雙重認證',
+        loginHistory: '登入歷史',
+        connectedAccounts: '關聯帳戶',
+        deleteAccount: '刪除帳戶',
+        downloadData: '下載數據'
+      },
+
+      actions: {
+        follow: '關注',
+        unfollow: '取消關注',
+        block: '屏蔽',
+        unblock: '取消屏蔽',
+        report: '舉報',
+        message: '私信',
+        share: '分享資料'
+      },
+
+      messages: {
+        updateSuccess: '資料更新成功',
+        updateFailed: '資料更新失敗',
+        followSuccess: '關注成功',
+        followFailed: '關注失敗',
+        unfollowSuccess: '取消關注成功',
+        blockSuccess: '屏蔽成功',
+        reportSuccess: '舉報成功'
+      }
+    }
   },
   en: {
-    // Basic info
-    'profile.title': 'Profile',
-    'profile.subtitle': 'Manage your profile and settings',
-    'profile.edit': 'Edit Profile',
-    'profile.settings': 'Settings',
-    'profile.posts': 'Posts',
-    'profile.followers': 'Followers',
-    'profile.following': 'Following',
-    'profile.noProfile': 'No profile available',
-    'profile.createProfile': 'Create your profile',
-    'profile.userProfile': 'User Profile',
-    'profile.notLoggedIn': 'Not logged in',
-    'profile.pleaseLogin': 'Please log in to view your profile',
-    
-    // Avatar and basic info
-    'profile.changeAvatar': 'Change Avatar',
-    'profile.fullName': 'Full Name',
-    'profile.bio': 'Bio',
-    'profile.location': 'Location',
-    'profile.website': 'Website',
-    'profile.joinedOn': 'Joined on {date}',
-    
-    // Tabs
-    'profile.tabs.overview': 'Overview',
-    'profile.tabs.content': 'Content',
-    'profile.tabs.social': 'Social',
-    'profile.tabs.settings': 'Settings',
-    'profile.tabs.notifications': 'Notifications',
-    
-    // Create content
-    'profile.createPost': 'Create Post',
-    
-    // Statistics
-    'profile.statistics': 'Statistics',
-    'profile.stats.posts': 'Posts',
-    'profile.stats.followers': 'Followers',
-    'profile.stats.following': 'Following',
-    'profile.stats.likes': 'Likes',
-    
-    // Posts management
-    'profile.noPosts': 'No posts yet',
-    'profile.createFirstPost': 'Create your first post',
-    'profile.myPosts': 'My Posts',
-    'profile.untitledPost': 'Untitled Post',
-    'profile.deletePost': 'Delete Post',
-    'profile.confirmDeletePost': 'Are you sure you want to delete this post?',
-    'profile.postStatus.published': 'Published',
-    'profile.postStatus.pending': 'Pending',
-    'profile.postStatus.rejected': 'Rejected',
-    'profile.postStatus.draft': 'Draft',
-    
-    // Activities
-    'profile.noActivities': 'No activities yet',
-    'profile.joinFirstActivity': 'Join your first activity',
-    'profile.myActivities': 'My Activities',
-    'profile.untitledActivity': 'Untitled Activity',
-    'profile.participants': 'participants',
-    'profile.endsOn': 'Ends on',
-    'profile.activityStatus.ended': 'Ended',
-    'profile.activityStatus.ongoing': 'Ongoing',
-    'profile.activityStatus.upcoming': 'Upcoming',
-    
-    // Notifications
-    'profile.notifications.title': 'Notifications',
-    'profile.notifications.unread': 'unread',
-    'profile.notifications.markAllRead': 'Mark all as read',
-    'profile.notifications.noNotifications': 'No notifications',
-    'profile.notifications.noNotificationsDesc': 'Notifications will appear here when you have new interactions',
-    'profile.notifications.markAsRead': 'Mark as read',
-    'profile.notifications.delete': 'Delete',
-    'profile.notifications.loadMore': 'Load more',
-    
-    // Settings
-    'profile.confirmSignOut': 'Are you sure you want to sign out?',
-    'profile.settings.notifications': 'Notification Settings',
-    'profile.settings.emailNotifications': 'Email Notifications',
-    'profile.settings.emailNotificationsDesc': 'Receive email notifications for important updates',
-    'profile.settings.pushNotifications': 'Push Notifications',
-    'profile.settings.pushNotificationsDesc': 'Receive browser push notifications',
-    'profile.settings.smsNotifications': 'SMS Notifications',
-    'profile.settings.smsNotificationsDesc': 'Receive SMS notifications for important events',
-    'profile.settings.privacy': 'Privacy Settings',
-    'profile.settings.profileVisibility': 'Profile Visibility',
-    'profile.settings.profileVisibilityDesc': 'Choose who can view your profile',
-    'profile.settings.visibility.public': 'Public',
-    'profile.settings.visibility.friends': 'Friends Only',
-    'profile.settings.visibility.private': 'Private',
-    'profile.settings.activityPrivacy': 'Activity Privacy',
-    'profile.settings.activityPrivacyDesc': 'Control the display of activity status',
-    'profile.settings.showOnlineStatus': 'Show online status',
-    'profile.settings.language': 'Language Settings',
-    'profile.settings.preferredLanguage': 'Preferred Language',
-    'profile.settings.preferredLanguageDesc': 'Choose your preferred display language',
-    'profile.settings.languages.chinese': 'Simplified Chinese',
-    'profile.settings.languages.traditionalChinese': 'Traditional Chinese',
-    'profile.settings.languages.english': 'English',
-    'profile.settings.languages.vietnamese': 'Vietnamese',
-    'profile.settings.account': 'Account Actions',
-    'profile.settings.signOut': 'Sign Out',
-    'profile.settings.accountNote': 'You will need to re-enter your username and password to access your account after signing out.'
+    profile: {
+      title: 'Profile',
+      editProfile: 'Edit Profile',
+      viewProfile: 'View Profile',
+      
+      basic: {
+        username: 'Username',
+        email: 'Email',
+        phone: 'Phone',
+        birthday: 'Birthday',
+        gender: 'Gender',
+        location: 'Location',
+        website: 'Website',
+        bio: 'Bio',
+        avatar: 'Avatar',
+        cover: 'Cover'
+      },
+
+      stats: {
+        posts: 'Posts',
+        followers: 'Followers',
+        following: 'Following',
+        likes: 'Likes',
+        views: 'Views',
+        activities: 'Activities',
+        joinedOn: 'Joined on {date}'
+      },
+
+      posts: {
+        title: 'My Posts',
+        published: 'Published',
+        drafts: 'Drafts',
+        private: 'Private',
+        noPosts: 'No posts yet',
+        createFirst: 'Create your first post'
+      },
+
+      activities: {
+        title: 'My Activities',
+        created: 'Created',
+        joined: 'Joined',
+        completed: 'Completed',
+        upcoming: 'Upcoming',
+        noActivities: 'No activities yet',
+        joinFirst: 'Join your first activity'
+      },
+
+      notifications: {
+        title: 'Notification Settings',
+        email: 'Email Notifications',
+        push: 'Push Notifications',
+        sms: 'SMS Notifications',
+        newFollower: 'New Follower',
+        newLike: 'New Like',
+        newComment: 'New Comment',
+        activityReminder: 'Activity Reminder',
+        systemNews: 'System News'
+      },
+
+      privacy: {
+        title: 'Privacy Settings',
+        profileVisibility: 'Profile Visibility',
+        public: 'Public',
+        friendsOnly: 'Friends Only',
+        private: 'Private',
+        showEmail: 'Show Email',
+        showPhone: 'Show Phone',
+        allowMessages: 'Allow Messages',
+        allowFollow: 'Allow Follow'
+      },
+
+      account: {
+        title: 'Account Settings',
+        changePassword: 'Change Password',
+        twoFactor: 'Two-Factor Authentication',
+        loginHistory: 'Login History',
+        connectedAccounts: 'Connected Accounts',
+        deleteAccount: 'Delete Account',
+        downloadData: 'Download Data'
+      },
+
+      actions: {
+        follow: 'Follow',
+        unfollow: 'Unfollow',
+        block: 'Block',
+        unblock: 'Unblock',
+        report: 'Report',
+        message: 'Message',
+        share: 'Share Profile'
+      },
+
+      messages: {
+        updateSuccess: 'Profile updated successfully',
+        updateFailed: 'Profile update failed',
+        followSuccess: 'Followed successfully',
+        followFailed: 'Follow failed',
+        unfollowSuccess: 'Unfollowed successfully',
+        blockSuccess: 'Blocked successfully',
+        reportSuccess: 'Reported successfully'
+      }
+    }
   },
   vi: {
-    // Thông tin cơ bản
-    'profile.title': 'Hồ sơ',
-    'profile.subtitle': 'Quản lý hồ sơ và cài đặt của bạn',
-    'profile.edit': 'Chỉnh sửa hồ sơ',
-    'profile.settings': 'Cài đặt',
-    'profile.posts': 'Bài viết',
-    'profile.followers': 'Người theo dõi',
-    'profile.following': 'Đang theo dõi',
-    'profile.noProfile': 'Chưa có hồ sơ',
-    'profile.createProfile': 'Tạo hồ sơ của bạn',
-    'profile.userProfile': 'Hồ sơ người dùng',
-    'profile.notLoggedIn': 'Chưa đăng nhập',
-    'profile.pleaseLogin': 'Vui lòng đăng nhập để xem hồ sơ',
-    
-    // Ảnh đại diện và thông tin cơ bản
-    'profile.changeAvatar': 'Thay đổi ảnh đại diện',
-    'profile.fullName': 'Họ và tên',
-    'profile.bio': 'Tiểu sử',
-    'profile.location': 'Vị trí',
-    'profile.website': 'Trang web',
-    'profile.joinedOn': 'Tham gia vào {date}',
-    
-    // Các tab
-    'profile.tabs.overview': 'Tổng quan',
-    'profile.tabs.content': 'Nội dung',
-    'profile.tabs.social': 'Xã hội',
-    'profile.tabs.settings': 'Cài đặt',
-    'profile.tabs.notifications': 'Thông báo',
-    
-    // Tạo nội dung
-    'profile.createPost': 'Tạo bài viết',
-    
-    // Thống kê
-    'profile.statistics': 'Thống kê',
-    'profile.stats.posts': 'Bài viết',
-    'profile.stats.followers': 'Người theo dõi',
-    'profile.stats.following': 'Đang theo dõi',
-    'profile.stats.likes': 'Lượt thích',
-    
-    // Quản lý bài viết
-    'profile.noPosts': 'Chưa có bài viết nào',
-    'profile.createFirstPost': 'Tạo bài viết đầu tiên của bạn',
-    'profile.myPosts': 'Bài viết của tôi',
-    'profile.untitledPost': 'Bài viết không có tiêu đề',
-    'profile.deletePost': 'Xóa bài viết',
-    'profile.confirmDeletePost': 'Bạn có chắc chắn muốn xóa bài viết này?',
-    'profile.postStatus.published': 'Đã xuất bản',
-    'profile.postStatus.pending': 'Chờ duyệt',
-    'profile.postStatus.rejected': 'Bị từ chối',
-    'profile.postStatus.draft': 'Bản nháp',
-    
-    // Hoạt động
-    'profile.noActivities': 'Chưa có hoạt động nào',
-    'profile.joinFirstActivity': 'Tham gia hoạt động đầu tiên của bạn',
-    'profile.myActivities': 'Hoạt động của tôi',
-    'profile.untitledActivity': 'Hoạt động không có tiêu đề',
-    'profile.participants': 'người tham gia',
-    'profile.endsOn': 'Kết thúc vào',
-    'profile.activityStatus.ended': 'Đã kết thúc',
-    'profile.activityStatus.ongoing': 'Đang diễn ra',
-    'profile.activityStatus.upcoming': 'Sắp diễn ra',
-    
-    // Thông báo
-    'profile.notifications.title': 'Thông báo',
-    'profile.notifications.unread': 'chưa đọc',
-    'profile.notifications.markAllRead': 'Đánh dấu tất cả là đã đọc',
-    'profile.notifications.noNotifications': 'Không có thông báo',
-    'profile.notifications.noNotificationsDesc': 'Thông báo sẽ xuất hiện ở đây khi bạn có tương tác mới',
-    'profile.notifications.markAsRead': 'Đánh dấu là đã đọc',
-    'profile.notifications.delete': 'Xóa',
-    'profile.notifications.loadMore': 'Tải thêm',
-    
-    // Cài đặt
-    'profile.confirmSignOut': 'Bạn có chắc chắn muốn đăng xuất?',
-    'profile.settings.notifications': 'Cài đặt thông báo',
-    'profile.settings.emailNotifications': 'Thông báo email',
-    'profile.settings.emailNotificationsDesc': 'Nhận thông báo email cho các cập nhật quan trọng',
-    'profile.settings.pushNotifications': 'Thông báo đẩy',
-    'profile.settings.pushNotificationsDesc': 'Nhận thông báo đẩy từ trình duyệt',
-    'profile.settings.smsNotifications': 'Thông báo SMS',
-    'profile.settings.smsNotificationsDesc': 'Nhận thông báo SMS cho các sự kiện quan trọng',
-    'profile.settings.privacy': 'Cài đặt riêng tư',
-    'profile.settings.profileVisibility': 'Hiển thị hồ sơ',
-    'profile.settings.profileVisibilityDesc': 'Chọn ai có thể xem hồ sơ của bạn',
-    'profile.settings.visibility.public': 'Công khai',
-    'profile.settings.visibility.friends': 'Chỉ bạn bè',
-    'profile.settings.visibility.private': 'Riêng tư',
-    'profile.settings.activityPrivacy': 'Quyền riêng tư hoạt động',
-    'profile.settings.activityPrivacyDesc': 'Kiểm soát việc hiển thị trạng thái hoạt động',
-    'profile.settings.showOnlineStatus': 'Hiển thị trạng thái trực tuyến',
-    'profile.settings.language': 'Cài đặt ngôn ngữ',
-    'profile.settings.preferredLanguage': 'Ngôn ngữ ưa thích',
-    'profile.settings.preferredLanguageDesc': 'Chọn ngôn ngữ hiển thị ưa thích của bạn',
-    'profile.settings.languages.chinese': 'Tiếng Trung (Giản thể)',
-    'profile.settings.languages.traditionalChinese': 'Tiếng Trung (Phồn thể)',
-    'profile.settings.languages.english': 'Tiếng Anh',
-    'profile.settings.languages.vietnamese': 'Tiếng Việt',
-    'profile.settings.account': 'Hành động tài khoản',
-    'profile.settings.signOut': 'Đăng xuất',
-    'profile.settings.accountNote': 'Bạn sẽ cần nhập lại tên người dùng và mật khẩu để truy cập tài khoản sau khi đăng xuất.'
+    profile: {
+      title: 'Hồ sơ',
+      editProfile: 'Chỉnh sửa hồ sơ',
+      viewProfile: 'Xem hồ sơ',
+      
+      basic: {
+        username: 'Tên người dùng',
+        email: 'Email',
+        phone: 'Số điện thoại',
+        birthday: 'Sinh nhật',
+        gender: 'Giới tính',
+        location: 'Vị trí',
+        website: 'Website',
+        bio: 'Tiểu sử',
+        avatar: 'Ảnh đại diện',
+        cover: 'Ảnh bìa'
+      },
+
+      stats: {
+        posts: 'Bài viết',
+        followers: 'Người theo dõi',
+        following: 'Đang theo dõi',
+        likes: 'Lượt thích',
+        views: 'Lượt xem',
+        activities: 'Hoạt động',
+        joinedOn: 'Tham gia vào {date}'
+      },
+
+      posts: {
+        title: 'Bài viết của tôi',
+        published: 'Đã xuất bản',
+        drafts: 'Bản nháp',
+        private: 'Riêng tư',
+        noPosts: 'Chưa có bài viết nào',
+        createFirst: 'Tạo bài viết đầu tiên'
+      },
+
+      activities: {
+        title: 'Hoạt động của tôi',
+        created: 'Đã tạo',
+        joined: 'Đã tham gia',
+        completed: 'Hoàn thành',
+        upcoming: 'Sắp tới',
+        noActivities: 'Chưa có hoạt động nào',
+        joinFirst: 'Tham gia hoạt động đầu tiên'
+      },
+
+      notifications: {
+        title: 'Cài đặt thông báo',
+        email: 'Thông báo email',
+        push: 'Thông báo đẩy',
+        sms: 'Thông báo SMS',
+        newFollower: 'Người theo dõi mới',
+        newLike: 'Lượt thích mới',
+        newComment: 'Bình luận mới',
+        activityReminder: 'Nhắc nhở hoạt động',
+        systemNews: 'Tin tức hệ thống'
+      },
+
+      privacy: {
+        title: 'Cài đặt riêng tư',
+        profileVisibility: 'Hiển thị hồ sơ',
+        public: 'Công khai',
+        friendsOnly: 'Chỉ bạn bè',
+        private: 'Riêng tư',
+        showEmail: 'Hiển thị email',
+        showPhone: 'Hiển thị số điện thoại',
+        allowMessages: 'Cho phép tin nhắn',
+        allowFollow: 'Cho phép theo dõi'
+      },
+
+      account: {
+        title: 'Cài đặt tài khoản',
+        changePassword: 'Đổi mật khẩu',
+        twoFactor: 'Xác thực hai yếu tố',
+        loginHistory: 'Lịch sử đăng nhập',
+        connectedAccounts: 'Tài khoản liên kết',
+        deleteAccount: 'Xóa tài khoản',
+        downloadData: 'Tải dữ liệu'
+      },
+
+      actions: {
+        follow: 'Theo dõi',
+        unfollow: 'Bỏ theo dõi',
+        block: 'Chặn',
+        unblock: 'Bỏ chặn',
+        report: 'Báo cáo',
+        message: 'Nhắn tin',
+        share: 'Chia sẻ hồ sơ'
+      },
+
+      messages: {
+        updateSuccess: 'Cập nhật hồ sơ thành công',
+        updateFailed: 'Cập nhật hồ sơ thất bại',
+        followSuccess: 'Theo dõi thành công',
+        followFailed: 'Theo dõi thất bại',
+        unfollowSuccess: 'Bỏ theo dõi thành công',
+        blockSuccess: 'Chặn thành công',
+        reportSuccess: 'Báo cáo thành công'
+      }
+    }
   }
 }

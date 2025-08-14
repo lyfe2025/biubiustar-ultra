@@ -69,7 +69,7 @@ class SettingsService {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/api/admin/settings/public`, {
+      const response = await fetch(`${this.baseUrl}/api/settings/public`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

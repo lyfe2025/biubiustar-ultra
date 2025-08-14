@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Palette, Eye, EyeOff } from 'lucide-react'
-import { useLanguage } from '../../../contexts/LanguageContext'
+import { useLanguage } from '../../../contexts/language'
 import { SettingsSectionProps, ThemeSettingsData } from './types'
 
 const ThemeSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {

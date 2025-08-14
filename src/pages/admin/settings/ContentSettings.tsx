@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FileText, Eye, Heart, MessageSquare, Share } from 'lucide-react'
-import { useLanguage } from '../../../contexts/LanguageContext'
+import { useLanguage } from '../../../contexts/language'
 import { SettingsSectionProps, ContentSettingsData } from './types'
 
 const ContentSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {

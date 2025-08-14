@@ -1,7 +1,7 @@
 import React from 'react'
 import { Calendar, MapPin, Users, Clock } from 'lucide-react'
 import { format } from 'date-fns'
-import { useLanguage } from '../../contexts/LanguageContext'
+import { useLanguage } from '../../contexts/language'
 import { UserActivitiesListProps } from './types'
 
 const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isLoading }) => {

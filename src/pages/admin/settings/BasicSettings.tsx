@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Globe, Upload, Image } from 'lucide-react'
-import { useLanguage } from '../../../contexts/LanguageContext'
+import { useLanguage } from '../../../contexts/language'
 import { SettingsSectionProps, BasicSettingsData } from './types'
 
 const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {

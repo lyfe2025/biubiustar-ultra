@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
+import { allTranslations } from '../contexts/language/translationLoader'
 import { socialService } from '../lib/socialService'
 import type { Post } from '../types'
 import { ActivityService, Activity as ActivityType } from '../lib/activityService'
@@ -16,6 +17,9 @@ import { usePageTitle } from '../hooks/usePageTitle'
 const Home = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
+  
+
+  
   usePageTitle(t('home.title'))
   const [posts, setPosts] = useState<Post[]>([])
   const [activities, setActivities] = useState<ActivityType[]>([])
