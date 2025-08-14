@@ -1,0 +1,11 @@
+// 翻译模块统一导出
+export { navigationTranslations } from './navigation'
+export { homeTranslations } from './home'
+export { activitiesTranslations } from './activities'
+export { authTranslations } from './auth'
+export { postTranslations } from './posts'
+export { profileTranslations } from './profile'
+export { adminTranslations } from './admin'
+export { trendingTranslations } from './trending'
+export { aboutTranslations } from './about'
+export { commonTranslations } from './common'

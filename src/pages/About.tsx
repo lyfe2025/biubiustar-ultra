@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Star, Users, Globe, Heart, Mail, Phone, MapPin, Send } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from '../contexts/language';
 import { contactService, type ContactFormData } from '../services/ContactService';
 import { toast } from 'sonner';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -39,7 +39,7 @@ export default function About() {
       const result = await contactService.submitContactForm(formData);
       
       if (result.success) {
-        toast.success(result.message || '消息提交成功！');
+        toast.success(result.message || t('about.contact.form.success'));
         // Reset form
         setFormData({
           name: '',
@@ -48,11 +48,11 @@ export default function About() {
           message: ''
         });
       } else {
-        toast.error(result.message || '提交失败，请稍后重试');
+        toast.error(result.message || t('about.contact.form.error'));
       }
     } catch (error) {
       console.error('Contact form submission error:', error);
-      toast.error(error instanceof Error ? error.message : '提交失败，请检查网络连接');
+      toast.error(error instanceof Error ? error.message : t('about.contact.form.networkError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -61,31 +61,31 @@ export default function About() {
   const teamMembers = [
     {
       name: 'Sarah Chen',
-      role: '创始人 & CEO',
-      bio: '拥有10年互联网产品经验，致力于打造连接世界的社交平台。',
+      role: t('about.team.members.sarah.role'),
+      bio: t('about.team.members.sarah.bio'),
       avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20asian%20woman%20CEO%20executive%20portrait&image_size=square',
-      expertise: ['产品策略', '团队管理', '商业发展']
+      expertise: [t('about.team.members.sarah.expertise.0'), t('about.team.members.sarah.expertise.1'), t('about.team.members.sarah.expertise.2')]
     },
     {
       name: 'Michael Wang',
-      role: '技术总监',
-      bio: '资深全栈工程师，专注于构建高性能、可扩展的技术架构。',
+      role: t('about.team.members.michael.role'),
+      bio: t('about.team.members.michael.bio'),
       avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20asian%20man%20CTO%20engineer%20portrait&image_size=square',
-      expertise: ['系统架构', '云计算', 'AI技术']
+      expertise: [t('about.team.members.michael.expertise.0'), t('about.team.members.michael.expertise.1'), t('about.team.members.michael.expertise.2')]
     },
     {
       name: 'Anna Nguyen',
-      role: '设计总监',
-      bio: '用户体验设计专家，致力于创造直观美观的产品界面。',
+      role: t('about.team.members.anna.role'),
+      bio: t('about.team.members.anna.bio'),
       avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20vietnamese%20woman%20designer%20creative%20portrait&image_size=square',
-      expertise: ['UI/UX设计', '品牌设计', '用户研究']
+      expertise: [t('about.team.members.anna.expertise.0'), t('about.team.members.anna.expertise.1'), t('about.team.members.anna.expertise.2')]
     },
     {
       name: 'David Park',
-      role: '运营总监',
-      bio: '社区运营专家，擅长用户增长和社区建设。',
+      role: t('about.team.members.david.role'),
+      bio: t('about.team.members.david.bio'),
       avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20korean%20man%20operations%20manager%20portrait&image_size=square',
-      expertise: ['社区运营', '用户增长', '数据分析']
+      expertise: [t('about.team.members.david.expertise.0'), t('about.team.members.david.expertise.1'), t('about.team.members.david.expertise.2')]
     }
   ];
 
@@ -325,7 +325,7 @@ export default function About() {
                   className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-6 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className={`w-5 h-5 mr-2 ${isSubmitting ? 'animate-pulse' : ''}`} />
-                  {isSubmitting ? '提交中...' : t('about.contact.form.submit')}
+                  {isSubmitting ? t('about.contact.form.submitting') : t('about.contact.form.submit')}
                 </button>
               </form>
             </div>

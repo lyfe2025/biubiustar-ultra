@@ -679,6 +679,43 @@ class SocialService {
       throw error;
     }
   }
+
+  // 添加缺失的方法
+  async toggleLike(postId: string, userId: string): Promise<void> {
+    // 首先检查是否已经点赞
+    const { data: existingLike, error: checkError } = await supabase
+      .from('likes')
+      .select('id')
+      .eq('post_id', postId)
+      .eq('user_id', userId)
+      .single()
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      throw checkError
+    }
+
+    if (existingLike) {
+      // 如果已经点赞，则取消点赞
+      const { error } = await supabase
+        .from('likes')
+        .delete()
+        .eq('id', existingLike.id)
+      
+      if (error) throw error
+    } else {
+      // 如果没有点赞，则添加点赞
+      const { error } = await supabase
+        .from('likes')
+        .insert([{
+          post_id: postId,
+          user_id: userId
+        }])
+      
+      if (error) throw error
+    }
+  }
+
+
 }
 
 export const socialService = new SocialService()

@@ -4,7 +4,7 @@ import { Activity, ActivityService } from '../lib/activityService';
 import { ActivityCard } from '../components/ActivityCard';
 import { CreateActivityModal } from '../components/CreateActivityModal';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from '../contexts/language';
 import { toast } from 'sonner';
 import { usePageTitle } from '../hooks/usePageTitle';
 

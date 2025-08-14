@@ -1,0 +1,73 @@
+// 内容管理相关类型定义
+export interface Post {
+  id: string
+  title: string
+  content: string
+  image?: string
+  video?: string
+  status: 'pending' | 'published' | 'rejected' | 'draft'
+  likes_count: number
+  comments_count: number
+  views_count: number
+  created_at: string
+  updated_at: string
+  author: {
+    id: string
+    username: string
+    avatar?: string
+  }
+}
+
+export interface ContentCategory {
+  id: string
+  name: string
+  description?: string
+  color: string
+  icon: string
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ContentFiltersProps {
+  searchTerm: string
+  setSearchTerm: (term: string) => void
+  selectedStatus: string
+  setSelectedStatus: (status: string) => void
+  onRefresh: () => void
+}
+
+export interface ContentListProps {
+  posts: Post[]
+  loading: boolean
+  onView: (post: Post) => void
+  onUpdateStatus: (postId: string, status: Post['status']) => void
+  onDelete: (post: Post) => void
+}
+
+export interface ContentPreviewProps {
+  post: Post | null
+  isOpen: boolean
+  onClose: () => void
+  onUpdateStatus: (status: Post['status']) => void
+  onDelete: () => void
+}
+
+export interface CategoryManagementProps {
+  categories: ContentCategory[]
+  loading: boolean
+  searchTerm: string
+  setSearchTerm: (term: string) => void
+  onCreate: () => void
+  onEdit: (category: ContentCategory) => void
+  onDelete: (category: ContentCategory) => void
+  onToggle: (category: ContentCategory) => void
+}
+
+export interface NewCategoryData {
+  name: string
+  description: string
+  color: string
+  icon: string
+}

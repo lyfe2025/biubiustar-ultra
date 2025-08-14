@@ -15,7 +15,7 @@ import {
   BarChart3
 } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
-import { useLanguage } from '../../contexts/LanguageContext'
+import { useLanguage } from '../../contexts/language'
 import { adminService, type DashboardStats, type RecentActivity } from '../../services/AdminService'
 
 // 接口定义已移至AdminService中

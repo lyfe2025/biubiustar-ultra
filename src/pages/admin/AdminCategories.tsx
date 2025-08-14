@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Tag, Search } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
-import { useLanguage } from '../../contexts/LanguageContext'
+import { useLanguage } from '../../contexts/language'
 import { toast } from 'sonner'
 
 interface Category {

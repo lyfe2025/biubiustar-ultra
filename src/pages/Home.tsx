@@ -3,7 +3,7 @@ import { Plus, Calendar, Users, ArrowRight, TrendingUp, Star } from 'lucide-reac
 import { Link } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
-import { useLanguage } from '../contexts/LanguageContext'
+import { useLanguage } from '../contexts/language'
 import { socialService } from '../lib/socialService'
 import type { Post } from '../types'
 import { ActivityService, Activity as ActivityType } from '../lib/activityService'

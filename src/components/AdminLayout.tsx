@@ -1,7 +1,7 @@
 import React, { useState, ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '../lib/utils'
-import { useLanguage } from '../contexts/LanguageContext'
+import { useLanguage } from '../contexts/language'
 import {
   LayoutDashboard,
   FileText,
@@ -129,7 +129,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 >
                   <Globe className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">
-                    {language === 'zh' ? '中文' : language === 'en' ? 'English' : 'Tiếng Việt'}
+                    {language === 'zh' ? '简体中文' : language === 'zh-TW' ? '繁體中文' : language === 'en' ? 'English' : 'Tiếng Việt'}
                   </span>
                   <ChevronDown className="ml-1 h-3 w-3" />
                 </button>
@@ -147,7 +147,19 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                         language === 'zh' ? "bg-purple-50 text-purple-700 font-medium" : "text-gray-700"
                       )}
                     >
-                      中文
+                      简体中文
+                    </button>
+                    <button
+                      onClick={() => {
+                        setLanguage('zh-TW')
+                        setLanguageMenuOpen(false)
+                      }}
+                      className={cn(
+                        "w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors",
+                        language === 'zh-TW' ? "bg-purple-50 text-purple-700 font-medium" : "text-gray-700"
+                      )}
+                    >
+                      繁體中文
                     </button>
                     <button
                       onClick={() => {

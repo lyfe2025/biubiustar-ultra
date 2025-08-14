@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ChevronDown, Globe } from 'lucide-react'
-import { useLanguage } from '../contexts/LanguageContext'
+import { useLanguage } from '../contexts/language'
 
 const LanguageSelector: React.FC = () => {
   const { language, setLanguage, t } = useLanguage()

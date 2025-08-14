@@ -54,18 +54,10 @@ export interface ContentCategory {
   updated_at: string
 }
 
-export interface Activity {
-  id: string
-  title: string
-  description: string
-  image?: string
-  location: string
-  start_date: string
-  end_date: string
-  max_participants?: number
-  current_participants: number
-  status: 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled'
-  category: string
+import { Activity } from '../types/activity'
+
+export interface AdminActivity extends Activity {
+  status: 'draft' | 'published' | 'cancelled'
   category_id?: string
   organizer: {
     id: string
@@ -74,7 +66,7 @@ export interface Activity {
   }
   tags: string[]
   is_featured: boolean
-  created_at: string
+  is_recommended?: boolean
   updated_at: string
 }
 
@@ -247,15 +239,15 @@ class AdminService {
   }
 
   // 活动管理相关API
-  async getActivities(): Promise<Activity[]> {
-    return this.request<Activity[]>('/admin/activities')
+  async getActivities(): Promise<AdminActivity[]> {
+    return this.request<AdminActivity[]>('/admin/activities')
   }
 
   async getRecentActivities(): Promise<RecentActivity[]> {
     return this.request<RecentActivity[]>('/admin/recent-activities')
   }
 
-  async updateActivityStatus(activityId: string, status: Activity['status'], is_featured?: boolean): Promise<{ success: boolean }> {
+  async updateActivityStatus(activityId: string, status: AdminActivity['status'], is_featured?: boolean): Promise<{ success: boolean }> {
     const body: any = { status }
     if (is_featured !== undefined) {
       body.is_featured = is_featured
@@ -272,37 +264,23 @@ class AdminService {
     })
   }
 
-  async createActivity(activityData: {
-    title: string
-    description: string
-    location: string
-    start_date: string
-    end_date: string
-    category: string
-    category_id?: string
-    max_participants?: string
-    image_url?: string
-  }): Promise<Activity> {
-    return this.request<Activity>('/admin/activities', {
+  async createActivity(activityData: Omit<AdminActivity, 'id' | 'created_at' | 'updated_at' | 'current_participants' | 'organizer' | 'tags' | 'is_featured' | 'user_id' | 'author'>): Promise<AdminActivity> {
+    return this.request<AdminActivity>('/admin/activities', {
       method: 'POST',
       body: JSON.stringify(activityData),
     })
   }
 
-  async updateActivity(activityId: string, activityData: {
-    title?: string
-    description?: string
-    location?: string
-    start_date?: string
-    end_date?: string
-    category?: string
-    category_id?: string
-    max_participants?: string
-    image_url?: string
-  }): Promise<Activity> {
-    return this.request<Activity>(`/admin/activities/${activityId}`, {
+  async updateActivity(activityId: string, activityData: Partial<Omit<AdminActivity, 'id' | 'created_at' | 'updated_at' | 'organizer' | 'user_id' | 'author'>>): Promise<AdminActivity> {
+    return this.request<AdminActivity>(`/admin/activities/${activityId}`, {
       method: 'PUT',
       body: JSON.stringify(activityData),
+    })
+  }
+
+  async toggleActivityFeatured(activityId: string): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>(`/admin/activities/${activityId}/featured`, {
+      method: 'PUT',
     })
   }
 
@@ -419,6 +397,48 @@ class AdminService {
 
   async getPublicSettings(): Promise<Record<string, any>> {
     return this.request<Record<string, any>>('/admin/settings/public')
+  }
+
+  // 添加缺失的系统设置方法
+  async getSystemSettings(): Promise<any> {
+    return await this.request('/admin/settings')
+  }
+
+  async updateSystemSettings(settings: any): Promise<void> {
+    await this.request('/admin/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings)
+    })
+  }
+
+  async resetSystemSettings(): Promise<void> {
+    await this.request('/admin/settings/reset', {
+      method: 'POST'
+    })
+  }
+
+  async exportSystemSettings(): Promise<any> {
+    return await this.request('/admin/settings/export')
+  }
+
+  async importSystemSettings(settings: any): Promise<void> {
+    await this.request('/admin/settings/import', {
+      method: 'POST',
+      body: JSON.stringify(settings)
+    })
+  }
+
+  async testEmailConfig(settings: any): Promise<void> {
+    await this.request('/admin/settings/test-email', {
+      method: 'POST',
+      body: JSON.stringify(settings)
+    })
+  }
+
+  async clearCache(): Promise<void> {
+    await this.request('/admin/settings/clear-cache', {
+      method: 'POST'
+    })
   }
 }
 

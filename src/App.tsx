@@ -14,7 +14,7 @@ import AdminActivities from './pages/admin/AdminActivities'
 import AdminCategories from './pages/admin/AdminCategories'
 import AdminSettings from './pages/admin/AdminSettings'
 import { AuthProvider } from './contexts/AuthContext'
-import { LanguageProvider } from './contexts/LanguageContext'
+import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
 import { useFavicon } from './hooks/usePageTitle'
 

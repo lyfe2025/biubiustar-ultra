@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, TrendingUp, Heart, MessageCircle, Share2, Clock } from 'lucide-react'
-import { useLanguage } from '../contexts/LanguageContext'
+import { useLanguage } from '../contexts/language'
 import { useAuth } from '../contexts/AuthContext'
 import { cn } from '../lib/utils'
 import { socialService } from '../lib/socialService'
