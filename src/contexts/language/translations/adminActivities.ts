@@ -49,7 +49,19 @@ export const adminActivitiesTranslations = {
         createCategory: '创建分类',
         searchCategories: '搜索分类...',
         categoryName: '分类名称',
-        createdAt: '创建时间'
+        description: '描述',
+        createdAt: '创建时间',
+        totalActivities: '活动总数',
+        activeActivities: '进行中',
+        completedActivities: '已完成',
+        totalParticipants: '总参与人数',
+        categoryNameRequired: '分类名称不能为空',
+        categoryCreated: '分类创建成功',
+        categoryUpdated: '分类更新成功',
+        categoryDeleted: '分类删除成功',
+        createCategoryFailed: '创建分类失败',
+        updateCategoryFailed: '更新分类失败',
+        deleteCategoryFailed: '删除分类失败'
       }
     }
   },
@@ -95,7 +107,23 @@ export const adminActivitiesTranslations = {
         },
         list: {
           title: '活動列表'
-        }
+        },
+        createCategory: '創建分類',
+        searchCategories: '搜索分類...',
+        categoryName: '分類名稱',
+        description: '描述',
+        createdAt: '創建時間',
+        totalActivities: '活動總數',
+        activeActivities: '進行中',
+        completedActivities: '已完成',
+        totalParticipants: '總參與人數',
+        categoryNameRequired: '分類名稱不能為空',
+        categoryCreated: '分類創建成功',
+        categoryUpdated: '分類更新成功',
+        categoryDeleted: '分類刪除成功',
+        createCategoryFailed: '創建分類失敗',
+        updateCategoryFailed: '更新分類失敗',
+        deleteCategoryFailed: '刪除分類失敗'
       }
     }
   },
@@ -141,7 +169,23 @@ export const adminActivitiesTranslations = {
         },
         list: {
           title: 'Activity List'
-        }
+        },
+        createCategory: 'Create Category',
+        searchCategories: 'Search categories...',
+        categoryName: 'Category Name',
+        description: 'Description',
+        createdAt: 'Created At',
+        totalActivities: 'Total Activities',
+        activeActivities: 'Active',
+        completedActivities: 'Completed',
+        totalParticipants: 'Total Participants',
+        categoryNameRequired: 'Category name is required',
+        categoryCreated: 'Category created successfully',
+        categoryUpdated: 'Category updated successfully',
+        categoryDeleted: 'Category deleted successfully',
+        createCategoryFailed: 'Failed to create category',
+        updateCategoryFailed: 'Failed to update category',
+        deleteCategoryFailed: 'Failed to delete category'
       }
     }
   },
@@ -187,7 +231,23 @@ export const adminActivitiesTranslations = {
         },
         list: {
           title: 'Danh sách hoạt động'
-        }
+        },
+        createCategory: 'Tạo danh mục',
+        searchCategories: 'Tìm danh mục...',
+        categoryName: 'Tên danh mục',
+        description: 'Mô tả',
+        createdAt: 'Ngày tạo',
+        totalActivities: 'Tổng số hoạt động',
+        activeActivities: 'Đang diễn ra',
+        completedActivities: 'Đã hoàn thành',
+        totalParticipants: 'Tổng số người tham gia',
+        categoryNameRequired: 'Tên danh mục không được để trống',
+        categoryCreated: 'Tạo danh mục thành công',
+        categoryUpdated: 'Cập nhật danh mục thành công',
+        categoryDeleted: 'Xóa danh mục thành công',
+        createCategoryFailed: 'Tạo danh mục thất bại',
+        updateCategoryFailed: 'Cập nhật danh mục thất bại',
+        deleteCategoryFailed: 'Xóa danh mục thất bại'
       }
     }
   }

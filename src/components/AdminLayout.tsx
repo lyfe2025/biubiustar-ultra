@@ -36,22 +36,22 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const navigation = [
     {
-      name: t('admin.dashboard'),
+      name: t('admin.dashboard.title'),
       href: '/admin',
       icon: LayoutDashboard
     },
     {
-      name: t('admin.content'),
+      name: t('admin.content.title'),
       href: '/admin/content',
       icon: FileText
     },
     {
-      name: t('admin.users'),
+      name: t('admin.users.title'),
       href: '/admin/users',
       icon: Users
     },
     {
-      name: t('admin.activities'),
+      name: t('admin.activities.title'),
       href: '/admin/activities',
       icon: Calendar
     },
@@ -61,7 +61,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       icon: Mail
     },
     {
-      name: t('admin.settings'),
+      name: t('admin.settings.title'),
       href: '/admin/settings',
       icon: Settings
     }

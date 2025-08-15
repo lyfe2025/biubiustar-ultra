@@ -321,19 +321,31 @@ export default function About() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
             {[
-              { name: 'TikTok', description: 'tiktok' },
-              { name: '同程旅行', description: 'tongcheng' },
-              { name: 'BlueFocus蓝色光标', description: 'bluefocus' },
-              { name: 'DELSK', description: 'delsk' },
-              { name: 'azgo', description: 'azgo' },
-              { name: '艺龙eLong', description: 'elong' }
+              { description: 'tiktok', logo: '/images/partners/tiktok.png' },
+              { description: 'tongcheng', logo: '/images/partners/tongcheng.png' },
+              { description: 'bluefocus', logo: '/images/partners/lanseguangbiao.png' },
+              { description: 'delsk', logo: '/images/partners/delsk.png' },
+              { description: 'azgo', logo: '/images/partners/azgo.png' },
+              { description: 'elong', logo: '/images/partners/yilong.png' }
             ].map((partner, index) => (
               <div key={index} className="group">
                 <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-100 hover:shadow-xl transition-all duration-300 text-center h-32 flex flex-col justify-center items-center hover:scale-105">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mb-3">
-                    <Building className="w-6 h-6 text-white" />
+                  <div className="w-16 h-16 flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={partner.logo} 
+                      alt="Partner Logo"
+                      className="max-w-full max-h-full object-contain filter hover:brightness-110 transition-all duration-300"
+                      onError={(e) => {
+                        // Fallback to Building icon if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg items-center justify-center hidden">
+                      <Building className="w-6 h-6 text-white" />
+                    </div>
                   </div>
-                  <h3 className="text-sm font-bold text-gray-900 mb-1">{partner.name}</h3>
                 </div>
                 <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <p className="text-xs text-gray-600 text-center">
