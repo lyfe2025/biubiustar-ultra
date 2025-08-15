@@ -94,14 +94,33 @@ router.get('/:postId', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // 获取所有评论作者信息
+    // 🚀 优化：从user_profiles表获取评论作者信息，避免Auth API调用
     const userIds = [...new Set(comments?.map(comment => comment.user_id) || [])];
-    const { data: users } = await supabaseAdmin.auth.admin.listUsers();
     const userMap = new Map<string, any>();
-    if (users?.users) {
-      users.users.forEach((user: any) => {
-        userMap.set(user.id, user);
-      });
+    
+    if (userIds.length > 0) {
+      try {
+        // 从user_profiles表批量获取用户信息，避免Auth API调用
+        const { data: userProfiles } = await supabaseAdmin
+          .from('user_profiles')
+          .select('id, username, avatar_url')
+          .in('id', userIds);
+        
+        if (userProfiles) {
+          userProfiles.forEach(user => {
+            userMap.set(user.id, {
+              id: user.id,
+              username: user.username,
+              avatar_url: user.avatar_url
+            });
+          });
+        }
+        
+        console.log(`从user_profiles批量获取 ${userIds.length} 个评论作者信息，成功获取 ${userMap.size} 个用户信息`)
+      } catch (error) {
+        console.error('获取评论作者信息失败:', error)
+        // 继续执行，只是作者信息可能为空
+      }
     }
 
     // 格式化评论数据
@@ -114,8 +133,8 @@ router.get('/:postId', async (req: Request, res: Response): Promise<void> => {
         updated_at: comment.updated_at,
         author: {
           id: author?.id || comment.user_id,
-          username: author?.user_metadata?.username || author?.email?.split('@')[0] || '未知用户',
-          avatar_url: author?.user_metadata?.avatar_url
+          username: author?.username || '未知用户',
+          avatar_url: author?.avatar_url
         }
       };
     }) || [];
@@ -183,8 +202,12 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // 获取作者信息
-    const { data: authorData } = await supabaseAdmin.auth.admin.getUserById(user.id);
+    // 🚀 优化：从user_profiles获取作者信息，避免Auth API调用
+    const { data: authorData } = await supabaseAdmin
+      .from('user_profiles')
+      .select('id, username, avatar_url')
+      .eq('id', user.id)
+      .single();
     
     // 格式化返回数据
     const formattedComment = {
@@ -194,8 +217,8 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       updated_at: newComment.updated_at,
       author: {
         id: user.id,
-        username: authorData?.user?.user_metadata?.username || authorData?.user?.email?.split('@')[0] || '未知用户',
-        avatar_url: authorData?.user?.user_metadata?.avatar_url
+        username: authorData?.username || '未知用户',
+        avatar_url: authorData?.avatar_url
       }
     };
 
@@ -339,8 +362,12 @@ router.put('/:commentId', async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    // 获取作者信息
-    const { data: authorData } = await supabaseAdmin.auth.admin.getUserById(user.id);
+    // 🚀 优化：从user_profiles获取作者信息，避免Auth API调用
+    const { data: authorData } = await supabaseAdmin
+      .from('user_profiles')
+      .select('id, username, avatar_url')
+      .eq('id', user.id)
+      .single();
 
     // 格式化返回数据
     const formattedComment = {
@@ -350,8 +377,8 @@ router.put('/:commentId', async (req: Request, res: Response): Promise<void> => 
       updated_at: updatedComment.updated_at,
       author: {
         id: user.id,
-        username: authorData?.user?.user_metadata?.username || authorData?.user?.email?.split('@')[0] || '未知用户',
-        avatar_url: authorData?.user?.user_metadata?.avatar_url
+        username: authorData?.username || '未知用户',
+        avatar_url: authorData?.avatar_url
       }
     };
 

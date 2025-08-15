@@ -49,7 +49,7 @@ const Profile: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 pt-20 flex items-center justify-center">
         <div className="text-center">
           <User className="mx-auto h-16 w-16 text-gray-400 mb-4" />
           <h2 className="text-xl font-semibold text-gray-900">{t('profile.notLoggedIn')}</h2>
@@ -68,7 +68,7 @@ const Profile: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 pt-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 页面标题栏 */}
         <div className="flex items-center justify-between mb-8">

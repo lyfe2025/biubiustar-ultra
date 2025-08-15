@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>检查管理员认证状态</title>
+</head>
+<body>
+    <h1>管理员认证状态检查</h1>
+    <div id="result"></div>
+    
+    <script>
+        function checkAuthStatus() {
+            const resultDiv = document.getElementById('result');
+            
+            // 检查localStorage中的adminToken
+            const adminToken = localStorage.getItem('adminToken');
+            const adminUser = localStorage.getItem('adminUser');
+            const supabaseToken = localStorage.getItem('supabase.auth.token');
+            
+            let html = '<h2>认证状态检查结果:</h2>';
+            
+            if (adminToken) {
+                html += `<p><strong>✅ adminToken存在:</strong> ${adminToken.substring(0, 20)}...</p>`;
+                
+                // 尝试调用API验证token
+                fetch('/api/admin/settings', {
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        html += '<p><strong>✅ API调用成功:</strong> token有效</p>';
+                        return response.json();
+                    } else {
+                        html += `<p><strong>❌ API调用失败:</strong> ${response.status} - token可能无效</p>`;
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    html += '<p><strong>✅ 获取到的设置数据:</strong></p>';
+                    html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    resultDiv.innerHTML = html;
+                })
+                .catch(error => {
+                    html += `<p><strong>❌ API错误:</strong> ${error.message}</p>`;
+                    resultDiv.innerHTML = html;
+                });
+            } else {
+                html += '<p><strong>❌ adminToken不存在</strong></p>';
+            }
+            
+            if (adminUser) {
+                html += `<p><strong>✅ adminUser存在:</strong> ${adminUser}</p>`;
+            } else {
+                html += '<p><strong>❌ adminUser不存在</strong></p>';
+            }
+            
+            if (supabaseToken) {
+                html += '<p><strong>✅ supabaseToken存在</strong></p>';
+            } else {
+                html += '<p><strong>❌ supabaseToken不存在</strong></p>';
+            }
+            
+            html += '<br><button onclick="clearAuth()">清除所有认证信息</button>';
+            html += '<button onclick="location.href=\'/admin\'">前往管理员登录</button>';
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        function clearAuth() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            localStorage.removeItem('supabase.auth.token');
+            alert('已清除所有认证信息');
+            checkAuthStatus();
+        }
+        
+        // 页面加载时自动检查
+        window.onload = checkAuthStatus;
+    </script>
+</body>
+</html>

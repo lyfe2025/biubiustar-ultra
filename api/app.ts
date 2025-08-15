@@ -25,19 +25,28 @@ const __dirname = path.dirname(__filename);
 // load env
 dotenv.config();
 
+// 创建 Express 应用
+const app = express();
 
-const app: express.Application = express();
+// 信任代理
+app.set('trust proxy', true);
 
-app.use(cors());
+// CORS 配置
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://biubiustar-ultra.vercel.app',
+    /^https:\/\/.*\.vercel\.app$/
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+// 中间件
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// 静态文件服务 - 提供uploads文件夹的图片访问
-app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
-
-/**
- * API Routes
- */
+app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/comments', commentsRoutes);
@@ -48,63 +57,33 @@ app.use('/api/follows', followsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/settings', settingsRoutes);
 
-/**
- * health
- */
-app.use('/api/health', (req: Request, res: Response, next: NextFunction): void => {
-  res.status(200).json({
-    success: true,
-    message: 'ok'
-  });
+// 静态文件服务
+const staticPath = path.join(__dirname, '../public');
+app.use('/uploads', express.static(path.join(staticPath, 'uploads')));
+
+// API 路由不存在的处理
+app.use('/api/*', (req: Request, res: Response) => {
+  res.status(404).json({ error: 'API endpoint not found' });
 });
 
-/**
- * error handler middleware
- */
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-  res.status(500).json({
-    success: false,
-    error: 'Server internal error'
-  });
+// 前端应用
+const frontendPath = path.join(__dirname, '../dist');
+app.use(express.static(frontendPath));
+
+// 错误处理中间件
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
-/**
- * 404 handler
- */
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    error: 'API not found'
-  });
+// SPA 路由回退
+app.use('*', (req: Request, res: Response) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// 启动安全数据清理调度器
-let cleanupScheduler: NodeJS.Timeout | null = null;
-
-try {
-  cleanupScheduler = startSecurityCleanupScheduler();
-  console.log('Security cleanup scheduler started successfully');
-} catch (error) {
-  console.error('Failed to start security cleanup scheduler:', error);
+// 启动安全清理调度器
+if (process.env.NODE_ENV !== 'test') {
+  startSecurityCleanupScheduler();
 }
-
-// 优雅关闭处理
-process.on('SIGTERM', () => {
-  console.log('Received SIGTERM, shutting down gracefully...');
-  if (cleanupScheduler) {
-    clearInterval(cleanupScheduler);
-    console.log('Security cleanup scheduler stopped');
-  }
-  process.exit(0);
-});
-
-process.on('SIGINT', () => {
-  console.log('Received SIGINT, shutting down gracefully...');
-  if (cleanupScheduler) {
-    clearInterval(cleanupScheduler);
-    console.log('Security cleanup scheduler stopped');
-  }
-  process.exit(0);
-});
 
 export default app;

@@ -50,14 +50,14 @@ const Activities = () => {
     : activities.filter(activity => activity.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 pt-20">
       <div className="container mx-auto px-4 py-8">
         {/* 页面标题 */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">
             {t('activities.title')}
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             {t('activities.subtitle')}
           </p>
         </div>
@@ -67,7 +67,7 @@ const Activities = () => {
           <div className="text-center mb-8">
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center px-6 py-3 bg-purple-500/20 text-purple-200 border border-purple-500/30 rounded-lg hover:bg-purple-500/30 transition-colors"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-purple-500/20"
             >
               <Plus className="w-5 h-5 mr-2" />
               {t('activities.createActivity')}
@@ -82,10 +82,10 @@ const Activities = () => {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 backdrop-blur-md rounded-full border transition-all duration-300 ${
+                className={`px-6 py-2 backdrop-blur-sm rounded-full border transition-all duration-300 ${
                   selectedCategory === category
-                    ? 'bg-purple-500/30 text-purple-200 border-purple-500/50'
-                    : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-500 shadow-lg'
+                    : 'bg-white/80 text-gray-600 border-gray-200 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-300'
                 }`}
               >
                 {t(`activities.categories.${category}`)}
@@ -97,18 +97,18 @@ const Activities = () => {
         {/* 活动列表 */}
         {isLoading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
-            <p className="text-gray-300 mt-4">{t('activities.loading')}</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            <p className="text-gray-600 mt-4">{t('activities.loading')}</p>
           </div>
         ) : filteredActivities.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-300 text-lg mb-4">
+            <p className="text-gray-600 text-lg mb-4">
               {selectedCategory === '全部' ? t('activities.noActivities') : `${t('activities.noActivitiesFor')}${selectedCategory}${t('activities.activities')}`}
             </p>
             {user && (
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center px-6 py-3 bg-purple-500/20 text-purple-200 border border-purple-500/30 rounded-lg hover:bg-purple-500/30 transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-purple-500/20"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 {t('activities.createFirstActivity')}

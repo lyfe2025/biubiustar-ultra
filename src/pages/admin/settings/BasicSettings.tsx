@@ -40,9 +40,9 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
     resetEditingState
   }), [])
 
-  // 同步settings变化到formData（仅在初始加载或非编辑状态时）
+  // 同步父组件传递的设置到本地表单数据
   React.useEffect(() => {
-    if (settings && (initialLoad || !isEditing)) {
+    if (settings) {
       setFormData({
         site_name: settings['basic.siteName']?.value ?? '',
         site_description: settings['basic.siteDescription']?.value ?? '',
@@ -55,11 +55,13 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
         contact_email: settings['basic.contactEmail']?.value ?? '',
         site_domain: settings['basic.siteDomain']?.value ?? ''
       })
+      // 数据更新后重置编辑状态
+      setIsEditing(false)
       if (initialLoad) {
         setInitialLoad(false)
       }
     }
-  }, [settings, isEditing, initialLoad])
+  }, [settings])
 
   const handleChange = (field: keyof BasicSettingsData, value: string | undefined) => {
     // 标记为编辑状态，防止useEffect重置表单数据

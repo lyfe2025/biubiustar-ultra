@@ -436,7 +436,7 @@ show_blocked_ips() {
     fi
     
     # 直接通过Node.js连接Supabase查询IP黑名单
-    local response=$(node --input-type=module -e "
+    response=$(node --input-type=module -e "
         import dotenv from 'dotenv';
         import { createClient } from '@supabase/supabase-js';
         
@@ -480,7 +480,7 @@ show_blocked_ips() {
     
     # 检查响应是否包含错误
     if echo "$response" | grep -q '"error"'; then
-        local error_msg=$(echo "$response" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
+        error_msg=$(echo "$response" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
         echo -e "${RED}查询失败: $error_msg${NC}"
         read -p "按回车键继续..."
         return
@@ -540,7 +540,7 @@ unblock_ip() {
     
     # 首先显示当前被限制的IP列表供参考
     echo -e "${YELLOW}当前被限制的IP列表：${NC}"
-    local list_response=$(node --input-type=module -e "
+    list_response=$(node --input-type=module -e "
         import dotenv from 'dotenv';
         import { createClient } from '@supabase/supabase-js';
         
@@ -606,7 +606,7 @@ unblock_ip() {
     echo -e "${YELLOW}正在解除IP $target_ip 的限制...${NC}"
     
     # 直接通过Node.js连接Supabase删除IP黑名单记录
-    local unblock_response=$(node --input-type=module -e "
+    unblock_response=$(node --input-type=module -e "
         import dotenv from 'dotenv';
         import { createClient } from '@supabase/supabase-js';
         
@@ -691,7 +691,7 @@ unblock_ip() {
     if echo "$unblock_response" | grep -q '"success":true'; then
         echo -e "${GREEN}✓ IP地址 $target_ip 已成功解除限制${NC}"
     elif echo "$unblock_response" | grep -q '"error"'; then
-        local error_msg=$(echo "$unblock_response" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
+        error_msg=$(echo "$unblock_response" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
         echo -e "${RED}解除限制失败: $error_msg${NC}"
     else
         echo -e "${YELLOW}操作完成，但响应格式异常：${NC}"

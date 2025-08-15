@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Mail, Eye, Check, MessageSquare, Search, Filter, Trash2 } from 'lucide-react'
+import { Mail, Eye, Check, MessageSquare, Search, Filter, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
 import { useLanguage } from '../../contexts/language/LanguageContext'
 import { adminContactsTranslations } from '../../contexts/language/translations/adminContacts'
@@ -33,6 +33,35 @@ const AdminContacts = () => {
         page,
         pagination.limit,
         status
+      )
+      
+      if (response.success && response.data) {
+        setSubmissions(response.data.submissions)
+        setPagination(response.data.pagination)
+      }
+    } catch (error) {
+      console.error('获取联系提交失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 切换页面
+  const changePage = (page: number) => {
+    if (page >= 1 && page <= pagination.totalPages) {
+      fetchSubmissions(page, selectedStatus === 'all' ? undefined : selectedStatus)
+    }
+  }
+
+  // 改变每页显示数量
+  const changePageSize = async (limit: number) => {
+    setPagination(prev => ({ ...prev, limit, page: 1 }))
+    try {
+      setLoading(true)
+      const response = await contactService.getContactSubmissions(
+        1,
+        limit,
+        selectedStatus === 'all' ? undefined : selectedStatus
       )
       
       if (response.success && response.data) {
@@ -402,23 +431,70 @@ const AdminContacts = () => {
           )}
         </div>
 
-        {/* 分页 */}
-        {pagination.totalPages > 1 && (
-          <div className="mt-6 flex justify-center">
-            <div className="flex space-x-2">
-              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+        {/* 分页组件 */}
+        {!loading && pagination.total > 0 && (
+          <div className="mt-6 flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              显示第 {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} 条，共 {pagination.total} 条记录
+            </div>
+            <div className="flex items-center space-x-2">
+              {/* 每页显示数量选择 */}
+              <select
+                value={pagination.limit}
+                onChange={(e) => changePageSize(Number(e.target.value))}
+                className="border border-gray-300 rounded px-3 py-1 text-sm"
+              >
+                <option value={10}>10条/页</option>
+                <option value={20}>20条/页</option>
+                <option value={50}>50条/页</option>
+              </select>
+              
+              {/* 分页按钮 */}
+              <div className="flex items-center space-x-1">
                 <button
-                  key={page}
-                  onClick={() => fetchSubmissions(page, selectedStatus === 'all' ? undefined : selectedStatus)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                    page === pagination.page
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                  }`}
+                  onClick={() => changePage(pagination.page - 1)}
+                  disabled={pagination.page <= 1}
+                  className="p-2 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
-                  {page}
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
-              ))}
+                
+                {/* 页码按钮 */}
+                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                  let pageNum
+                  if (pagination.totalPages <= 5) {
+                    pageNum = i + 1
+                  } else if (pagination.page <= 3) {
+                    pageNum = i + 1
+                  } else if (pagination.page >= pagination.totalPages - 2) {
+                    pageNum = pagination.totalPages - 4 + i
+                  } else {
+                    pageNum = pagination.page - 2 + i
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => changePage(pageNum)}
+                      className={`px-3 py-1 rounded border ${
+                        pageNum === pagination.page
+                          ? 'bg-purple-600 text-white border-purple-600'
+                          : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })}
+                
+                <button
+                  onClick={() => changePage(pagination.page + 1)}
+                  disabled={pagination.page >= pagination.totalPages}
+                  className="p-2 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         )}

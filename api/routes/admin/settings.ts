@@ -11,6 +11,7 @@ router.use(requireAdmin)
 router.get('/', async (req, res) => {
   try {
     const { category } = req.query
+    console.log('GET /api/admin/settings 请求参数:', { category })
     
     let query = supabaseAdmin
       .from('system_settings')
@@ -19,7 +20,10 @@ router.get('/', async (req, res) => {
       .order('setting_key', { ascending: true })
     
     if (category) {
+      console.log(`过滤分类: ${category}`)
       query = query.eq('category', category)
+    } else {
+      console.log('获取所有分类的设置')
     }
     
     const { data: settings, error } = await query
@@ -29,50 +33,58 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: '获取系统设置失败' })
     }
     
-    // 按分类组织设置 - 使用category.key格式
-    const settingsByCategory = settings?.reduce((acc, setting) => {
-      let value = setting.setting_value
-      // 根据类型转换值
-      if (setting.setting_type === 'boolean') {
-        value = value === 'true'
-      } else if (setting.setting_type === 'number') {
-        value = parseInt(value) || 0
-      } else if (setting.setting_type === 'json') {
+    console.log('原始数据库设置:', settings);
+
+    // 转换为前端期望的嵌套对象格式
+    const result: { [key: string]: any } = {};
+    settings?.forEach(setting => {
+      const { category, setting_key, setting_value, setting_type } = setting;
+      
+      // 转换数据类型
+      let convertedValue = setting_value;
+      if (setting_type === 'boolean') {
+        convertedValue = setting_value === 'true';
+      } else if (setting_type === 'number') {
+        convertedValue = parseFloat(setting_value);
+      } else if (setting_type === 'json') {
         try {
-          value = JSON.parse(value)
+          convertedValue = JSON.parse(setting_value);
         } catch (e) {
-          value = null
+          convertedValue = null;
         }
       }
+      
+      // 转换字段名为驼峰命名
+      let camelKey = setting_key;
+      if (setting_key === 'contact_email') camelKey = 'contactEmail';
+      if (setting_key === 'site_domain') camelKey = 'siteDomain';
+      if (setting_key === 'site_name') camelKey = 'siteName';
+      if (setting_key === 'site_description') camelKey = 'siteDescription';
+      if (setting_key === 'site_description_zh') camelKey = 'siteDescriptionZh';
+      if (setting_key === 'site_description_zh_tw') camelKey = 'siteDescriptionZhTw';
+      if (setting_key === 'site_description_en') camelKey = 'siteDescriptionEn';
+      if (setting_key === 'site_description_vi') camelKey = 'siteDescriptionVi';
+      if (setting_key === 'site_logo') camelKey = 'siteLogo';
+      if (setting_key === 'site_favicon') camelKey = 'siteFavicon';
+      if (setting_key === 'site_keywords') camelKey = 'siteKeywords';
+      if (setting_key === 'tech_stack') camelKey = 'techStack';
+      
+      // 创建嵌套对象结构
+      if (!result[category]) {
+        result[category] = {};
+      }
+      result[category][camelKey] = convertedValue;
+      
+      console.log(`转换字段: ${category}.${setting_key} -> ${category}.${camelKey} = ${convertedValue}`);
+    });
 
-      // 转换数据库字段名为前端使用的格式
-      let frontendKey = setting.setting_key
-      if (setting.category === 'basic') {
-        // 将下划线命名转换为驼峰命名
-        if (setting.setting_key === 'site_name') frontendKey = 'siteName'
-        else if (setting.setting_key === 'site_description') frontendKey = 'siteDescription'
-        else if (setting.setting_key === 'site_description_zh') frontendKey = 'siteDescriptionZh'
-        else if (setting.setting_key === 'site_description_zh_tw') frontendKey = 'siteDescriptionZhTw'
-        else if (setting.setting_key === 'site_description_en') frontendKey = 'siteDescriptionEn'
-        else if (setting.setting_key === 'site_description_vi') frontendKey = 'siteDescriptionVi'
-        else if (setting.setting_key === 'site_logo') frontendKey = 'siteLogo'
-        else if (setting.setting_key === 'site_favicon') frontendKey = 'siteFavicon'
-        else if (setting.setting_key === 'site_keywords') frontendKey = 'siteKeywords'
-      }
-      
-      // 使用category.key格式作为键名
-      const categoryKey = `${setting.category}.${frontendKey}`
-      acc[categoryKey] = {
-        value,
-        type: setting.setting_type,
-        description: setting.description,
-        is_public: setting.is_public
-      }
-      
-      return acc
-    }, {} as any) || {}
-    
-    res.json(settingsByCategory)
+    console.log('最终返回数据:', result);
+    console.log('basic分类是否存在:', !!result.basic);
+    if (result.basic) {
+      console.log('basic分类内容:', result.basic);
+      console.log('basic分类字段数量:', Object.keys(result.basic).length);
+    }
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error('获取系统设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
@@ -323,6 +335,10 @@ router.get('/public', async (req, res) => {
         else if (setting.setting_key === 'site_logo') frontendKey = 'siteLogo'
         else if (setting.setting_key === 'site_favicon') frontendKey = 'siteFavicon'
         else if (setting.setting_key === 'site_keywords') frontendKey = 'siteKeywords'
+        else if (setting.setting_key === 'contact_email') frontendKey = 'contactEmail'
+        else if (setting.setting_key === 'site_domain') frontendKey = 'siteDomain'
+        else if (setting.setting_key === 'tech_stack') frontendKey = 'techStack'
+        else if (setting.setting_key === 'timezone') frontendKey = 'timezone'
       }
       
       // 使用category.key格式作为键名

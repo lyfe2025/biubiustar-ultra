@@ -3,7 +3,7 @@ export const homeTranslations = {
   zh: {
     home: {
       title: '首页',
-      welcome: '欢迎来到 Biubiustar',
+      welcome: '欢迎来到 BiuBiuStar',
       subtitle: '连接世界，分享精彩。在这里发现有趣的内容，结识志同道合的朋友，参与精彩的活动。',
       joinUs: '加入我们',
       exploreContent: '探索热门内容',
@@ -32,7 +32,7 @@ export const homeTranslations = {
   'zh-TW': {
     home: {
       title: '首頁',
-      welcome: '歡迎來到 Biubiustar',
+      welcome: '歡迎來到 BiuBiuStar',
       subtitle: '連接世界，分享精彩。在這裡發現有趣的內容，結識志同道合的朋友，參與精彩的活動。',
       joinUs: '加入我們',
       exploreContent: '探索熱門內容',
@@ -61,7 +61,7 @@ export const homeTranslations = {
   en: {
     home: {
       title: 'Home',
-      welcome: 'Welcome to Biubiustar',
+      welcome: 'Welcome to BiuBiuStar',
       subtitle: 'Connect the world, share wonderful moments. Discover interesting content, meet like-minded friends, and participate in exciting activities.',
       joinUs: 'Join Us',
       exploreContent: 'Explore Popular Content',
@@ -90,7 +90,7 @@ export const homeTranslations = {
   vi: {
     home: {
       title: 'Trang chủ',
-      welcome: 'Chào mừng đến với Biubiustar',
+      welcome: 'Chào mừng đến với BiuBiuStar',
       subtitle: 'Kết nối thế giới, chia sẻ những khoảnh khắc tuyệt vời. Khám phá nội dung thú vị, gặp gỡ những người bạn cùng chí hướng và tham gia các hoạt động thú vị.',
       joinUs: 'Tham gia',
       exploreContent: 'Khám phá nội dung phổ biến',

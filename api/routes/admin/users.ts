@@ -4,6 +4,52 @@ import { requireAdmin } from './auth'
 
 const router = Router()
 
+// 🚀 方案B优化：添加认证用户信息缓存（5分钟有效期）
+interface AuthUsersCache {
+  data: any[]
+  timestamp: number
+  ttl: number // 缓存有效期（毫秒）
+}
+
+let authUsersCache: AuthUsersCache | null = null
+const CACHE_TTL = 5 * 60 * 1000 // 5分钟缓存
+
+// 获取缓存的认证用户数据
+const getCachedAuthUsers = async (): Promise<any[]> => {
+  const now = Date.now()
+  
+  // 检查缓存是否有效
+  if (authUsersCache && (now - authUsersCache.timestamp) < authUsersCache.ttl) {
+    console.log(`使用缓存的认证用户数据，缓存中有${authUsersCache.data.length}个用户`)
+    return authUsersCache.data
+  }
+  
+  // 缓存无效或不存在，重新获取
+  console.log('缓存失效，重新获取认证用户数据...')
+  const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers()
+  
+  if (authError) {
+    console.error('获取认证用户失败:', authError)
+    return []
+  }
+  
+  // 更新缓存
+  authUsersCache = {
+    data: authUsers.users,
+    timestamp: now,
+    ttl: CACHE_TTL
+  }
+  
+  console.log(`认证用户数据已缓存，共${authUsers.users.length}个用户，缓存有效期${CACHE_TTL/1000}秒`)
+  return authUsers.users
+}
+
+// 清除认证用户缓存
+const clearAuthUsersCache = () => {
+  authUsersCache = null
+  console.log('认证用户缓存已清除')
+}
+
 // 对所有路由应用权限验证
 router.use(requireAdmin)
 
@@ -53,19 +99,35 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: '获取用户资料失败' })
     }
 
-    // 从auth.users表获取邮箱信息（使用正确的方法）
+    // 🚀 方案B优化：使用缓存的认证用户数据，按需过滤
     const emailMap = new Map()
     
-    // 为每个用户获取认证信息
-    for (const profile of userProfiles || []) {
+    if (userProfiles && userProfiles.length > 0) {
       try {
-        const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(profile.id)
-        if (!authError && authUser?.user?.email) {
-          emailMap.set(profile.id, authUser.user.email)
+        const startTime = Date.now()
+        
+        // 使用缓存获取认证用户信息
+        const authUsers = await getCachedAuthUsers()
+        
+        if (authUsers.length > 0) {
+          // 创建需要的用户ID集合，提高查找效率
+          const neededUserIds = new Set(userProfiles.map(profile => profile.id))
+          
+          // 只处理当前分页需要的用户，构建邮箱映射表
+          let processedCount = 0
+          authUsers.forEach(authUser => {
+            if (neededUserIds.has(authUser.id) && authUser.email) {
+              emailMap.set(authUser.id, authUser.email)
+              processedCount++
+            }
+          })
+          
+          const endTime = Date.now()
+          console.log(`方案B缓存优化: 总认证用户${authUsers.length}个，当前分页需要${userProfiles.length}个，成功匹配${processedCount}个邮箱，耗时${endTime - startTime}ms`)
         }
       } catch (error) {
-        console.error(`获取用户 ${profile.id} 的邮箱失败:`, error)
-        // 继续处理其他用户，不中断整个流程
+        console.error('获取用户邮箱失败:', error)
+        // 如果获取失败，继续执行，只是邮箱信息为空
       }
     }
 
@@ -380,6 +442,9 @@ router.post('/', async (req, res) => {
     // 原子化创建用户
     const newUser = await createUserAtomically({ username, email, password, full_name, role })
     
+    // 🚀 清除认证用户缓存，确保新用户信息在下次获取时是最新的
+    clearAuthUsersCache()
+    
     res.status(201).json({
       message: '用户创建成功',
       user: newUser
@@ -419,6 +484,9 @@ router.delete('/:id', async (req, res) => {
       console.error('删除用户失败:', error)
       return res.status(500).json({ error: '删除用户失败' })
     }
+
+    // 🚀 清除认证用户缓存，确保删除的用户在下次获取时不会出现
+    clearAuthUsersCache()
 
     res.json({ success: true })
   } catch (error) {
