@@ -95,7 +95,7 @@ export function useSiteInfo() {
     'basic.siteName',
     'basic.siteDescription',
     'basic.siteLogo',
-    'basic.siteIcon',
+    'basic.siteFavicon',
     'basic.contactEmail'
   ])
   
@@ -103,7 +103,7 @@ export function useSiteInfo() {
     siteName: siteInfo['basic.siteName'] as string || 'BiuBiuStar',
     siteDescription: siteInfo['basic.siteDescription'] as string || '一个现代化的社交平台',
     siteLogo: siteInfo['basic.siteLogo'] as string || '',
-    siteIcon: siteInfo['basic.siteIcon'] as string || '',
+    siteIcon: siteInfo['basic.siteFavicon'] as string || '',
     contactEmail: siteInfo['basic.contactEmail'] as string || 'contact@biubiustar.com',
     loading,
     error

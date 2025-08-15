@@ -4,6 +4,13 @@ import { adminService } from '../../../../services/AdminService'
 import { toast } from 'sonner'
 import { Post, ContentCategory } from '../types'
 
+interface PaginationInfo {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
+
 export const useContentManagement = () => {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -12,6 +19,12 @@ export const useContentManagement = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [activeTab, setActiveTab] = useState<'content' | 'categories'>('content')
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0
+  })
   
   // 分类管理状态
   const [contentCategories, setContentCategories] = useState<ContentCategory[]>([])
@@ -24,11 +37,17 @@ export const useContentManagement = () => {
   const navigate = useNavigate()
 
   // 获取帖子数据
-  const fetchPosts = async () => {
+  const fetchPosts = async (page: number = pagination.page, limit: number = pagination.limit) => {
     try {
       setLoading(true)
-      const data = await adminService.getPosts()
-      setPosts(data)
+      const response = await adminService.getPosts(page, limit)
+      setPosts(response.posts)
+      setPagination({
+        page: response.pagination.page,
+        limit: response.pagination.limit,
+        total: response.pagination.total,
+        totalPages: response.pagination.totalPages
+      })
     } catch (error) {
       console.error('获取帖子数据失败:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
@@ -59,16 +78,19 @@ export const useContentManagement = () => {
     fetchContentCategories()
   }, [])
 
-  // 过滤帖子
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.author.username.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = selectedStatus === 'all' || post.status === selectedStatus
-    
-    return matchesSearch && matchesStatus
-  })
+  // 分页操作
+  const changePage = (newPage: number) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      fetchPosts(newPage, pagination.limit)
+    }
+  }
+
+  const changePageSize = (newLimit: number) => {
+    fetchPosts(1, newLimit)
+  }
+
+  // 过滤帖子 - 由于使用后端分页，这里主要用于前端显示
+  const filteredPosts = posts
 
   // 过滤分类
   const filteredCategories = contentCategories.filter(category =>
@@ -197,6 +219,7 @@ export const useContentManagement = () => {
     loading,
     selectedPost,
     selectedCategory,
+    pagination,
     
     // 筛选状态
     searchTerm,
@@ -227,6 +250,8 @@ export const useContentManagement = () => {
     updateContentCategory,
     deleteContentCategory,
     toggleCategoryStatus,
+    changePage,
+    changePageSize,
     
     // 预览操作
     openPreview,

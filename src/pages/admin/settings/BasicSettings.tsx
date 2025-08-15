@@ -5,39 +5,78 @@ import { SettingsSectionProps, BasicSettingsData } from './types'
 
 const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {
   const { t } = useLanguage()
+  
+  // 默认数据
+  const defaultData: BasicSettingsData = {
+    site_name: 'BiuBiuStar',
+    site_description: '一个现代化的社交平台，连接世界各地的用户',
+    site_logo: '/logo-tubiao.svg',
+    site_favicon: '/favicon.svg'
+  }
+  
   const [formData, setFormData] = useState<BasicSettingsData>({
-    site_name: settings?.site_name || '',
-    site_description: settings?.site_description || '',
-    site_logo: settings?.site_logo,
-    site_favicon: settings?.site_favicon
+    site_name: settings?.['basic.siteName']?.value || defaultData.site_name,
+    site_description: settings?.['basic.siteDescription']?.value || defaultData.site_description,
+    site_logo: settings?.['basic.siteLogo']?.value || defaultData.site_logo,
+    site_favicon: settings?.['basic.siteFavicon']?.value || defaultData.site_favicon
   })
 
   // 同步settings变化到formData
   React.useEffect(() => {
     if (settings) {
       setFormData({
-        site_name: settings.site_name,
-        site_description: settings.site_description,
-        site_logo: settings.site_logo,
-        site_favicon: settings.site_favicon
+        site_name: settings['basic.siteName']?.value || defaultData.site_name,
+        site_description: settings['basic.siteDescription']?.value || defaultData.site_description,
+        site_logo: settings['basic.siteLogo']?.value || defaultData.site_logo,
+        site_favicon: settings['basic.siteFavicon']?.value || defaultData.site_favicon
       })
     }
   }, [settings])
 
   const handleChange = (field: keyof BasicSettingsData, value: string | undefined) => {
-    const newData = { ...formData, [field]: value }
+    // 确保值不为undefined，使用默认值
+    const safeValue = value || defaultData[field]
+    const newData = { ...formData, [field]: safeValue }
     setFormData(newData)
-    onUpdate(newData)
+    
+    // 通知父组件更新待保存的数据（不立即保存到数据库）
+    const settingsToSave = {
+      'basic.siteName': field === 'site_name' ? safeValue : formData.site_name,
+      'basic.siteDescription': field === 'site_description' ? safeValue : formData.site_description,
+      'basic.siteLogo': field === 'site_logo' ? safeValue : formData.site_logo,
+      'basic.siteFavicon': field === 'site_favicon' ? safeValue : formData.site_favicon
+    }
+    onUpdate(settingsToSave)
   }
 
   const handleFileUpload = async (field: 'site_logo' | 'site_favicon', file: File) => {
     try {
-      // 这里应该实现文件上传逻辑
-      // const uploadedUrl = await uploadFile(file)
-      // handleChange(field, uploadedUrl)
-      console.log('File upload not implemented yet', field, file)
+      // 文件大小检查（限制为5MB）
+      if (file.size > 5 * 1024 * 1024) {
+        alert('文件大小不能超过5MB')
+        return
+      }
+
+      // 文件类型检查
+      if (!file.type.startsWith('image/')) {
+        alert('只能上传图片文件')
+        return
+      }
+
+      // 转换为base64数据URL
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string
+        handleChange(field, dataUrl)
+      }
+      reader.onerror = () => {
+        alert('文件读取失败')
+      }
+      reader.readAsDataURL(file)
+
     } catch (error) {
       console.error('文件上传失败:', error)
+      alert('文件上传失败')
     }
   }
 
@@ -127,10 +166,10 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
                 <Upload className="w-4 h-4" />
                 <span>{t('admin.settings.basic.uploadLogo')}</span>
               </button>
-              {formData.site_logo && (
+              {formData.site_logo && formData.site_logo !== defaultData.site_logo && (
                 <button
                   type="button"
-                  onClick={() => handleChange('site_logo', undefined)}
+                  onClick={() => handleChange('site_logo', defaultData.site_logo)}
                   className="text-sm text-red-600 hover:text-red-800"
                 >
                   {t('admin.settings.basic.removeLogo')}
@@ -176,10 +215,10 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
                 <Image className="w-4 h-4" />
                 <span>{t('admin.settings.basic.uploadFavicon')}</span>
               </button>
-              {formData.site_favicon && (
+              {formData.site_favicon && formData.site_favicon !== defaultData.site_favicon && (
                 <button
                   type="button"
-                  onClick={() => handleChange('site_favicon', undefined)}
+                  onClick={() => handleChange('site_favicon', defaultData.site_favicon)}
                   className="text-sm text-red-600 hover:text-red-800"
                 >
                   {t('admin.settings.basic.removeFavicon')}

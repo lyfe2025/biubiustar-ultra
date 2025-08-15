@@ -32,14 +32,14 @@ export const useSystemSettings = () => {
   }
 
   // 更新系统设置
-  const updateSettings = async (updates: Partial<SystemSettings>) => {
-    if (!settings) return
-
+  const updateSettings = async (updates: Record<string, any>) => {
     try {
       setSaving(true)
-      const newSettings = { ...settings, ...updates }
-      await adminService.updateSystemSettings(newSettings)
-      setSettings(newSettings)
+      // 直接使用updates对象，它已经是category.key: value的格式
+      await adminService.updateSystemSettings(updates)
+      
+      // 重新获取设置以确保状态同步
+      await fetchSettings()
       toast.success('设置保存成功')
     } catch (error) {
       console.error('保存设置失败:', error)

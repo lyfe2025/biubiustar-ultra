@@ -8,7 +8,7 @@ export interface SystemSettings {
   'basic.siteName': string
   'basic.siteDescription': string
   'basic.siteLogo': string
-  'basic.siteIcon': string
+  'basic.siteFavicon': string
   'basic.contactEmail': string
   'basic.timezone': string
 

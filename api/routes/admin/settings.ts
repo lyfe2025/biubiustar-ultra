@@ -29,12 +29,8 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: '获取系统设置失败' })
     }
     
-    // 按分类组织设置
+    // 按分类组织设置 - 使用category.key格式
     const settingsByCategory = settings?.reduce((acc, setting) => {
-      if (!acc[setting.category]) {
-        acc[setting.category] = {}
-      }
-      
       let value = setting.setting_value
       // 根据类型转换值
       if (setting.setting_type === 'boolean') {
@@ -48,8 +44,21 @@ router.get('/', async (req, res) => {
           value = null
         }
       }
+
+      // 转换数据库字段名为前端使用的格式
+      let frontendKey = setting.setting_key
+      if (setting.category === 'basic') {
+        // 将下划线命名转换为驼峰命名
+        if (setting.setting_key === 'site_name') frontendKey = 'siteName'
+        else if (setting.setting_key === 'site_description') frontendKey = 'siteDescription'
+        else if (setting.setting_key === 'site_logo') frontendKey = 'siteLogo'
+        else if (setting.setting_key === 'site_favicon') frontendKey = 'siteFavicon'
+        else if (setting.setting_key === 'site_keywords') frontendKey = 'siteKeywords'
+      }
       
-      acc[setting.category][setting.setting_key] = {
+      // 使用category.key格式作为键名
+      const categoryKey = `${setting.category}.${frontendKey}`
+      acc[categoryKey] = {
         value,
         type: setting.setting_type,
         description: setting.description,
@@ -69,7 +78,7 @@ router.get('/', async (req, res) => {
 // 保存系统设置
 router.put('/', async (req, res) => {
   try {
-    const { settings } = req.body
+    const settings = req.body
     
     if (!settings || typeof settings !== 'object') {
       return res.status(400).json({ error: '设置数据格式不正确' })
@@ -77,23 +86,47 @@ router.put('/', async (req, res) => {
     
     const updates = []
     
-    // 遍历所有分类的设置
-    for (const [category, categorySettings] of Object.entries(settings)) {
-      if (typeof categorySettings === 'object' && categorySettings !== null) {
-        for (const [key, value] of Object.entries(categorySettings as any)) {
-          let stringValue = String(value)
-          
-          // 如果是对象或数组，转换为JSON字符串
-          if (typeof value === 'object' && value !== null) {
-            stringValue = JSON.stringify(value)
-          }
-          
-          updates.push({
-            setting_key: key,
-            setting_value: stringValue,
-            updated_at: new Date().toISOString()
-          })
+    // 遍历所有的设置项（支持category.key格式）
+    for (const [fullKey, value] of Object.entries(settings)) {
+      if (fullKey.includes('.')) {
+        // category.key格式
+        const [category, frontendKey] = fullKey.split('.')
+        
+        // 将前端格式转换为数据库字段名
+        let dbKey = frontendKey
+        if (category === 'basic') {
+          if (frontendKey === 'siteName') dbKey = 'site_name'
+          else if (frontendKey === 'siteDescription') dbKey = 'site_description'
+          else if (frontendKey === 'siteLogo') dbKey = 'site_logo'
+          else if (frontendKey === 'siteFavicon') dbKey = 'site_favicon'
+          else if (frontendKey === 'siteKeywords') dbKey = 'site_keywords'
         }
+        
+        let stringValue = String(value)
+        
+        // 如果是对象或数组，转换为JSON字符串
+        if (typeof value === 'object' && value !== null) {
+          stringValue = JSON.stringify(value)
+        }
+        
+        updates.push({
+          setting_key: dbKey,
+          setting_value: stringValue,
+          updated_at: new Date().toISOString()
+        })
+      } else {
+        // 兼容旧格式 - 直接使用字段名
+        let stringValue = String(value)
+        
+        if (typeof value === 'object' && value !== null) {
+          stringValue = JSON.stringify(value)
+        }
+        
+        updates.push({
+          setting_key: fullKey,
+          setting_value: stringValue,
+          updated_at: new Date().toISOString()
+        })
       }
     }
     
@@ -214,12 +247,8 @@ router.get('/public', async (req, res) => {
       return res.status(500).json({ error: '获取公开系统设置失败' })
     }
     
-    // 按分类组织设置
+    // 按分类组织设置 - 使用category.key格式
     const settingsByCategory = settings?.reduce((acc, setting) => {
-      if (!acc[setting.category]) {
-        acc[setting.category] = {}
-      }
-      
       let value = setting.setting_value
       // 根据类型转换值
       if (setting.setting_type === 'boolean') {
@@ -233,8 +262,21 @@ router.get('/public', async (req, res) => {
           value = null
         }
       }
+
+      // 转换数据库字段名为前端使用的格式
+      let frontendKey = setting.setting_key
+      if (setting.category === 'basic') {
+        // 将下划线命名转换为驼峰命名
+        if (setting.setting_key === 'site_name') frontendKey = 'siteName'
+        else if (setting.setting_key === 'site_description') frontendKey = 'siteDescription'
+        else if (setting.setting_key === 'site_logo') frontendKey = 'siteLogo'
+        else if (setting.setting_key === 'site_favicon') frontendKey = 'siteFavicon'
+        else if (setting.setting_key === 'site_keywords') frontendKey = 'siteKeywords'
+      }
       
-      acc[setting.category][setting.setting_key] = value
+      // 使用category.key格式作为键名
+      const categoryKey = `${setting.category}.${frontendKey}`
+      acc[categoryKey] = value
       
       return acc
     }, {} as any) || {}

@@ -26,6 +26,8 @@ export const adminDashboardTranslations = {
         userManagementDesc: '管理用户权限',
         activityManagement: '活动管理',
         activityManagementDesc: '管理平台活动',
+        securityManagement: '安全管理',
+        securityManagementDesc: '管理登录安全和IP限制',
         systemSettings: '系统设置',
         systemSettingsDesc: '配置系统参数',
         viewAllActivities: '查看所有活动'
@@ -58,6 +60,8 @@ export const adminDashboardTranslations = {
         userManagementDesc: '管理用戶權限',
         activityManagement: '活動管理',
         activityManagementDesc: '管理平台活動',
+        securityManagement: '安全管理',
+        securityManagementDesc: '管理登錄安全和IP限制',
         systemSettings: '系統設置',
         systemSettingsDesc: '配置系統參數',
         viewAllActivities: '查看所有活動'
@@ -90,6 +94,8 @@ export const adminDashboardTranslations = {
         userManagementDesc: 'Manage user permissions',
         activityManagement: 'Activity Management',
         activityManagementDesc: 'Manage platform activities',
+        securityManagement: 'Security Management',
+        securityManagementDesc: 'Manage login security and IP restrictions',
         systemSettings: 'System Settings',
         systemSettingsDesc: 'Configure system parameters',
         viewAllActivities: 'View All Activities'
@@ -122,6 +128,8 @@ export const adminDashboardTranslations = {
         userManagementDesc: 'Quản lý quyền người dùng',
         activityManagement: 'Quản lý hoạt động',
         activityManagementDesc: 'Quản lý hoạt động nền tảng',
+        securityManagement: 'Quản lý bảo mật',
+        securityManagementDesc: 'Quản lý bảo mật đăng nhập và hạn chế IP',
         systemSettings: 'Cài đặt hệ thống',
         systemSettingsDesc: 'Cấu hình tham số hệ thống',
         viewAllActivities: 'Xem tất cả hoạt động'

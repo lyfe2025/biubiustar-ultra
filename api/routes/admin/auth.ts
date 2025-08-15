@@ -1,5 +1,11 @@
 import { Router } from 'express'
 import { supabaseAdmin } from '../../lib/supabase'
+import { 
+  ipSecurityCheck, 
+  logLoginAttempt, 
+  logSecurityEvent, 
+  getClientIP 
+} from '../../middleware/security'
 
 const router = Router()
 
@@ -37,13 +43,20 @@ export const requireAdmin = async (req: any, res: any, next: any) => {
   }
 }
 
-// 管理员登录API（不需要权限验证）
-router.post('/login', async (req, res) => {
+// 管理员登录API（应用安全检查中间件）
+router.post('/login', ipSecurityCheck, async (req, res) => {
   try {
     const { email, password } = req.body
+    const ipAddress = req.clientIP || getClientIP(req)
+    const userAgent = req.headers['user-agent'] || null
+    const loginAttempts = req.loginAttempts
 
     if (!email || !password) {
-      return res.status(400).json({ error: '邮箱和密码不能为空' })
+      await logLoginAttempt(ipAddress, email, false, userAgent, 'Missing email or password')
+      return res.status(400).json({ 
+        error: '邮箱和密码不能为空',
+        attemptsRemaining: loginAttempts ? Math.max(0, 3 - loginAttempts.recentFailedAttempts) : 3
+      })
     }
 
     // 使用Supabase进行用户认证
@@ -53,7 +66,17 @@ router.post('/login', async (req, res) => {
     })
 
     if (authError || !authData.user || !authData.session) {
-      return res.status(401).json({ error: '邮箱或密码错误' })
+      // 记录登录失败
+      await logLoginAttempt(ipAddress, email, false, userAgent, 'Invalid credentials')
+      
+      // 计算剩余尝试次数
+      const attemptsRemaining = loginAttempts ? Math.max(0, 3 - (loginAttempts.recentFailedAttempts + 1)) : 2
+      
+      return res.status(401).json({ 
+        error: '邮箱或密码错误',
+        attemptsRemaining,
+        maxAttempts: 3
+      })
     }
 
     // 查询用户资料以验证管理员权限 - 使用supabaseAdmin绕过RLS限制
@@ -73,13 +96,48 @@ router.post('/login', async (req, res) => {
 
     if (profileError || !userProfile) {
       console.log('权限检查失败:', { profileError, userProfile, role: userProfile?.role })
-      return res.status(403).json({ error: '需要管理员权限' })
+      await logLoginAttempt(ipAddress, email, false, userAgent, 'User profile not found')
+      
+      const attemptsRemaining = loginAttempts ? Math.max(0, 3 - (loginAttempts.recentFailedAttempts + 1)) : 2
+      
+      return res.status(403).json({ 
+        error: '需要管理员权限',
+        attemptsRemaining,
+        maxAttempts: 3
+      })
     }
 
     if (userProfile.role !== 'admin') {
       console.log('权限检查失败:', { profileError, userProfile, role: userProfile?.role })
-      return res.status(403).json({ error: '需要管理员权限' })
+      await logLoginAttempt(ipAddress, email, false, userAgent, 'Insufficient privileges - not admin')
+      await logSecurityEvent(
+        'unauthorized_admin_access_attempt',
+        ipAddress,
+        authData.user.id,
+        email,
+        { role: userProfile.role, userAgent },
+        'warning'
+      )
+      
+      const attemptsRemaining = loginAttempts ? Math.max(0, 3 - (loginAttempts.recentFailedAttempts + 1)) : 2
+      
+      return res.status(403).json({ 
+        error: '需要管理员权限',
+        attemptsRemaining,
+        maxAttempts: 3
+      })
     }
+
+    // 记录成功登录
+    await logLoginAttempt(ipAddress, email, true, userAgent)
+    await logSecurityEvent(
+      'admin_login_success',
+      ipAddress,
+      authData.user.id,
+      email,
+      { username: userProfile.username, userAgent },
+      'info'
+    )
 
     // 返回认证信息
     res.json({
@@ -94,6 +152,19 @@ router.post('/login', async (req, res) => {
     })
   } catch (error) {
     console.error('管理员登录失败:', error)
+    
+    // 记录系统错误
+    const ipAddress = req.clientIP || getClientIP(req)
+    const email = req.body?.email
+    await logSecurityEvent(
+      'login_system_error',
+      ipAddress,
+      null,
+      email,
+      { error: error.message, userAgent: req.headers['user-agent'] },
+      'error'
+    )
+    
     res.status(500).json({ error: '服务器内部错误' })
   }
 })

@@ -12,13 +12,65 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  BarChart3
+  BarChart3,
+  Shield
 } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
 import { useLanguage } from '../../contexts/language'
 import { adminService, type DashboardStats, type RecentActivity } from '../../services/AdminService'
 
 // 接口定义已移至AdminService中
+
+// 辅助函数：格式化时间为相对时间
+const formatTimeAgo = (dateString: string): string => {
+  const now = new Date()
+  const date = new Date(dateString)
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+  
+  if (diffInMinutes < 1) {
+    return '刚刚'
+  } else if (diffInMinutes < 60) {
+    return `${diffInMinutes}分钟前`
+  } else if (diffInMinutes < 1440) {
+    const hours = Math.floor(diffInMinutes / 60)
+    return `${hours}小时前`
+  } else {
+    const days = Math.floor(diffInMinutes / 1440)
+    return `${days}天前`
+  }
+}
+
+// 辅助函数：根据类型获取图标
+const getIconByType = (type: string): string => {
+  switch (type) {
+    case 'user_register':
+      return 'UserPlus'
+    case 'post_create':
+    case 'post_pending':
+      return 'FileText'
+    case 'admin_login':
+    case 'login':
+      return 'Shield'
+    default:
+      return 'Clock'
+  }
+}
+
+// 辅助函数：根据类型获取颜色
+const getColorByType = (type: string): string => {
+  switch (type) {
+    case 'user_register':
+      return 'text-green-600'
+    case 'post_create':
+    case 'post_pending':
+      return 'text-orange-600'
+    case 'admin_login':
+    case 'login':
+      return 'text-blue-600'
+    default:
+      return 'text-gray-600'
+  }
+}
 
 const AdminDashboard = () => {
   const { t } = useLanguage();
@@ -55,11 +107,20 @@ const AdminDashboard = () => {
         // 并行获取统计数据和最近活动
         const [statsData, activitiesData] = await Promise.all([
           adminService.getStats(),
-          adminService.getRecentActivities()
+          adminService.getActivityLogs(1, 5) // 获取前5条活动日志作为最近活动
         ])
         
         setStats(statsData)
-        setRecentActivities(activitiesData)
+        // 适配activity_logs表的数据结构
+        const formattedActivities = activitiesData.data.map((log: any) => ({
+          id: log.id,
+          type: log.type,
+          message: log.action || log.details,
+          time: formatTimeAgo(log.created_at),
+          icon: getIconByType(log.type),
+          color: getColorByType(log.type)
+        }))
+        setRecentActivities(formattedActivities)
       } catch (error) {
         console.error('加载管理后台数据失败:', error)
         
@@ -152,6 +213,13 @@ const AdminDashboard = () => {
       color: 'bg-green-500'
     },
     {
+      title: t('admin.dashboard.securityManagement'),
+      description: t('admin.dashboard.securityManagementDesc'),
+      icon: Shield,
+      link: '/admin/security',
+      color: 'bg-red-500'
+    },
+    {
       title: t('admin.dashboard.systemSettings'),
       description: t('admin.dashboard.systemSettingsDesc'),
       icon: AlertCircle,
@@ -242,9 +310,10 @@ const AdminDashboard = () => {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('admin.dashboard.recentActivities')}</h2>
             <div className="space-y-4">
               {recentActivities.map((activity) => {
-                // 使用接口定义的属性
+                // 根据图标字符串映射到实际组件
                 const IconComponent = activity.icon === 'UserPlus' ? UserPlus : 
-                                    activity.icon === 'FileText' ? FileText : Clock
+                                    activity.icon === 'FileText' ? FileText :
+                                    activity.icon === 'Shield' ? Shield : Clock
                 const color = activity.color || 'text-gray-600'
                 const message = activity.message
                 const time = activity.time

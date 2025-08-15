@@ -10,6 +10,21 @@ router.use(requireAdmin)
 // 获取所有活动（活动管理）
 router.get('/', async (req, res) => {
   try {
+    // 获取分页参数
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 10
+    const offset = (page - 1) * limit
+
+    // 获取总活动数
+    const { count: totalActivities, error: countError } = await supabaseAdmin
+      .from('activities')
+      .select('*', { count: 'exact', head: true })
+    
+    if (countError) {
+      console.error('获取活动总数失败:', countError)
+      return res.status(500).json({ error: '获取活动总数失败' })
+    }
+
     const { data: activities, error } = await supabaseAdmin
       .from('activities')
       .select(`
@@ -29,6 +44,7 @@ router.get('/', async (req, res) => {
         user_id
       `)
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
     
     if (error) {
       console.error('获取活动数据失败:', error)
@@ -75,7 +91,17 @@ router.get('/', async (req, res) => {
       }
     }) || []
 
-    res.json(formattedActivities)
+    // 返回分页数据
+    const totalPages = Math.ceil((totalActivities || 0) / limit)
+    res.json({
+      activities: formattedActivities,
+      pagination: {
+        page,
+        limit,
+        total: totalActivities || 0,
+        totalPages
+      }
+    })
   } catch (error) {
     console.error('获取活动列表失败:', error)
     res.status(500).json({ error: '服务器内部错误' })

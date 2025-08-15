@@ -4,6 +4,13 @@ import { adminService } from '../../../../services/AdminService'
 import { toast } from 'sonner'
 import { User, NewUserData } from '../types'
 
+interface PaginationInfo {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
+
 export const useUserManagement = () => {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
@@ -17,14 +24,21 @@ export const useUserManagement = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  })
   const navigate = useNavigate()
 
   // 获取用户数据
-  const fetchUsers = async () => {
+  const fetchUsers = async (page: number = pagination.page, limit: number = pagination.limit) => {
     try {
       setLoading(true)
-      const data = await adminService.getUsers()
-      setUsers(data)
+      const response = await adminService.getUsers(page, limit)
+      setUsers(response.users)
+      setPagination(response.pagination)
     } catch (error) {
       console.error('获取用户数据失败:', error)
       
@@ -38,14 +52,25 @@ export const useUserManagement = () => {
     }
   }
 
+  // 切换页面
+  const changePage = (page: number) => {
+    fetchUsers(page, pagination.limit)
+  }
+
+  // 改变每页显示数量
+  const changePageSize = (limit: number) => {
+    fetchUsers(1, limit)
+  }
+
   // 初始加载
   useEffect(() => {
     fetchUsers()
   }, [])
 
-  // 过滤用户
+  // 过滤用户（现在在后端处理分页，前端只做简单筛选）
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = searchTerm === '' || 
+                         user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (user.full_name && user.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
     
@@ -166,6 +191,7 @@ export const useUserManagement = () => {
     selectedUser,
     isSubmitting,
     isUpdatingPassword,
+    pagination,
     
     // 筛选状态
     searchTerm,
@@ -188,6 +214,8 @@ export const useUserManagement = () => {
     deleteUser,
     createUser,
     updateUserPassword,
+    changePage,
+    changePageSize,
     
     // 模态框操作
     openUserModal,

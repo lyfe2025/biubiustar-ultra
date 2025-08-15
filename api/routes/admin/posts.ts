@@ -10,6 +10,21 @@ router.use(requireAdmin)
 // 获取所有帖子（内容管理）
 router.get('/', async (req, res) => {
   try {
+    // 获取分页参数
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 10
+    const offset = (page - 1) * limit
+
+    // 获取总帖子数
+    const { count: totalPosts, error: countError } = await supabaseAdmin
+      .from('posts')
+      .select('*', { count: 'exact', head: true })
+    
+    if (countError) {
+      console.error('获取帖子总数失败:', countError)
+      return res.status(500).json({ error: '获取帖子总数失败' })
+    }
+
     const { data: posts, error } = await supabaseAdmin
       .from('posts')
       .select(`
@@ -29,6 +44,7 @@ router.get('/', async (req, res) => {
         user_id
       `)
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
     
     if (error) {
       console.error('获取帖子数据失败:', error)
@@ -71,7 +87,17 @@ router.get('/', async (req, res) => {
       }
     }) || []
 
-    res.json(formattedPosts)
+    // 返回分页数据
+    const totalPages = Math.ceil((totalPosts || 0) / limit)
+    res.json({
+      posts: formattedPosts,
+      pagination: {
+        page,
+        limit,
+        total: totalPosts || 0,
+        totalPages
+      }
+    })
   } catch (error) {
     console.error('获取帖子列表失败:', error)
     res.status(500).json({ error: '服务器内部错误' })

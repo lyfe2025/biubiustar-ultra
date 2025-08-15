@@ -32,7 +32,8 @@ const UserSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpd
   ) => {
     const newData = { ...formData, [field]: value }
     setFormData(newData)
-    onUpdate(newData)
+    // 移除自动保存，改为手动保存
+    // onUpdate(newData)
   }
 
   if (loading) {

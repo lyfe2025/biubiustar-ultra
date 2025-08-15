@@ -62,11 +62,26 @@ export default function About() {
     
     try {
       // Prepare data for API submission
+      // 创建category到中文文本的映射，避免提交翻译键
+      const categoryTextMap: { [key: string]: string } = {
+        'live-ecommerce': '直播电商合作',
+        'short-video': '短视频制作',
+        'business-cooperation': '商务合作',
+        'influencer-cooperation': '网红合作',
+        'technical-consulting': '技术咨询',
+        'product-inquiry': '产品咨询',
+        'media-cooperation': '媒体合作',
+        'other': '其他咨询'
+      };
+      
+      const categoryText = categoryTextMap[formData.category] || formData.category;
+      
       const contactData: ContactFormData = {
         name: formData.name,
         email: formData.email,
-        subject: `${t(`about.contactForm.categories.${formData.category.replace('-', '')}`)} - ${formData.company || formData.name}`,
-        message: `联系方式: ${formData.phone}\n公司: ${formData.company || '未提供'}\n\n${formData.message}`
+        phone: formData.phone,
+        subject: `${categoryText} - ${formData.company || formData.name}`,
+        message: `公司: ${formData.company || '未提供'}\n\n${formData.message}`
       };
 
       // Submit to API
@@ -169,7 +184,7 @@ export default function About() {
             <p className="text-xl text-gray-600">{t('about.company.subtitle')}</p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid lg:grid-cols-2 gap-8">
             {/* Company Profile */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100">
               <div className="flex items-center mb-6">
@@ -217,7 +232,7 @@ export default function About() {
             {/* Timeline Line */}
             <div className="absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-gradient-to-b from-purple-500 to-purple-600"></div>
             
-            <div className="space-y-12">
+            <div className="space-y-8">
               {[
                 { period: '2023.10', events: ['market', 'research'] },
                 { period: '2023.11', events: ['location', 'registration', 'recruitment'] },
@@ -292,24 +307,7 @@ export default function About() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div key={index} className="text-center">
-                  <div className="bg-gradient-to-r from-purple-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icon className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                  <div className="text-gray-600">{stat.label}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+
 
       {/* Partners Section */}
       <section className="py-16 bg-white/50 backdrop-blur-sm">
@@ -358,66 +356,10 @@ export default function About() {
         </div>
       </section>
 
-      {/* Mission Section */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.mission.title')}</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {t('about.mission.description')}
-            </p>
-          </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => {
-              const Icon = value.icon;
-              return (
-                <div key={index} className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-100">
-                  <div className="bg-gradient-to-r from-purple-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{t(`about.values.${value.title}.title`)}</h3>
-                  <p className="text-gray-600 leading-relaxed">{value.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* Team Section */}
-      <section className="py-16 bg-white/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.team.title')}</h2>
-            <p className="text-xl text-gray-600">
-              {t('about.team.description')}
-            </p>
-          </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {teamMembers.map((member, index) => (
-              <div key={index} className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-100 text-center">
-                <img
-                  src={member.avatar}
-                  alt={member.name}
-                  className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-                />
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{member.name}</h3>
-                <p className="text-purple-600 font-medium mb-3">{member.role}</p>
-                <p className="text-gray-600 text-sm mb-4 leading-relaxed">{member.bio}</p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {member.expertise.map((skill, skillIndex) => (
-                    <span key={skillIndex} className="px-2 py-1 bg-purple-100 text-purple-600 rounded-full text-xs">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Contact Section */}
       <section className="py-16 bg-gradient-to-br from-purple-50 to-pink-50">

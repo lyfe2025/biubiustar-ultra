@@ -4,6 +4,7 @@
  */
 import { Router, type Request, type Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase.js';
+import { requireAdmin } from './admin/auth';
 
 const router = Router();
 
@@ -14,10 +15,14 @@ const validateEmail = (email: string): boolean => {
 };
 
 const validateContactForm = (data: any): { valid: boolean; message?: string } => {
-  const { name, email, subject, message } = data;
+  const { name, email, subject, message, phone } = data;
   
   if (!name || !email || !subject || !message) {
     return { valid: false, message: '所有字段都是必填的' };
+  }
+  
+  if (phone && phone.trim().length > 0 && phone.trim().length < 8) {
+    return { valid: false, message: '电话号码格式不正确' };
   }
   
   if (name.trim().length < 2) {
@@ -50,17 +55,93 @@ const sendResponse = (res: Response, success: boolean, data?: any, message?: str
 };
 
 /**
+ * Get client IP address from request
+ * Enhanced to get real user IP from various proxy headers
+ */
+const getClientIP = (req: Request): string => {
+  // Check for IP from various headers (for proxy/load balancer scenarios)
+  const forwarded = req.headers['x-forwarded-for'] as string;
+  const realIP = req.headers['x-real-ip'] as string;
+  const cfConnectingIP = req.headers['cf-connecting-ip'] as string;
+  const trueClientIP = req.headers['true-client-ip'] as string;
+  const xClientIP = req.headers['x-client-ip'] as string;
+  
+  // Priority order for getting real IP
+  if (trueClientIP) {
+    return trueClientIP.trim();
+  }
+  
+  if (cfConnectingIP) {
+    return cfConnectingIP.trim();
+  }
+  
+  if (realIP) {
+    return realIP.trim();
+  }
+  
+  if (xClientIP) {
+    return xClientIP.trim();
+  }
+  
+  if (forwarded) {
+    // x-forwarded-for can contain multiple IPs, take the first one (original client)
+    const ips = forwarded.split(',').map(ip => ip.trim());
+    // Filter out private/local IPs and return the first public IP
+    for (const ip of ips) {
+      if (!ip.startsWith('10.') && !ip.startsWith('192.168.') && !ip.startsWith('172.') && ip !== '127.0.0.1') {
+        return ip;
+      }
+    }
+    return ips[0]; // Fallback to first IP if no public IP found
+  }
+  
+  // Fallback to connection remote address
+  return req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+};
+
+/**
+ * Check for duplicate submissions from same IP
+ */
+const checkDuplicateSubmission = async (ip: string): Promise<boolean> => {
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  
+  const { data, error } = await supabaseAdmin
+    .from('contact_submissions')
+    .select('id')
+    .eq('ip_address', ip)
+    .gte('submitted_at', fiveMinutesAgo)
+    .limit(1);
+  
+  if (error) {
+    console.error('Error checking duplicate submission:', error);
+    return false; // Allow submission if check fails
+  }
+  
+  return data && data.length > 0;
+};
+
+/**
  * Submit Contact Form
  * POST /api/contact/submit
  */
 router.post('/submit', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, subject, message } = req.body;
+    const { name, email, subject, message, phone } = req.body;
 
     // Input validation
-    const validation = validateContactForm({ name, email, subject, message });
+    const validation = validateContactForm({ name, email, subject, message, phone });
     if (!validation.valid) {
       sendResponse(res, false, null, validation.message, 400);
+      return;
+    }
+
+    // Get client IP address
+    const clientIP = getClientIP(req);
+
+    // Check for duplicate submissions from same IP
+    const isDuplicate = await checkDuplicateSubmission(clientIP);
+    if (isDuplicate) {
+      sendResponse(res, false, null, '您刚刚已经提交过表单，请等待5分钟后再次提交', 429);
       return;
     }
 
@@ -70,6 +151,8 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
       email: email.trim().toLowerCase(),
       subject: subject.trim(),
       message: message.trim(),
+      phone: phone ? phone.trim() : null,
+      ip_address: clientIP,
       submitted_at: new Date().toISOString(),
       status: 'pending' // pending, read, replied
     };
@@ -103,10 +186,8 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
  * Get Contact Submissions (Admin only)
  * GET /api/contact/submissions
  */
-router.get('/submissions', async (req: Request, res: Response): Promise<void> => {
+router.get('/submissions', requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
-    // TODO: Add admin authentication middleware
-    // For now, this endpoint is not secured
     
     const { page = 1, limit = 10, status } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -150,9 +231,8 @@ router.get('/submissions', async (req: Request, res: Response): Promise<void> =>
  * Update Contact Submission Status (Admin only)
  * PUT /api/contact/submissions/:id/status
  */
-router.put('/submissions/:id/status', async (req: Request, res: Response): Promise<void> => {
+router.put('/submissions/:id/status', requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
-    // TODO: Add admin authentication middleware
     
     const { id } = req.params;
     const { status } = req.body;
@@ -184,6 +264,46 @@ router.put('/submissions/:id/status', async (req: Request, res: Response): Promi
 
   } catch (error) {
     console.error('Update status error:', error);
+    sendResponse(res, false, null, '服务器内部错误', 500);
+  }
+});
+
+/**
+ * Delete Contact Submission (Admin only)
+ * DELETE /api/contact/submissions/:id
+ */
+router.delete('/submissions/:id', requireAdmin, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // First check if the submission exists
+    const { data: existingData, error: checkError } = await supabaseAdmin
+      .from('contact_submissions')
+      .select('id')
+      .eq('id', id)
+      .single();
+
+    if (checkError || !existingData) {
+      sendResponse(res, false, null, '未找到指定的提交记录', 404);
+      return;
+    }
+
+    // Delete the submission
+    const { error } = await supabaseAdmin
+      .from('contact_submissions')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Database error:', error);
+      sendResponse(res, false, null, '删除失败', 500);
+      return;
+    }
+
+    sendResponse(res, true, null, '联系提交记录删除成功');
+
+  } catch (error) {
+    console.error('Delete submission error:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
 });

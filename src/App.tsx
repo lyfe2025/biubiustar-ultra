@@ -14,6 +14,9 @@ import AdminActivities from './pages/admin/AdminActivities'
 import AdminCategories from './pages/admin/AdminCategories'
 import AdminContacts from './pages/admin/AdminContacts'
 import AdminSettings from './pages/admin/AdminSettings'
+import AdminSecurity from './pages/admin/AdminSecurity'
+import AdminLogs from './pages/admin/AdminLogs'
+import AdminAuthGuard from './components/AdminAuthGuard'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
@@ -34,13 +37,15 @@ function AppContent() {
               <Route path="/about" element={<About />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/content" element={<AdminContent />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/activities" element={<AdminActivities />} />
-              <Route path="/admin/categories" element={<AdminCategories />} />
-              <Route path="/admin/contacts" element={<AdminContacts />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/dashboard" element={<AdminAuthGuard><AdminDashboard /></AdminAuthGuard>} />
+              <Route path="/admin/content" element={<AdminAuthGuard><AdminContent /></AdminAuthGuard>} />
+              <Route path="/admin/users" element={<AdminAuthGuard><AdminUsers /></AdminAuthGuard>} />
+              <Route path="/admin/activities" element={<AdminAuthGuard><AdminActivities /></AdminAuthGuard>} />
+              <Route path="/admin/categories" element={<AdminAuthGuard><AdminCategories /></AdminAuthGuard>} />
+              <Route path="/admin/contacts" element={<AdminAuthGuard><AdminContacts /></AdminAuthGuard>} />
+              <Route path="/admin/settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
+              <Route path="/admin/security" element={<AdminAuthGuard><AdminSecurity /></AdminAuthGuard>} />
+              <Route path="/admin/logs" element={<AdminAuthGuard><AdminLogs /></AdminAuthGuard>} />
       </Routes>
       <Toaster position="top-right" richColors />
     </div>

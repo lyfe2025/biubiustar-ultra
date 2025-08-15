@@ -10,6 +10,8 @@ export const adminSettingsTranslations = {
         export: '导出',
         import: '导入',
         reset: '重置',
+        save: '保存',
+        saving: '保存中...',
         tabs: {
           basic: '基础设置',
           users: '用户设置',
@@ -31,7 +33,9 @@ export const adminSettingsTranslations = {
           logoDescription: '网站的标志图片',
           siteFavicon: '站点图标',
           uploadFavicon: '上传图标',
-          faviconDescription: '浏览器标签页显示的图标'
+          faviconDescription: '浏览器标签页显示的图标',
+          removeLogo: '移除标志',
+          removeFavicon: '移除图标'
         },
         user: {
           title: '用户设置',
@@ -115,8 +119,7 @@ export const adminSettingsTranslations = {
           testEmail: '测试邮件',
           testEmailDescription: '发送测试邮件验证配置',
           testNow: '立即测试'
-        },
-        saving: '保存中...'
+        }
       }
     }
   },
@@ -130,6 +133,8 @@ export const adminSettingsTranslations = {
         export: '導出',
         import: '導入',
         reset: '重置',
+        save: '保存',
+        saving: '保存中...',
         tabs: {
           basic: '基礎設置',
           users: '用戶設置',
@@ -151,7 +156,9 @@ export const adminSettingsTranslations = {
           logoDescription: '網站的標志圖片',
           siteFavicon: '站點圖標',
           uploadFavicon: '上傳圖標',
-          faviconDescription: '瀏覽器標簽頁顯示的圖標'
+          faviconDescription: '瀏覽器標簽頁顯示的圖標',
+          removeLogo: '移除標志',
+          removeFavicon: '移除圖標'
         },
         user: {
           title: '用戶設置',
@@ -235,8 +242,7 @@ export const adminSettingsTranslations = {
           testEmail: '測試郵件',
           testEmailDescription: '發送測試郵件驗證配置',
           testNow: '立即測試'
-        },
-        saving: '保存中...'
+        }
       }
     }
   },
@@ -250,6 +256,8 @@ export const adminSettingsTranslations = {
         export: 'Export',
         import: 'Import',
         reset: 'Reset',
+        save: 'Save',
+        saving: 'Saving...',
         tabs: {
           basic: 'Basic Settings',
           users: 'User Settings',
@@ -271,7 +279,9 @@ export const adminSettingsTranslations = {
           logoDescription: 'Logo image of the website',
           siteFavicon: 'Site Favicon',
           uploadFavicon: 'Upload Favicon',
-          faviconDescription: 'Icon displayed in browser tab'
+          faviconDescription: 'Icon displayed in browser tab',
+          removeLogo: 'Remove Logo',
+          removeFavicon: 'Remove Favicon'
         },
         user: {
           title: 'User Settings',
@@ -355,8 +365,7 @@ export const adminSettingsTranslations = {
           testEmail: 'Test Email',
           testEmailDescription: 'Send test email to verify configuration',
           testNow: 'Test Now'
-        },
-        saving: 'Saving...'
+        }
       }
     }
   },
@@ -370,6 +379,8 @@ export const adminSettingsTranslations = {
         export: 'Xuất',
         import: 'Nhập',
         reset: 'Đặt lại',
+        save: 'Lưu',
+        saving: 'Đang lưu...',
         tabs: {
           basic: 'Cài đặt cơ bản',
           users: 'Cài đặt người dùng',
@@ -391,7 +402,9 @@ export const adminSettingsTranslations = {
           logoDescription: 'Hình ảnh logo của trang web',
           siteFavicon: 'Favicon trang web',
           uploadFavicon: 'Tải lên favicon',
-          faviconDescription: 'Biểu tượng hiển thị trên tab trình duyệt'
+          faviconDescription: 'Biểu tượng hiển thị trên tab trình duyệt',
+          removeLogo: 'Xóa logo',
+          removeFavicon: 'Xóa favicon'
         },
         user: {
           title: 'Cài đặt người dùng',
@@ -475,8 +488,7 @@ export const adminSettingsTranslations = {
           testEmail: 'Email thử nghiệm',
           testEmailDescription: 'Gửi email thử nghiệm để xác minh cấu hình',
           testNow: 'Thử nghiệm ngay'
-        },
-        saving: 'Đang lưu...'
+        }
       }
     }
   }

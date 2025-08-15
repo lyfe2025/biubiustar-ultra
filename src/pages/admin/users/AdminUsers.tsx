@@ -1,5 +1,5 @@
 import React from 'react'
-import { UserPlus } from 'lucide-react'
+import { UserPlus, ChevronLeft, ChevronRight } from 'lucide-react'
 import AdminLayout from '../../../components/AdminLayout'
 import { useLanguage } from '../../../contexts/language'
 import UserFilters from './UserFilters'
@@ -16,6 +16,7 @@ const AdminUsers = () => {
     selectedUser,
     isSubmitting,
     isUpdatingPassword,
+    pagination,
     
     // 筛选状态
     searchTerm,
@@ -38,6 +39,8 @@ const AdminUsers = () => {
     deleteUser,
     createUser,
     updateUserPassword,
+    changePage,
+    changePageSize,
     
     // 模态框操作
     openUserModal,
@@ -110,6 +113,74 @@ const AdminUsers = () => {
           onUpdateRole={updateUserRole}
           onChangePassword={openPasswordModal}
         />
+
+        {/* 分页组件 */}
+        {!loading && pagination.total > 0 && (
+          <div className="mt-6 flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              显示第 {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} 条，共 {pagination.total} 条记录
+            </div>
+            <div className="flex items-center space-x-2">
+              {/* 每页显示数量选择 */}
+              <select
+                value={pagination.limit}
+                onChange={(e) => changePageSize(Number(e.target.value))}
+                className="border border-gray-300 rounded px-3 py-1 text-sm"
+              >
+                <option value={10}>10条/页</option>
+                <option value={20}>20条/页</option>
+                <option value={50}>50条/页</option>
+              </select>
+              
+              {/* 分页按钮 */}
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => changePage(pagination.page - 1)}
+                  disabled={pagination.page <= 1}
+                  className="p-2 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                
+                {/* 页码按钮 */}
+                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                  let pageNum
+                  if (pagination.totalPages <= 5) {
+                    pageNum = i + 1
+                  } else if (pagination.page <= 3) {
+                    pageNum = i + 1
+                  } else if (pagination.page >= pagination.totalPages - 2) {
+                    pageNum = pagination.totalPages - 4 + i
+                  } else {
+                    pageNum = pagination.page - 2 + i
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => changePage(pageNum)}
+                      className={`px-3 py-1 rounded border ${
+                        pageNum === pagination.page
+                          ? 'bg-purple-600 text-white border-purple-600'
+                          : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })}
+                
+                <button
+                  onClick={() => changePage(pagination.page + 1)}
+                  disabled={pagination.page >= pagination.totalPages}
+                  className="p-2 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 模态框 */}
         <UserModal

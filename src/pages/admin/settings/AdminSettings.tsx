@@ -1,5 +1,5 @@
-import React from 'react'
-import { Settings, Save, RefreshCw, Download, Upload, Trash2 } from 'lucide-react'
+import React, { useState } from 'react'
+import { Settings, Save, RefreshCw, Download, Upload, Trash2, RotateCcw, Mail, Trash } from 'lucide-react'
 import AdminLayout from '../../../components/AdminLayout'
 import { useLanguage } from '../../../contexts/language'
 import { useSystemSettings } from './hooks/useSystemSettings'
@@ -12,6 +12,8 @@ import ThemeSettings from './ThemeSettings'
 
 const AdminSettings = () => {
   const { t } = useLanguage()
+  const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({})
+  
   const {
     // 数据状态
     settings,
@@ -31,6 +33,19 @@ const AdminSettings = () => {
     clearCache,
     fetchSettings
   } = useSystemSettings()
+
+  // 处理设置更新（不立即保存，只更新待保存状态）
+  const handleSettingsChange = (updates: Record<string, any>) => {
+    setPendingChanges(prev => ({ ...prev, ...updates }))
+  }
+
+  // 保存所有待保存的更改
+  const handleSave = async () => {
+    if (Object.keys(pendingChanges).length > 0) {
+      await updateSettings(pendingChanges)
+      setPendingChanges({}) // 清除待保存状态
+    }
+  }
 
   const tabs = [
     { id: 'basic', name: t('admin.settings.tabs.basic'), icon: Settings },
@@ -58,7 +73,7 @@ const AdminSettings = () => {
     const commonProps = {
       settings,
       loading,
-      onUpdate: updateSettings
+      onUpdate: handleSettingsChange  // 使用新的处理函数，不立即保存
     }
 
     switch (activeTab) {
@@ -120,11 +135,17 @@ const AdminSettings = () => {
             
             <div className="flex items-center space-x-3">
               <button
-                onClick={resetToDefaults}
-                className="flex items-center space-x-2 px-4 py-2 text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
+                onClick={handleSave}
+                disabled={saving || Object.keys(pendingChanges).length === 0}
+                className="flex items-center space-x-2 px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
               >
-                <Trash2 className="w-4 h-4" />
-                <span>{t('admin.settings.reset')}</span>
+                <Save className="w-4 h-4" />
+                <span>{saving ? t('admin.settings.saving') : t('admin.settings.save')}</span>
+                {Object.keys(pendingChanges).length > 0 && (
+                  <span className="ml-1 px-2 py-0.5 text-xs bg-white text-purple-600 rounded-full">
+                    {Object.keys(pendingChanges).length}
+                  </span>
+                )}
               </button>
             </div>
           </div>

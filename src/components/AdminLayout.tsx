@@ -1,7 +1,9 @@
-import React, { useState, ReactNode } from 'react'
+import React, { useState, useEffect, ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import { useLanguage } from '../contexts/language'
+import { useTranslation } from '../contexts/language'
+import { AdminService } from '../services/AdminService'
 import {
   LayoutDashboard,
   FileText,
@@ -30,9 +32,43 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken')
+    AdminService.clearAuth()
     navigate('/admin')
   }
+
+  // 设置认证错误回调
+  useEffect(() => {
+    const handleAuthError = () => {
+      // 显示友好提示
+      alert(t('admin.tokenExpired'))
+      // 跳转到登录页
+      navigate('/admin')
+    }
+
+    AdminService.setAuthErrorCallback(handleAuthError)
+
+    // 组件卸载时清除回调
+    return () => {
+      AdminService.clearAuthErrorCallback()
+    }
+  }, [navigate, t])
+
+  // 定期检查token有效性
+  useEffect(() => {
+    const checkTokenValidity = () => {
+      if (!AdminService.hasValidToken()) {
+        handleLogout()
+      }
+    }
+
+    // 立即检查一次
+    checkTokenValidity()
+
+    // 每5分钟检查一次
+    const interval = setInterval(checkTokenValidity, 5 * 60 * 1000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const navigation = [
     {
@@ -56,7 +92,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       icon: Calendar
     },
     {
-      name: t('adminContacts.title'),
+      name: t('admin.contacts.title'),
       href: '/admin/contacts',
       icon: Mail
     },

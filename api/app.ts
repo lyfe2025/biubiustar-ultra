@@ -16,6 +16,7 @@ import usersRoutes from './routes/users.js';
 import followsRoutes from './routes/follows.js';
 import adminRoutes from './routes/admin.js';
 import settingsRoutes from './routes/settings.js';
+import { startSecurityCleanupScheduler } from './middleware/security.js';
 
 // for esm mode
 const __filename = fileURLToPath(import.meta.url);
@@ -72,6 +73,35 @@ app.use((req: Request, res: Response) => {
     success: false,
     error: 'API not found'
   });
+});
+
+// 启动安全数据清理调度器
+let cleanupScheduler: NodeJS.Timeout | null = null;
+
+try {
+  cleanupScheduler = startSecurityCleanupScheduler();
+  console.log('Security cleanup scheduler started successfully');
+} catch (error) {
+  console.error('Failed to start security cleanup scheduler:', error);
+}
+
+// 优雅关闭处理
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully...');
+  if (cleanupScheduler) {
+    clearInterval(cleanupScheduler);
+    console.log('Security cleanup scheduler stopped');
+  }
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('Received SIGINT, shutting down gracefully...');
+  if (cleanupScheduler) {
+    clearInterval(cleanupScheduler);
+    console.log('Security cleanup scheduler stopped');
+  }
+  process.exit(0);
 });
 
 export default app;

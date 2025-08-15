@@ -8,6 +8,7 @@ export interface ContactFormData {
   email: string;
   subject: string;
   message: string;
+  phone?: string;
 }
 
 export interface ContactSubmissionResponse {
@@ -26,9 +27,11 @@ export interface ContactSubmission {
   email: string;
   subject: string;
   message: string;
+  phone?: string;
   status: 'pending' | 'read' | 'replied';
   submitted_at: string;
   updated_at: string;
+  ip_address?: string;
 }
 
 export interface ContactSubmissionsResponse {
@@ -102,11 +105,19 @@ class ContactService {
         params.append('status', status);
       }
 
+      // Get admin token for authentication
+      const adminToken = localStorage.getItem('adminToken');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (adminToken) {
+        headers['Authorization'] = `Bearer ${adminToken}`;
+      }
+
       const response = await fetch(`${this.baseUrl}/api/contact/submissions?${params}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       const result: ContactSubmissionsResponse = await response.json();
@@ -134,11 +145,19 @@ class ContactService {
     status: 'pending' | 'read' | 'replied'
   ): Promise<ContactSubmissionResponse> {
     try {
+      // Get admin token for authentication
+      const adminToken = localStorage.getItem('adminToken');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (adminToken) {
+        headers['Authorization'] = `Bearer ${adminToken}`;
+      }
+
       const response = await fetch(`${this.baseUrl}/api/contact/submissions/${id}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({ status }),
       });
 
@@ -160,13 +179,58 @@ class ContactService {
   }
 
   /**
+   * Delete contact submission (Admin only)
+   */
+  async deleteSubmission(id: string): Promise<ContactSubmissionResponse> {
+    try {
+      // Get admin token for authentication
+      const adminToken = localStorage.getItem('adminToken');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (adminToken) {
+        headers['Authorization'] = `Bearer ${adminToken}`;
+      }
+
+      const response = await fetch(`${this.baseUrl}/api/contact/submissions/${id}`, {
+        method: 'DELETE',
+        headers,
+      });
+
+      const result: ContactSubmissionResponse = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Delete submission error:', error);
+      throw new Error(
+        error instanceof Error 
+          ? error.message 
+          : '删除失败，请稍后重试'
+      );
+    }
+  }
+
+  /**
    * Validate contact form data
    */
   validateContactForm(data: ContactFormData): { valid: boolean; message?: string } {
-    const { name, email, subject, message } = data;
+    const { name, email, subject, message, phone } = data;
     
     if (!name || !email || !subject || !message) {
       return { valid: false, message: '所有字段都是必填的' };
+    }
+    
+    // Phone validation (optional field)
+    if (phone && phone.trim()) {
+      const phoneRegex = /^[\+]?[1-9][\d\s\-\(\)]{7,15}$/;
+      if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+        return { valid: false, message: '请输入有效的电话号码' };
+      }
     }
     
     if (name.trim().length < 2) {

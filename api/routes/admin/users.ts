@@ -10,7 +10,22 @@ router.use(requireAdmin)
 // 获取所有用户（用户管理）
 router.get('/', async (req, res) => {
   try {
-    // 从user_profiles表获取用户资料信息
+    // 获取分页参数
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 10
+    const offset = (page - 1) * limit
+
+    // 获取总用户数
+    const { count: totalUsers, error: countError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('*', { count: 'exact', head: true })
+    
+    if (countError) {
+      console.error('获取用户总数失败:', countError)
+      return res.status(500).json({ error: '获取用户总数失败' })
+    }
+
+    // 从user_profiles表获取用户资料信息（分页）
     const { data: userProfiles, error: profilesError } = await supabaseAdmin
       .from('user_profiles')
       .select(`
@@ -31,6 +46,7 @@ router.get('/', async (req, res) => {
         updated_at
       `)
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
     
     if (profilesError) {
       console.error('获取用户资料失败:', profilesError)
@@ -74,7 +90,17 @@ router.get('/', async (req, res) => {
       updated_at: user.updated_at
     })) || []
 
-    res.json(formattedUsers)
+    // 返回分页数据
+    const totalPages = Math.ceil((totalUsers || 0) / limit)
+    res.json({
+      users: formattedUsers,
+      pagination: {
+        page,
+        limit,
+        total: totalUsers || 0,
+        totalPages
+      }
+    })
   } catch (error) {
     console.error('获取用户列表失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
