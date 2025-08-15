@@ -1,0 +1,483 @@
+// 系统设置翻译
+export const adminSettingsTranslations = {
+  zh: {
+    admin: {
+      // 系统设置
+      settings: {
+        title: '系统设置',
+        description: '配置系统参数和选项',
+        refresh: '刷新',
+        export: '导出',
+        import: '导入',
+        reset: '重置',
+        tabs: {
+          basic: '基础设置',
+          users: '用户设置',
+          content: '内容设置',
+          email: '邮件设置',
+          security: '安全设置',
+          theme: '主题设置'
+        },
+        basic: {
+          title: '基础设置',
+          siteName: '站点名称',
+          siteNamePlaceholder: '请输入站点名称',
+          siteNameDescription: '网站的名称',
+          siteDescription: '站点描述',
+          siteDescriptionPlaceholder: '请输入站点描述',
+          siteDescriptionDescription: '网站的描述信息',
+          siteLogo: '站点标志',
+          uploadLogo: '上传标志',
+          logoDescription: '网站的标志图片',
+          siteFavicon: '站点图标',
+          uploadFavicon: '上传图标',
+          faviconDescription: '浏览器标签页显示的图标'
+        },
+        user: {
+          title: '用户设置',
+          allowRegistration: '允许注册',
+          allowRegistrationDescription: '是否允许新用户注册',
+          requireEmailVerification: '需要邮箱验证',
+          requireEmailVerificationDescription: '新用户注册时是否需要验证邮箱',
+          defaultRole: '默认角色',
+          defaultRoleDescription: '新用户注册时的默认角色',
+          maxPostsPerDay: '每日最大发帖数',
+          maxPostsPerDayDescription: '用户每天最多可以发布的帖子数量',
+          maxFileSize: '最大文件大小',
+          maxFileSizeDescription: '用户上传文件的最大大小限制',
+          roles: {
+            user: '普通用户'
+          }
+        },
+        content: {
+          title: '内容设置',
+          enableModeration: '启用内容审核',
+          enableModerationDescription: '是否对新发布的内容进行审核',
+          autoApprove: '自动批准',
+          autoApproveDescription: '是否自动批准新发布的内容',
+          interactionFeatures: '互动功能',
+          enableComments: '启用评论',
+          enableCommentsDescription: '是否允许用户评论',
+          enableLikes: '启用点赞',
+          enableLikesDescription: '是否允许用户点赞',
+          enableShares: '启用分享',
+          enableSharesDescription: '是否允许用户分享内容',
+          loading: '加载中...'
+        },
+        security: {
+          title: '安全设置',
+          enableRateLimit: '启用访问限制',
+          enableRateLimitDescription: '限制用户访问频率以防止滥用',
+          maxLoginAttempts: '最大登录尝试次数',
+          maxLoginAttemptsDescription: '账户锁定前允许的错误登录次数',
+          sessionTimeout: '会话超时',
+          hours: '小时',
+          sessionTimeoutDescription: '用户会话的有效时长',
+          enableTwoFactor: '启用双重验证',
+          enableTwoFactorDescription: '为管理员账户启用双重身份验证',
+          recommendations: '安全建议',
+          recommendation1: '定期更换管理员密码',
+          recommendation2: '启用双重身份验证',
+          recommendation3: '限制登录失败尝试次数',
+          recommendation4: '使用强密码策略'
+        },
+        theme: {
+          title: '主题设置',
+          primaryColor: '主色调',
+          primaryColorDescription: '网站的主要颜色',
+          secondaryColor: '辅色调',
+          secondaryColorDescription: '网站的次要颜色',
+          enableDarkMode: '启用暗色模式',
+          enableDarkModeDescription: '为用户提供暗色主题选项',
+          customCSS: '自定义CSS',
+          customCSSPlaceholder: '在此输入自定义CSS代码...',
+          customCSSDescription: '添加自定义样式来个性化网站外观',
+          preview: '预览',
+          primaryColorPreview: '主色调预览',
+          secondaryColorPreview: '辅色调预览',
+          sampleButton: '示例按钮',
+          sampleSecondary: '次要示例'
+        },
+        email: {
+          title: '邮件设置',
+          smtpHost: 'SMTP服务器',
+          smtpHostDescription: 'SMTP服务器地址',
+          smtpPort: 'SMTP端口',
+          smtpEncryption: 'SMTP加密',
+          encryption: {
+            tls: 'TLS'
+          },
+          smtpUsername: 'SMTP用户名',
+          smtpPassword: 'SMTP密码',
+          senderInfo: '发件人信息',
+          fromEmail: '发件人邮箱',
+          fromName: '发件人姓名',
+          testEmail: '测试邮件',
+          testEmailDescription: '发送测试邮件验证配置',
+          testNow: '立即测试'
+        },
+        saving: '保存中...'
+      }
+    }
+  },
+  
+  'zh-TW': {
+    admin: {
+      settings: {
+        title: '系統設置',
+        description: '配置系統參數和選項',
+        refresh: '刷新',
+        export: '導出',
+        import: '導入',
+        reset: '重置',
+        tabs: {
+          basic: '基礎設置',
+          users: '用戶設置',
+          content: '內容設置',
+          email: '郵件設置',
+          security: '安全設置',
+          theme: '主題設置'
+        },
+        basic: {
+          title: '基礎設置',
+          siteName: '站點名稱',
+          siteNamePlaceholder: '請輸入站點名稱',
+          siteNameDescription: '網站的名稱',
+          siteDescription: '站點描述',
+          siteDescriptionPlaceholder: '請輸入站點描述',
+          siteDescriptionDescription: '網站的描述信息',
+          siteLogo: '站點標志',
+          uploadLogo: '上傳標志',
+          logoDescription: '網站的標志圖片',
+          siteFavicon: '站點圖標',
+          uploadFavicon: '上傳圖標',
+          faviconDescription: '瀏覽器標簽頁顯示的圖標'
+        },
+        user: {
+          title: '用戶設置',
+          allowRegistration: '允許註冊',
+          allowRegistrationDescription: '是否允許新用戶註冊',
+          requireEmailVerification: '需要郵箱驗證',
+          requireEmailVerificationDescription: '新用戶註冊時是否需要驗證郵箱',
+          defaultRole: '默認角色',
+          defaultRoleDescription: '新用戶註冊時的默認角色',
+          maxPostsPerDay: '每日最大發帖數',
+          maxPostsPerDayDescription: '用戶每天最多可以發布的帖子數量',
+          maxFileSize: '最大文件大小',
+          maxFileSizeDescription: '用戶上傳文件的最大大小限制',
+          roles: {
+            user: '普通用戶'
+          }
+        },
+        content: {
+          title: '內容設置',
+          enableModeration: '啟用內容審核',
+          enableModerationDescription: '是否對新發布的內容進行審核',
+          autoApprove: '自動批准',
+          autoApproveDescription: '是否自動批准新發布的內容',
+          interactionFeatures: '互動功能',
+          enableComments: '啟用評論',
+          enableCommentsDescription: '是否允許用戶評論',
+          enableLikes: '啟用點讚',
+          enableLikesDescription: '是否允許用戶點讚',
+          enableShares: '啟用分享',
+          enableSharesDescription: '是否允許用戶分享內容',
+          loading: '加載中...'
+        },
+        security: {
+          title: '安全設置',
+          enableRateLimit: '啟用訪問限制',
+          enableRateLimitDescription: '限制用戶訪問頻率以防止濫用',
+          maxLoginAttempts: '最大登錄嘗試次數',
+          maxLoginAttemptsDescription: '賬戶鎖定前允許的錯誤登錄次數',
+          sessionTimeout: '會話超時',
+          hours: '小時',
+          sessionTimeoutDescription: '用戶會話的有效時長',
+          enableTwoFactor: '啟用雙重驗證',
+          enableTwoFactorDescription: '為管理員賬戶啟用雙重身份驗證',
+          recommendations: '安全建議',
+          recommendation1: '定期更換管理員密碼',
+          recommendation2: '啟用雙重身份驗證',
+          recommendation3: '限制登錄失敗嘗試次數',
+          recommendation4: '使用強密碼策略'
+        },
+        theme: {
+          title: '主題設置',
+          primaryColor: '主色調',
+          primaryColorDescription: '網站的主要顏色',
+          secondaryColor: '輔色調',
+          secondaryColorDescription: '網站的次要顏色',
+          enableDarkMode: '啟用暗色模式',
+          enableDarkModeDescription: '為用戶提供暗色主題選項',
+          customCSS: '自定義CSS',
+          customCSSPlaceholder: '在此輸入自定義CSS代碼...',
+          customCSSDescription: '添加自定義樣式來個性化網站外觀',
+          preview: '預覽',
+          primaryColorPreview: '主色調預覽',
+          secondaryColorPreview: '輔色調預覽',
+          sampleButton: '示例按鈕',
+          sampleSecondary: '次要示例'
+        },
+        email: {
+          title: '郵件設置',
+          smtpHost: 'SMTP服務器',
+          smtpHostDescription: 'SMTP服務器地址',
+          smtpPort: 'SMTP端口',
+          smtpEncryption: 'SMTP加密',
+          encryption: {
+            tls: 'TLS'
+          },
+          smtpUsername: 'SMTP用戶名',
+          smtpPassword: 'SMTP密碼',
+          senderInfo: '發件人信息',
+          fromEmail: '發件人郵箱',
+          fromName: '發件人姓名',
+          testEmail: '測試郵件',
+          testEmailDescription: '發送測試郵件驗證配置',
+          testNow: '立即測試'
+        },
+        saving: '保存中...'
+      }
+    }
+  },
+  
+  en: {
+    admin: {
+      settings: {
+        title: 'System Settings',
+        description: 'Configure system parameters and options',
+        refresh: 'Refresh',
+        export: 'Export',
+        import: 'Import',
+        reset: 'Reset',
+        tabs: {
+          basic: 'Basic Settings',
+          users: 'User Settings',
+          content: 'Content Settings',
+          email: 'Email Settings',
+          security: 'Security Settings',
+          theme: 'Theme Settings'
+        },
+        basic: {
+          title: 'Basic Settings',
+          siteName: 'Site Name',
+          siteNamePlaceholder: 'Enter site name',
+          siteNameDescription: 'Name of the website',
+          siteDescription: 'Site Description',
+          siteDescriptionPlaceholder: 'Enter site description',
+          siteDescriptionDescription: 'Description of the website',
+          siteLogo: 'Site Logo',
+          uploadLogo: 'Upload Logo',
+          logoDescription: 'Logo image of the website',
+          siteFavicon: 'Site Favicon',
+          uploadFavicon: 'Upload Favicon',
+          faviconDescription: 'Icon displayed in browser tab'
+        },
+        user: {
+          title: 'User Settings',
+          allowRegistration: 'Allow Registration',
+          allowRegistrationDescription: 'Whether to allow new user registration',
+          requireEmailVerification: 'Require Email Verification',
+          requireEmailVerificationDescription: 'Whether new users need to verify email',
+          defaultRole: 'Default Role',
+          defaultRoleDescription: 'Default role for new users',
+          maxPostsPerDay: 'Max Posts Per Day',
+          maxPostsPerDayDescription: 'Maximum number of posts per user per day',
+          maxFileSize: 'Max File Size',
+          maxFileSizeDescription: 'Maximum file size for user uploads',
+          roles: {
+            user: 'User'
+          }
+        },
+        content: {
+          title: 'Content Settings',
+          enableModeration: 'Enable Moderation',
+          enableModerationDescription: 'Whether to moderate new content',
+          autoApprove: 'Auto Approve',
+          autoApproveDescription: 'Whether to auto-approve new content',
+          interactionFeatures: 'Interaction Features',
+          enableComments: 'Enable Comments',
+          enableCommentsDescription: 'Whether to allow comments',
+          enableLikes: 'Enable Likes',
+          enableLikesDescription: 'Whether to allow likes',
+          enableShares: 'Enable Shares',
+          enableSharesDescription: 'Whether to allow content sharing',
+          loading: 'Loading...'
+        },
+        security: {
+          title: 'Security Settings',
+          enableRateLimit: 'Enable Rate Limiting',
+          enableRateLimitDescription: 'Limit user access frequency to prevent abuse',
+          maxLoginAttempts: 'Max Login Attempts',
+          maxLoginAttemptsDescription: 'Number of failed login attempts before account lockout',
+          sessionTimeout: 'Session Timeout',
+          hours: 'hours',
+          sessionTimeoutDescription: 'Duration of user session validity',
+          enableTwoFactor: 'Enable Two-Factor Authentication',
+          enableTwoFactorDescription: 'Enable two-factor authentication for admin accounts',
+          recommendations: 'Security Recommendations',
+          recommendation1: 'Regularly change admin passwords',
+          recommendation2: 'Enable two-factor authentication',
+          recommendation3: 'Limit failed login attempts',
+          recommendation4: 'Use strong password policies'
+        },
+        theme: {
+          title: 'Theme Settings',
+          primaryColor: 'Primary Color',
+          primaryColorDescription: 'Main color of the website',
+          secondaryColor: 'Secondary Color',
+          secondaryColorDescription: 'Secondary color of the website',
+          enableDarkMode: 'Enable Dark Mode',
+          enableDarkModeDescription: 'Provide dark theme option for users',
+          customCSS: 'Custom CSS',
+          customCSSPlaceholder: 'Enter custom CSS code here...',
+          customCSSDescription: 'Add custom styles to personalize website appearance',
+          preview: 'Preview',
+          primaryColorPreview: 'Primary Color Preview',
+          secondaryColorPreview: 'Secondary Color Preview',
+          sampleButton: 'Sample Button',
+          sampleSecondary: 'Secondary Sample'
+        },
+        email: {
+          title: 'Email Settings',
+          smtpHost: 'SMTP Host',
+          smtpHostDescription: 'SMTP server address',
+          smtpPort: 'SMTP Port',
+          smtpEncryption: 'SMTP Encryption',
+          encryption: {
+            tls: 'TLS'
+          },
+          smtpUsername: 'SMTP Username',
+          smtpPassword: 'SMTP Password',
+          senderInfo: 'Sender Information',
+          fromEmail: 'From Email',
+          fromName: 'From Name',
+          testEmail: 'Test Email',
+          testEmailDescription: 'Send test email to verify configuration',
+          testNow: 'Test Now'
+        },
+        saving: 'Saving...'
+      }
+    }
+  },
+  
+  vi: {
+    admin: {
+      settings: {
+        title: 'Cài đặt hệ thống',
+        description: 'Cấu hình tham số và tùy chọn hệ thống',
+        refresh: 'Làm mới',
+        export: 'Xuất',
+        import: 'Nhập',
+        reset: 'Đặt lại',
+        tabs: {
+          basic: 'Cài đặt cơ bản',
+          users: 'Cài đặt người dùng',
+          content: 'Cài đặt nội dung',
+          email: 'Cài đặt email',
+          security: 'Cài đặt bảo mật',
+          theme: 'Cài đặt giao diện'
+        },
+        basic: {
+          title: 'Cài đặt cơ bản',
+          siteName: 'Tên trang web',
+          siteNamePlaceholder: 'Nhập tên trang web',
+          siteNameDescription: 'Tên của trang web',
+          siteDescription: 'Mô tả trang web',
+          siteDescriptionPlaceholder: 'Nhập mô tả trang web',
+          siteDescriptionDescription: 'Thông tin mô tả về trang web',
+          siteLogo: 'Logo trang web',
+          uploadLogo: 'Tải lên logo',
+          logoDescription: 'Hình ảnh logo của trang web',
+          siteFavicon: 'Favicon trang web',
+          uploadFavicon: 'Tải lên favicon',
+          faviconDescription: 'Biểu tượng hiển thị trên tab trình duyệt'
+        },
+        user: {
+          title: 'Cài đặt người dùng',
+          allowRegistration: 'Cho phép đăng ký',
+          allowRegistrationDescription: 'Có cho phép người dùng mới đăng ký không',
+          requireEmailVerification: 'Yêu cầu xác minh email',
+          requireEmailVerificationDescription: 'Người dùng mới có cần xác minh email không',
+          defaultRole: 'Vai trò mặc định',
+          defaultRoleDescription: 'Vai trò mặc định cho người dùng mới',
+          maxPostsPerDay: 'Số bài viết tối đa mỗi ngày',
+          maxPostsPerDayDescription: 'Số lượng bài viết tối đa mỗi người dùng có thể đăng mỗi ngày',
+          maxFileSize: 'Kích thước file tối đa',
+          maxFileSizeDescription: 'Kích thước file tối đa cho việc tải lên',
+          roles: {
+            user: 'Người dùng'
+          }
+        },
+        content: {
+          title: 'Cài đặt nội dung',
+          enableModeration: 'Bật kiểm duyệt',
+          enableModerationDescription: 'Có kiểm duyệt nội dung mới không',
+          autoApprove: 'Tự động duyệt',
+          autoApproveDescription: 'Có tự động duyệt nội dung mới không',
+          interactionFeatures: 'Tính năng tương tác',
+          enableComments: 'Bật bình luận',
+          enableCommentsDescription: 'Có cho phép bình luận không',
+          enableLikes: 'Bật thích',
+          enableLikesDescription: 'Có cho phép thích không',
+          enableShares: 'Bật chia sẻ',
+          enableSharesDescription: 'Có cho phép chia sẻ nội dung không',
+          loading: 'Đang tải...'
+        },
+        security: {
+          title: 'Cài đặt bảo mật',
+          enableRateLimit: 'Bật giới hạn truy cập',
+          enableRateLimitDescription: 'Giới hạn tần suất truy cập để ngăn lạm dụng',
+          maxLoginAttempts: 'Số lần đăng nhập tối đa',
+          maxLoginAttemptsDescription: 'Số lần đăng nhập sai trước khi khóa tài khoản',
+          sessionTimeout: 'Hết hạn phiên',
+          hours: 'giờ',
+          sessionTimeoutDescription: 'Thời gian hiệu lực của phiên người dùng',
+          enableTwoFactor: 'Bật xác thực hai yếu tố',
+          enableTwoFactorDescription: 'Bật xác thực hai yếu tố cho tài khoản quản trị',
+          recommendations: 'Khuyến nghị bảo mật',
+          recommendation1: 'Thay đổi mật khẩu quản trị định kỳ',
+          recommendation2: 'Bật xác thực hai yếu tố',
+          recommendation3: 'Giới hạn số lần đăng nhập sai',
+          recommendation4: 'Sử dụng chính sách mật khẩu mạnh'
+        },
+        theme: {
+          title: 'Cài đặt giao diện',
+          primaryColor: 'Màu chính',
+          primaryColorDescription: 'Màu chính của trang web',
+          secondaryColor: 'Màu phụ',
+          secondaryColorDescription: 'Màu phụ của trang web',
+          enableDarkMode: 'Bật chế độ tối',
+          enableDarkModeDescription: 'Cung cấp tùy chọn giao diện tối cho người dùng',
+          customCSS: 'CSS tùy chỉnh',
+          customCSSPlaceholder: 'Nhập mã CSS tùy chỉnh tại đây...',
+          customCSSDescription: 'Thêm kiểu tùy chỉnh để cá nhân hóa giao diện',
+          preview: 'Xem trước',
+          primaryColorPreview: 'Xem trước màu chính',
+          secondaryColorPreview: 'Xem trước màu phụ',
+          sampleButton: 'Nút mẫu',
+          sampleSecondary: 'Mẫu phụ'
+        },
+        email: {
+          title: 'Cài đặt email',
+          smtpHost: 'Máy chủ SMTP',
+          smtpHostDescription: 'Địa chỉ máy chủ SMTP',
+          smtpPort: 'Cổng SMTP',
+          smtpEncryption: 'Mã hóa SMTP',
+          encryption: {
+            tls: 'TLS'
+          },
+          smtpUsername: 'Tên người dùng SMTP',
+          smtpPassword: 'Mật khẩu SMTP',
+          senderInfo: 'Thông tin người gửi',
+          fromEmail: 'Email người gửi',
+          fromName: 'Tên người gửi',
+          testEmail: 'Email thử nghiệm',
+          testEmailDescription: 'Gửi email thử nghiệm để xác minh cấu hình',
+          testNow: 'Thử nghiệm ngay'
+        },
+        saving: 'Đang lưu...'
+      }
+    }
+  }
+}

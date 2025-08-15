@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, Users, Globe, Heart, Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Star, Users, Globe, Heart, Mail, Phone, MapPin, Send, Building, Calendar, TrendingUp, Handshake } from 'lucide-react';
 import { useLanguage } from '../contexts/language';
 import { contactService, type ContactFormData } from '../services/ContactService';
 import { toast } from 'sonner';
@@ -8,51 +8,83 @@ import { usePageTitle } from '../hooks/usePageTitle';
 export default function About() {
   const { t } = useLanguage();
   usePageTitle(t('about.title'));
-  const [formData, setFormData] = useState<ContactFormData>({
+  const [formData, setFormData] = useState({
     name: '',
+    company: '',
+    phone: '',
     email: '',
-    subject: '',
+    category: '',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
+  // Validation functions
+  const validatePhone = (phone: string): boolean => {
+    // Support multiple regions: China, Hong Kong, Taiwan, Vietnam
+    const phoneRegex = /^(\+86|\+852|\+886|\+84)?[\s-]?1[3-9]\d{9}$|^(\+852)?[\s-]?[5-9]\d{7}$|^(\+886)?[\s-]?09\d{8}$|^(\+84)?[\s-]?0[3-9]\d{8}$/;
+    return phoneRegex.test(phone.replace(/[\s-]/g, ''));
+  };
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form data
-    const validation = contactService.validateContactForm(formData);
-    if (!validation.valid) {
-      toast.error(validation.message);
+    // Validate required fields
+    if (!formData.name || !formData.phone || !formData.email || !formData.category) {
+      toast.error(t('about.contactForm.validation.required'));
+      return;
+    }
+
+    // Validate phone format
+    if (!validatePhone(formData.phone)) {
+      toast.error(t('about.contactForm.validation.invalidPhone'));
+      return;
+    }
+
+    // Validate email format
+    if (!validateEmail(formData.email)) {
+      toast.error(t('about.contactForm.validation.invalidEmail'));
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      const result = await contactService.submitContactForm(formData);
+      // Prepare data for API submission
+      const contactData: ContactFormData = {
+        name: formData.name,
+        email: formData.email,
+        subject: `${t(`about.contactForm.categories.${formData.category.replace('-', '')}`)} - ${formData.company || formData.name}`,
+        message: `联系方式: ${formData.phone}\n公司: ${formData.company || '未提供'}\n\n${formData.message}`
+      };
+
+      // Submit to API
+      await contactService.submitContactForm(contactData);
       
-      if (result.success) {
-        toast.success(result.message || t('about.contact.form.success'));
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          subject: '',
-          message: ''
-        });
-      } else {
-        toast.error(result.message || t('about.contact.form.error'));
-      }
+      toast.success(t('about.contactForm.success'));
+      // Reset form
+      setFormData({
+        name: '',
+        company: '',
+        phone: '',
+        email: '',
+        category: '',
+        message: ''
+      });
     } catch (error) {
       console.error('Contact form submission error:', error);
-      toast.error(error instanceof Error ? error.message : t('about.contact.form.networkError'));
+      toast.error(error instanceof Error ? error.message : t('about.contactForm.error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -129,8 +161,138 @@ export default function About() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Company Introduction Section */}
       <section className="py-16 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.company.title')}</h2>
+            <p className="text-xl text-gray-600">{t('about.company.subtitle')}</p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Company Profile */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100">
+              <div className="flex items-center mb-6">
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mr-4">
+                  <Building className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">{t('about.company.profile.title')}</h3>
+              </div>
+              <p className="text-gray-600 leading-relaxed mb-6">
+                {t('about.company.profile.description')}
+              </p>
+              <p className="text-gray-600 leading-relaxed">
+                {t('about.company.profile.expansion')}
+              </p>
+            </div>
+
+            {/* Company Overview */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100">
+              <div className="flex items-center mb-6">
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mr-4">
+                  <Globe className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">{t('about.company.overview.title')}</h3>
+              </div>
+              <p className="text-gray-600 leading-relaxed mb-6">
+                {t('about.company.overview.business')}
+              </p>
+              <p className="text-gray-600 leading-relaxed">
+                {t('about.company.overview.project')}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Timeline Section */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.timeline.title')}</h2>
+            <p className="text-xl text-gray-600">{t('about.timeline.subtitle')}</p>
+          </div>
+
+          <div className="relative">
+            {/* Timeline Line */}
+            <div className="absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-gradient-to-b from-purple-500 to-purple-600"></div>
+            
+            <div className="space-y-12">
+              {[
+                { period: '2023.10', events: ['market', 'research'] },
+                { period: '2023.11', events: ['location', 'registration', 'recruitment'] },
+                { period: '2023.12', events: ['trial', 'testing'] },
+                { period: '2024.01', events: ['bigo', 'opening', 'network', 'china'] },
+                { period: '2024.02', events: ['award', 'scale', 'annual'] },
+                { period: '2024.05', events: ['newbie', 'quarterly'] },
+                { period: '2024.06', events: ['tiktok', 'visit'] },
+                { period: '2024.07', events: ['tiktokAward'] },
+                { period: '2024.11', events: ['douyinAward'] },
+                { period: '2024.12', events: ['excellence', 'carnival'] }
+              ].map((item, index) => (
+                <div key={index} className={`relative flex items-center ${index % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
+                  {/* Timeline Node */}
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-purple-600 rounded-full border-4 border-white shadow-lg z-10"></div>
+                  
+                  {/* Content Card */}
+                  <div className={`w-5/12 ${index % 2 === 0 ? 'pr-8' : 'pl-8'}`}>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-100 hover:shadow-xl transition-all duration-300">
+                      <div className="flex items-center mb-4">
+                        <div className="bg-gradient-to-r from-purple-500 to-purple-600 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                          <Calendar className="w-5 h-5 text-white" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900">{item.period}</h3>
+                      </div>
+                      <ul className="space-y-2">
+                        {item.events.map((event, eventIndex) => (
+                          <li key={eventIndex} className="text-gray-600 text-sm leading-relaxed flex items-start">
+                            <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                            {t(`about.timeline.events.${item.period.replace('.', '')}.${event}`)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Performance Section */}
+      <section className="py-16 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.performance.title')}</h2>
+            <p className="text-xl text-gray-600">{t('about.performance.subtitle')}</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { period: 'q1q2', value: '30万', description: 'q1q2Description', color: 'from-blue-500 to-blue-600' },
+              { period: 'q3', value: '60万', description: 'q3Description', color: 'from-green-500 to-green-600' },
+              { period: 'q4', value: '150万', description: 'q4Description', color: 'from-purple-500 to-purple-600' }
+            ].map((item, index) => (
+              <div key={index} className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100 hover:shadow-xl transition-all duration-300 text-center">
+                <div className={`bg-gradient-to-r ${item.color} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6`}>
+                  <TrendingUp className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{t(`about.performance.periods.${item.period}`)}</h3>
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">
+                  {item.value}
+                </div>
+                <p className="text-gray-600 leading-relaxed">
+                  {t(`about.performance.${item.description}`)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => {
@@ -145,6 +307,41 @@ export default function About() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="py-16 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.partners.title')}</h2>
+            <p className="text-xl text-gray-600">{t('about.partners.subtitle')}</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+            {[
+              { name: 'TikTok', description: 'tiktok' },
+              { name: '同程旅行', description: 'tongcheng' },
+              { name: 'BlueFocus蓝色光标', description: 'bluefocus' },
+              { name: 'DELSK', description: 'delsk' },
+              { name: 'azgo', description: 'azgo' },
+              { name: '艺龙eLong', description: 'elong' }
+            ].map((partner, index) => (
+              <div key={index} className="group">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-100 hover:shadow-xl transition-all duration-300 text-center h-32 flex flex-col justify-center items-center hover:scale-105">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mb-3">
+                    <Building className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-1">{partner.name}</h3>
+                </div>
+                <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <p className="text-xs text-gray-600 text-center">
+                    {t(`about.partners.descriptions.${partner.description}`)}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -211,124 +408,132 @@ export default function About() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.contact.title')}</h2>
-            <p className="text-xl text-gray-600">
-              {t('about.contact.description')}
-            </p>
+      <section className="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.contactForm.title')}</h2>
+            <p className="text-xl text-gray-600">{t('about.contactForm.subtitle')}</p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
-            {/* Contact Info */}
-            <div className="space-y-8">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('about.contact.info.title')}</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <div className="bg-purple-100 p-3 rounded-lg mr-4">
-                      <Mail className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{t('about.contact.info.email')}</p>
-                      <p className="text-gray-600">contact@biubiustar.com</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="bg-purple-100 p-3 rounded-lg mr-4">
-                      <Phone className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{t('about.contact.info.phone')}</p>
-                      <p className="text-gray-600">+86 400-123-4567</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="bg-purple-100 p-3 rounded-lg mr-4">
-                      <MapPin className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{t('about.contact.info.address')}</p>
-                      <p className="text-gray-600">{t('about.contact.info.addressValue')}</p>
-                    </div>
-                  </div>
-                </div>
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-purple-100">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('about.contactForm.form.category')}
+                </label>
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  required
+                >
+                  <option value="">{t('about.contactForm.form.categoryPlaceholder')}</option>
+                  <option value="live-ecommerce">{t('about.contactForm.categories.liveEcommerce')}</option>
+                  <option value="short-video">{t('about.contactForm.categories.shortVideo')}</option>
+                  <option value="business-cooperation">{t('about.contactForm.categories.businessCooperation')}</option>
+                  <option value="influencer-cooperation">{t('about.contactForm.categories.influencerCooperation')}</option>
+                  <option value="technical-consulting">{t('about.contactForm.categories.technicalConsulting')}</option>
+                  <option value="product-inquiry">{t('about.contactForm.categories.productInquiry')}</option>
+                  <option value="media-cooperation">{t('about.contactForm.categories.mediaCooperation')}</option>
+                  <option value="other">{t('about.contactForm.categories.other')}</option>
+                </select>
               </div>
-            </div>
-
-            {/* Contact Form */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('about.contact.form.title')}</h3>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('about.contact.form.name')}
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder={t('about.contact.form.namePlaceholder')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('about.contact.form.email')}
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder={t('about.contact.form.emailPlaceholder')}
-                    />
-                  </div>
-                </div>
+              
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('about.contact.form.subject')}
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('about.contactForm.form.name')}
                   </label>
                   <input
                     type="text"
-                    name="subject"
-                    value={formData.subject}
+                    id="name"
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                     required
-                    className="w-full px-4 py-3 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder={t('about.contact.form.subjectPlaceholder')}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('about.contact.form.message')}
+                  <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('about.contactForm.form.company')}
                   </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
+                  <input
+                    type="text"
+                    id="company"
+                    name="company"
+                    value={formData.company}
                     onChange={handleInputChange}
-                    required
-                    rows={5}
-                    className="w-full px-4 py-3 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                    placeholder={t('about.contact.form.messagePlaceholder')}
-                  ></textarea>
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  />
                 </div>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('about.contactForm.form.phone')}
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('about.contactForm.form.email')}
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('about.contactForm.form.message')}
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={6}
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  placeholder={t('about.contactForm.form.messagePlaceholder')}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
+                ></textarea>
+              </div>
+              
+              <div className="text-center">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-6 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                 >
-                  <Send className={`w-5 h-5 mr-2 ${isSubmitting ? 'animate-pulse' : ''}`} />
-                  {isSubmitting ? t('about.contact.form.submitting') : t('about.contact.form.submit')}
+                  {isSubmitting ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      {t('about.contactForm.form.sending')}
+                    </div>
+                  ) : (
+                    t('about.contactForm.form.submit')
+                  )}
                 </button>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
         </div>
       </section>

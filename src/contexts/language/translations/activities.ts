@@ -129,7 +129,6 @@ export const activitiesTranslations = {
         其他: '其他'
       },
 
-      loading: '加載中...',
       noActivities: '暫無活動',
 
       details: {

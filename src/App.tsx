@@ -12,6 +12,7 @@ import AdminContent from './pages/admin/AdminContent'
 import AdminUsers from './pages/admin/AdminUsers'
 import AdminActivities from './pages/admin/AdminActivities'
 import AdminCategories from './pages/admin/AdminCategories'
+import AdminContacts from './pages/admin/AdminContacts'
 import AdminSettings from './pages/admin/AdminSettings'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/language'
@@ -38,6 +39,7 @@ function AppContent() {
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/activities" element={<AdminActivities />} />
               <Route path="/admin/categories" element={<AdminCategories />} />
+              <Route path="/admin/contacts" element={<AdminContacts />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
       </Routes>
       <Toaster position="top-right" richColors />

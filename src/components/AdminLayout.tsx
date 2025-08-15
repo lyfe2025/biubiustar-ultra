@@ -14,7 +14,8 @@ import {
   Menu,
   X,
   Globe,
-  ChevronDown
+  ChevronDown,
+  Mail
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -36,7 +37,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navigation = [
     {
       name: t('admin.dashboard'),
-      href: '/admin/dashboard',
+      href: '/admin',
       icon: LayoutDashboard
     },
     {
@@ -54,7 +55,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       href: '/admin/activities',
       icon: Calendar
     },
-
+    {
+      name: t('adminContacts.title'),
+      href: '/admin/contacts',
+      icon: Mail
+    },
     {
       name: t('admin.settings'),
       href: '/admin/settings',

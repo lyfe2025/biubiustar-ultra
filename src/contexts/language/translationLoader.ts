@@ -7,11 +7,39 @@ import {
   authTranslations,
   postTranslations,
   profileTranslations,
-  adminTranslations,
+  adminAuthTranslations,
+  adminDashboardTranslations,
+  adminUsersTranslations,
+  adminContentTranslations,
+  adminActivitiesTranslations,
+  adminContactsTranslations,
+  adminSettingsTranslations,
   trendingTranslations,
-  aboutTranslations,
+  aboutCoreTranslations,
+  aboutCompanyTranslations,
+  aboutTeamTranslations,
+  aboutContactTranslations,
   commonTranslations
 } from './translations'
+
+// 深度合并对象的辅助函数
+const deepMerge = (target: any, source: any): any => {
+  const result = { ...target }
+  
+  Object.keys(source).forEach(key => {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      if (result[key] && typeof result[key] === 'object' && !Array.isArray(result[key])) {
+        result[key] = deepMerge(result[key], source[key])
+      } else {
+        result[key] = { ...source[key] }
+      }
+    } else {
+      result[key] = source[key]
+    }
+  })
+  
+  return result
+}
 
 // 合并所有翻译模块
 export const mergeTranslations = (...translationModules: any[]): Translations => {
@@ -22,7 +50,7 @@ export const mergeTranslations = (...translationModules: any[]): Translations =>
     result[lang] = {}
     translationModules.forEach(module => {
       if (module[lang]) {
-        result[lang] = { ...result[lang], ...module[lang] }
+        result[lang] = deepMerge(result[lang], module[lang])
       }
     })
   })
@@ -38,9 +66,18 @@ export const allTranslations = mergeTranslations(
   authTranslations,
   postTranslations,
   profileTranslations,
-  adminTranslations,
+  adminAuthTranslations,
+  adminDashboardTranslations,
+  adminUsersTranslations,
+  adminContentTranslations,
+  adminActivitiesTranslations,
+  adminContactsTranslations,
+  adminSettingsTranslations,
   trendingTranslations,
-  aboutTranslations,
+  aboutCoreTranslations,
+  aboutCompanyTranslations,
+  aboutTeamTranslations,
+  aboutContactTranslations,
   commonTranslations
 )
 

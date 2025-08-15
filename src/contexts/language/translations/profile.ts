@@ -76,12 +76,6 @@ export const profileTranslations = {
         joinFirst: '参与第一个活动'
       },
 
-      // 活动相关
-      myActivities: '我的活动',
-      joinFirstActivity: '参与第一个活动',
-      untitledActivity: '未命名活动',
-      participants: '参与者',
-      endsOn: '结束于',
       confirmSignOut: '确定要退出登录吗？',
 
       // 设置

@@ -1,5 +1,5 @@
-// 关于页面翻译
-export const aboutTranslations = {
+// 关于页面核心翻译
+export const aboutCoreTranslations = {
   zh: {
     about: {
       title: '关于我们',
@@ -8,7 +8,7 @@ export const aboutTranslations = {
       // 统计数据
       stats: {
         users: '用户',
-        communities: '社区',
+        communities: '社区', 
         interactions: '互动',
         satisfaction: '满意度'
       },
@@ -50,86 +50,14 @@ export const aboutTranslations = {
         }
       },
 
-      // 团队介绍
-      team: {
-        title: '我们的团队',
-        description: '由一群充满激情的开发者和设计师组成，致力于创造最佳的用户体验。',
-        members: {
-          sarah: {
-            role: '产品经理',
-            bio: '负责产品规划和用户体验设计',
-            expertise: {
-              0: '产品策略',
-              1: '用户研究',
-              2: '项目管理'
-            }
-          },
-          michael: {
-            role: '技术总监',
-            bio: '负责技术架构和团队管理',
-            expertise: {
-              0: '全栈开发',
-              1: '系统架构',
-              2: '团队管理'
-            }
-          },
-          anna: {
-            role: 'UI/UX 设计师',
-            bio: '负责界面设计和用户体验',
-            expertise: {
-              0: '界面设计',
-              1: '用户体验',
-              2: '视觉设计'
-            }
-          },
-          david: {
-            role: '后端工程师',
-            bio: '负责服务器开发和数据库',
-            expertise: {
-              0: '后端开发',
-              1: '数据库设计',
-              2: '性能优化'
-            }
-          }
-        }
-      },
-
       // 使命愿景
       mission: {
         title: '使命愿景',
         description: '让每个人都能在数字世界中找到归属感，通过技术连接人与人之间的情感。'
-      },
-
-      // 联系方式
-      contact: {
-        title: '联系我们',
-        description: '随时与我们取得联系，我们很乐意为您提供帮助',
-        email: '邮箱',
-        phone: '电话',
-        address: '地址',
-        followUs: '关注我们',
-        info: {
-          title: '联系信息',
-          email: '邮箱地址',
-          phone: '联系电话',
-          address: '公司地址',
-          addressValue: '北京市朝阳区xxx大厦'
-        },
-        form: {
-          title: '在线留言',
-          name: '姓名',
-          namePlaceholder: '请输入您的姓名',
-          email: '邮箱',
-          emailPlaceholder: '请输入您的邮箱',
-          subject: '主题',
-          subjectPlaceholder: '请输入留言主题',
-          message: '留言内容',
-          messagePlaceholder: '请输入您的留言内容',
-          submit: '发送留言'
-        }
       }
     }
   },
+  
   'zh-TW': {
     about: {
       title: '關於我們',
@@ -140,6 +68,21 @@ export const aboutTranslations = {
         communities: '社區',
         interactions: '互動',
         satisfaction: '滿意度'
+      },
+
+      values: {
+        connect: {
+          title: '連接世界',
+          description: '打破地域界限，連接全球用戶'
+        },
+        sharing: {
+          title: '分享精彩',
+          description: '分享生活中的美好時刻'
+        },
+        innovation: {
+          title: '創新驅動',
+          description: '持續創新，提供最佳體驗'
+        }
       },
 
       features: {
@@ -162,76 +105,73 @@ export const aboutTranslations = {
         }
       },
 
-      team: {
-        title: '我們的團隊',
-        description: '由一群充滿激情的開發者和設計師組成，致力於創造最佳的用戶體驗。'
-      },
-
       mission: {
         title: '使命願景',
         description: '讓每個人都能在數位世界中找到歸屬感，通過技術連接人與人之間的情感。'
-      },
-
-      contact: {
-        title: '聯繫我們',
-        email: '郵箱',
-        phone: '電話',
-        address: '地址',
-        followUs: '關注我們'
       }
     }
   },
+  
   en: {
     about: {
       title: 'About Us',
-      subtitle: 'Connect the world, share wonderful moments. We are dedicated to creating a vibrant social platform where everyone can find their own community.',
-      
+      subtitle: 'Leading the Future of Digital Entertainment',
+      description: 'BiuBiuStar is a leading digital entertainment platform focused on live streaming e-commerce and short video content creation. We are committed to providing users with the most exciting interactive experiences and helping creators achieve their dreams.',
+
       stats: {
-        users: 'Users',
-        communities: 'Communities',
-        interactions: 'Interactions',
-        satisfaction: 'Satisfaction'
+        users: 'Active Users',
+        creators: 'Content Creators',
+        videos: 'Videos Published',
+        revenue: 'Platform Revenue'
       },
 
-      features: {
-        title: 'Platform Features',
-        social: {
-          title: 'Social Interaction',
-          description: 'Connect with like-minded friends and share life moments'
+      values: {
+        innovation: {
+          title: 'Innovation',
+          description: 'Continuously exploring new technologies and creative methods'
         },
-        activities: {
-          title: 'Exciting Activities',
-          description: 'Participate in various interesting online and offline activities'
+        quality: {
+          title: 'Quality',
+          description: 'Providing high-quality content and services'
         },
-        content: {
-          title: 'Quality Content',
-          description: 'Discover and create high-quality content'
-        },
-        global: {
-          title: 'Global Connection',
-          description: 'Connect users worldwide and expand horizons'
+        community: {
+          title: 'Community',
+          description: 'Building a vibrant creator and user community'
         }
       },
 
-      team: {
-        title: 'Our Team',
-        description: 'Composed of a passionate group of developers and designers, dedicated to creating the best user experience.'
+      features: {
+        title: 'Our Features',
+        social: {
+          title: 'Social Interaction',
+          description: 'Connect with friends and discover new communities'
+        },
+        activities: {
+          title: 'Exciting Activities',
+          description: 'Participate in various interesting activities and events'
+        },
+        content: {
+          title: 'Quality Content',
+          description: 'Discover and share high-quality content'
+        },
+        global: {
+          title: 'Global Connection',
+          description: 'Connect with users from around the world'
+        }
       },
 
       mission: {
-        title: 'Mission & Vision',
-        description: 'Enable everyone to find a sense of belonging in the digital world, connecting human emotions through technology.'
-      },
-
-      contact: {
-        title: 'Contact Us',
-        email: 'Email',
-        phone: 'Phone',
-        address: 'Address',
-        followUs: 'Follow Us'
+        title: 'Our Mission',
+        vision: 'To create a world where everyone feels connected and valued',
+        values: {
+          innovation: 'We embrace innovation and continuous improvement',
+          community: 'We believe in the power of community and collaboration',
+          integrity: 'We operate with transparency and integrity in everything we do'
+        }
       }
     }
   },
+  
   vi: {
     about: {
       title: 'Về chúng tôi',
@@ -242,6 +182,21 @@ export const aboutTranslations = {
         communities: 'Cộng đồng',
         interactions: 'Tương tác',
         satisfaction: 'Hài lòng'
+      },
+
+      values: {
+        connect: {
+          title: 'Kết nối thế giới',
+          description: 'Phá vỡ ranh giới địa lý, kết nối người dùng toàn cầu'
+        },
+        sharing: {
+          title: 'Chia sẻ tuyệt vời',
+          description: 'Chia sẻ những khoảnh khắc tuyệt vời trong cuộc sống'
+        },
+        innovation: {
+          title: 'Đổi mới thúc đẩy',
+          description: 'Liên tục đổi mới, cung cấp trải nghiệm tốt nhất'
+        }
       },
 
       features: {
@@ -264,22 +219,9 @@ export const aboutTranslations = {
         }
       },
 
-      team: {
-        title: 'Đội ngũ của chúng tôi',
-        description: 'Bao gồm một nhóm các nhà phát triển và thiết kế đầy đam mê, cam kết tạo ra trải nghiệm người dùng tốt nhất.'
-      },
-
       mission: {
         title: 'Sứ mệnh & Tầm nhìn',
         description: 'Giúp mọi người tìm thấy cảm giác thuộc về trong thế giới số, kết nối cảm xúc con người thông qua công nghệ.'
-      },
-
-      contact: {
-        title: 'Liên hệ với chúng tôi',
-        email: 'Email',
-        phone: 'Điện thoại',
-        address: 'Địa chỉ',
-        followUs: 'Theo dõi chúng tôi'
       }
     }
   }
