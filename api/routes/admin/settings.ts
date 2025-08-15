@@ -11,8 +11,6 @@ router.use(requireAdmin)
 router.get('/', async (req, res) => {
   try {
     const { category } = req.query
-    console.log('GET /api/admin/settings 请求参数:', { category })
-    
     let query = supabaseAdmin
       .from('system_settings')
       .select('*')
@@ -20,10 +18,7 @@ router.get('/', async (req, res) => {
       .order('setting_key', { ascending: true })
     
     if (category) {
-      console.log(`过滤分类: ${category}`)
       query = query.eq('category', category)
-    } else {
-      console.log('获取所有分类的设置')
     }
     
     const { data: settings, error } = await query
@@ -32,25 +27,44 @@ router.get('/', async (req, res) => {
       console.error('获取系统设置失败:', error)
       return res.status(500).json({ error: '获取系统设置失败' })
     }
-    
-    console.log('原始数据库设置:', settings);
+
 
     // 转换为前端期望的嵌套对象格式
     const result: { [key: string]: any } = {};
     settings?.forEach(setting => {
       const { category, setting_key, setting_value, setting_type } = setting;
       
+      // 先尝试解析 setting_value，可能包含嵌套的元数据
+      let rawValue = setting_value;
+      try {
+        const parsedValue = JSON.parse(setting_value);
+        // 如果解析成功且包含 value 字段，使用内部的 value
+        if (parsedValue && typeof parsedValue === 'object' && 'value' in parsedValue) {
+          rawValue = parsedValue.value;
+        } else {
+          rawValue = parsedValue;
+        }
+      } catch (e) {
+        // 如果解析失败，直接使用原始值
+        rawValue = setting_value;
+      }
+      
       // 转换数据类型
-      let convertedValue = setting_value;
+      let convertedValue = rawValue;
       if (setting_type === 'boolean') {
-        convertedValue = setting_value === 'true';
+        convertedValue = rawValue === true || rawValue === 'true';
       } else if (setting_type === 'number') {
-        convertedValue = parseFloat(setting_value);
+        const numValue = parseFloat(rawValue);
+        convertedValue = isNaN(numValue) ? 0 : numValue;
       } else if (setting_type === 'json') {
-        try {
-          convertedValue = JSON.parse(setting_value);
-        } catch (e) {
-          convertedValue = null;
+        if (typeof rawValue === 'string') {
+          try {
+            convertedValue = JSON.parse(rawValue);
+          } catch (e) {
+            convertedValue = rawValue;
+          }
+        } else {
+          convertedValue = rawValue;
         }
       }
       
@@ -74,16 +88,7 @@ router.get('/', async (req, res) => {
         result[category] = {};
       }
       result[category][camelKey] = convertedValue;
-      
-      console.log(`转换字段: ${category}.${setting_key} -> ${category}.${camelKey} = ${convertedValue}`);
     });
-
-    console.log('最终返回数据:', result);
-    console.log('basic分类是否存在:', !!result.basic);
-    if (result.basic) {
-      console.log('basic分类内容:', result.basic);
-      console.log('basic分类字段数量:', Object.keys(result.basic).length);
-    }
     res.json({ success: true, data: result });
   } catch (error) {
     console.error('获取系统设置失败:', error)
@@ -158,7 +163,6 @@ router.put('/', async (req, res) => {
     }
     
     // 批量更新设置
-    console.log('准备保存的设置:', updates)
     
     try {
       const updatePromises = updates.map(async (update) => {
@@ -174,8 +178,6 @@ router.put('/', async (req, res) => {
         
         // 如果更新失败或没有影响行数，尝试插入
         if (updateError || !updateData || updateData.length === 0) {
-          console.log(`设置 ${update.setting_key} 不存在，尝试插入`)
-          
           const { data: insertData, error: insertError } = await supabaseAdmin
             .from('system_settings')
             .insert({
@@ -195,10 +197,8 @@ router.put('/', async (req, res) => {
             throw new Error(`插入设置失败: ${insertError.message}`)
           }
           
-          console.log(`成功插入设置 ${update.setting_key}:`, update.setting_value)
           return insertData
         } else {
-          console.log(`成功更新设置 ${update.setting_key}:`, update.setting_value)
           return updateData
         }
       })
@@ -358,7 +358,6 @@ router.get('/public', async (req, res) => {
 // 调试端点：测试数据库连接和查看设置状态
 router.get('/debug', async (req, res) => {
   try {
-    console.log('调试端点被访问')
     
     // 测试数据库连接
     const { data: testData, error: testError } = await supabaseAdmin
