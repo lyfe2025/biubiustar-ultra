@@ -6,7 +6,7 @@ import { useSiteInfo } from '../hooks/useSettings'
 
 const Footer: React.FC = () => {
   const { t } = useLanguage()
-  const { siteName, siteDescription, contactEmail, siteLogo } = useSiteInfo()
+  const { siteName, siteDescription, siteLogo, contactEmail, siteDomain } = useSiteInfo()
   
   // 获取当前年份
   const currentYear = new Date().getFullYear()
@@ -16,11 +16,11 @@ const Footer: React.FC = () => {
     ? siteDescription.length > 100 
       ? siteDescription.substring(0, 97) + '...'
       : siteDescription
-    : t('footer.defaultDescription')
+    : t('common.footer.defaultDescription')
 
   const footerLinks = [
     {
-      title: t('footer.quickLinks.title'),
+      title: t('common.footer.quickLinks.title'),
       links: [
         { label: t('nav.home'), path: '/' },
         { label: t('nav.trending'), path: '/trending' },
@@ -71,7 +71,7 @@ const Footer: React.FC = () => {
           {/* 快速链接 */}
           <div>
             <h4 className="text-lg font-semibold mb-4 text-purple-300">
-              {t('footer.quickLinks.title')}
+              {t('common.footer.quickLinks.title')}
             </h4>
             <ul className="space-y-2">
               {footerLinks[0].links.map((link, index) => (
@@ -90,12 +90,12 @@ const Footer: React.FC = () => {
           {/* 联系信息 */}
           <div>
             <h4 className="text-lg font-semibold mb-4 text-purple-300">
-              {t('footer.contact.title')}
+              {t('common.footer.contact.title')}
             </h4>
             <div className="space-y-3">
               <div className="flex items-center text-gray-300 text-sm">
                 <Globe className="w-4 h-4 mr-2 text-purple-400" />
-                <span>www.biubiustar.com</span>
+                <span>{siteDomain || 'www.biubiustar.com'}</span>
               </div>
               {contactEmail && (
                 <div className="flex items-center text-gray-300 text-sm">
@@ -113,13 +113,13 @@ const Footer: React.FC = () => {
         {/* 版权信息 */}
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm mb-4 md:mb-0">
-            © {currentYear} {siteName || 'BiuBiuStar'}. {t('footer.copyright.allRightsReserved')}
+            © 2025 Wind's Valley Technology. All rights reserved
           </p>
           
           <div className="flex items-center text-gray-400 text-sm">
-            <span>{t('footer.copyright.madeWith')}</span>
+            <span>Made with</span>
             <Heart className="w-4 h-4 mx-2 text-red-500" />
-            <span>{t('footer.copyright.poweredBy')} React & TypeScript</span>
+            <span>Technical Support: Wind's Valley Technology</span>
           </div>
         </div>
       </div>

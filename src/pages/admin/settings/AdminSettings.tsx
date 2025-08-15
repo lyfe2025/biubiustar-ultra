@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Settings, Save, RefreshCw, Download, Upload, Trash2, RotateCcw, Mail, Trash } from 'lucide-react'
 import AdminLayout from '../../../components/AdminLayout'
 import { useLanguage } from '../../../contexts/language'
@@ -13,6 +13,7 @@ import ThemeSettings from './ThemeSettings'
 const AdminSettings = () => {
   const { t } = useLanguage()
   const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({})
+  const basicSettingsRef = useRef<{ resetEditingState: () => void }>(null)
   
   const {
     // 数据状态
@@ -44,6 +45,12 @@ const AdminSettings = () => {
     if (Object.keys(pendingChanges).length > 0) {
       await updateSettings(pendingChanges)
       setPendingChanges({}) // 清除待保存状态
+      
+      // 重置BasicSettings的编辑状态，允许useEffect同步最新数据
+      // 无论当前在哪个标签页，都要重置编辑状态以确保数据同步
+      if (basicSettingsRef.current) {
+        basicSettingsRef.current.resetEditingState()
+      }
     }
   }
 
@@ -78,7 +85,7 @@ const AdminSettings = () => {
 
     switch (activeTab) {
       case 'basic':
-        return <BasicSettings {...commonProps} />
+        return <BasicSettings {...commonProps} ref={basicSettingsRef} />
       case 'users':
         return <UserSettings {...commonProps} />
       case 'content':
@@ -90,7 +97,7 @@ const AdminSettings = () => {
       case 'theme':
         return <ThemeSettings {...commonProps} />
       default:
-        return <BasicSettings {...commonProps} />
+        return <BasicSettings {...commonProps} ref={basicSettingsRef} />
     }
   }
 

@@ -38,6 +38,14 @@ export const useSystemSettings = () => {
       // 直接使用updates对象，它已经是category.key: value的格式
       await adminService.updateSystemSettings(updates)
       
+      // 清除前台缓存
+      try {
+        settingsService.clearCache()
+        console.log('前台设置缓存已清除')
+      } catch (cacheError) {
+        console.warn('清除前台缓存失败:', cacheError)
+      }
+      
       // 重新获取设置以确保状态同步
       await fetchSettings()
       toast.success('设置保存成功')

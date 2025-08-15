@@ -482,6 +482,15 @@ class AdminService {
       method: 'PUT',
       body: JSON.stringify(settings)
     })
+    
+    // 保存成功后清除前台缓存
+    try {
+      if (typeof window !== 'undefined' && (window as any).clearSettingsCache) {
+        (window as any).clearSettingsCache()
+      }
+    } catch (error) {
+      console.warn('清除前台缓存失败:', error)
+    }
   }
 
   async resetSystemSettings(): Promise<void> {

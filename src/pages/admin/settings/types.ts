@@ -7,6 +7,7 @@ export interface SettingsSectionProps {
   settings: SystemSettings | null
   loading: boolean
   onUpdate: (updates: Record<string, any>) => void
+  onSaveComplete?: () => void // 保存完成后的回调
 }
 
 export interface BasicSettingsData {
@@ -14,6 +15,8 @@ export interface BasicSettingsData {
   site_description: string
   site_logo?: string
   site_favicon?: string
+  contact_email: string
+  site_domain: string
 }
 
 export interface UserSettingsData {

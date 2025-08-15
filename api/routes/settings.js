@@ -48,6 +48,8 @@ router.get('/public', async (req, res) => {
         else if (setting.setting_key === 'site_favicon') frontendKey = 'siteFavicon'
         else if (setting.setting_key === 'site_keywords') frontendKey = 'siteKeywords'
         else if (setting.setting_key === 'contact_email') frontendKey = 'contactEmail'
+        else if (setting.setting_key === 'site_domain') frontendKey = 'siteDomain'
+        else if (setting.setting_key === 'tech_stack') frontendKey = 'techStack'
         else if (setting.setting_key === 'timezone') frontendKey = 'timezone'
       }
 

@@ -10,6 +10,7 @@ export interface SystemSettings {
   'basic.siteLogo': string
   'basic.siteFavicon': string
   'basic.contactEmail': string
+  'basic.siteDomain': string
   'basic.timezone': string
 
   // 语言设置
@@ -135,6 +136,7 @@ class SettingsService {
       'basic.siteName': 'BiuBiuStar',
       'basic.siteDescription': '一个现代化的社交平台',
       'basic.contactEmail': 'contact@biubiustar.com',
+      'basic.siteDomain': 'biubiustar.com',
       'basic.timezone': 'Asia/Shanghai',
       'language.defaultLanguage': 'zh-CN',
       'language.supportedLanguages': ['zh-CN', 'zh-TW', 'en', 'vi'],

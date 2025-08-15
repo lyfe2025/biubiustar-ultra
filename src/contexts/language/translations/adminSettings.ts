@@ -35,7 +35,16 @@ export const adminSettingsTranslations = {
           uploadFavicon: '上传图标',
           faviconDescription: '浏览器标签页图标，推荐尺寸：32×32像素，最大5MB，支持ICO/PNG/JPG格式',
           removeLogo: '移除标志',
-          removeFavicon: '移除图标'
+          removeFavicon: '移除图标',
+          contactEmail: '联系邮箱',
+          contactEmailPlaceholder: '请输入联系邮箱',
+          contactEmailDescription: '网站的联系邮箱，将显示在页脚等位置',
+          siteDomain: '站点域名',
+          siteDomainPlaceholder: '请输入站点域名，如：example.com',
+          siteDomainDescription: '网站的主域名，用于页脚显示和SEO优化',
+          techStack: '技术支持',
+          techStackPlaceholder: '请输入技术支持信息，如：React & TypeScript',
+          techStackDescription: '网站的技术支持信息，将显示在页脚等位置'
         },
         user: {
           title: '用户设置',
@@ -158,7 +167,16 @@ export const adminSettingsTranslations = {
           uploadFavicon: '上傳圖標',
           faviconDescription: '瀏覽器標簽頁圖標，推薦尺寸：32×32像素，最大5MB，支持ICO/PNG/JPG格式',
           removeLogo: '移除標志',
-          removeFavicon: '移除圖標'
+          removeFavicon: '移除圖標',
+          contactEmail: '聯繫郵箱',
+          contactEmailPlaceholder: '請輸入聯繫郵箱',
+          contactEmailDescription: '網站的聯繫郵箱，將顯示在頁腳等位置',
+          siteDomain: '站點域名',
+          siteDomainPlaceholder: '請輸入站點域名，如：example.com',
+          siteDomainDescription: '網站的主域名，用於頁腳顯示和SEO優化',
+          techStack: '技術支持',
+          techStackPlaceholder: '請輸入技術支持信息，如：React & TypeScript',
+          techStackDescription: '網站的技術支持信息，將顯示在頁腳等位置'
         },
         user: {
           title: '用戶設置',
@@ -281,7 +299,16 @@ export const adminSettingsTranslations = {
           uploadFavicon: 'Upload Favicon',
           faviconDescription: 'Browser tab icon, recommended size: 32×32 pixels, max 5MB, supports ICO/PNG/JPG formats',
           removeLogo: 'Remove Logo',
-          removeFavicon: 'Remove Favicon'
+          removeFavicon: 'Remove Favicon',
+          contactEmail: 'Contact Email',
+          contactEmailPlaceholder: 'Enter contact email',
+          contactEmailDescription: 'Website contact email, will be displayed in footer and other locations',
+          siteDomain: 'Site Domain',
+          siteDomainPlaceholder: 'Enter site domain, e.g.: example.com',
+          siteDomainDescription: 'Main domain of the website, used for footer display and SEO optimization',
+          techStack: 'Technical Support',
+          techStackPlaceholder: 'Enter technical support info, e.g.: React & TypeScript',
+          techStackDescription: 'Technical support information for the website, displayed in footer and other locations'
         },
         user: {
           title: 'User Settings',
@@ -404,7 +431,16 @@ export const adminSettingsTranslations = {
           uploadFavicon: 'Tải lên favicon',
           faviconDescription: 'Biểu tượng tab trình duyệt, kích thước đề xuất: 32×32 pixel, tối đa 5MB, hỗ trợ định dạng ICO/PNG/JPG',
           removeLogo: 'Xóa logo',
-          removeFavicon: 'Xóa favicon'
+          removeFavicon: 'Xóa favicon',
+          contactEmail: 'Email liên hệ',
+          contactEmailPlaceholder: 'Nhập email liên hệ',
+          contactEmailDescription: 'Email liên hệ của trang web, sẽ hiển thị ở footer và các vị trí khác',
+          siteDomain: 'Tên miền trang web',
+          siteDomainPlaceholder: 'Nhập tên miền, ví dụ: example.com',
+          siteDomainDescription: 'Tên miền chính của trang web, dùng để hiển thị ở footer và tối ưu SEO',
+          techStack: 'Hỗ trợ kỹ thuật',
+          techStackPlaceholder: 'Nhập thông tin hỗ trợ kỹ thuật, ví dụ: React & TypeScript',
+          techStackDescription: 'Thông tin hỗ trợ kỹ thuật của trang web, hiển thị ở footer và các vị trí khác'
         },
         user: {
           title: 'Cài đặt người dùng',

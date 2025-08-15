@@ -3,7 +3,7 @@ import { Globe, Upload, Image } from 'lucide-react'
 import { useLanguage } from '../../../contexts/language'
 import { SettingsSectionProps, BasicSettingsData } from './types'
 
-const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {
+const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, SettingsSectionProps>(({ settings, loading, onUpdate, onSaveComplete }, ref) => {
   const { t } = useLanguage()
   
   // 默认数据
@@ -11,37 +11,52 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
     site_name: 'BiuBiuStar',
     site_description: '一个现代化的社交平台，连接世界各地的用户',
     site_logo: '/logo-tubiao.svg',
-    site_favicon: '/favicon.svg'
+    site_favicon: '/favicon.ico',
+    contact_email: 'contact@biubiustar.com',
+    site_domain: 'biubiustar.com'
   }
   
-  const [formData, setFormData] = useState<BasicSettingsData>({
-    site_name: settings?.['basic.siteName']?.value || defaultData.site_name,
-    site_description: settings?.['basic.siteDescription']?.value || defaultData.site_description,
-    site_logo: settings?.['basic.siteLogo']?.value || defaultData.site_logo,
-    site_favicon: settings?.['basic.siteFavicon']?.value || defaultData.site_favicon
-  })
-  
-  const [uploading, setUploading] = useState<{
-    site_logo: boolean
-    site_favicon: boolean
-  }>({
+  // 表单数据状态
+  const [formData, setFormData] = useState<BasicSettingsData>(defaultData)
+  const [uploading, setUploading] = useState<{ site_logo: boolean; site_favicon: boolean }>({
     site_logo: false,
     site_favicon: false
   })
+  // 编辑状态标记，防止保存后settings更新时覆盖用户输入
+  const [isEditing, setIsEditing] = useState(false)
+  const [initialLoad, setInitialLoad] = useState(true)
 
-  // 同步settings变化到formData
+  // 重置编辑状态的方法
+  const resetEditingState = () => {
+    setIsEditing(false)
+  }
+
+  // 暴露重置方法给父组件
+  React.useImperativeHandle(ref, () => ({
+    resetEditingState
+  }), [])
+
+  // 同步settings变化到formData（仅在初始加载或非编辑状态时）
   React.useEffect(() => {
-    if (settings) {
+    if (settings && (initialLoad || !isEditing)) {
       setFormData({
         site_name: settings['basic.siteName']?.value || defaultData.site_name,
         site_description: settings['basic.siteDescription']?.value || defaultData.site_description,
         site_logo: settings['basic.siteLogo']?.value || defaultData.site_logo,
-        site_favicon: settings['basic.siteFavicon']?.value || defaultData.site_favicon
+        site_favicon: settings['basic.siteFavicon']?.value || defaultData.site_favicon,
+        contact_email: settings['basic.contactEmail']?.value || defaultData.contact_email,
+        site_domain: settings['basic.siteDomain']?.value || defaultData.site_domain
       })
+      if (initialLoad) {
+        setInitialLoad(false)
+      }
     }
-  }, [settings])
+  }, [settings, isEditing, initialLoad])
 
   const handleChange = (field: keyof BasicSettingsData, value: string | undefined) => {
+    // 标记为编辑状态，防止useEffect重置表单数据
+    setIsEditing(true)
+    
     // 确保值不为undefined，使用默认值
     const safeValue = value || defaultData[field]
     const newData = { ...formData, [field]: safeValue }
@@ -52,7 +67,9 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
       'basic.siteName': field === 'site_name' ? safeValue : formData.site_name,
       'basic.siteDescription': field === 'site_description' ? safeValue : formData.site_description,
       'basic.siteLogo': field === 'site_logo' ? safeValue : formData.site_logo,
-      'basic.siteFavicon': field === 'site_favicon' ? safeValue : formData.site_favicon
+      'basic.siteFavicon': field === 'site_favicon' ? safeValue : formData.site_favicon,
+      'basic.contactEmail': field === 'contact_email' ? safeValue : formData.contact_email,
+      'basic.siteDomain': field === 'site_domain' ? safeValue : formData.site_domain
     }
     onUpdate(settingsToSave)
   }
@@ -356,8 +373,46 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
           </div>
         </div>
       </div>
+
+      {/* 联系邮箱 */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          {t('admin.settings.basic.contactEmail')}
+        </label>
+        <input
+          type="email"
+          value={formData.contact_email}
+          onChange={(e) => handleChange('contact_email', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          placeholder={t('admin.settings.basic.contactEmailPlaceholder')}
+        />
+        <p className="mt-1 text-sm text-gray-500">
+          {t('admin.settings.basic.contactEmailDescription')}
+        </p>
+      </div>
+
+      {/* 站点域名 */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          {t('admin.settings.basic.siteDomain')}
+        </label>
+        <input
+          type="text"
+          value={formData.site_domain}
+          onChange={(e) => handleChange('site_domain', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          placeholder={t('admin.settings.basic.siteDomainPlaceholder')}
+        />
+        <p className="mt-1 text-sm text-gray-500">
+           {t('admin.settings.basic.siteDomainDescription')}
+         </p>
+      </div>
+
+
     </div>
   )
-}
+})
+
+BasicSettings.displayName = 'BasicSettings'
 
 export default BasicSettings

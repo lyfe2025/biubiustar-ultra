@@ -96,7 +96,8 @@ export function useSiteInfo() {
     'basic.siteDescription',
     'basic.siteLogo',
     'basic.siteFavicon',
-    'basic.contactEmail'
+    'basic.contactEmail',
+    'basic.siteDomain'
   ])
   
   // 辅助函数：为站点资源URL添加缓存破坏参数
@@ -124,6 +125,7 @@ export function useSiteInfo() {
     siteLogo: addCacheBuster(logoUrl),
     siteIcon: addCacheBuster(faviconUrl),
     contactEmail: siteInfo['basic.contactEmail'] as string || 'contact@biubiustar.com',
+    siteDomain: siteInfo['basic.siteDomain'] as string || 'biubiustar.com',
     loading,
     error
   }

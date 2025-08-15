@@ -100,6 +100,9 @@ router.put('/', async (req, res) => {
           else if (frontendKey === 'siteLogo') dbKey = 'site_logo'
           else if (frontendKey === 'siteFavicon') dbKey = 'site_favicon'
           else if (frontendKey === 'siteKeywords') dbKey = 'site_keywords'
+          else if (frontendKey === 'contactEmail') dbKey = 'contact_email'
+          else if (frontendKey === 'siteDomain') dbKey = 'site_domain'
+          else if (frontendKey === 'techStack') dbKey = 'tech_stack'
         }
         
         let stringValue = String(value)
