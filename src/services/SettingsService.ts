@@ -7,6 +7,10 @@ export interface SystemSettings {
   // 基本设置
   'basic.siteName': string
   'basic.siteDescription': string
+  'basic.siteDescriptionZh': string
+  'basic.siteDescriptionZhTw': string
+  'basic.siteDescriptionEn': string
+  'basic.siteDescriptionVi': string
   'basic.siteLogo': string
   'basic.siteFavicon': string
   'basic.contactEmail': string
@@ -135,6 +139,10 @@ class SettingsService {
     return {
       'basic.siteName': 'BiuBiuStar',
       'basic.siteDescription': '一个现代化的社交平台',
+      'basic.siteDescriptionZh': '一个现代化的社交平台',
+      'basic.siteDescriptionZhTw': '一個現代化的社交平台',
+      'basic.siteDescriptionEn': 'A modern social platform',
+      'basic.siteDescriptionVi': 'Một nền tảng xã hội hiện đại',
       'basic.contactEmail': 'contact@biubiustar.com',
       'basic.siteDomain': 'biubiustar.com',
       'basic.timezone': 'Asia/Shanghai',

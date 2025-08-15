@@ -2,20 +2,21 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, Phone, MapPin, Globe, Heart } from 'lucide-react'
 import { useLanguage } from '../contexts/language/LanguageContext'
-import { useSiteInfo } from '../hooks/useSettings'
+import { useSiteInfo, useLocalizedSiteDescription } from '../hooks/useSettings'
 
 const Footer: React.FC = () => {
   const { t } = useLanguage()
   const { siteName, siteDescription, siteLogo, contactEmail, siteDomain } = useSiteInfo()
+  const { localizedDescription } = useLocalizedSiteDescription()
   
   // 获取当前年份
   const currentYear = new Date().getFullYear()
   
   // 截取站点描述的前100个字符作为简短描述
-  const shortDescription = siteDescription 
-    ? siteDescription.length > 100 
-      ? siteDescription.substring(0, 97) + '...'
-      : siteDescription
+  const shortDescription = localizedDescription 
+    ? localizedDescription.length > 100 
+      ? localizedDescription.substring(0, 97) + '...'
+      : localizedDescription
     : t('common.footer.defaultDescription')
 
   const footerLinks = [

@@ -13,6 +13,10 @@ export interface SettingsSectionProps {
 export interface BasicSettingsData {
   site_name: string
   site_description: string
+  site_description_zh: string
+  site_description_zh_tw: string
+  site_description_en: string
+  site_description_vi: string
   site_logo?: string
   site_favicon?: string
   contact_email: string

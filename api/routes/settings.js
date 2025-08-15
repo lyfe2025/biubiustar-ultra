@@ -44,6 +44,10 @@ router.get('/public', async (req, res) => {
         // 将下划线命名转换为驼峰命名
         if (setting.setting_key === 'site_name') frontendKey = 'siteName'
         else if (setting.setting_key === 'site_description') frontendKey = 'siteDescription'
+        else if (setting.setting_key === 'site_description_zh') frontendKey = 'siteDescriptionZh'
+        else if (setting.setting_key === 'site_description_zh_tw') frontendKey = 'siteDescriptionZhTw'
+        else if (setting.setting_key === 'site_description_en') frontendKey = 'siteDescriptionEn'
+        else if (setting.setting_key === 'site_description_vi') frontendKey = 'siteDescriptionVi'
         else if (setting.setting_key === 'site_logo') frontendKey = 'siteLogo'
         else if (setting.setting_key === 'site_favicon') frontendKey = 'siteFavicon'
         else if (setting.setting_key === 'site_keywords') frontendKey = 'siteKeywords'

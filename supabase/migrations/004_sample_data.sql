@@ -5,6 +5,17 @@
 -- 这个迁移文件将添加一些不依赖用户ID的示例数据
 -- 用户相关的数据需要在实际用户注册后通过应用程序创建
 
+-- 创建联系表单表（如果不存在）
+CREATE TABLE IF NOT EXISTS contact_submissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  subject VARCHAR(200) NOT NULL,
+  message TEXT NOT NULL,
+  status VARCHAR(20) DEFAULT 'pending',
+  submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- 插入联系表单示例数据（这些数据不依赖用户表）
 INSERT INTO contact_submissions (id, name, email, subject, message, status, submitted_at) VALUES
 ('990e8400-e29b-41d4-a716-446655440001', '张三', 'zhangsan@email.com', '合作咨询', '您好，我们公司希望与贵平台建立合作关系，请问可以安排时间详谈吗？', 'pending', NOW() - INTERVAL '2 days'),

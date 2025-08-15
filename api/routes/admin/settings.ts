@@ -51,6 +51,10 @@ router.get('/', async (req, res) => {
         // 将下划线命名转换为驼峰命名
         if (setting.setting_key === 'site_name') frontendKey = 'siteName'
         else if (setting.setting_key === 'site_description') frontendKey = 'siteDescription'
+        else if (setting.setting_key === 'site_description_zh') frontendKey = 'siteDescriptionZh'
+        else if (setting.setting_key === 'site_description_zh_tw') frontendKey = 'siteDescriptionZhTw'
+        else if (setting.setting_key === 'site_description_en') frontendKey = 'siteDescriptionEn'
+        else if (setting.setting_key === 'site_description_vi') frontendKey = 'siteDescriptionVi'
         else if (setting.setting_key === 'site_logo') frontendKey = 'siteLogo'
         else if (setting.setting_key === 'site_favicon') frontendKey = 'siteFavicon'
         else if (setting.setting_key === 'site_keywords') frontendKey = 'siteKeywords'
@@ -97,6 +101,10 @@ router.put('/', async (req, res) => {
         if (category === 'basic') {
           if (frontendKey === 'siteName') dbKey = 'site_name'
           else if (frontendKey === 'siteDescription') dbKey = 'site_description'
+          else if (frontendKey === 'siteDescriptionZh') dbKey = 'site_description_zh'
+          else if (frontendKey === 'siteDescriptionZhTw') dbKey = 'site_description_zh_tw'
+          else if (frontendKey === 'siteDescriptionEn') dbKey = 'site_description_en'
+          else if (frontendKey === 'siteDescriptionVi') dbKey = 'site_description_vi'
           else if (frontendKey === 'siteLogo') dbKey = 'site_logo'
           else if (frontendKey === 'siteFavicon') dbKey = 'site_favicon'
           else if (frontendKey === 'siteKeywords') dbKey = 'site_keywords'
@@ -308,6 +316,10 @@ router.get('/public', async (req, res) => {
         // 将下划线命名转换为驼峰命名
         if (setting.setting_key === 'site_name') frontendKey = 'siteName'
         else if (setting.setting_key === 'site_description') frontendKey = 'siteDescription'
+        else if (setting.setting_key === 'site_description_zh') frontendKey = 'siteDescriptionZh'
+        else if (setting.setting_key === 'site_description_zh_tw') frontendKey = 'siteDescriptionZhTw'
+        else if (setting.setting_key === 'site_description_en') frontendKey = 'siteDescriptionEn'
+        else if (setting.setting_key === 'site_description_vi') frontendKey = 'siteDescriptionVi'
         else if (setting.setting_key === 'site_logo') frontendKey = 'siteLogo'
         else if (setting.setting_key === 'site_favicon') frontendKey = 'siteFavicon'
         else if (setting.setting_key === 'site_keywords') frontendKey = 'siteKeywords'

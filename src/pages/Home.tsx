@@ -13,20 +13,21 @@ import CommentModal from '../components/CommentModal'
 import CreatePostModal from '../components/CreatePostModal'
 import AuthModal from '../components/AuthModal'
 import { usePageTitle } from '../hooks/usePageTitle'
-import { useSiteInfo } from '../hooks/useSettings'
+import { useSiteInfo, useLocalizedSiteDescription } from '../hooks/useSettings'
 import { useMetaDescription, useSocialMetaTags } from '../hooks/useMetaDescription'
 
 const Home = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
   const { siteDescription, siteName, siteLogo } = useSiteInfo()
+  const { localizedDescription } = useLocalizedSiteDescription()
 
   
   usePageTitle(t('home.title'))
-  useMetaDescription(siteDescription)
+  useMetaDescription(localizedDescription)
   useSocialMetaTags(
     siteName || 'BiuBiuStar',
-    siteDescription,
+    localizedDescription,
     // 可以在这里添加站点Logo作为分享图片
   )
   const [posts, setPosts] = useState<Post[]>([])
@@ -134,7 +135,7 @@ const Home = () => {
                 {t('home.welcome')}
               </h1>
               <p className="text-lg md:text-xl text-white/85 drop-shadow-md max-w-lg">
-                {siteDescription || t('home.subtitle')}
+                {localizedDescription || t('home.subtitle')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link
@@ -161,10 +162,15 @@ const Home = () => {
                 {/* 中心装饰 - 几乎移除发光效果 */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="relative w-40 h-40">
-                    {/* Logo发光背景 - 圆形发光体 */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0.05 via-purple-500/0.05 to-purple-400/0.05 rounded-full blur-xl animate-pulse" style={{animationDuration: '6s'}}></div>
-                    <div className="absolute inset-2 bg-gradient-to-r from-purple-500/0.03 via-purple-400/0.03 to-purple-300/0.03 rounded-full blur-lg animate-pulse delay-1000" style={{animationDuration: '6s'}}></div>
-                    <div className="absolute inset-4 bg-gradient-to-r from-purple-400/0.02 via-purple-300/0.02 to-purple-200/0.02 rounded-full blur-md animate-pulse delay-2000" style={{animationDuration: '6s'}}></div>
+                    {/* Logo发光背景 - 更大范围的柔和发光效果 */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {/* 内层柔和发光 */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-purple-400/20 rounded-full blur-lg animate-gentle-glow" style={{animationDuration: '4s'}}></div>
+                      {/* 中层呼吸光晕 */}
+                      <div className="absolute inset-2 bg-gradient-to-br from-purple-400/15 to-purple-300/15 rounded-full blur-md animate-breathing-glow" style={{animationDuration: '5s'}}></div>
+                      {/* 外层涟漪扩散 */}
+                      <div className="absolute inset-4 bg-gradient-to-br from-purple-300/10 to-purple-200/10 rounded-full blur-sm animate-ripple-glow" style={{animationDuration: '6s'}}></div>
+                    </div>
                     
                     {/* Logo直接显示 - 使用指定的PNG logo */}
                     <div className="relative w-full h-full flex items-center justify-center p-6 z-10">
@@ -175,9 +181,11 @@ const Home = () => {
                       />
                     </div>
                     
-                    {/* 外发光效果 - 圆形发光体 */}
-                    <div className="absolute -inset-6 bg-gradient-to-r from-purple-600/0.03 via-purple-500/0.03 to-purple-400/0.03 rounded-full blur-2xl animate-pulse" style={{animationDuration: '6s'}}></div>
-                    <div className="absolute -inset-8 bg-gradient-to-r from-purple-500/0.02 via-purple-400/0.02 to-purple-300/0.02 rounded-full blur-3xl animate-pulse delay-1000" style={{animationDuration: '6s'}}></div>
+                    {/* 外发光效果 - 更大范围的多层柔和光晕 */}
+                    <div className="absolute -inset-8 bg-gradient-to-br from-purple-600/15 to-purple-500/15 rounded-full blur-xl animate-gentle-glow" style={{animationDuration: '4s', animationDelay: '1s'}}></div>
+                    <div className="absolute -inset-14 bg-gradient-to-br from-purple-500/10 to-purple-400/10 rounded-full blur-2xl animate-breathing-glow" style={{animationDuration: '5s', animationDelay: '2s'}}></div>
+                    <div className="absolute -inset-20 bg-gradient-to-br from-purple-400/8 to-purple-300/8 rounded-full blur-3xl animate-ripple-glow" style={{animationDuration: '6s', animationDelay: '3s'}}></div>
+                    <div className="absolute -inset-26 bg-gradient-to-br from-purple-300/6 to-purple-200/6 rounded-full blur-3xl animate-gentle-glow" style={{animationDuration: '4s', animationDelay: '4s'}}></div>
                   </div>
                 </div>
               </div>

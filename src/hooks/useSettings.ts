@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { settingsService, SystemSettings } from '../services/SettingsService'
+import { useLanguage } from '../contexts/language'
 
 interface UseSettingsReturn {
   settings: Partial<SystemSettings>
@@ -94,6 +95,10 @@ export function useSiteInfo() {
   const siteInfo = getSettings([
     'basic.siteName',
     'basic.siteDescription',
+    'basic.siteDescriptionZh',
+    'basic.siteDescriptionZhTw',
+    'basic.siteDescriptionEn',
+    'basic.siteDescriptionVi',
     'basic.siteLogo',
     'basic.siteFavicon',
     'basic.contactEmail',
@@ -122,10 +127,51 @@ export function useSiteInfo() {
   return {
     siteName: siteInfo['basic.siteName'] as string || 'BiuBiuStar',
     siteDescription: siteInfo['basic.siteDescription'] as string || '一个现代化的社交平台',
+    siteDescriptionZh: siteInfo['basic.siteDescriptionZh'] as string || '一个现代化的社交平台',
+    siteDescriptionZhTw: siteInfo['basic.siteDescriptionZhTw'] as string || '一個現代化的社交平台',
+    siteDescriptionEn: siteInfo['basic.siteDescriptionEn'] as string || 'A modern social platform',
+    siteDescriptionVi: siteInfo['basic.siteDescriptionVi'] as string || 'Một nền tảng xã hội hiện đại',
     siteLogo: addCacheBuster(logoUrl),
     siteIcon: addCacheBuster(faviconUrl),
     contactEmail: siteInfo['basic.contactEmail'] as string || 'contact@biubiustar.com',
     siteDomain: siteInfo['basic.siteDomain'] as string || 'biubiustar.com',
+    loading,
+    error
+  }
+}
+
+/**
+ * 获取当前语言的站点描述
+ */
+export function useLocalizedSiteDescription() {
+  const { language } = useLanguage()
+  const { 
+    siteDescriptionZh, 
+    siteDescriptionZhTw, 
+    siteDescriptionEn, 
+    siteDescriptionVi,
+    siteDescription,
+    loading,
+    error 
+  } = useSiteInfo()
+  
+  const getLocalizedDescription = () => {
+    switch (language) {
+      case 'zh':
+        return siteDescriptionZh || siteDescription || '一个现代化的社交平台'
+      case 'zh-TW':
+        return siteDescriptionZhTw || siteDescription || '一個現代化的社交平台'
+      case 'en':
+        return siteDescriptionEn || siteDescription || 'A modern social platform'
+      case 'vi':
+        return siteDescriptionVi || siteDescription || 'Một nền tảng xã hội hiện đại'
+      default:
+        return siteDescription || '一个现代化的社交平台'
+    }
+  }
+  
+  return {
+    localizedDescription: getLocalizedDescription(),
     loading,
     error
   }
