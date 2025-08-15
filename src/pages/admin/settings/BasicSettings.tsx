@@ -6,14 +6,14 @@ import { SettingsSectionProps, BasicSettingsData } from './types'
 const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, SettingsSectionProps>(({ settings, loading, onUpdate, onSaveComplete }, ref) => {
   const { t } = useLanguage()
   
-  // 默认数据
+  // 默认数据 - 仅用于初始化空值，不应覆盖数据库中的实际值
   const defaultData: BasicSettingsData = {
-    site_name: 'BiuBiuStar',
-    site_description: '一个现代化的社交平台，连接世界各地的用户',
-    site_logo: '/logo-tubiao.svg',
-    site_favicon: '/favicon.ico',
-    contact_email: 'contact@biubiustar.com',
-    site_domain: 'biubiustar.com'
+    site_name: '',
+    site_description: '',
+    site_logo: '',
+    site_favicon: '',
+    contact_email: '',
+    site_domain: ''
   }
   
   // 表单数据状态
@@ -40,12 +40,12 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
   React.useEffect(() => {
     if (settings && (initialLoad || !isEditing)) {
       setFormData({
-        site_name: settings['basic.siteName']?.value || defaultData.site_name,
-        site_description: settings['basic.siteDescription']?.value || defaultData.site_description,
-        site_logo: settings['basic.siteLogo']?.value || defaultData.site_logo,
-        site_favicon: settings['basic.siteFavicon']?.value || defaultData.site_favicon,
-        contact_email: settings['basic.contactEmail']?.value || defaultData.contact_email,
-        site_domain: settings['basic.siteDomain']?.value || defaultData.site_domain
+        site_name: settings['basic.siteName']?.value || '',
+        site_description: settings['basic.siteDescription']?.value || '',
+        site_logo: settings['basic.siteLogo']?.value || '',
+        site_favicon: settings['basic.siteFavicon']?.value || '',
+        contact_email: settings['basic.contactEmail']?.value || '',
+        site_domain: settings['basic.siteDomain']?.value || ''
       })
       if (initialLoad) {
         setInitialLoad(false)

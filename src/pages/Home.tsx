@@ -19,7 +19,7 @@ import { useMetaDescription, useSocialMetaTags } from '../hooks/useMetaDescripti
 const Home = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
-  const { siteDescription, siteName } = useSiteInfo()
+  const { siteDescription, siteName, siteLogo } = useSiteInfo()
 
   
   usePageTitle(t('home.title'))
@@ -90,33 +90,105 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50">
       {/* Hero Section */}
-      <section className="relative pt-20 pb-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-purple-800/10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-6">
-              {t('home.welcome')}
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              {siteDescription || t('home.subtitle')}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/trending"
-                className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                <TrendingUp className="w-5 h-5 mr-2" />
-                {t('home.exploreContent')}
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Link>
-              <Link
-                to="/activities"
-                className="inline-flex items-center px-8 py-3 bg-white/80 backdrop-blur-sm text-purple-600 rounded-lg hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl border border-purple-200"
-              >
-                <Calendar className="w-5 h-5 mr-2" />
-                {t('home.viewActivities')}
-              </Link>
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* 背景图片 */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/images/hero-background-modern.svg')`,
+          }}
+        />
+        
+        {/* 背景遮罩层 - 更柔和的遮罩 */}
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]"></div>
+        
+        {/* 动态光效 - 与科技感背景协调 */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-500/6 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-3/4 right-1/4 w-56 h-56 bg-blue-500/4 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-indigo-500/3 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        </div>
+        
+        {/* 粒子效果 - 减少数量和亮度 */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-white/30 rounded-full animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 4}s`
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* 主要内容 - 左右分栏布局 */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-8 items-center min-h-screen py-20">
+            {/* 左侧文字内容 */}
+            <div className="text-left space-y-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg leading-tight">
+                {t('home.welcome')}
+              </h1>
+              <p className="text-lg md:text-xl text-white/85 drop-shadow-md max-w-lg">
+                {siteDescription || t('home.subtitle')}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Link
+                  to="/trending"
+                  className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-500/90 to-purple-600/90 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 shadow-xl hover:shadow-purple-500/20 hover:scale-105 backdrop-blur-sm border border-white/15 w-full sm:w-auto"
+                >
+                  <TrendingUp className="w-5 h-5 mr-2" />
+                  {t('home.exploreContent')}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+                <Link
+                  to="/activities"
+                  className="inline-flex items-center justify-center px-8 py-4 bg-white/15 backdrop-blur-md text-white rounded-xl hover:bg-white/25 transition-all duration-300 shadow-xl hover:shadow-white/15 hover:scale-105 border border-white/20 w-full sm:w-auto"
+                >
+                  <Calendar className="w-5 h-5 mr-2" />
+                  {t('home.viewActivities')}
+                </Link>
+              </div>
             </div>
+            
+            {/* 右侧装饰区域 - 让背景图片的钻石元素显示 */}
+            <div className="hidden lg:flex items-center justify-center">
+              <div className="relative w-96 h-96">
+                {/* 中心装饰 - 几乎移除发光效果 */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative w-40 h-40">
+                    {/* Logo发光背景 - 圆形发光体 */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0.05 via-purple-500/0.05 to-purple-400/0.05 rounded-full blur-xl animate-pulse" style={{animationDuration: '6s'}}></div>
+                    <div className="absolute inset-2 bg-gradient-to-r from-purple-500/0.03 via-purple-400/0.03 to-purple-300/0.03 rounded-full blur-lg animate-pulse delay-1000" style={{animationDuration: '6s'}}></div>
+                    <div className="absolute inset-4 bg-gradient-to-r from-purple-400/0.02 via-purple-300/0.02 to-purple-200/0.02 rounded-full blur-md animate-pulse delay-2000" style={{animationDuration: '6s'}}></div>
+                    
+                    {/* Logo直接显示 - 使用指定的PNG logo */}
+                    <div className="relative w-full h-full flex items-center justify-center p-6 z-10">
+                      <img 
+                        src="/images/big-logo.png" 
+                        alt="Big Logo" 
+                        className="w-full h-full object-contain opacity-90 drop-shadow-md" 
+                      />
+                    </div>
+                    
+                    {/* 外发光效果 - 圆形发光体 */}
+                    <div className="absolute -inset-6 bg-gradient-to-r from-purple-600/0.03 via-purple-500/0.03 to-purple-400/0.03 rounded-full blur-2xl animate-pulse" style={{animationDuration: '6s'}}></div>
+                    <div className="absolute -inset-8 bg-gradient-to-r from-purple-500/0.02 via-purple-400/0.02 to-purple-300/0.02 rounded-full blur-3xl animate-pulse delay-1000" style={{animationDuration: '6s'}}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* 滚动指示器 - 降低亮度 */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-white/40 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
       </section>

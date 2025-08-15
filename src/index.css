@@ -12,3 +12,27 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* 粒子浮动动画 - 更柔和的版本 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-15px) translateX(8px);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-8px) translateX(-4px);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateY(-12px) translateX(12px);
+    opacity: 0.6;
+  }
+}
+
+.animate-float {
+  animation: float ease-in-out infinite;
+}
