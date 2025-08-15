@@ -116,6 +116,22 @@ export const commonTranslations = {
         saveFailed: '保存失败',
         networkError: '网络错误',
         serverError: '服务器错误'
+      },
+
+      // 页脚
+      footer: {
+        defaultDescription: '一个现代化的社交平台，连接世界各地的用户',
+        quickLinks: {
+          title: '快速链接'
+        },
+        contact: {
+          title: '联系我们'
+        },
+        copyright: {
+          allRightsReserved: '版权所有',
+          madeWith: '用',
+          poweredBy: '技术支持:'
+        }
       }
     }
   },
@@ -228,6 +244,22 @@ export const commonTranslations = {
         saveFailed: '保存失敗',
         networkError: '網絡錯誤',
         serverError: '服務器錯誤'
+      },
+
+      // 頁腳
+      footer: {
+        defaultDescription: '一個現代化的社交平台，連接世界各地的用戶',
+        quickLinks: {
+          title: '快速鏈接'
+        },
+        contact: {
+          title: '聯繫我們'
+        },
+        copyright: {
+          allRightsReserved: '版權所有',
+          madeWith: '用',
+          poweredBy: '技術支持:'
+        }
       }
     }
   },
@@ -340,6 +372,22 @@ export const commonTranslations = {
         saveFailed: 'Save failed',
         networkError: 'Network error',
         serverError: 'Server error'
+      },
+
+      // Footer
+      footer: {
+        defaultDescription: 'A modern social platform connecting users worldwide',
+        quickLinks: {
+          title: 'Quick Links'
+        },
+        contact: {
+          title: 'Contact Us'
+        },
+        copyright: {
+          allRightsReserved: 'All rights reserved',
+          madeWith: 'Made with',
+          poweredBy: 'Powered by:'
+        }
       }
     }
   },
@@ -452,6 +500,22 @@ export const commonTranslations = {
         saveFailed: 'Lưu thất bại',
         networkError: 'Lỗi mạng',
         serverError: 'Lỗi máy chủ'
+      },
+
+      // Footer
+      footer: {
+        defaultDescription: 'Một nền tảng xã hội hiện đại kết nối người dùng trên toàn thế giới',
+        quickLinks: {
+          title: 'Liên kết nhanh'
+        },
+        contact: {
+          title: 'Liên hệ'
+        },
+        copyright: {
+          allRightsReserved: 'Tất cả quyền được bảo lưu',
+          madeWith: 'Được tạo với',
+          poweredBy: 'Được hỗ trợ bởi:'
+        }
       }
     }
   }

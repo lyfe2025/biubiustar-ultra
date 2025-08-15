@@ -97,8 +97,8 @@ router.post('/image', upload.single('image'), async (req, res) => {
 // 专门用于站点Logo和Favicon上传的端点
 router.post('/site-asset', (req, res, next) => {
   
-  // 动态配置存储，使用固定文件名
-  const siteAssetStorage = multer.diskStorage({
+  // 先用临时文件名上传，然后根据type重命名
+  const tempStorage = multer.diskStorage({
     destination: (req, file, cb) => {
       const uploadDir = path.join(process.cwd(), 'public', 'uploads')
       
@@ -109,50 +109,15 @@ router.post('/site-asset', (req, res, next) => {
       cb(null, uploadDir)
     },
     filename: (req, file, cb) => {
+      // 使用临时文件名
       const ext = path.extname(file.originalname).toLowerCase()
-      
-      // 判断文件类型 - 严格按照前端指定的类型
-      let fileType = 'logo' // 默认为logo
-      
-      // 严格优先使用前端提供的类型（确保logo和favicon不会混淆）
-      if (req.body.type && ['logo', 'favicon'].includes(req.body.type)) {
-        fileType = req.body.type
-        console.log(`使用前端指定的类型: ${fileType}`)
-      } else {
-        // 只有在前端未指定时才进行自动判断
-        const originalName = file.originalname.toLowerCase()
-        
-        if (originalName.includes('favicon') || originalName.includes('icon')) {
-          fileType = 'favicon'
-        } else if (originalName.includes('logo')) {
-          fileType = 'logo'
-        } else if (originalName.match(/\b(16|32|48)\b/)) {
-          // 小尺寸通常是favicon
-          fileType = 'favicon'
-        } else if (originalName.match(/\b(100|128|200|256|512)\b/)) {
-          // 大尺寸通常是logo
-          fileType = 'logo'
-        }
-        console.log(`自动检测文件类型: ${originalName} → ${fileType}`)
-      }
-      
-      // 存储类型信息供后续使用
-      (req as any).detectedType = fileType
-      
-      // 使用固定的文件名
-      let filename
-      if (fileType === 'logo') {
-        filename = `site-logo${ext}`
-      } else if (fileType === 'favicon') {
-        filename = `site-favicon${ext}`
-      }
-      
-      cb(null, filename)
+      const tempName = `temp-${Date.now()}${ext}`
+      cb(null, tempName)
     }
   })
 
-  const siteAssetUpload = multer({
-    storage: siteAssetStorage,
+  const tempUpload = multer({
+    storage: tempStorage,
     fileFilter,
     limits: {
       fileSize: 5 * 1024 * 1024,
@@ -160,7 +125,7 @@ router.post('/site-asset', (req, res, next) => {
     }
   })
 
-  siteAssetUpload.single('image')(req, res, (err) => {
+  tempUpload.single('image')(req, res, async (err) => {
     if (err) {
       console.error('站点资源上传失败:', err)
       return res.status(500).json({
@@ -173,25 +138,75 @@ router.post('/site-asset', (req, res, next) => {
       return res.status(400).json({ error: '未选择文件' })
     }
 
-    const relativePath = `/uploads/${req.file.filename}`
-    const detectedType = (req as any).detectedType || 'logo'
-    
-    console.log(`站点${detectedType}上传成功: ${req.file.filename}, 大小: ${req.file.size} bytes`)
-    console.log(`自动检测类型: ${detectedType} (原文件名: ${req.file.originalname})`)
-    
-    res.json({
-      success: true,
-      message: `站点${detectedType}上传成功`,
-      data: {
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        size: req.file.size,
-        mimetype: req.file.mimetype,
-        path: relativePath,
-        url: `${req.protocol}://${req.get('host')}${relativePath}`,
-        type: detectedType
+    try {
+      // 现在可以安全地读取req.body.type
+      const providedType = req.body.type
+      console.log(`前端指定的类型: ${providedType}`)
+      
+      // 判断最终的文件类型
+      let finalType = 'logo' // 默认为logo
+      
+      // 严格优先使用前端提供的类型
+      if (providedType && ['logo', 'favicon'].includes(providedType)) {
+        finalType = providedType
+        console.log(`使用前端指定的类型: ${finalType}`)
+      } else {
+        // 只有在前端未指定时才进行自动判断
+        const originalName = req.file.originalname.toLowerCase()
+        
+        if (originalName.includes('favicon') || originalName.includes('icon')) {
+          finalType = 'favicon'
+        } else if (originalName.includes('logo')) {
+          finalType = 'logo'
+        } else if (originalName.match(/\b(16|32|48)\b/)) {
+          finalType = 'favicon'
+        } else if (originalName.match(/\b(100|128|200|256|512)\b/)) {
+          finalType = 'logo'
+        }
+        console.log(`自动检测文件类型: ${originalName} → ${finalType}`)
       }
-    })
+      
+      // 根据最终类型确定目标文件名
+      const ext = path.extname(req.file.originalname).toLowerCase()
+      const finalFilename = finalType === 'logo' ? `site-logo${ext}` : `site-favicon${ext}`
+      const finalPath = path.join(req.file.destination, finalFilename)
+      
+      // 将临时文件重命名为最终文件名
+      fs.renameSync(req.file.path, finalPath)
+      
+      const relativePath = `/uploads/${finalFilename}`
+      
+      console.log(`站点${finalType}上传成功: ${finalFilename}, 大小: ${req.file.size} bytes`)
+      console.log(`类型检测结果: ${finalType} (原文件名: ${req.file.originalname})`)
+      
+      res.json({
+        success: true,
+        message: `站点${finalType}上传成功`,
+        data: {
+          filename: finalFilename,
+          originalName: req.file.originalname,
+          size: req.file.size,
+          mimetype: req.file.mimetype,
+          path: relativePath,
+          url: `${req.protocol}://${req.get('host')}${relativePath}`,
+          type: finalType
+        }
+      })
+      
+    } catch (error) {
+      // 如果重命名失败，删除临时文件
+      try {
+        fs.unlinkSync(req.file.path)
+      } catch (cleanupError) {
+        console.error('清理临时文件失败:', cleanupError)
+      }
+      
+      console.error('站点资源处理失败:', error)
+      res.status(500).json({
+        error: '文件处理失败',
+        details: error instanceof Error ? error.message : '未知错误'
+      })
+    }
   })
 })
 

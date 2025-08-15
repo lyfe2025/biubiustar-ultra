@@ -107,16 +107,43 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
         
         // 图片上传成功后，自动保存到数据库，确保前台能立即获取最新设置
         try {
-          const settingsToSave = {
+          // 验证后端返回的类型与前端期望一致
+          const expectedType = field === 'site_logo' ? 'logo' : 'favicon'
+          const actualType = result.data.type
+          
+          if (actualType !== expectedType) {
+            console.warn(`类型不匹配! 期望: ${expectedType}, 实际: ${actualType}`)
+          }
+          
+          // 只构建需要更新的字段，避免意外覆盖其他字段
+          const settingsToSave: Record<string, any> = {
             'basic.siteName': formData.site_name,
             'basic.siteDescription': formData.site_description,
-            'basic.siteLogo': field === 'site_logo' ? result.data.path : formData.site_logo,
-            'basic.siteFavicon': field === 'site_favicon' ? result.data.path : formData.site_favicon
+          }
+          
+          // 严格按照上传字段类型更新对应设置
+          if (field === 'site_logo' && actualType === 'logo') {
+            settingsToSave['basic.siteLogo'] = result.data.path
+            console.log(`更新站点Logo: ${result.data.path}`)
+          } else if (field === 'site_favicon' && actualType === 'favicon') {
+            settingsToSave['basic.siteFavicon'] = result.data.path
+            console.log(`更新站点Favicon: ${result.data.path}`)
+          } else {
+            console.error('字段类型不匹配，取消自动保存以防止错误覆盖')
+            throw new Error(`字段类型不匹配: 上传字段=${field}, 后端类型=${actualType}`)
+          }
+          
+          // 保持其他字段不变
+          if (formData.site_logo && field !== 'site_logo') {
+            settingsToSave['basic.siteLogo'] = formData.site_logo
+          }
+          if (formData.site_favicon && field !== 'site_favicon') {
+            settingsToSave['basic.siteFavicon'] = formData.site_favicon
           }
           
           console.log('自动保存图片设置到数据库:', settingsToSave)
           // 直接保存到数据库，不等待全局保存按钮
-          await fetch('/api/admin/settings', {
+          const saveResponse = await fetch('/api/admin/settings', {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -125,9 +152,14 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
             body: JSON.stringify(settingsToSave)
           })
           
+          if (!saveResponse.ok) {
+            throw new Error('保存到数据库失败')
+          }
+          
           console.log('图片设置已自动保存到数据库')
         } catch (saveError) {
-          console.warn('自动保存图片设置失败，但图片已上传成功:', saveError)
+          console.error('自动保存图片设置失败:', saveError)
+          alert(`图片上传成功，但自动保存失败: ${saveError instanceof Error ? saveError.message : '未知错误'}`)
         }
         
         // 添加时间戳参数避免浏览器缓存

@@ -13,14 +13,22 @@ import CommentModal from '../components/CommentModal'
 import CreatePostModal from '../components/CreatePostModal'
 import AuthModal from '../components/AuthModal'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { useSiteInfo } from '../hooks/useSettings'
+import { useMetaDescription, useSocialMetaTags } from '../hooks/useMetaDescription'
 
 const Home = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
-  
+  const { siteDescription, siteName } = useSiteInfo()
 
   
   usePageTitle(t('home.title'))
+  useMetaDescription(siteDescription)
+  useSocialMetaTags(
+    siteName || 'BiuBiuStar',
+    siteDescription,
+    // 可以在这里添加站点Logo作为分享图片
+  )
   const [posts, setPosts] = useState<Post[]>([])
   const [activities, setActivities] = useState<ActivityType[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -90,7 +98,7 @@ const Home = () => {
               {t('home.welcome')}
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              {t('home.subtitle')}
+              {siteDescription || t('home.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

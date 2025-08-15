@@ -17,6 +17,7 @@ import AdminSettings from './pages/admin/AdminSettings'
 import AdminSecurity from './pages/admin/AdminSecurity'
 import AdminLogs from './pages/admin/AdminLogs'
 import AdminAuthGuard from './components/AdminAuthGuard'
+import Footer from './components/Footer'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
@@ -47,6 +48,7 @@ function AppContent() {
               <Route path="/admin/security" element={<AdminAuthGuard><AdminSecurity /></AdminAuthGuard>} />
               <Route path="/admin/logs" element={<AdminAuthGuard><AdminLogs /></AdminAuthGuard>} />
       </Routes>
+      {!isAdminRoute && <Footer />}
       <Toaster position="top-right" richColors />
     </div>
   )

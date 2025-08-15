@@ -4,10 +4,18 @@ import { useLanguage } from '../contexts/language';
 import { contactService, type ContactFormData } from '../services/ContactService';
 import { toast } from 'sonner';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useSiteInfo } from '../hooks/useSettings';
+import { useMetaDescription, useSocialMetaTags } from '../hooks/useMetaDescription';
 
 export default function About() {
   const { t } = useLanguage();
+  const { siteDescription, siteName } = useSiteInfo();
   usePageTitle(t('about.title'));
+  useMetaDescription(siteDescription);
+  useSocialMetaTags(
+    `${t('about.title')} - ${siteName || 'BiuBiuStar'}`,
+    siteDescription
+  );
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -171,7 +179,7 @@ export default function About() {
             {t('about.title')}
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            {t('about.subtitle')}
+            {siteDescription || t('about.subtitle')}
           </p>
         </div>
       </section>
