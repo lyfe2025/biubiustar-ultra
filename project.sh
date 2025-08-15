@@ -393,6 +393,316 @@ clean_project() {
     echo -e "${GREEN}项目清理完成${NC}"
 }
 
+# IP黑名单管理
+manage_ip_blacklist() {
+    echo -e "${BLUE}=== IP黑名单管理 ===${NC}"
+    echo ""
+    echo -e "${YELLOW}请选择操作：${NC}"
+    echo "1. 查看被限制的IP列表"
+    echo "2. 解除指定IP限制"
+    echo "3. 返回主菜单"
+    echo ""
+    echo -n "请输入选项 (1-3): "
+    
+    read -r ip_choice
+    
+    case $ip_choice in
+        1)
+            show_blocked_ips
+            ;;
+        2)
+            unblock_ip
+            ;;
+        3)
+            return
+            ;;
+        *)
+            echo -e "${RED}无效选项，请重新选择${NC}"
+            sleep 1
+            manage_ip_blacklist
+            ;;
+    esac
+}
+
+# 查看被限制的IP列表
+show_blocked_ips() {
+    echo -e "${BLUE}正在获取IP黑名单...${NC}"
+    
+    # 检查.env文件是否存在
+    if [ ! -f ".env" ]; then
+        echo -e "${RED}错误: .env文件不存在，请先创建配置文件${NC}"
+        read -p "按回车键继续..."
+        return
+    fi
+    
+    # 直接通过Node.js连接Supabase查询IP黑名单
+    local response=$(node --input-type=module -e "
+        import dotenv from 'dotenv';
+        import { createClient } from '@supabase/supabase-js';
+        
+        dotenv.config({ silent: true });
+        
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        
+        if (!supabaseUrl || !supabaseServiceKey) {
+            console.log(JSON.stringify({ error: 'Supabase配置缺失，请检查.env文件中的SUPABASE_URL和SUPABASE_SERVICE_ROLE_KEY' }));
+            process.exit(1);
+        }
+        
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        
+        (async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('ip_blacklist')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                
+                if (error) {
+                    console.log(JSON.stringify({ error: '查询IP黑名单失败: ' + error.message }));
+                    return;
+                }
+                
+                console.log(JSON.stringify({ success: true, data: data || [] }));
+            } catch (err) {
+                console.log(JSON.stringify({ error: '数据库连接失败: ' + err.message }));
+            }
+        })();
+    " 2>&1 | grep '^{')
+    
+    if [ $? -ne 0 ] || [ -z "$response" ]; then
+        echo -e "${RED}错误: 无法查询IP黑名单，请检查Node.js环境和依赖${NC}"
+        read -p "按回车键继续..."
+        return
+    fi
+    
+    # 检查响应是否包含错误
+    if echo "$response" | grep -q '"error"'; then
+        local error_msg=$(echo "$response" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
+        echo -e "${RED}查询失败: $error_msg${NC}"
+        read -p "按回车键继续..."
+        return
+    fi
+    
+    # 解析并显示IP黑名单
+    echo -e "${GREEN}当前被限制的IP列表：${NC}"
+    echo -e "${BLUE}================================================${NC}"
+    
+    # 使用node来解析JSON并格式化输出
+    node -e "
+        try {
+            const result = JSON.parse(process.argv[1]);
+            if (result.data && result.data.length > 0) {
+                result.data.forEach((item, index) => {
+                    console.log(\`\${index + 1}. IP地址: \${item.ip_address}\`);
+                    console.log(\`   封禁原因: \${item.reason || '未知'}\`);
+                    console.log(\`   封禁时间: \${new Date(item.created_at).toLocaleString('zh-CN')}\`);
+                    if (item.blocked_until) {
+                        console.log(\`   解封时间: \${new Date(item.blocked_until).toLocaleString('zh-CN')}\`);
+                    } else {
+                        console.log(\`   解封时间: 永久封禁\`);
+                    }
+                    console.log('   ----------------------------------------');
+                });
+                console.log(\`\n总计: \${result.data.length} 个被限制的IP\`);
+            } else {
+                console.log('暂无被限制的IP地址');
+            }
+        } catch (e) {
+            console.log('解析数据失败:', e.message);
+        }
+    " "$response" 2>/dev/null
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${YELLOW}数据解析失败，显示原始响应：${NC}"
+        echo "$response"
+    fi
+    
+    echo ""
+    read -p "按回车键继续..."
+    manage_ip_blacklist
+}
+
+# 解除指定IP限制
+unblock_ip() {
+    echo -e "${BLUE}解除IP限制${NC}"
+    echo ""
+    
+    # 检查.env文件是否存在
+    if [ ! -f ".env" ]; then
+        echo -e "${RED}错误: .env文件不存在，请先创建配置文件${NC}"
+        read -p "按回车键继续..."
+        manage_ip_blacklist
+        return
+    fi
+    
+    # 首先显示当前被限制的IP列表供参考
+    echo -e "${YELLOW}当前被限制的IP列表：${NC}"
+    local list_response=$(node --input-type=module -e "
+        import dotenv from 'dotenv';
+        import { createClient } from '@supabase/supabase-js';
+        
+        dotenv.config();
+        
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        
+        if (!supabaseUrl || !supabaseServiceKey) {
+            console.log('配置缺失');
+            process.exit(1);
+        }
+        
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        
+        (async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('ip_blacklist')
+                    .select('ip_address, reason')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) {
+                    console.log('查询失败');
+                    return;
+                }
+                
+                if (data && data.length > 0) {
+                    data.forEach((item, index) => {
+                        console.log(\`\${index + 1}. \${item.ip_address} (\${item.reason || '未知原因'})\`);
+                    });
+                } else {
+                    console.log('暂无被限制的IP地址');
+                }
+            } catch (err) {
+                console.log('无法显示IP列表');
+            }
+        })();
+    " 2>/dev/null)
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${YELLOW}无法获取IP列表，请手动输入要解除限制的IP地址${NC}"
+    fi
+    
+    echo ""
+    echo -n "请输入要解除限制的IP地址 (或输入 'back' 返回): "
+    read -r target_ip
+    
+    if [ "$target_ip" = "back" ] || [ -z "$target_ip" ]; then
+        manage_ip_blacklist
+        return
+    fi
+    
+    # 验证IP地址格式（简单验证）
+    if ! echo "$target_ip" | grep -E '^([0-9]{1,3}\.){3}[0-9]{1,3}$|^::1$|^[0-9a-fA-F:]+$' > /dev/null; then
+        echo -e "${RED}错误: IP地址格式不正确${NC}"
+        read -p "按回车键重试..."
+        unblock_ip
+        return
+    fi
+    
+    echo -e "${YELLOW}正在解除IP $target_ip 的限制...${NC}"
+    
+    # 直接通过Node.js连接Supabase删除IP黑名单记录
+    local unblock_response=$(node --input-type=module -e "
+        import dotenv from 'dotenv';
+        import { createClient } from '@supabase/supabase-js';
+        
+        dotenv.config({ silent: true });
+        
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        
+        if (!supabaseUrl || !supabaseServiceKey) {
+            console.log(JSON.stringify({ error: 'Supabase配置缺失' }));
+            process.exit(1);
+        }
+        
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        const targetIp = process.argv[1];
+        
+        (async () => {
+            try {
+                // 首先检查IP是否存在于黑名单中
+                const { data: existingData, error: checkError } = await supabase
+                    .from('ip_blacklist')
+                    .select('*')
+                    .eq('ip_address', targetIp)
+                    .single();
+                
+                if (checkError && checkError.code !== 'PGRST116') {
+                    console.log(JSON.stringify({ error: '检查IP状态失败: ' + checkError.message }));
+                    return;
+                }
+                
+                if (!existingData) {
+                    console.log(JSON.stringify({ error: 'IP地址不在黑名单中' }));
+                    return;
+                }
+                
+                // 删除IP黑名单记录
+                const { error: deleteError } = await supabase
+                    .from('ip_blacklist')
+                    .delete()
+                    .eq('ip_address', targetIp);
+                
+                if (deleteError) {
+                    console.log(JSON.stringify({ error: '删除IP黑名单失败: ' + deleteError.message }));
+                    return;
+                }
+                
+                // 记录安全日志
+                await supabase
+                    .from('security_logs')
+                    .insert({
+                        event_type: 'ip_unblocked',
+                        ip_address: targetIp,
+                        details: { reason: 'Manual unblock via script', original_reason: existingData.reason },
+                        created_at: new Date().toISOString()
+                    });
+                
+                // 记录活动日志
+                await supabase
+                    .from('activity_logs')
+                    .insert({
+                        event_type: 'ip_auto_unblocked',
+                        ip_address: targetIp,
+                        details: { reason: 'Manual unblock via script', original_reason: existingData.reason },
+                        created_at: new Date().toISOString()
+                    });
+                
+                console.log(JSON.stringify({ success: true, message: 'IP地址已成功解除限制' }));
+            } catch (err) {
+                console.log(JSON.stringify({ error: '操作失败: ' + err.message }));
+            }
+        })();
+    " "$target_ip" 2>&1 | grep '^{')
+    
+    if [ $? -ne 0 ] || [ -z "$unblock_response" ]; then
+        echo -e "${RED}错误: 无法执行解除限制操作，请检查Node.js环境和依赖${NC}"
+        read -p "按回车键继续..."
+        manage_ip_blacklist
+        return
+    fi
+    
+    # 检查响应结果
+    if echo "$unblock_response" | grep -q '"success":true'; then
+        echo -e "${GREEN}✓ IP地址 $target_ip 已成功解除限制${NC}"
+    elif echo "$unblock_response" | grep -q '"error"'; then
+        local error_msg=$(echo "$unblock_response" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
+        echo -e "${RED}解除限制失败: $error_msg${NC}"
+    else
+        echo -e "${YELLOW}操作完成，但响应格式异常：${NC}"
+        echo "$unblock_response"
+    fi
+    
+    echo ""
+    read -p "按回车键继续..."
+    manage_ip_blacklist
+}
+
 # 显示菜单
 show_menu() {
     clear
@@ -409,9 +719,10 @@ show_menu() {
     echo "5. 查看日志"
     echo "6. 创建/编辑 .env 配置"
     echo "7. 清理项目"
-    echo "8. 退出"
+    echo "8. IP黑名单管理"
+    echo "9. 退出"
     echo ""
-    echo -n "请输入选项 (1-8): "
+    echo -n "请输入选项 (1-9): "
 }
 
 # 主循环
@@ -470,6 +781,10 @@ main() {
                 read -p "按回车键继续..."
                 ;;
             8)
+                echo ""
+                manage_ip_blacklist
+                ;;
+            9)
                 echo -e "${GREEN}再见！${NC}"
                 exit 0
                 ;;
@@ -507,6 +822,9 @@ case "$1" in
     clean)
         clean_project
         ;;
+    ip)
+        manage_ip_blacklist
+        ;;
     help|--help|-h)
         echo -e "${BLUE}$PROJECT_NAME 管理脚本${NC}"
         echo -e "${YELLOW}用法: $0 [命令]${NC}"
@@ -518,6 +836,7 @@ case "$1" in
         echo "  status     查看状态"
         echo "  env        创建/编辑 .env 配置文件"
         echo "  clean      清理项目"
+        echo "  ip         IP黑名单管理"
         echo "  help       显示此帮助信息"
         echo ""
         echo -e "${YELLOW}不带参数运行时将显示交互菜单${NC}"

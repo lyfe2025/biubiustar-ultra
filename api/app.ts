@@ -32,6 +32,9 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// 静态文件服务 - 提供uploads文件夹的图片访问
+app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
+
 /**
  * API Routes
  */

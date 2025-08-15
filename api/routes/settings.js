@@ -22,12 +22,8 @@ router.get('/public', async (req, res) => {
       return res.status(500).json({ error: '获取公开系统设置失败' })
     }
     
-    // 按分类组织设置
+    // 按分类组织设置 - 使用category.key格式（与前台SettingsService兼容）
     const settingsByCategory = settings?.reduce((acc, setting) => {
-      if (!acc[setting.category]) {
-        acc[setting.category] = {}
-      }
-      
       let value = setting.setting_value
       // 根据类型转换值
       if (setting.setting_type === 'boolean') {
@@ -41,8 +37,23 @@ router.get('/public', async (req, res) => {
           value = null
         }
       }
-      
-      acc[setting.category][setting.setting_key] = value
+
+      // 转换数据库字段名为前端使用的格式
+      let frontendKey = setting.setting_key
+      if (setting.category === 'basic') {
+        // 将下划线命名转换为驼峰命名
+        if (setting.setting_key === 'site_name') frontendKey = 'siteName'
+        else if (setting.setting_key === 'site_description') frontendKey = 'siteDescription'
+        else if (setting.setting_key === 'site_logo') frontendKey = 'siteLogo'
+        else if (setting.setting_key === 'site_favicon') frontendKey = 'siteFavicon'
+        else if (setting.setting_key === 'site_keywords') frontendKey = 'siteKeywords'
+        else if (setting.setting_key === 'contact_email') frontendKey = 'contactEmail'
+        else if (setting.setting_key === 'timezone') frontendKey = 'timezone'
+      }
+
+      // 使用 category.key 格式作为键名
+      const categoryKey = `${setting.category}.${frontendKey}`
+      acc[categoryKey] = value
       
       return acc
     }, {}) || {}

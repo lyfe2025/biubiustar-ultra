@@ -164,4 +164,13 @@ class SettingsService {
 
 // 创建单例实例
 export const settingsService = new SettingsService()
+
+// 在全局对象上暴露清除缓存方法，供管理后台使用
+if (typeof window !== 'undefined') {
+  (window as any).clearSettingsCache = () => {
+    console.log('清除前台设置缓存')
+    settingsService.clearCache()
+  }
+}
+
 export default settingsService

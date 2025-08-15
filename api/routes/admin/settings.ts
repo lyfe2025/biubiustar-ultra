@@ -135,23 +135,59 @@ router.put('/', async (req, res) => {
     }
     
     // 批量更新设置
-    const updatePromises = updates.map(update => 
-      supabaseAdmin
-        .from('system_settings')
-        .update({
-          setting_value: update.setting_value,
-          updated_at: update.updated_at
-        })
-        .eq('setting_key', update.setting_key)
-    )
+    console.log('准备保存的设置:', updates)
     
-    const results = await Promise.all(updatePromises)
-    
-    // 检查是否有错误
-    const errors = results.filter(result => result.error)
-    if (errors.length > 0) {
-      console.error('更新系统设置失败:', errors)
-      return res.status(500).json({ error: '更新系统设置失败' })
+    try {
+      const updatePromises = updates.map(async (update) => {
+        // 首先尝试更新
+        const { data: updateData, error: updateError } = await supabaseAdmin
+          .from('system_settings')
+          .update({
+            setting_value: update.setting_value,
+            updated_at: update.updated_at
+          })
+          .eq('setting_key', update.setting_key)
+          .select()
+        
+        // 如果更新失败或没有影响行数，尝试插入
+        if (updateError || !updateData || updateData.length === 0) {
+          console.log(`设置 ${update.setting_key} 不存在，尝试插入`)
+          
+          const { data: insertData, error: insertError } = await supabaseAdmin
+            .from('system_settings')
+            .insert({
+              setting_key: update.setting_key,
+              setting_value: update.setting_value,
+              setting_type: 'string',
+              category: 'basic',
+              description: `Setting: ${update.setting_key}`,
+              is_public: true,
+              created_at: update.updated_at,
+              updated_at: update.updated_at
+            })
+            .select()
+          
+          if (insertError) {
+            console.error(`插入设置 ${update.setting_key} 失败:`, insertError)
+            throw new Error(`插入设置失败: ${insertError.message}`)
+          }
+          
+          console.log(`成功插入设置 ${update.setting_key}:`, update.setting_value)
+          return insertData
+        } else {
+          console.log(`成功更新设置 ${update.setting_key}:`, update.setting_value)
+          return updateData
+        }
+      })
+      
+      await Promise.all(updatePromises)
+      
+    } catch (error) {
+      console.error('保存系统设置时发生异常:', error)
+      return res.status(500).json({ 
+        error: '保存系统设置失败',
+        details: error.message
+      })
     }
     
     res.json({ success: true, message: '系统设置保存成功' })
@@ -285,6 +321,59 @@ router.get('/public', async (req, res) => {
   } catch (error) {
     console.error('获取公开系统设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
+  }
+})
+
+// 调试端点：测试数据库连接和查看设置状态
+router.get('/debug', async (req, res) => {
+  try {
+    console.log('调试端点被访问')
+    
+    // 测试数据库连接
+    const { data: testData, error: testError } = await supabaseAdmin
+      .from('system_settings')
+      .select('*')
+      .limit(5)
+    
+    if (testError) {
+      console.error('数据库连接测试失败:', testError)
+      return res.status(500).json({
+        success: false,
+        error: '数据库连接失败',
+        details: testError
+      })
+    }
+    
+    // 检查基础设置项是否存在
+    const { data: basicSettings, error: basicError } = await supabaseAdmin
+      .from('system_settings')
+      .select('*')
+      .eq('category', 'basic')
+    
+    if (basicError) {
+      console.error('查询基础设置失败:', basicError)
+      return res.status(500).json({
+        success: false,
+        error: '查询基础设置失败',
+        details: basicError
+      })
+    }
+    
+    res.json({
+      success: true,
+      message: '调试信息',
+      database_connection: '正常',
+      sample_settings: testData,
+      basic_settings: basicSettings,
+      basic_settings_count: basicSettings?.length || 0
+    })
+  } catch (error) {
+    console.error('调试端点异常:', error)
+    res.status(500).json({
+      success: false,
+      error: '调试端点异常',
+      details: error.message
+    })
   }
 })
 

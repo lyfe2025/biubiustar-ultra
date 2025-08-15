@@ -8,26 +8,26 @@ const EmailSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
   const [showPassword, setShowPassword] = useState(false)
   const [testing, setTesting] = useState(false)
   const [formData, setFormData] = useState<EmailSettingsData>({
-    smtp_host: settings?.smtp_host || '',
-    smtp_port: settings?.smtp_port || 587,
-    smtp_username: settings?.smtp_username || '',
-    smtp_password: settings?.smtp_password || '',
-    smtp_encryption: settings?.smtp_encryption || 'tls',
-    from_email: settings?.from_email || '',
-    from_name: settings?.from_name || ''
+    smtp_host: settings?.smtp_host?.value || '',
+    smtp_port: settings?.smtp_port?.value || 587,
+    smtp_username: settings?.smtp_username?.value || '',
+    smtp_password: settings?.smtp_password?.value || '',
+    smtp_encryption: settings?.smtp_encryption?.value || 'tls',
+    from_email: settings?.from_email?.value || '',
+    from_name: settings?.from_name?.value || ''
   })
 
   // 同步settings变化到formData
   React.useEffect(() => {
     if (settings) {
       setFormData({
-        smtp_host: settings.smtp_host,
-        smtp_port: settings.smtp_port,
-        smtp_username: settings.smtp_username,
-        smtp_password: settings.smtp_password,
-        smtp_encryption: settings.smtp_encryption,
-        from_email: settings.from_email,
-        from_name: settings.from_name
+        smtp_host: settings.smtp_host?.value || '',
+        smtp_port: settings.smtp_port?.value || 587,
+        smtp_username: settings.smtp_username?.value || '',
+        smtp_password: settings.smtp_password?.value || '',
+        smtp_encryption: settings.smtp_encryption?.value || 'tls',
+        from_email: settings.from_email?.value || '',
+        from_name: settings.from_name?.value || ''
       })
     }
   }, [settings])

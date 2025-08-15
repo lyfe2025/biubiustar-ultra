@@ -8,6 +8,7 @@ import settingsRouter from './settings'
 import securityRouter from './security'
 import securityStatusRouter from './security-status'
 import logsRouter from './logs'
+import uploadRouter from './upload'
 
 const router = Router()
 
@@ -21,5 +22,6 @@ router.use('/categories', categoriesRouter)  // 分类管理路由
 router.use('/settings', settingsRouter)      // 系统设置路由
 router.use('/security', securityRouter)      // 安全管理路由
 router.use('/logs', logsRouter)               // 日志管理路由
+router.use('/upload', uploadRouter)          // 文件上传路由
 
 export default router

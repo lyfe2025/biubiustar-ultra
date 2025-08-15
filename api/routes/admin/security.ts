@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../lib/supabase'
 import { requireAdmin } from './auth';
-import { logSecurityEvent, getClientIP } from '../../middleware/security'
+import { logSecurityEvent, logActivityEvent, getClientIP } from '../../middleware/security'
 
 // 扩展Request接口以包含user属性
 interface AuthenticatedRequest extends Request {
@@ -183,6 +183,15 @@ router.delete('/ip-blacklist/:ip', requireAdmin, async (req: AuthenticatedReques
       { unlockedIP: ip, adminAction: true },
       'info'
     )
+    await logActivityEvent(
+      'ip_security',
+      'ip_manual_unlock',
+      { unlockedIP: ip, adminAction: true },
+      req.user?.id || null,
+      req.user?.email || null,
+      adminIP,
+      req.headers['user-agent'] as string
+    )
     
     res.json({ success: true, message: 'IP已成功解锁' })
   } catch (error) {
@@ -235,6 +244,15 @@ router.post('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res
       req.user?.email || null,
       { blockedIP: ip_address, reason, adminAction: true },
       'warning'
+    )
+    await logActivityEvent(
+      'ip_security',
+      'ip_blocked',
+      { blockedIP: ip_address, reason, adminAction: true },
+      req.user?.id || null,
+      req.user?.email || null,
+      adminIP,
+      req.headers['user-agent'] as string
     )
     
     res.json({ success: true, message: 'IP已添加到黑名单' })

@@ -4,7 +4,8 @@ import {
   ipSecurityCheck, 
   logLoginAttempt, 
   logSecurityEvent, 
-  getClientIP 
+  getClientIP,
+  logActivityEvent 
 } from '../../middleware/security'
 
 const router = Router()
@@ -118,6 +119,15 @@ router.post('/login', ipSecurityCheck, async (req, res) => {
         { role: userProfile.role, userAgent },
         'warning'
       )
+      await logActivityEvent(
+        'admin_login',
+        'unauthorized_admin_access_attempt',
+        { role: userProfile.role, userAgent },
+        authData.user.id,
+        email,
+        ipAddress,
+        userAgent
+      )
       
       const attemptsRemaining = loginAttempts ? Math.max(0, 3 - (loginAttempts.recentFailedAttempts + 1)) : 2
       
@@ -137,6 +147,15 @@ router.post('/login', ipSecurityCheck, async (req, res) => {
       email,
       { username: userProfile.username, userAgent },
       'info'
+    )
+    await logActivityEvent(
+      'admin_login',
+      'admin_login_success',
+      { username: userProfile.username, userAgent },
+      authData.user.id,
+      email,
+      ipAddress,
+      userAgent
     )
 
     // 返回认证信息
@@ -163,6 +182,15 @@ router.post('/login', ipSecurityCheck, async (req, res) => {
       email,
       { error: error.message, userAgent: req.headers['user-agent'] },
       'error'
+    )
+    await logActivityEvent(
+      'admin_login',
+      'login_system_error',
+      { error: error.message, userAgent: req.headers['user-agent'] },
+      null,
+      email,
+      ipAddress,
+      req.headers['user-agent'] as string
     )
     
     res.status(500).json({ error: '服务器内部错误' })

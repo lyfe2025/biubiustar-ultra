@@ -6,20 +6,20 @@ import { SettingsSectionProps, SecuritySettingsData } from './types'
 const SecuritySettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {
   const { t } = useLanguage()
   const [formData, setFormData] = useState<SecuritySettingsData>({
-    enable_rate_limiting: settings?.enable_rate_limiting || false,
-    max_login_attempts: settings?.max_login_attempts || 5,
-    session_timeout_hours: settings?.session_timeout_hours || 24,
-    enable_two_factor: settings?.enable_two_factor || false
+    enable_rate_limiting: settings?.enable_rate_limiting?.value || true,
+    max_login_attempts: settings?.max_login_attempts?.value || 5,
+    session_timeout_hours: settings?.session_timeout_hours?.value || 24,
+    enable_two_factor: settings?.enable_two_factor?.value || false
   })
 
   // 同步settings变化到formData
   React.useEffect(() => {
     if (settings) {
       setFormData({
-        enable_rate_limiting: settings.enable_rate_limiting,
-        max_login_attempts: settings.max_login_attempts,
-        session_timeout_hours: settings.session_timeout_hours,
-        enable_two_factor: settings.enable_two_factor
+        enable_rate_limiting: settings.enable_rate_limiting?.value || true,
+        max_login_attempts: settings.max_login_attempts?.value || 5,
+        session_timeout_hours: settings.session_timeout_hours?.value || 24,
+        enable_two_factor: settings.enable_two_factor?.value || false
       })
     }
   }, [settings])

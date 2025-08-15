@@ -20,7 +20,7 @@ import AdminAuthGuard from './components/AdminAuthGuard'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
-import { useFavicon } from './hooks/usePageTitle'
+import { useFavicon } from './hooks/useFavicon'
 
 function AppContent() {
   const location = useLocation()

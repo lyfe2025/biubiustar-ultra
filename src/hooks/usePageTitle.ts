@@ -25,24 +25,3 @@ export const usePageTitle = (pageTitle?: string) => {
   }, [pageTitle, siteName])
 }
 
-/**
- * 设置网站图标
- * @param iconUrl 图标URL
- */
-export const useFavicon = (iconUrl?: string) => {
-  useEffect(() => {
-    if (!iconUrl) return
-    
-    // 查找现有的favicon链接
-    let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement
-    
-    if (!link) {
-      // 如果不存在，创建新的favicon链接
-      link = document.createElement('link')
-      link.rel = 'icon'
-      document.head.appendChild(link)
-    }
-    
-    link.href = iconUrl
-  }, [iconUrl])
-}

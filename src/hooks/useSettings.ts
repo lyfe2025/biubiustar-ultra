@@ -99,11 +99,30 @@ export function useSiteInfo() {
     'basic.contactEmail'
   ])
   
+  // 辅助函数：为站点资源URL添加缓存破坏参数
+  const addCacheBuster = (url: string): string => {
+    if (!url || url.startsWith('data:') || url.startsWith('/logo')) {
+      // 对于默认文件或Base64数据，不添加缓存破坏参数
+      return url
+    }
+    
+    if (url.startsWith('/uploads/site-')) {
+      // 对于站点资源文件，添加时间戳参数
+      const separator = url.includes('?') ? '&' : '?'
+      return `${url}${separator}t=${Math.floor(Date.now() / 60000)}` // 每分钟更新一次
+    }
+    
+    return url
+  }
+  
+  const logoUrl = siteInfo['basic.siteLogo'] as string || ''
+  const faviconUrl = siteInfo['basic.siteFavicon'] as string || ''
+  
   return {
     siteName: siteInfo['basic.siteName'] as string || 'BiuBiuStar',
     siteDescription: siteInfo['basic.siteDescription'] as string || '一个现代化的社交平台',
-    siteLogo: siteInfo['basic.siteLogo'] as string || '',
-    siteIcon: siteInfo['basic.siteFavicon'] as string || '',
+    siteLogo: addCacheBuster(logoUrl),
+    siteIcon: addCacheBuster(faviconUrl),
     contactEmail: siteInfo['basic.contactEmail'] as string || 'contact@biubiustar.com',
     loading,
     error

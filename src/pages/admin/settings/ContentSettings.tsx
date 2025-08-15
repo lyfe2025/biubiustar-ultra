@@ -6,22 +6,22 @@ import { SettingsSectionProps, ContentSettingsData } from './types'
 const ContentSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {
   const { t } = useLanguage()
   const [formData, setFormData] = useState<ContentSettingsData>({
-    enable_content_moderation: settings?.enable_content_moderation || false,
-    auto_approve_posts: settings?.auto_approve_posts || false,
-    enable_comments: settings?.enable_comments || true,
-    enable_likes: settings?.enable_likes || true,
-    enable_shares: settings?.enable_shares || true
+    enable_content_moderation: settings?.enable_content_moderation?.value || false,
+    auto_approve_posts: settings?.auto_approve_posts?.value || true,
+    enable_comments: settings?.enable_comments?.value || true,
+    enable_likes: settings?.enable_likes?.value || true,
+    enable_shares: settings?.enable_shares?.value || true
   })
 
   // 同步settings变化到formData
   React.useEffect(() => {
     if (settings) {
       setFormData({
-        enable_content_moderation: settings.enable_content_moderation,
-        auto_approve_posts: settings.auto_approve_posts,
-        enable_comments: settings.enable_comments,
-        enable_likes: settings.enable_likes,
-        enable_shares: settings.enable_shares
+        enable_content_moderation: settings.enable_content_moderation?.value || false,
+        auto_approve_posts: settings.auto_approve_posts?.value || true,
+        enable_comments: settings.enable_comments?.value || true,
+        enable_likes: settings.enable_likes?.value || true,
+        enable_shares: settings.enable_shares?.value || true
       })
     }
   }, [settings])

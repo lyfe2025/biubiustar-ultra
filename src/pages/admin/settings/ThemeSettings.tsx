@@ -6,20 +6,20 @@ import { SettingsSectionProps, ThemeSettingsData } from './types'
 const ThemeSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {
   const { t } = useLanguage()
   const [formData, setFormData] = useState<ThemeSettingsData>({
-    primary_color: settings?.primary_color || '#8B5CF6',
-    secondary_color: settings?.secondary_color || '#06B6D4',
-    enable_dark_mode: settings?.enable_dark_mode || false,
-    custom_css: settings?.custom_css || ''
+    primary_color: settings?.primary_color?.value || '#8B5CF6',
+    secondary_color: settings?.secondary_color?.value || '#06B6D4',
+    enable_dark_mode: settings?.enable_dark_mode?.value || false,
+    custom_css: settings?.custom_css?.value || ''
   })
 
   // 同步settings变化到formData
   React.useEffect(() => {
     if (settings) {
       setFormData({
-        primary_color: settings.primary_color,
-        secondary_color: settings.secondary_color,
-        enable_dark_mode: settings.enable_dark_mode,
-        custom_css: settings.custom_css || ''
+        primary_color: settings.primary_color?.value || '#8B5CF6',
+        secondary_color: settings.secondary_color?.value || '#06B6D4',
+        enable_dark_mode: settings.enable_dark_mode?.value || false,
+        custom_css: settings.custom_css?.value || ''
       })
     }
   }, [settings])

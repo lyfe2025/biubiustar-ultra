@@ -71,6 +71,33 @@ export async function logSecurityEvent(
   }
 }
 
+// 记录活动日志到activity_logs表
+export async function logActivityEvent(
+  type: string,
+  action: string,
+  details: any = {},
+  userId: string | null = null,
+  userEmail: string | null = null,
+  ipAddress: string | null = null,
+  userAgent: string | null = null
+): Promise<void> {
+  try {
+    await supabaseAdmin
+      .from('activity_logs')
+      .insert({
+        type,
+        action,
+        details: typeof details === 'object' ? details : { message: details },
+        user_id: userId,
+        user_email: userEmail,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+      });
+  } catch (error) {
+    console.error('Failed to log activity event:', error);
+  }
+}
+
 // 检查IP是否在黑名单中
 export async function checkIPBlacklist(ipAddress: string): Promise<{
   isBlocked: boolean;
@@ -117,6 +144,16 @@ export async function checkIPBlacklist(ipAddress: string): Promise<{
           null,
           { reason: 'Lockout period expired' },
           'info'
+        );
+        
+        await logActivityEvent(
+          'ip_security',
+          'ip_auto_unblocked',
+          { reason: 'Lockout period expired' },
+          null,
+          null,
+          ipAddress,
+          null
         );
         
         return { isBlocked: false };
@@ -225,6 +262,21 @@ export async function addToBlacklist(
       },
       'warning'
     );
+    
+    await logActivityEvent(
+      'ip_security',
+      isPermanent ? 'ip_permanently_blocked' : 'ip_blocked',
+      { 
+        reason, 
+        failed_attempts: failedAttempts,
+        blocked_until: blockedUntil,
+        blocked_by: blockedBy 
+      },
+      null,
+      null,
+      ipAddress,
+      null
+    );
   } catch (error) {
     console.error('Failed to add IP to blacklist:', error);
   }
@@ -326,6 +378,19 @@ export async function cleanupExpiredBlacklist(): Promise<{
           },
           'info'
         );
+        
+        await logActivityEvent(
+          'system_maintenance',
+          'blacklist_cleanup',
+          { 
+            cleaned_count: cleaned,
+            cleanup_time: now
+          },
+          null,
+          null,
+          null,
+          null
+        );
       }
     }
   } catch (error) {
@@ -379,6 +444,20 @@ export async function cleanupOldLoginAttempts(): Promise<{
           },
           'info'
         );
+        
+        await logActivityEvent(
+          'system_maintenance',
+          'login_attempts_cleanup',
+          { 
+            cleaned_count: cleaned,
+            cutoff_time: cutoffTime,
+            cleanup_time: new Date().toISOString()
+          },
+          null,
+          null,
+          null,
+          null
+        );
       }
     }
   } catch (error) {
@@ -417,6 +496,21 @@ export async function performSecurityCleanup(): Promise<{
     totalErrors > 0 ? 'warning' : 'info'
   );
   
+  await logActivityEvent(
+    'system_maintenance',
+    'security_cleanup_summary',
+    {
+      blacklist_cleaned: blacklistResult.cleaned,
+      login_attempts_cleaned: loginAttemptsResult.cleaned,
+      total_errors: totalErrors,
+      cleanup_time: new Date().toISOString()
+    },
+    null,
+    null,
+    null,
+    null
+  );
+  
   console.log(`Security cleanup completed: ${blacklistResult.cleaned} blacklist entries, ${loginAttemptsResult.cleaned} login attempts cleaned, ${totalErrors} errors`);
   
   return {
@@ -452,6 +546,18 @@ export function startSecurityCleanupScheduler(): NodeJS.Timeout {
         'error'
       ).catch(logError => {
         console.error('Failed to log cleanup failure:', logError);
+      });
+      
+      await logActivityEvent(
+        'system_maintenance',
+        'security_cleanup_failed',
+        { error: error instanceof Error ? error.message : 'Unknown error' },
+        null,
+        null,
+        null,
+        null
+      ).catch(logError => {
+        console.error('Failed to log activity event for cleanup failure:', logError);
       });
     }
   }, 60 * 60 * 1000); // 每小时执行一次

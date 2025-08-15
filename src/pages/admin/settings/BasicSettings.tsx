@@ -20,6 +20,14 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
     site_logo: settings?.['basic.siteLogo']?.value || defaultData.site_logo,
     site_favicon: settings?.['basic.siteFavicon']?.value || defaultData.site_favicon
   })
+  
+  const [uploading, setUploading] = useState<{
+    site_logo: boolean
+    site_favicon: boolean
+  }>({
+    site_logo: false,
+    site_favicon: false
+  })
 
   // 同步settings变化到formData
   React.useEffect(() => {
@@ -51,6 +59,9 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
 
   const handleFileUpload = async (field: 'site_logo' | 'site_favicon', file: File) => {
     try {
+      // 设置上传状态
+      setUploading(prev => ({ ...prev, [field]: true }))
+
       // 文件大小检查（限制为5MB）
       if (file.size > 5 * 1024 * 1024) {
         alert('文件大小不能超过5MB')
@@ -63,20 +74,94 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
         return
       }
 
-      // 转换为base64数据URL
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const dataUrl = e.target?.result as string
-        handleChange(field, dataUrl)
+      // 获取认证token
+      const token = localStorage.getItem('adminToken') || 
+                   (localStorage.getItem('supabase.auth.token') && 
+                    JSON.parse(localStorage.getItem('supabase.auth.token')!).access_token)
+
+      if (!token) {
+        alert('未找到认证信息，请重新登录')
+        return
       }
-      reader.onerror = () => {
-        alert('文件读取失败')
+
+      // 创建FormData，包含文件和类型信息
+      const uploadFormData = new FormData()
+      uploadFormData.append('image', file)
+      uploadFormData.append('type', field === 'site_logo' ? 'logo' : 'favicon')
+
+      // 上传站点资源到专用端点
+      const response = await fetch('/api/admin/upload/site-asset', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: uploadFormData
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        // 使用固定的文件路径（自动覆盖旧文件）
+        handleChange(field, result.data.path)
+        console.log(`站点${result.data.type}上传成功:`, result.data)
+        
+        // 图片上传成功后，自动保存到数据库，确保前台能立即获取最新设置
+        try {
+          const settingsToSave = {
+            'basic.siteName': formData.site_name,
+            'basic.siteDescription': formData.site_description,
+            'basic.siteLogo': field === 'site_logo' ? result.data.path : formData.site_logo,
+            'basic.siteFavicon': field === 'site_favicon' ? result.data.path : formData.site_favicon
+          }
+          
+          console.log('自动保存图片设置到数据库:', settingsToSave)
+          // 直接保存到数据库，不等待全局保存按钮
+          await fetch('/api/admin/settings', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(settingsToSave)
+          })
+          
+          console.log('图片设置已自动保存到数据库')
+        } catch (saveError) {
+          console.warn('自动保存图片设置失败，但图片已上传成功:', saveError)
+        }
+        
+        // 添加时间戳参数避免浏览器缓存
+        const pathWithTimestamp = `${result.data.path}?t=${Date.now()}`
+        
+        // 立即更新预览显示
+        setTimeout(() => {
+          const imgElements = document.querySelectorAll(`img[src*="${result.data.path.split('?')[0]}"]`)
+          imgElements.forEach(img => {
+            (img as HTMLImageElement).src = pathWithTimestamp
+          })
+        }, 100)
+        
+        // 清空前台设置缓存，强制重新获取最新数据
+        setTimeout(() => {
+          // 触发前台设置缓存清理
+          if (typeof (window as any).clearSettingsCache === 'function') {
+            (window as any).clearSettingsCache()
+            console.log('已清除前台设置缓存，前台将自动获取最新图片')
+          } else {
+            console.log('图片上传完成，前台将在缓存过期后获取最新设置')
+          }
+        }, 500)
+        
+      } else {
+        throw new Error(result.error || '上传失败')
       }
-      reader.readAsDataURL(file)
 
     } catch (error) {
       console.error('文件上传失败:', error)
-      alert('文件上传失败')
+      alert(`文件上传失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    } finally {
+      // 清除上传状态
+      setUploading(prev => ({ ...prev, [field]: false }))
     }
   }
 
@@ -151,8 +236,10 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
             <div className="flex items-center space-x-2">
               <button
                 type="button"
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={uploading.site_logo}
+                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 onClick={() => {
+                  if (uploading.site_logo) return
                   const input = document.createElement('input')
                   input.type = 'file'
                   input.accept = 'image/*'
@@ -163,8 +250,10 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
                   input.click()
                 }}
               >
-                <Upload className="w-4 h-4" />
-                <span>{t('admin.settings.basic.uploadLogo')}</span>
+                <Upload className={`w-4 h-4 ${uploading.site_logo ? 'animate-spin' : ''}`} />
+                <span>
+                  {uploading.site_logo ? '上传中...' : t('admin.settings.basic.uploadLogo')}
+                </span>
               </button>
               {formData.site_logo && formData.site_logo !== defaultData.site_logo && (
                 <button
@@ -200,8 +289,10 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
             <div className="flex items-center space-x-2">
               <button
                 type="button"
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={uploading.site_favicon}
+                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 onClick={() => {
+                  if (uploading.site_favicon) return
                   const input = document.createElement('input')
                   input.type = 'file'
                   input.accept = '.ico,.png,.gif,.jpg,.jpeg'
@@ -212,8 +303,10 @@ const BasicSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
                   input.click()
                 }}
               >
-                <Image className="w-4 h-4" />
-                <span>{t('admin.settings.basic.uploadFavicon')}</span>
+                <Image className={`w-4 h-4 ${uploading.site_favicon ? 'animate-spin' : ''}`} />
+                <span>
+                  {uploading.site_favicon ? '上传中...' : t('admin.settings.basic.uploadFavicon')}
+                </span>
               </button>
               {formData.site_favicon && formData.site_favicon !== defaultData.site_favicon && (
                 <button

@@ -6,22 +6,22 @@ import { SettingsSectionProps, UserSettingsData } from './types'
 const UserSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {
   const { t } = useLanguage()
   const [formData, setFormData] = useState<UserSettingsData>({
-    allow_registration: settings?.allow_registration || false,
-    require_email_verification: settings?.require_email_verification || false,
-    default_user_role: settings?.default_user_role || 'user',
-    max_posts_per_day: settings?.max_posts_per_day || 10,
-    max_file_size_mb: settings?.max_file_size_mb || 10
+    allow_registration: settings?.allow_registration?.value || false,
+    require_email_verification: settings?.require_email_verification?.value || false,
+    default_user_role: settings?.default_user_role?.value || 'user',
+    max_posts_per_day: settings?.max_posts_per_day?.value || 10,
+    max_file_size_mb: settings?.max_file_size_mb?.value || 10
   })
 
   // 同步settings变化到formData
   React.useEffect(() => {
     if (settings) {
       setFormData({
-        allow_registration: settings.allow_registration,
-        require_email_verification: settings.require_email_verification,
-        default_user_role: settings.default_user_role,
-        max_posts_per_day: settings.max_posts_per_day,
-        max_file_size_mb: settings.max_file_size_mb
+        allow_registration: settings.allow_registration?.value || false,
+        require_email_verification: settings.require_email_verification?.value || false,
+        default_user_role: settings.default_user_role?.value || 'user',
+        max_posts_per_day: settings.max_posts_per_day?.value || 10,
+        max_file_size_mb: settings.max_file_size_mb?.value || 10
       })
     }
   }, [settings])
