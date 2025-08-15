@@ -295,9 +295,9 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
                 onChange={(e) => setUserData(prev => ({ ...prev, role: e.target.value as NewUserData['role'] }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="user">{t('admin.users.role.user')}</option>
-                <option value="moderator">{t('admin.users.role.moderator')}</option>
-                <option value="admin">{t('admin.users.role.admin')}</option>
+                <option value="user">{t('admin.usersManagement.role.user')}</option>
+                <option value="moderator">{t('admin.usersManagement.role.moderator')}</option>
+                <option value="admin">{t('admin.usersManagement.role.admin')}</option>
               </select>
             </div>
 
@@ -310,10 +310,10 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
                 onChange={(e) => setUserData(prev => ({ ...prev, status: e.target.value as NewUserData['status'] }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="active">{t('admin.users.status.active')}</option>
-                <option value="pending">{t('admin.users.status.pending')}</option>
-                <option value="suspended">{t('admin.users.status.suspended')}</option>
-                <option value="banned">{t('admin.users.status.banned')}</option>
+                <option value="active">{t('admin.usersManagement.status.active')}</option>
+                <option value="pending">{t('admin.usersManagement.status.pending')}</option>
+                <option value="suspended">{t('admin.usersManagement.status.suspended')}</option>
+                <option value="banned">{t('admin.usersManagement.status.banned')}</option>
               </select>
             </div>
           </div>

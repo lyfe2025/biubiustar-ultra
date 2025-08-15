@@ -27,10 +27,10 @@ const UserList: React.FC<UserListProps> = ({
 
   const getStatusBadge = (status: UserType['status']) => {
     const configs = {
-      active: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: t('admin.users.status.active') },
-      suspended: { color: 'bg-yellow-100 text-yellow-800', icon: Ban, text: t('admin.users.status.suspended') },
-      banned: { color: 'bg-red-100 text-red-800', icon: XCircle, text: t('admin.users.status.banned') },
-      pending: { color: 'bg-gray-100 text-gray-800', icon: Calendar, text: t('admin.users.status.pending') }
+      active: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: t('admin.usersManagement.status.active') },
+      suspended: { color: 'bg-yellow-100 text-yellow-800', icon: Ban, text: t('admin.usersManagement.status.suspended') },
+      banned: { color: 'bg-red-100 text-red-800', icon: XCircle, text: t('admin.usersManagement.status.banned') },
+      pending: { color: 'bg-gray-100 text-gray-800', icon: Calendar, text: t('admin.usersManagement.status.pending') }
     }
     const config = configs[status]
     const Icon = config.icon
@@ -45,9 +45,9 @@ const UserList: React.FC<UserListProps> = ({
 
   const getRoleBadge = (role: UserType['role']) => {
     const configs = {
-      admin: { color: 'bg-purple-100 text-purple-800', text: t('admin.users.role.admin') },
-      moderator: { color: 'bg-blue-100 text-blue-800', text: t('admin.users.role.moderator') },
-      user: { color: 'bg-gray-100 text-gray-800', text: t('admin.users.role.user') }
+      admin: { color: 'bg-purple-100 text-purple-800', text: t('admin.usersManagement.role.admin') },
+      moderator: { color: 'bg-blue-100 text-blue-800', text: t('admin.usersManagement.role.moderator') },
+      user: { color: 'bg-gray-100 text-gray-800', text: t('admin.usersManagement.role.user') }
     }
     const config = configs[role]
     
@@ -81,25 +81,25 @@ const UserList: React.FC<UserListProps> = ({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.users.table.user')}
+                {t('admin.usersManagement.table.user')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.users.table.contact')}
+                {t('admin.usersManagement.table.contact')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.users.table.status')}
+                {t('admin.usersManagement.table.status')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.users.table.role')}
+                {t('admin.usersManagement.table.role')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.users.table.stats')}
+                {t('admin.usersManagement.table.stats')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.users.table.joined')}
+                {t('admin.usersManagement.table.joined')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.users.table.actions')}
+                {t('admin.usersManagement.table.actions')}
               </th>
             </tr>
           </thead>

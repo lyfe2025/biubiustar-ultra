@@ -114,6 +114,24 @@ export const activitiesTranslations = {
         cancelled: '已取消'
       },
 
+      // 活動分類
+      categories: {
+        全部: '全部',
+        文化交流: '文化交流',
+        技術分享: '技術分享',
+        戶外運動: '戶外運動',
+        美食聚會: '美食聚會',
+        學習交流: '學習交流',
+        娛樂活動: '娛樂活動',
+        志願服務: '志願服務',
+        商務網絡: '商務網絡',
+        藝術創作: '藝術創作',
+        其他: '其他'
+      },
+
+      loading: '加載中...',
+      noActivities: '暫無活動',
+
       details: {
         participants: '參與者',
         organizer: '主辦方',
@@ -182,6 +200,23 @@ export const activitiesTranslations = {
         cancelled: 'Cancelled'
       },
 
+      // Activity Categories
+      categories: {
+        全部: 'All',
+        文化交流: 'Cultural Exchange',
+        技术分享: 'Tech Sharing',
+        户外运动: 'Outdoor Sports',
+        美食聚会: 'Food Gathering',
+        学习交流: 'Learning Exchange',
+        娱乐活动: 'Entertainment',
+        志愿服务: 'Volunteer Service',
+        商务网络: 'Business Network',
+        艺术创作: 'Art Creation',
+        其他: 'Others'
+      },
+
+      noActivities: 'No activities',
+
       details: {
         participants: 'Participants',
         organizer: 'Organizer',
@@ -249,6 +284,23 @@ export const activitiesTranslations = {
         completed: 'Đã hoàn thành',
         cancelled: 'Đã hủy'
       },
+
+      // Danh mục hoạt động
+      categories: {
+        全部: 'Tất cả',
+        文化交流: 'Giao lưu văn hóa',
+        技术分享: 'Chia sẻ công nghệ',
+        户外运动: 'Thể thao ngoài trời',
+        美食聚会: 'Tụ tập ẩm thực',
+        学习交流: 'Giao lưu học tập',
+        娱乐活动: 'Hoạt động giải trí',
+        志愿服务: 'Dịch vụ tình nguyện',
+        商务网络: 'Mạng lưới kinh doanh',
+        艺术创作: 'Sáng tác nghệ thuật',
+        其他: 'Khác'
+      },
+
+      noActivities: 'Không có hoạt động',
 
       details: {
         participants: 'Người tham gia',

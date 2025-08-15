@@ -4,11 +4,22 @@ export const profileTranslations = {
     profile: {
       title: '个人资料',
       subtitle: '管理您的个人信息和设置',
+      noProfile: '暂无个人资料',
+      createProfile: '创建个人资料',
       editProfile: '编辑资料',
       viewProfile: '查看资料',
       createPost: '发布帖子',
       notLoggedIn: '您尚未登录',
       pleaseLogin: '请先登录以查看个人资料',
+      statistics: '统计信息',
+      noActivities: '暂无活动',
+      joinFirstActivity: '参与第一个活动',
+      myActivities: '我的活动',
+      untitledActivity: '未命名活动',
+      participants: '参与者',
+      endsOn: '结束于',
+      noPosts: '暂无帖子',
+      createFirstPost: '发布第一篇帖子',
       
       // 标签页
       tabs: {

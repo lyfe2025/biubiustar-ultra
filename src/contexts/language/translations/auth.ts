@@ -17,6 +17,11 @@ export const authTranslations = {
       hasAccount: '已有账户？',
       signUp: '注册',
       signIn: '登录',
+      resetPassword: '重置密码',
+      sendResetEmail: '发送重置邮件',
+      rememberedPassword: '想起密码了？',
+      backToLogin: '返回登录',
+      usernamePlaceholder: '请输入用户名',
       
       // Placeholder文本
       emailPlaceholder: '请输入邮箱地址',
@@ -113,6 +118,11 @@ export const authTranslations = {
       hasAccount: '已有帳戶？',
       signUp: '註冊',
       signIn: '登入',
+      resetPassword: '重置密碼',
+      sendResetEmail: '發送重置郵件',
+      rememberedPassword: '想起密碼了？',
+      backToLogin: '返回登入',
+      usernamePlaceholder: '請輸入用戶名',
       
       emailPlaceholder: '請輸入郵箱地址',
       passwordPlaceholder: '請輸入密碼',
@@ -203,6 +213,11 @@ export const authTranslations = {
       hasAccount: 'Already have an account?',
       signUp: 'Sign Up',
       signIn: 'Sign In',
+      resetPassword: 'Reset Password',
+      sendResetEmail: 'Send Reset Email',
+      rememberedPassword: 'Remembered password?',
+      backToLogin: 'Back to Login',
+      usernamePlaceholder: 'Enter username',
       
       emailPlaceholder: 'Enter your email',
       passwordPlaceholder: 'Enter your password',
@@ -293,6 +308,11 @@ export const authTranslations = {
       hasAccount: 'Đã có tài khoản?',
       signUp: 'Đăng ký',
       signIn: 'Đăng nhập',
+      resetPassword: 'Đặt lại mật khẩu',
+      sendResetEmail: 'Gửi email đặt lại',
+      rememberedPassword: 'Đã nhớ mật khẩu?',
+      backToLogin: 'Quay lại đăng nhập',
+      usernamePlaceholder: 'Nhập tên người dùng',
       
       emailPlaceholder: 'Nhập email của bạn',
       passwordPlaceholder: 'Nhập mật khẩu',
