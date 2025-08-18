@@ -18,6 +18,7 @@ export const adminActivitiesTranslations = {
         completedActivities: '已完成活动',
         totalParticipants: '参与人数',
         noActivities: '暂无活动',
+        noCategories: '暂无分类',
         searchPlaceholder: '搜索活动...',
         allStatus: '所有状态',
         allCategories: '所有分类',
@@ -137,6 +138,7 @@ export const adminActivitiesTranslations = {
         completedActivities: '已完成活動',
         totalParticipants: '參與人數',
         noActivities: '暫無活動',
+        noCategories: '暫無分類',
         tabs: {
           activities: '活動',
           categories: '分類'

@@ -6,6 +6,7 @@ export const commonTranslations = {
       actions: {
         save: '保存',
         cancel: '取消',
+        create: '创建',
         submit: '提交',
         edit: '编辑',
         delete: '删除',
@@ -140,6 +141,7 @@ export const commonTranslations = {
       actions: {
         save: '保存',
         cancel: '取消',
+        create: '創建',
         submit: '提交',
         edit: '編輯',
         delete: '刪除',

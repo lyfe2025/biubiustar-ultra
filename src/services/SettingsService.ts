@@ -58,7 +58,7 @@ class SettingsService {
   private cacheTimeout = 5 * 60 * 1000 // 5分钟缓存
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+    this.baseUrl = import.meta.env.VITE_API_URL || ''
   }
 
   /**
@@ -74,7 +74,7 @@ class SettingsService {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/api/settings/public`, {
+      const response = await fetch(this.baseUrl ? `${this.baseUrl}/api/settings/public` : '/api/settings/public', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
