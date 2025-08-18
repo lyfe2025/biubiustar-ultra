@@ -210,7 +210,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response): Promise
       current_participants: 0,
       user_id,
       category: category || 'other',
-      status: 'active'
+      status: 'published'
     };
 
     const { data, error } = await userSupabase

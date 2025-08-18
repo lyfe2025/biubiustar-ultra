@@ -2,6 +2,13 @@
 export const commonTranslations = {
   zh: {
     common: {
+      // 基础操作（根级别）
+      cancel: '取消',
+      delete: '删除',
+      save: '保存',
+      edit: '编辑',
+      create: '创建',
+      
       // 通用操作
       actions: {
         save: '保存',
@@ -138,6 +145,13 @@ export const commonTranslations = {
   },
   'zh-TW': {
     common: {
+      // 基礎操作（根級別）
+      cancel: '取消',
+      delete: '刪除',
+      save: '保存',
+      edit: '編輯',
+      create: '創建',
+      
       actions: {
         save: '保存',
         cancel: '取消',
@@ -267,6 +281,13 @@ export const commonTranslations = {
   },
   en: {
     common: {
+      // Basic actions (root level)
+      cancel: 'Cancel',
+      delete: 'Delete',
+      save: 'Save',
+      edit: 'Edit',
+      create: 'Create',
+      
       actions: {
         save: 'Save',
         cancel: 'Cancel',
@@ -395,6 +416,13 @@ export const commonTranslations = {
   },
   vi: {
     common: {
+      // Hành động cơ bản (cấp gốc)
+      cancel: 'Hủy',
+      delete: 'Xóa',
+      save: 'Lưu',
+      edit: 'Chỉnh sửa',
+      create: 'Tạo',
+      
       actions: {
         save: 'Lưu',
         cancel: 'Hủy',

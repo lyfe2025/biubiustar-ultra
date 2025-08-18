@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
 import { Activity, ActivityService } from '../lib/activityService';
 import { ActivityCard } from '../components/ActivityCard';
-import { CreateActivityModal } from '../components/CreateActivityModal';
-import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/language';
 import { toast } from 'sonner';
 import { usePageTitle } from '../hooks/usePageTitle';
 
 const Activities = () => {
-  const { user } = useAuth();
   const { t } = useLanguage();
   usePageTitle(t('activities.title'));
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('全部');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('全部');
 
   const categories = ['全部', '文化交流', '技术分享', '户外运动', '美食聚会', '学习交流', '娱乐活动', '志愿服务', '商务网络', '艺术创作', '其他'];
+  const statusOptions = ['全部', '即将开始', '进行中', '已结束'];
 
   useEffect(() => {
     loadActivities();
@@ -37,17 +34,30 @@ const Activities = () => {
     }
   };
 
-  const handleActivityCreated = () => {
-    loadActivities();
+  // 获取活动状态
+  const getActivityStatus = (activity: Activity) => {
+    const now = new Date();
+    const startDate = new Date(activity.start_date);
+    const endDate = new Date(activity.end_date);
+    
+    if (now < startDate) {
+      return '即将开始';
+    } else if (now >= startDate && now <= endDate) {
+      return '进行中';
+    } else {
+      return '已结束';
+    }
   };
 
   const handleParticipationChange = () => {
     loadActivities();
   };
 
-  const filteredActivities = selectedCategory === '全部' 
-    ? activities 
-    : activities.filter(activity => activity.category === selectedCategory);
+  const filteredActivities = activities.filter(activity => {
+    const categoryMatch = selectedCategory === '全部' || activity.category === selectedCategory;
+    const statusMatch = selectedStatus === '全部' || getActivityStatus(activity) === selectedStatus;
+    return categoryMatch && statusMatch;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 pt-20">
@@ -62,35 +72,48 @@ const Activities = () => {
           </p>
         </div>
 
-        {/* 创建活动按钮 */}
-        {user && (
-          <div className="text-center mb-8">
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-purple-500/20"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              {t('activities.createActivity')}
-            </button>
-          </div>
-        )}
+
 
         {/* 活动筛选 */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-4 justify-center">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 backdrop-blur-sm rounded-full border transition-all duration-300 ${
-                  selectedCategory === category
-                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-500 shadow-lg'
-                    : 'bg-white/80 text-gray-600 border-gray-200 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-300'
-                }`}
-              >
-                {t(`activities.categories.${category}`)}
-              </button>
-            ))}
+        <div className="mb-8 space-y-6">
+          {/* 状态筛选 */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center">按状态筛选</h3>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {statusOptions.map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setSelectedStatus(status)}
+                  className={`px-4 py-2 backdrop-blur-sm rounded-full border transition-all duration-300 ${
+                    selectedStatus === status
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-500 shadow-lg'
+                      : 'bg-white/80 text-gray-600 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300'
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* 分类筛选 */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center">按分类筛选</h3>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 backdrop-blur-sm rounded-full border transition-all duration-300 ${
+                    selectedCategory === category
+                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-500 shadow-lg'
+                      : 'bg-white/80 text-gray-600 border-gray-200 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-300'
+                  }`}
+                >
+                  {t(`activities.categories.${category}`)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -105,15 +128,7 @@ const Activities = () => {
             <p className="text-gray-600 text-lg mb-4">
               {selectedCategory === '全部' ? t('activities.noActivities') : `${t('activities.noActivitiesFor')}${selectedCategory}${t('activities.activities')}`}
             </p>
-            {user && (
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-purple-500/20"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                {t('activities.createFirstActivity')}
-              </button>
-            )}
+
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -128,12 +143,7 @@ const Activities = () => {
         )}
       </div>
 
-      {/* 创建活动弹窗 */}
-      <CreateActivityModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onActivityCreated={handleActivityCreated}
-      />
+
     </div>
   );
 };

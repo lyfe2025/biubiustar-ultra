@@ -82,20 +82,49 @@ export class AuthService {
   // 用户登出
   static async signOut() {
     try {
+      // 获取存储的token
+      const sessionData = localStorage.getItem('supabase.auth.token');
+      let token = '';
+      
+      if (sessionData) {
+        try {
+          const session = JSON.parse(sessionData);
+          token = session.access_token || '';
+        } catch (parseError) {
+          console.warn('解析session数据失败:', parseError);
+        }
+      }
+
+      // 如果没有token，直接清除本地数据即可
+      if (!token) {
+        console.warn('未找到有效的访问令牌，直接清除本地数据');
+        localStorage.removeItem('supabase.auth.token');
+        return;
+      }
+
       const response = await fetch(`${this.API_BASE}/logout`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
 
       const result = await response.json();
       
       if (!result.success) {
-        throw new Error(result.message || '登出失败');
+        // 即使服务器端登出失败，我们也应该清除本地token
+        console.warn('服务器端登出失败，但会清除本地token:', result.message);
       }
+      
+      // 无论服务器端登出是否成功，都清除本地存储
+      localStorage.removeItem('supabase.auth.token');
+      
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : '登出失败');
+      // 即使出现错误，也要确保清除本地token
+      localStorage.removeItem('supabase.auth.token');
+      console.warn('登出过程中出现错误，已清除本地token:', error);
+      // 不抛出错误，因为用户体验上我们希望总是能"成功"登出
     }
   }
 

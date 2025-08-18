@@ -114,7 +114,7 @@ router.put('/:id/status', async (req: Request, res: Response): Promise<Response 
     const { id } = req.params
     const { status } = req.body
 
-    if (!['active', 'cancelled', 'completed', 'pending'].includes(status)) {
+    if (!['published', 'draft', 'cancelled', 'active', 'completed', 'pending'].includes(status)) {
       return res.status(400).json({ error: '无效的状态值' })
     }
 
@@ -219,6 +219,14 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
       }
     }
 
+    // 从认证中间件获取当前用户ID
+    const currentUserId = (req as any).user?.id
+    if (!currentUserId) {
+      return res.status(401).json({ 
+        error: '无法获取当前用户信息，请重新登录' 
+      })
+    }
+
     // 创建活动
     const { data: activity, error } = await supabaseAdmin
       .from('activities')
@@ -231,8 +239,8 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
         category: activityCategory,
         max_participants: max_participants || null,
         image_url: image_url || null,
-        user_id: user_id || null, // 如果没有指定用户ID，则为系统创建
-        status: 'active',
+        user_id: currentUserId, // 使用当前认证用户的ID
+        status: 'published',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })

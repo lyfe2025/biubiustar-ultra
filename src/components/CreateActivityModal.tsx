@@ -109,7 +109,7 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
         location: formData.location,
         max_participants: formData.max_participants,
         category: formData.category,
-        user_id: user.id
+        user_id: '' // 后端会自动使用认证用户的ID，这里传空字符串
       });
       
       toast.success('活动创建成功！');
@@ -127,9 +127,26 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
         max_participants: 10,
         category: ''
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating activity:', error);
-      toast.error('创建活动失败，请重试');
+      
+      // 根据错误类型提供具体的用户反馈
+      let errorMessage = '创建活动失败，请重试';
+      
+      if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.response?.status === 401) {
+        errorMessage = '登录已过期，请重新登录';
+        // 可以在这里添加跳转到登录页面的逻辑
+      } else if (error?.response?.status === 400) {
+        errorMessage = '输入信息有误，请检查后重试';
+      } else if (error?.response?.status === 500) {
+        errorMessage = '服务器错误，请稍后重试';
+      } else if (error?.message) {
+        errorMessage = `创建失败: ${error.message}`;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

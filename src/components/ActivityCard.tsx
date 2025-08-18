@@ -86,8 +86,24 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
     }
   };
 
+  // 获取活动状态
+  const getActivityStatus = () => {
+    const now = new Date();
+    const startDate = new Date(activity.start_date);
+    const endDate = new Date(activity.end_date);
+    
+    if (now < startDate) {
+      return { status: '即将开始', color: 'bg-blue-500/30 text-blue-200' };
+    } else if (now >= startDate && now <= endDate) {
+      return { status: '进行中', color: 'bg-green-500/30 text-green-200' };
+    } else {
+      return { status: '已结束', color: 'bg-gray-500/30 text-gray-300' };
+    }
+  };
+
+  const activityStatus = getActivityStatus();
   const isActivityFull = participantCount >= activity.max_participants;
-  const isActivityPast = new Date(activity.start_date) < new Date();
+  const isActivityPast = activityStatus.status === '已结束';
 
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
@@ -106,9 +122,14 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
       <div className="mb-3">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xl font-bold text-white">{activity.title}</h3>
-          <span className="px-3 py-1 bg-purple-500/30 text-purple-200 rounded-full text-sm">
-            {activity.category}
-          </span>
+          <div className="flex gap-2">
+            <span className={`px-3 py-1 rounded-full text-sm ${activityStatus.color}`}>
+              {activityStatus.status}
+            </span>
+            <span className="px-3 py-1 bg-purple-500/30 text-purple-200 rounded-full text-sm">
+              {activity.category}
+            </span>
+          </div>
         </div>
         
         {/* 作者信息 */}
@@ -149,12 +170,16 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
           )}
         </div>
         
-        {isActivityPast && (
-          <div className="flex items-center text-gray-400">
-            <Clock className="w-4 h-4 mr-2" />
-            <span className="text-sm">活动已结束</span>
-          </div>
-        )}
+        <div className="flex items-center text-gray-300">
+          <Clock className="w-4 h-4 mr-2" />
+          <span className={`text-sm font-medium ${
+            activityStatus.status === '进行中' ? 'text-green-300' :
+            activityStatus.status === '即将开始' ? 'text-blue-300' :
+            'text-gray-400'
+          }`}>
+            状态：{activityStatus.status}
+          </span>
+        </div>
       </div>
 
       {/* 参与按钮 */}

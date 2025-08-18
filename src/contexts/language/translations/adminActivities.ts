@@ -16,7 +16,8 @@ export const adminActivitiesTranslations = {
         status: {
           draft: '草稿',
           published: '已发布',
-          cancelled: '已取消'
+          cancelled: '已取消',
+          active: '活跃'
         },
         participants: '参与者',
         totalActivities: '活动总数',
@@ -66,6 +67,9 @@ export const adminActivitiesTranslations = {
         createCategoryFailed: '创建分类失败',
         updateCategoryFailed: '更新分类失败',
         deleteCategoryFailed: '删除分类失败',
+        deleteCategory: '删除分类',
+        deleteCategoryConfirm: '确定要删除这个分类吗？',
+        editCategory: '编辑分类',
         // 表单相关
         form: {
           title: '活动标题',
@@ -112,7 +116,8 @@ export const adminActivitiesTranslations = {
           save: '保存',
           edit: '编辑',
           delete: '删除',
-          view: '查看'
+          view: '查看',
+          creating: '创建中...'
         },
         // 消息提示
         messages: {
@@ -142,7 +147,8 @@ export const adminActivitiesTranslations = {
         status: {
           draft: '草稿',
           published: '已發布',
-          cancelled: '已取消'
+          cancelled: '已取消',
+          active: '活躍'
         },
         participants: '參與者',
         totalActivities: '活動總數',
@@ -189,6 +195,9 @@ export const adminActivitiesTranslations = {
         createCategoryFailed: '創建分類失敗',
         updateCategoryFailed: '更新分類失敗',
         deleteCategoryFailed: '刪除分類失敗',
+        deleteCategory: '刪除分類',
+        deleteCategoryConfirm: '確定要刪除這個分類嗎？',
+        editCategory: '編輯分類',
         // 表單相關
         form: {
           title: '活動標題',
@@ -235,7 +244,8 @@ export const adminActivitiesTranslations = {
           save: '保存',
           edit: '編輯',
           delete: '刪除',
-          view: '查看'
+          view: '查看',
+          creating: '創建中...'
         },
         // 消息提示
         messages: {
@@ -265,7 +275,8 @@ export const adminActivitiesTranslations = {
         status: {
           draft: 'Draft',
           published: 'Published',
-          cancelled: 'Cancelled'
+          cancelled: 'Cancelled',
+          active: 'Active'
         },
         participants: 'Participants',
         totalActivities: 'Total Activities',
@@ -311,6 +322,9 @@ export const adminActivitiesTranslations = {
         createCategoryFailed: 'Failed to create category',
         updateCategoryFailed: 'Failed to update category',
         deleteCategoryFailed: 'Failed to delete category',
+        deleteCategory: 'Delete Category',
+        deleteCategoryConfirm: 'Are you sure you want to delete this category?',
+        editCategory: 'Edit Category',
         // Form related
         form: {
           title: 'Activity Title',
@@ -357,7 +371,8 @@ export const adminActivitiesTranslations = {
           save: 'Save',
           edit: 'Edit',
           delete: 'Delete',
-          view: 'View'
+          view: 'View',
+          creating: 'Creating...'
         },
         // Messages
         messages: {
@@ -387,7 +402,8 @@ export const adminActivitiesTranslations = {
         status: {
           draft: 'Bản nháp',
           published: 'Đã xuất bản',
-          cancelled: 'Đã hủy'
+          cancelled: 'Đã hủy',
+          active: 'Hoạt động'
         },
         participants: 'Người tham gia',
         totalActivities: 'Tổng số hoạt động',
@@ -433,6 +449,9 @@ export const adminActivitiesTranslations = {
         createCategoryFailed: 'Tạo danh mục thất bại',
         updateCategoryFailed: 'Cập nhật danh mục thất bại',
         deleteCategoryFailed: 'Xóa danh mục thất bại',
+        deleteCategory: 'Xóa danh mục',
+        deleteCategoryConfirm: 'Bạn có chắc chắn muốn xóa danh mục này?',
+        editCategory: 'Chỉnh sửa danh mục',
         // Biểu mẫu liên quan
         form: {
           title: 'Tiêu đề hoạt động',
@@ -479,7 +498,8 @@ export const adminActivitiesTranslations = {
           save: 'Lưu',
           edit: 'Chỉnh sửa',
           delete: 'Xóa',
-          view: 'Xem'
+          view: 'Xem',
+          creating: 'Đang tạo...'
         },
         // Thông báo
         messages: {

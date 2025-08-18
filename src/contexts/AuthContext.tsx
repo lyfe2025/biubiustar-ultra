@@ -131,11 +131,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async () => {
     try {
       setLoading(true);
+      
+      // 调用AuthService的登出方法（它会处理服务器端登出和本地token清除）
       await AuthService.signOut();
+      
+      // 重置用户状态
       setUser(null);
       setUserProfile(null);
       setSession(null);
-      // 清除本地存储的会话信息
+      
+      // 确保本地存储被清除（AuthService.signOut已经做了，但这里作为保险）
+      localStorage.removeItem('supabase.auth.token');
+      
+      console.log('用户已成功登出');
+    } catch (error) {
+      // 即使出现错误，也要确保用户状态被重置
+      console.warn('登出过程中出现错误，但用户状态仍会被重置:', error);
+      setUser(null);
+      setUserProfile(null);
+      setSession(null);
       localStorage.removeItem('supabase.auth.token');
     } finally {
       setLoading(false);
