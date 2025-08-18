@@ -66,14 +66,14 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
     setIsLoading(true);
     try {
       if (isParticipating) {
-        const success = await ActivityService.leaveActivity(activity.id, user.id);
-        if (success) {
+        const result = await ActivityService.leaveActivity(activity.id, user.id);
+        if (result.success) {
           setIsParticipating(false);
           setParticipantCount(prev => Math.max(0, prev - 1));
           toast.success('已退出活动');
           onParticipationChange?.();
         } else {
-          toast.error('退出活动失败');
+          toast.error(`退出活动失败: ${result.error || '未知错误'}`);
         }
       } else {
         if (participantCount >= activity.max_participants) {
@@ -81,14 +81,25 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
           return;
         }
         
-        const success = await ActivityService.joinActivity(activity.id, user.id);
-        if (success) {
+        const result = await ActivityService.joinActivity(activity.id, user.id);
+        if (result.success) {
           setIsParticipating(true);
           setParticipantCount(prev => prev + 1);
           toast.success(t('activities.messages.joinSuccess'));
           onParticipationChange?.();
         } else {
-          toast.error(t('activities.messages.joinFailed'));
+          // 根据错误类型显示不同的错误信息
+          let errorMessage = result.error || '未知错误';
+          if (errorMessage.includes('Activity not found')) {
+            errorMessage = '活动不存在';
+          } else if (errorMessage.includes('Activity is full')) {
+            errorMessage = '活动人数已满';
+          } else if (errorMessage.includes('User already joined')) {
+            errorMessage = '您已经参加了此活动';
+          } else if (errorMessage.includes('Network error')) {
+            errorMessage = '网络连接失败，请检查网络后重试';
+          }
+          toast.error(`参加活动失败: ${errorMessage}`);
         }
       }
     } catch (error) {

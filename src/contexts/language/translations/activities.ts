@@ -83,7 +83,13 @@ export const activitiesTranslations = {
         operationFailed: '操作失败，请重试',
         activityFull: '活动人数已满',
         createSuccess: '活动创建成功！',
-        createFailed: '创建活动失败，请重试'
+        createFailed: '创建活动失败，请重试',
+        activityNotFound: '活动不存在',
+        alreadyJoined: '您已参加此活动',
+        notJoined: '您未参加此活动',
+        permissionDenied: '权限不足',
+        networkError: '网络错误，请稍后重试',
+        deleteConfirm: '确定要删除这个活动吗？'
       },
 
       // 界面文本
@@ -211,7 +217,13 @@ export const activitiesTranslations = {
         operationFailed: '操作失敗，請重試',
         activityFull: '活動人數已滿',
         createSuccess: '活動創建成功！',
-        createFailed: '創建活動失敗，請重試'
+        createFailed: '創建活動失敗，請重試',
+        activityNotFound: '活動不存在',
+        alreadyJoined: '您已參加此活動',
+        notJoined: '您未參加此活動',
+        permissionDenied: '權限不足',
+        networkError: '網絡錯誤，請稍後重試',
+        deleteConfirm: '確定要刪除這個活動嗎？'
       },
 
       // 界面文本
@@ -338,7 +350,13 @@ export const activitiesTranslations = {
         operationFailed: 'Operation failed, please try again',
         activityFull: 'Activity is full',
         createSuccess: 'Activity created successfully!',
-        createFailed: 'Failed to create activity, please try again'
+        createFailed: 'Failed to create activity, please try again',
+        activityNotFound: 'Activity not found',
+        alreadyJoined: 'You have already joined this activity',
+        notJoined: 'You have not joined this activity',
+        permissionDenied: 'Permission denied',
+        networkError: 'Network error, please try again later',
+        deleteConfirm: 'Are you sure you want to delete this activity?'
       },
 
       // UI Text
@@ -465,7 +483,13 @@ export const activitiesTranslations = {
         operationFailed: 'Thao tác thất bại, vui lòng thử lại',
         activityFull: 'Hoạt động đã đầy',
         createSuccess: 'Tạo hoạt động thành công!',
-        createFailed: 'Tạo hoạt động thất bại, vui lòng thử lại'
+        createFailed: 'Tạo hoạt động thất bại, vui lòng thử lại',
+        activityNotFound: 'Không tìm thấy hoạt động',
+        alreadyJoined: 'Bạn đã tham gia hoạt động này',
+        notJoined: 'Bạn chưa tham gia hoạt động này',
+        permissionDenied: 'Không có quyền truy cập',
+        networkError: 'Lỗi mạng, vui lòng thử lại sau',
+        deleteConfirm: 'Bạn có chắc chắn muốn xóa hoạt động này?'
       },
 
       // Văn bản giao diện

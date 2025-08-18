@@ -83,8 +83,8 @@ const ActivityDetail: React.FC = () => {
     
     setProcessing(true);
     try {
-      const success = await ActivityService.joinActivity(activity.id, user.id);
-      if (success) {
+      const result = await ActivityService.joinActivity(activity.id, user.id);
+      if (result.success) {
         setIsParticipating(true);
         setActivity(prev => prev ? {
           ...prev,
@@ -92,11 +92,22 @@ const ActivityDetail: React.FC = () => {
         } : null);
         toast.success(t('activities.messages.joinSuccess'));
       } else {
-        toast.error(t('activities.messages.joinFailed'));
+        // 根据错误类型显示不同的错误信息
+        let errorMessage = result.error || '未知错误';
+        if (errorMessage.includes('Activity not found')) {
+          errorMessage = '活动不存在';
+        } else if (errorMessage.includes('Activity is full')) {
+          errorMessage = '活动人数已满';
+        } else if (errorMessage.includes('User already joined')) {
+          errorMessage = '您已经参加了此活动';
+        } else if (errorMessage.includes('Network error')) {
+          errorMessage = '网络连接失败，请检查网络后重试';
+        }
+        toast.error(`参加活动失败: ${errorMessage}`);
       }
     } catch (error) {
       console.error('Failed to join activity:', error);
-      toast.error(t('activities.messages.joinFailed'));
+      toast.error('参加活动失败: 网络连接异常');
     } finally {
       setProcessing(false);
     }
@@ -107,8 +118,8 @@ const ActivityDetail: React.FC = () => {
     
     setProcessing(true);
     try {
-      const success = await ActivityService.leaveActivity(activity.id, user.id);
-      if (success) {
+      const result = await ActivityService.leaveActivity(activity.id, user.id);
+      if (result.success) {
         setIsParticipating(false);
         setActivity(prev => prev ? {
           ...prev,
@@ -116,11 +127,11 @@ const ActivityDetail: React.FC = () => {
         } : null);
         toast.success(t('activities.messages.leaveSuccess'));
       } else {
-        toast.error(t('activities.messages.leaveFailed'));
+        toast.error(`退出活动失败: ${result.error || '未知错误'}`);
       }
     } catch (error) {
       console.error('Failed to leave activity:', error);
-      toast.error(t('activities.messages.leaveFailed'));
+      toast.error('退出活动失败: 网络连接异常');
     } finally {
       setProcessing(false);
     }

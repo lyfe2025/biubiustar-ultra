@@ -92,7 +92,7 @@ export class ActivityService {
   }
 
   // 参与活动
-  static async joinActivity(activityId: string, userId: string): Promise<boolean> {
+  static async joinActivity(activityId: string, userId: string): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await fetch(`/api/activities/${activityId}/join`, {
         method: 'POST',
@@ -102,15 +102,20 @@ export class ActivityService {
         body: JSON.stringify({ userId }),
       });
       
-      return response.ok;
+      if (response.ok) {
+        return { success: true };
+      } else {
+        const errorData = await response.json();
+        return { success: false, error: errorData.error || 'Unknown error' };
+      }
     } catch (error) {
       console.error('Error joining activity:', error);
-      return false;
+      return { success: false, error: 'Network error' };
     }
   }
 
   // 取消参与活动
-  static async leaveActivity(activityId: string, userId: string): Promise<boolean> {
+  static async leaveActivity(activityId: string, userId: string): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await fetch(`/api/activities/${activityId}/leave`, {
         method: 'POST',
@@ -120,10 +125,15 @@ export class ActivityService {
         body: JSON.stringify({ userId }),
       });
       
-      return response.ok;
+      if (response.ok) {
+        return { success: true };
+      } else {
+        const errorData = await response.json();
+        return { success: false, error: errorData.error || 'Unknown error' };
+      }
     } catch (error) {
       console.error('Error leaving activity:', error);
-      return false;
+      return { success: false, error: 'Network error' };
     }
   }
 
