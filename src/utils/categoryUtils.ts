@@ -14,7 +14,7 @@ export function getCategoryName(category: ActivityCategory, language: Language):
       return category.name_zh || category.name || '';
     case 'en':
       return category.name_en || category.name || '';
-    case 'zh-tw':
+    case 'zh-TW':
       return category.name_zh_tw || category.name || '';
     case 'vi':
       return category.name_vi || category.name || '';
@@ -36,7 +36,7 @@ export function getCategoryDescription(category: ActivityCategory, language: Lan
       return category.description_zh || category.description || '';
     case 'en':
       return category.description_en || category.description || '';
-    case 'zh-tw':
+    case 'zh-TW':
       return category.description_zh_tw || category.description || '';
     case 'vi':
       return category.description_vi || category.description || '';

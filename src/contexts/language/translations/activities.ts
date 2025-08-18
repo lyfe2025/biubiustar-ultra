@@ -66,7 +66,8 @@ export const activitiesTranslations = {
         edit: '编辑活动',
         delete: '删除活动',
         viewDetails: '查看详情',
-        register: '立即报名'
+        register: '立即报名',
+        backToActivities: '返回活动列表'
       },
 
       // 消息提示
@@ -107,7 +108,10 @@ export const activitiesTranslations = {
         inputImageUrl: '输入图片链接（可选）',
         inputLocation: '输入活动地点',
         creating: '创建中...',
-        required: '*'
+        required: '*',
+        participantsJoined: '人参加',
+        month: '月',
+        day: '日'
       },
 
       // 创建活动
@@ -191,7 +195,8 @@ export const activitiesTranslations = {
         edit: '編輯活動',
         delete: '刪除活動',
         viewDetails: '查看詳情',
-        register: '立即報名'
+        register: '立即報名',
+        backToActivities: '返回活動列表'
       },
 
       messages: {
@@ -231,7 +236,10 @@ export const activitiesTranslations = {
         inputImageUrl: '輸入圖片鏈接（可選）',
         inputLocation: '輸入活動地點',
         creating: '創建中...',
-        required: '*'
+        required: '*',
+        participantsJoined: '人參加',
+        month: '月',
+        day: '日'
       },
 
       create: {
@@ -314,7 +322,8 @@ export const activitiesTranslations = {
         edit: 'Edit Activity',
         delete: 'Delete Activity',
         viewDetails: 'View Details',
-        register: 'Register Now'
+        register: 'Register Now',
+        backToActivities: 'Back to Activities'
       },
 
       messages: {
@@ -354,7 +363,10 @@ export const activitiesTranslations = {
         inputImageUrl: 'Enter image URL (optional)',
         inputLocation: 'Enter activity location',
         creating: 'Creating...',
-        required: '*'
+        required: '*',
+        participantsJoined: 'participants',
+        month: '',
+        day: ''
       },
 
       create: {
@@ -437,7 +449,8 @@ export const activitiesTranslations = {
         edit: 'Chỉnh sửa hoạt động',
         delete: 'Xóa hoạt động',
         viewDetails: 'Xem chi tiết',
-        register: 'Đăng ký ngay'
+        register: 'Đăng ký ngay',
+        backToActivities: 'Quay lại danh sách hoạt động'
       },
 
       messages: {
@@ -477,7 +490,10 @@ export const activitiesTranslations = {
         inputImageUrl: 'Nhập URL hình ảnh (tùy chọn)',
         inputLocation: 'Nhập địa điểm hoạt động',
         creating: 'Đang tạo...',
-        required: '*'
+        required: '*',
+        participantsJoined: 'người tham gia',
+        month: 'tháng',
+        day: 'ngày'
       },
 
       create: {

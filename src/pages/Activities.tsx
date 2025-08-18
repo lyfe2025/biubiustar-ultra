@@ -14,12 +14,12 @@ const Activities = () => {
   const [categories, setCategories] = useState<ActivityCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('全部');
-  const [selectedStatus, setSelectedStatus] = useState('全部');
+  const [selectedCategory, setSelectedCategory] = useState(t('activities.categories.全部'));
+  const [selectedStatus, setSelectedStatus] = useState(t('activities.status.全部'));
 
   // 硬编码分类作为降级处理
-  const fallbackCategories = ['全部', '文化交流', '技术分享', '户外运动', '美食聚会', '学习交流', '娱乐活动', '志愿服务', '商务网络', '艺术创作', '其他'];
-  const statusOptions = ['全部', '即将开始', '进行中', '已结束'];
+  const fallbackCategories = [t('activities.categories.全部'), '文化交流', '技术分享', '户外运动', '美食聚会', '学习交流', '娱乐活动', '志愿服务', '商务网络', '艺术创作', '其他'];
+  const statusOptions = [t('activities.status.全部'), '即将开始', '进行中', '已结束'];
 
   useEffect(() => {
     loadActivities();
@@ -88,11 +88,11 @@ const Activities = () => {
   // 获取显示的分类列表（API分类 + 降级处理）
   const displayCategories = useMemo(() => {
     if (isCategoriesLoading) {
-      return ['全部']; // 加载中只显示全部
+      return [t('activities.categories.全部')]; // 加载中只显示全部
     }
     
     if (categories.length > 0) {
-      return ['全部', ...categories.map(cat => getCategoryName(cat, language))];
+      return [t('activities.categories.全部'), ...categories.map(cat => getCategoryName(cat, language))];
     }
     
     // 降级到硬编码分类
@@ -100,7 +100,7 @@ const Activities = () => {
   }, [categories, isCategoriesLoading, language]);
 
   const filteredActivities = activities.filter(activity => {
-    let categoryMatch = selectedCategory === '全部';
+    let categoryMatch = selectedCategory === t('activities.categories.全部');
     
     if (!categoryMatch) {
       // 如果有API分类数据，根据本地化名称匹配
@@ -113,7 +113,7 @@ const Activities = () => {
       }
     }
     
-    const statusMatch = selectedStatus === '全部' || getActivityStatus(activity) === selectedStatus;
+    const statusMatch = selectedStatus === t('activities.status.全部') || getActivityStatus(activity) === selectedStatus;
     return categoryMatch && statusMatch;
   });
 
@@ -177,7 +177,7 @@ const Activities = () => {
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <span className="relative z-10 font-medium">
-                      {category}
+                      {category === t('activities.categories.全部') ? t('activities.categories.全部') : category}
                     </span>
                     {selectedCategory !== category && (
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-600/0 group-hover:from-purple-500/10 group-hover:to-purple-600/10 rounded-2xl transition-all duration-300"></div>
@@ -240,8 +240,8 @@ const Activities = () => {
               <p className="text-base md:text-lg text-gray-500 mb-6 md:mb-8 max-w-md mx-auto">{t('activities.ui.tryAdjustFilters')}</p>
               <button 
                 onClick={() => {
-                  setSelectedCategory('全部');
-                  setSelectedStatus('全部');
+                  setSelectedCategory(t('activities.categories.全部'));
+                  setSelectedStatus(t('activities.status.全部'));
                 }}
                 className="px-6 md:px-8 py-2 md:py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl font-medium hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-sm md:text-base"
               >

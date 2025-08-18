@@ -5,9 +5,10 @@ import { zhCN } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import { Activity, ActivityService } from '../lib/activityService';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/language';
+import { useLanguage } from '../contexts/language/LanguageContext';
 import { getCategoryName } from '../utils/categoryUtils';
 import { toast } from 'sonner';
+
 
 interface ActivityCardProps {
   activity: Activity;
@@ -99,11 +100,21 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
   };
 
   const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MM月dd日 HH:mm', { locale: zhCN });
-    } catch {
-      return dateString;
+    const date = new Date(dateString);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    const monthText = t('activities.ui.month');
+    const dayText = t('activities.ui.day');
+    
+    // 对于英文等不需要月日文字的语言，直接返回数字格式
+    if (!monthText && !dayText) {
+      return `${month}/${day} ${hours}:${minutes}`;
     }
+    
+    return `${month}${monthText}${day}${dayText} ${hours}:${minutes}`;
   };
 
   // 获取活动状态
@@ -113,17 +124,17 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
     const endDate = new Date(activity.end_date);
     
     if (now < startDate) {
-      return { status: '即将开始', color: 'bg-blue-500/30 text-blue-200' };
+      return { status: t('activities.status.upcoming'), color: 'bg-blue-500/30 text-blue-200' };
     } else if (now >= startDate && now <= endDate) {
-      return { status: '进行中', color: 'bg-green-500/30 text-green-200' };
+      return { status: t('activities.status.ongoing'), color: 'bg-green-500/30 text-green-200' };
     } else {
-      return { status: '已结束', color: 'bg-gray-500/30 text-gray-300' };
+      return { status: t('activities.status.completed'), color: 'bg-gray-500/30 text-gray-300' };
     }
   };
 
   const activityStatus = getActivityStatus();
   const isActivityFull = participantCount >= activity.max_participants;
-  const isActivityPast = activityStatus.status === '已结束';
+  const isActivityPast = activityStatus.status === t('activities.status.completed');
 
   // 简化模式渲染
   if (simplified) {
@@ -139,11 +150,11 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
           {/* 状态标签 */}
           <div className="absolute top-3 left-3">
             <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
-              activityStatus.status === '进行中' 
-                ? 'bg-green-100 text-green-800 border border-green-200'
-                : activityStatus.status === '即将开始' 
-                ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                : 'bg-gray-100 text-gray-600 border border-gray-200'
+              activityStatus.status === t('activities.status.ongoing') 
+              ? 'bg-green-100 text-green-800 border border-green-200'
+              : activityStatus.status === t('activities.status.upcoming') 
+              ? 'bg-blue-100 text-blue-800 border border-blue-200'
+              : 'bg-gray-100 text-gray-600 border border-gray-200'
             }`}>
               {activityStatus.status}
             </span>
@@ -167,16 +178,16 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
             {/* 参与人数 */}
             <div className="flex items-center text-gray-600">
               <Users className="w-4 h-4 mr-2 text-purple-600" />
-              <span className="text-sm">{participantCount} 人参加</span>
+              <span className="text-sm">{participantCount} {t('activities.ui.participantsJoined')}</span>
             </div>
           </div>
 
-          {/* 了解更多按钮 */}
+          {/* 查看详情按钮 */}
           <Link
-            to="/activities"
+            to={`/activities/${activity.id}`}
             className="block w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 text-sm font-semibold text-center"
           >
-            {t('activities.ui.learnMore')}
+            {t('activities.actions.viewDetails')}
           </Link>
         </div>
       </div>
@@ -187,7 +198,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
   return (
     <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-50 hover:border-purple-100 group transform hover:-translate-y-2">
       {/* 活动图片 */}
-      <div className="relative overflow-hidden">
+      <Link to={`/activities/${activity.id}`} className="block relative overflow-hidden">
         <img
           src={activity.image_url || '/images/placeholder-activity.svg'}
           alt={activity.title}
@@ -199,9 +210,9 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
         {/* 状态标签 */}
         <div className="absolute top-4 left-4">
           <span className={`px-4 py-2 rounded-full text-sm font-bold backdrop-blur-md border-2 ${
-            activityStatus.status === '进行中' 
+            activityStatus.status === t('activities.status.ongoing') 
               ? 'bg-green-50/90 text-green-800 border-green-200 shadow-lg shadow-green-200/50'
-              : activityStatus.status === '即将开始' 
+              : activityStatus.status === t('activities.status.upcoming') 
               ? 'bg-blue-50/90 text-blue-800 border-blue-200 shadow-lg shadow-blue-200/50'
               : 'bg-gray-50/90 text-gray-600 border-gray-200 shadow-lg shadow-gray-200/50'
           }`}>
@@ -214,9 +225,9 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
             {(() => {
               let matchedCategory = null;
               
-              // 优先使用category_id进行匹配
+              // 优先使用category_id进行匹配（处理类型转换）
               if (activity.category_id) {
-                matchedCategory = categories.find(cat => cat.id === activity.category_id);
+                matchedCategory = categories.find(cat => cat.id === String(activity.category_id));
               }
               
               // 如果category_id匹配失败，尝试字符串匹配
@@ -257,13 +268,15 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
             )}
           </div>
         </div>
-      </div>
+      </Link>
 
       <div className="p-8">
         {/* 活动标题 */}
-        <h3 className="text-2xl font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-purple-700 transition-colors leading-tight">
-          {activity.title}
-        </h3>
+        <Link to={`/activities/${activity.id}`} className="block">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-purple-700 transition-colors leading-tight hover:text-purple-600">
+            {activity.title}
+          </h3>
+        </Link>
 
         {/* 活动描述 */}
         <p className="text-gray-600 text-base mb-6 line-clamp-3 leading-relaxed">
