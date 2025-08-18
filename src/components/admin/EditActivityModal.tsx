@@ -252,15 +252,12 @@ const EditActivityModal: React.FC<EditActivityModalProps> = ({
         return
       }
 
-      // 准备活动数据 - 将内部的image字段映射为后端期望的image_url字段
+      // 准备活动数据 - 后端期望的字段名是 image（不是image_url）
       const activityData = {
         ...editActivityData,
         max_participants: editActivityData.max_participants ? parseInt(editActivityData.max_participants.toString()) : null,
-        image_url: editActivityData.image // 后端期望的字段名是 image_url
+        image: editActivityData.image // 后端期望的字段名是 image
       }
-      
-      // 移除内部使用的image字段，避免冲突
-      delete (activityData as any).image
 
       await adminService.updateActivity(activity.id, activityData)
       toast.success(t('admin.activities.messages.updateSuccess'))

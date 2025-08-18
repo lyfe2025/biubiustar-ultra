@@ -38,6 +38,14 @@ export interface ActivityCategory {
   id: string
   name: string
   description?: string
+  name_zh?: string
+  name_zh_tw?: string
+  name_en?: string
+  name_vi?: string
+  description_zh?: string
+  description_zh_tw?: string
+  description_en?: string
+  description_vi?: string
   color: string
   icon: string
   is_active: boolean
@@ -57,10 +65,10 @@ export interface ContentCategory {
   updated_at: string
 }
 
-import { Activity } from '../types/activity'
+import { Activity } from '../types/index'
 
-export interface AdminActivity extends Activity {
-  status: 'draft' | 'published' | 'cancelled'
+export interface AdminActivity extends Omit<Activity, 'status' | 'category_id'> {
+  status: 'published' | 'draft' | 'cancelled'
   category_id?: string
   image?: string // 兼容性字段，支持旧数据
   organizer: {

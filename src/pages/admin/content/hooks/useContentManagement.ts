@@ -51,7 +51,7 @@ export const useContentManagement = () => {
     } catch (error) {
       console.error('获取帖子数据失败:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
-        alert('认证令牌已失效，请重新登录')
+        toast.error('认证令牌已失效，请重新登录')
         navigate('/admin')
         return
       }

@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { XCircle, MapPin, Calendar, Users, Tag, User } from 'lucide-react'
 import { AdminActivity } from '../../services/AdminService'
 import { useLanguage } from '../../contexts/language'
+import { ActivityCategory, ActivityService } from '../../lib/activityService'
+import { getCategoryName } from '../../utils/categoryUtils'
 
 interface ActivityModalProps {
   activity: AdminActivity | null
@@ -13,7 +15,21 @@ interface ActivityModalProps {
 }
 
 const ActivityModal: React.FC<ActivityModalProps> = ({ activity, isOpen, onClose, onEdit, onDelete, onToggleFeatured }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+  const [categories, setCategories] = useState<ActivityCategory[]>([])
+
+  // 加载分类数据
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoryData = await ActivityService.getActivityCategories(language);
+        setCategories(categoryData);
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+      }
+    };
+    loadCategories();
+  }, [language]);
 
   if (!isOpen || !activity) return null
 
@@ -113,7 +129,12 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, isOpen, onClose
               </div>
               <div>
                 <div className="text-sm font-medium text-gray-900">{t('admin.activities.form.category')}</div>
-                <div className="text-sm text-gray-500">{activity.category}</div>
+                <div className="text-sm text-gray-500">
+                  {(() => {
+                    const category = categories.find(cat => cat.name === activity.category);
+                    return category ? getCategoryName(category, language) : activity.category;
+                  })()}
+                </div>
               </div>
             </div>
 

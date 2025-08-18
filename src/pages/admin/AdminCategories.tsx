@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Tag, Search } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
-// import { useLanguage } from '../../contexts/language'
+import { useLanguage } from '../../contexts/language'
 import { toast } from 'sonner'
 
 interface Category {
@@ -11,10 +11,19 @@ interface Category {
   color: string
   created_at: string
   updated_at: string
+  // 多语言字段
+  name_zh?: string
+  name_zh_tw?: string
+  name_en?: string
+  name_vi?: string
+  description_zh?: string
+  description_zh_tw?: string
+  description_en?: string
+  description_vi?: string
 }
 
 const AdminCategories: React.FC = () => {
-  // const { t } = useLanguage()
+  const { t } = useLanguage()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -25,7 +34,16 @@ const AdminCategories: React.FC = () => {
   const [newCategoryData, setNewCategoryData] = useState({
     name: '',
     description: '',
-    color: '#8B5CF6'
+    color: '#8B5CF6',
+    // 多语言字段
+    name_zh: '',
+    name_zh_tw: '',
+    name_en: '',
+    name_vi: '',
+    description_zh: '',
+    description_zh_tw: '',
+    description_en: '',
+    description_vi: ''
   })
 
   const predefinedColors = [
@@ -58,8 +76,10 @@ const AdminCategories: React.FC = () => {
 
   // 创建分类
   const handleCreateCategory = async () => {
-    if (!newCategoryData.name.trim()) {
-      toast.error('请输入分类名称')
+    // 验证所有语言的名称都已填写
+    if (!newCategoryData.name_zh.trim() || !newCategoryData.name_zh_tw.trim() || 
+        !newCategoryData.name_en.trim() || !newCategoryData.name_vi.trim()) {
+      toast.error('请填写所有语言的分类名称')
       return
     }
 
@@ -75,7 +95,19 @@ const AdminCategories: React.FC = () => {
       if (response.ok) {
         toast.success('分类创建成功')
         setShowCreateModal(false)
-        setNewCategoryData({ name: '', description: '', color: '#8B5CF6' })
+        setNewCategoryData({ 
+          name: '', 
+          description: '', 
+          color: '#8B5CF6',
+          name_zh: '',
+          name_zh_tw: '',
+          name_en: '',
+          name_vi: '',
+          description_zh: '',
+          description_zh_tw: '',
+          description_en: '',
+          description_vi: ''
+        })
         loadCategories()
       } else {
         toast.error('创建分类失败')
@@ -88,8 +120,9 @@ const AdminCategories: React.FC = () => {
 
   // 更新分类
   const handleUpdateCategory = async () => {
-    if (!selectedCategory || !newCategoryData.name.trim()) {
-      toast.error('请输入分类名称')
+    if (!selectedCategory || !newCategoryData.name_zh.trim() || !newCategoryData.name_zh_tw.trim() || 
+        !newCategoryData.name_en.trim() || !newCategoryData.name_vi.trim()) {
+      toast.error('请填写所有语言的分类名称')
       return
     }
 
@@ -106,7 +139,19 @@ const AdminCategories: React.FC = () => {
         toast.success('分类更新成功')
         setShowEditModal(false)
         setSelectedCategory(null)
-        setNewCategoryData({ name: '', description: '', color: '#8B5CF6' })
+        setNewCategoryData({ 
+          name: '', 
+          description: '', 
+          color: '#8B5CF6',
+          name_zh: '',
+          name_zh_tw: '',
+          name_en: '',
+          name_vi: '',
+          description_zh: '',
+          description_zh_tw: '',
+          description_en: '',
+          description_vi: ''
+        })
         loadCategories()
       } else {
         toast.error('更新分类失败')
@@ -146,7 +191,15 @@ const AdminCategories: React.FC = () => {
     setNewCategoryData({
       name: category.name,
       description: category.description || '',
-      color: category.color
+      color: category.color,
+      name_zh: category.name_zh || '',
+      name_zh_tw: category.name_zh_tw || '',
+      name_en: category.name_en || '',
+      name_vi: category.name_vi || '',
+      description_zh: category.description_zh || '',
+      description_zh_tw: category.description_zh_tw || '',
+      description_en: category.description_en || '',
+      description_vi: category.description_vi || ''
     })
     setShowEditModal(true)
   }
@@ -274,26 +327,98 @@ const AdminCategories: React.FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">创建新分类</h3>
                 
                 <div className="space-y-4">
+                  {/* 多语言名称输入 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">分类名称 *</label>
-                    <input
-                      type="text"
-                      value={newCategoryData.name}
-                      onChange={(e) => setNewCategoryData(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="请输入分类名称"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">分类名称 *</label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">中文</label>
+                        <input
+                          type="text"
+                          value={newCategoryData.name_zh}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, name_zh: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="请输入中文名称"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">繁体中文</label>
+                        <input
+                          type="text"
+                          value={newCategoryData.name_zh_tw}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, name_zh_tw: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="請輸入繁體中文名稱"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">English</label>
+                        <input
+                          type="text"
+                          value={newCategoryData.name_en}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, name_en: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="Please enter English name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Tiếng Việt</label>
+                        <input
+                          type="text"
+                          value={newCategoryData.name_vi}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, name_vi: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="Vui lòng nhập tên tiếng Việt"
+                        />
+                      </div>
+                    </div>
                   </div>
 
+                  {/* 多语言描述输入 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">分类描述</label>
-                    <textarea
-                      value={newCategoryData.description}
-                      onChange={(e) => setNewCategoryData(prev => ({ ...prev, description: e.target.value }))}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="请输入分类描述（可选）"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">分类描述</label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">中文</label>
+                        <textarea
+                          value={newCategoryData.description_zh}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, description_zh: e.target.value }))}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="请输入中文描述（可选）"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">繁体中文</label>
+                        <textarea
+                          value={newCategoryData.description_zh_tw}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, description_zh_tw: e.target.value }))}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="請輸入繁體中文描述（可選）"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">English</label>
+                        <textarea
+                          value={newCategoryData.description_en}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, description_en: e.target.value }))}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="Please enter English description (optional)"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Tiếng Việt</label>
+                        <textarea
+                          value={newCategoryData.description_vi}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, description_vi: e.target.value }))}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="Vui lòng nhập mô tả tiếng Việt (tùy chọn)"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div>
@@ -322,7 +447,7 @@ const AdminCategories: React.FC = () => {
                   </button>
                   <button
                     onClick={handleCreateCategory}
-                    disabled={!newCategoryData.name.trim()}
+                    disabled={!newCategoryData.name_zh.trim() || !newCategoryData.name_zh_tw.trim() || !newCategoryData.name_en.trim() || !newCategoryData.name_vi.trim()}
                     className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
                     创建分类
@@ -345,26 +470,98 @@ const AdminCategories: React.FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">编辑分类</h3>
                 
                 <div className="space-y-4">
+                  {/* 多语言名称输入 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">分类名称 *</label>
-                    <input
-                      type="text"
-                      value={newCategoryData.name}
-                      onChange={(e) => setNewCategoryData(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="请输入分类名称"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">分类名称 *</label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">中文</label>
+                        <input
+                          type="text"
+                          value={newCategoryData.name_zh}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, name_zh: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="请输入中文名称"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">繁体中文</label>
+                        <input
+                          type="text"
+                          value={newCategoryData.name_zh_tw}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, name_zh_tw: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="請輸入繁體中文名稱"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">English</label>
+                        <input
+                          type="text"
+                          value={newCategoryData.name_en}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, name_en: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="Please enter English name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Tiếng Việt</label>
+                        <input
+                          type="text"
+                          value={newCategoryData.name_vi}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, name_vi: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="Vui lòng nhập tên tiếng Việt"
+                        />
+                      </div>
+                    </div>
                   </div>
 
+                  {/* 多语言描述输入 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">分类描述</label>
-                    <textarea
-                      value={newCategoryData.description}
-                      onChange={(e) => setNewCategoryData(prev => ({ ...prev, description: e.target.value }))}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="请输入分类描述（可选）"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">分类描述</label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">中文</label>
+                        <textarea
+                          value={newCategoryData.description_zh}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, description_zh: e.target.value }))}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="请输入中文描述（可选）"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">繁体中文</label>
+                        <textarea
+                          value={newCategoryData.description_zh_tw}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, description_zh_tw: e.target.value }))}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="請輸入繁體中文描述（可選）"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">English</label>
+                        <textarea
+                          value={newCategoryData.description_en}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, description_en: e.target.value }))}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="Please enter English description (optional)"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Tiếng Việt</label>
+                        <textarea
+                          value={newCategoryData.description_vi}
+                          onChange={(e) => setNewCategoryData(prev => ({ ...prev, description_vi: e.target.value }))}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          placeholder="Vui lòng nhập mô tả tiếng Việt (tùy chọn)"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div>
@@ -393,7 +590,7 @@ const AdminCategories: React.FC = () => {
                   </button>
                   <button
                     onClick={handleUpdateCategory}
-                    disabled={!newCategoryData.name.trim()}
+                    disabled={!newCategoryData.name_zh.trim() || !newCategoryData.name_zh_tw.trim() || !newCategoryData.name_en.trim() || !newCategoryData.name_vi.trim()}
                     className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
                     更新分类

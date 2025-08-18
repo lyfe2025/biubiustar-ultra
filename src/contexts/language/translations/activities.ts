@@ -76,7 +76,38 @@ export const activitiesTranslations = {
         leaveSuccess: '已退出活动',
         leaveFailed: '退出活动失败',
         deleteSuccess: '活动删除成功',
-        deleteFailed: '活动删除失败'
+        deleteFailed: '活动删除失败',
+        loadFailed: '加载活动失败',
+        loginRequired: '请先登录',
+        operationFailed: '操作失败，请重试',
+        activityFull: '活动人数已满',
+        createSuccess: '活动创建成功！',
+        createFailed: '创建活动失败，请重试'
+      },
+
+      // 界面文本
+      ui: {
+        filterByCategory: '按分类筛选',
+        filterByStatus: '按状态筛选',
+        loading: '正在加载精彩活动...',
+        noMatchingActivities: '暂无符合条件的活动',
+        tryAdjustFilters: '请尝试调整筛选条件或稍后再来看看更多精彩活动',
+        resetFilters: '重置筛选条件',
+        foundActivities: '发现 {count} 个精彩活动',
+        learnMore: '了解更多',
+        full: '已满',
+        activityTime: '活动时间',
+        activityLocation: '活动地点',
+        organizer: '发起人',
+        processing: '处理中...',
+        activityEnded: '活动已结束',
+        selectCategory: '选择活动分类',
+        inputTitle: '输入活动标题',
+        inputDescription: '详细描述活动内容、目的和注意事项',
+        inputImageUrl: '输入图片链接（可选）',
+        inputLocation: '输入活动地点',
+        creating: '创建中...',
+        required: '*'
       },
 
       // 创建活动
@@ -91,7 +122,10 @@ export const activitiesTranslations = {
         maxParticipants: '最大参与人数',
         requirements: '参与要求',
         submit: '创建活动',
-        cancel: '取消'
+        cancel: '取消',
+        image: '活动图片链接',
+        startTime: '开始时间',
+        endTime: '结束时间'
       }
     }
   },
@@ -166,7 +200,38 @@ export const activitiesTranslations = {
         leaveSuccess: '已退出活動',
         leaveFailed: '退出活動失敗',
         deleteSuccess: '活動刪除成功',
-        deleteFailed: '活動刪除失敗'
+        deleteFailed: '活動刪除失敗',
+        loadFailed: '加載活動失敗',
+        loginRequired: '請先登入',
+        operationFailed: '操作失敗，請重試',
+        activityFull: '活動人數已滿',
+        createSuccess: '活動創建成功！',
+        createFailed: '創建活動失敗，請重試'
+      },
+
+      // 界面文本
+      ui: {
+        filterByCategory: '按分類篩選',
+        filterByStatus: '按狀態篩選',
+        loading: '正在加載精彩活動...',
+        noMatchingActivities: '暫無符合條件的活動',
+        tryAdjustFilters: '請嘗試調整篩選條件或稍後再來看看更多精彩活動',
+        resetFilters: '重置篩選條件',
+        foundActivities: '發現 {count} 個精彩活動',
+        learnMore: '了解更多',
+        full: '已滿',
+        activityTime: '活動時間',
+        activityLocation: '活動地點',
+        organizer: '發起人',
+        processing: '處理中...',
+        activityEnded: '活動已結束',
+        selectCategory: '選擇活動分類',
+        inputTitle: '輸入活動標題',
+        inputDescription: '詳細描述活動內容、目的和注意事項',
+        inputImageUrl: '輸入圖片鏈接（可選）',
+        inputLocation: '輸入活動地點',
+        creating: '創建中...',
+        required: '*'
       },
 
       create: {
@@ -180,7 +245,10 @@ export const activitiesTranslations = {
         maxParticipants: '最大參與人數',
         requirements: '參與要求',
         submit: '創建活動',
-        cancel: '取消'
+        cancel: '取消',
+        image: '活動圖片鏈接',
+        startTime: '開始時間',
+        endTime: '結束時間'
       }
     }
   },
@@ -255,7 +323,38 @@ export const activitiesTranslations = {
         leaveSuccess: 'Left the activity',
         leaveFailed: 'Failed to leave activity',
         deleteSuccess: 'Activity deleted successfully',
-        deleteFailed: 'Failed to delete activity'
+        deleteFailed: 'Failed to delete activity',
+        loadFailed: 'Failed to load activities',
+        loginRequired: 'Please login first',
+        operationFailed: 'Operation failed, please try again',
+        activityFull: 'Activity is full',
+        createSuccess: 'Activity created successfully!',
+        createFailed: 'Failed to create activity, please try again'
+      },
+
+      // UI Text
+      ui: {
+        filterByCategory: 'Filter by Category',
+        filterByStatus: 'Filter by Status',
+        loading: 'Loading exciting activities...',
+        noMatchingActivities: 'No matching activities found',
+        tryAdjustFilters: 'Please try adjusting the filters or check back later for more exciting activities',
+        resetFilters: 'Reset Filters',
+        foundActivities: 'Found {count} exciting activities',
+        learnMore: 'Learn More',
+        full: 'Full',
+        activityTime: 'Activity Time',
+        activityLocation: 'Activity Location',
+        organizer: 'Organizer',
+        processing: 'Processing...',
+        activityEnded: 'Activity Ended',
+        selectCategory: 'Select activity category',
+        inputTitle: 'Enter activity title',
+        inputDescription: 'Describe the activity content, purpose and notes in detail',
+        inputImageUrl: 'Enter image URL (optional)',
+        inputLocation: 'Enter activity location',
+        creating: 'Creating...',
+        required: '*'
       },
 
       create: {
@@ -269,7 +368,10 @@ export const activitiesTranslations = {
         maxParticipants: 'Max Participants',
         requirements: 'Requirements',
         submit: 'Create Activity',
-        cancel: 'Cancel'
+        cancel: 'Cancel',
+        image: 'Activity Image URL',
+        startTime: 'Start Time',
+        endTime: 'End Time'
       }
     }
   },
@@ -344,7 +446,38 @@ export const activitiesTranslations = {
         leaveSuccess: 'Đã rời khỏi hoạt động',
         leaveFailed: 'Rời khỏi hoạt động thất bại',
         deleteSuccess: 'Xóa hoạt động thành công',
-        deleteFailed: 'Xóa hoạt động thất bại'
+        deleteFailed: 'Xóa hoạt động thất bại',
+        loadFailed: 'Tải hoạt động thất bại',
+        loginRequired: 'Vui lòng đăng nhập trước',
+        operationFailed: 'Thao tác thất bại, vui lòng thử lại',
+        activityFull: 'Hoạt động đã đầy',
+        createSuccess: 'Tạo hoạt động thành công!',
+        createFailed: 'Tạo hoạt động thất bại, vui lòng thử lại'
+      },
+
+      // Văn bản giao diện
+      ui: {
+        filterByCategory: 'Lọc theo danh mục',
+        filterByStatus: 'Lọc theo trạng thái',
+        loading: 'Đang tải các hoạt động thú vị...',
+        noMatchingActivities: 'Không tìm thấy hoạt động phù hợp',
+        tryAdjustFilters: 'Vui lòng thử điều chỉnh bộ lọc hoặc quay lại sau để xem thêm hoạt động thú vị',
+        resetFilters: 'Đặt lại bộ lọc',
+        foundActivities: 'Tìm thấy {count} hoạt động thú vị',
+        learnMore: 'Tìm hiểu thêm',
+        full: 'Đầy',
+        activityTime: 'Thời gian hoạt động',
+        activityLocation: 'Địa điểm hoạt động',
+        organizer: 'Người tổ chức',
+        processing: 'Đang xử lý...',
+        activityEnded: 'Hoạt động đã kết thúc',
+        selectCategory: 'Chọn danh mục hoạt động',
+        inputTitle: 'Nhập tiêu đề hoạt động',
+        inputDescription: 'Mô tả chi tiết nội dung, mục đích và ghi chú của hoạt động',
+        inputImageUrl: 'Nhập URL hình ảnh (tùy chọn)',
+        inputLocation: 'Nhập địa điểm hoạt động',
+        creating: 'Đang tạo...',
+        required: '*'
       },
 
       create: {
@@ -358,7 +491,10 @@ export const activitiesTranslations = {
         maxParticipants: 'Số người tham gia tối đa',
         requirements: 'Yêu cầu',
         submit: 'Tạo hoạt động',
-        cancel: 'Hủy'
+        cancel: 'Hủy',
+        image: 'URL hình ảnh hoạt động',
+        startTime: 'Thời gian bắt đầu',
+        endTime: 'Thời gian kết thúc'
       }
     }
   }

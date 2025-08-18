@@ -17,7 +17,13 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
 
     let query = supabase
       .from('activities')
-      .select('*')
+      .select(`
+        *,
+        activity_categories!left(
+          id,
+          name
+        )
+      `)
       .eq('status', status)
       .order('start_date', { ascending: true });
 
@@ -42,7 +48,14 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
       return res.status(500).json({ error: 'Failed to fetch activities' });
     }
 
-    res.json(data);
+    // 格式化返回数据，添加category_id字段
+    const formattedData = data?.map(activity => ({
+      ...activity,
+      category_id: activity.activity_categories?.id || null,
+      activity_categories: undefined // 移除嵌套对象
+    })) || [];
+
+    res.json(formattedData);
   } catch (error) {
     console.error('Error in GET /activities:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -57,7 +70,13 @@ router.get('/upcoming', async (req: Request, res: Response): Promise<Response | 
 
     const { data, error } = await supabase
       .from('activities')
-      .select('*')
+      .select(`
+        *,
+        activity_categories!left(
+          id,
+          name
+        )
+      `)
       .eq('status', 'published')
       .gte('start_date', now)
       .order('start_date', { ascending: true })
@@ -68,7 +87,14 @@ router.get('/upcoming', async (req: Request, res: Response): Promise<Response | 
       return res.status(500).json({ error: 'Failed to fetch upcoming activities' });
     }
 
-    res.json(data || []);
+    // 格式化返回数据，添加category_id字段
+    const formattedData = data?.map(activity => ({
+      ...activity,
+      category_id: activity.activity_categories?.id || null,
+      activity_categories: undefined // 移除嵌套对象
+    })) || [];
+
+    res.json(formattedData);
   } catch (error) {
     console.error('Error in GET /activities/upcoming:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -82,7 +108,13 @@ router.get('/:id', async (req: Request, res: Response): Promise<Response | void>
 
     const { data, error } = await supabase
       .from('activities')
-      .select('*')
+      .select(`
+        *,
+        activity_categories!left(
+          id,
+          name
+        )
+      `)
       .eq('id', id)
       .single();
 
@@ -94,7 +126,14 @@ router.get('/:id', async (req: Request, res: Response): Promise<Response | void>
       return res.status(500).json({ error: 'Failed to fetch activity' });
     }
 
-    res.json(data);
+    // 格式化返回数据，添加category_id字段
+    const formattedData = {
+      ...data,
+      category_id: data.activity_categories?.id || null,
+      activity_categories: undefined // 移除嵌套对象
+    };
+
+    res.json(formattedData);
   } catch (error) {
     console.error('Error in GET /activities/:id:', error);
     res.status(500).json({ error: 'Internal server error' });

@@ -1,4 +1,4 @@
-import type { Activity } from '../types/activity';
+import type { Activity } from '../types/index';
 
 export type { Activity };
 
@@ -21,6 +21,15 @@ export interface ActivityCategory {
   description?: string;
   color?: string;
   icon?: string;
+  // 多语言字段
+  name_zh?: string;
+  name_zh_tw?: string;
+  name_en?: string;
+  name_vi?: string;
+  description_zh?: string;
+  description_zh_tw?: string;
+  description_en?: string;
+  description_vi?: string;
 }
 
 export class ActivityService {
@@ -207,10 +216,13 @@ export class ActivityService {
   }
 
   // 获取活动分类
-  static async getActivityCategories(): Promise<ActivityCategory[]> {
+  static async getActivityCategories(language?: string): Promise<ActivityCategory[]> {
     try {
-      console.log('🌐 ActivityService: 开始调用API /api/categories/activity');
-      const response = await fetch('/api/categories/activity');
+      // 将语言代码转换为小写，确保与API期望的格式一致（如 'zh-TW' -> 'zh-tw'）
+      const langParam = language ? language.toLowerCase() : undefined;
+      const url = langParam ? `/api/categories/activity?lang=${langParam}` : '/api/categories/activity';
+      console.log('🌐 ActivityService: 开始调用API', url);
+      const response = await fetch(url);
       console.log('🌐 ActivityService: API响应状态:', response.status, response.statusText);
       
       if (!response.ok) {
@@ -218,14 +230,11 @@ export class ActivityService {
       }
       
       const response_data = await response.json();
-      console.log('🌐 ActivityService: API原始响应数据:', response_data);
-      console.log('🌐 ActivityService: response_data.data:', response_data.data);
-      console.log('🌐 ActivityService: response_data.data.data:', response_data.data?.data);
-      console.log('🌐 ActivityService: response_data.data.total:', response_data.data?.total);
-      console.log('🌐 ActivityService: categories长度:', response_data.data?.data?.length);
+      console.log('🌐 ActivityService: API响应数据:', response_data);
       
-      const categories = response_data.data?.data || [];
-      console.log('🌐 ActivityService: 最终返回的categories:', categories);
+      // 修复数据结构：API返回 {success: true, data: {categories: [...], total: n}}
+      const categories = response_data.data?.categories || [];
+      console.log('🌐 ActivityService: 解析出的分类:', categories);
       return categories;
     } catch (error) {
       console.error('❌ ActivityService: Error fetching activity categories:', error);

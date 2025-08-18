@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from "../../contexts/language"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { toast } from 'sonner'
 import AdminLayout from '../../components/AdminLayout'
 import ActivityList from '../../components/admin/ActivityList'
 import ActivityStats from '../../components/admin/ActivityStats'
@@ -10,6 +11,24 @@ import ActivityModal from '../../components/admin/ActivityModal'
 import CreateActivityModal from '../../components/admin/CreateActivityModal'
 import EditActivityModal from '../../components/admin/EditActivityModal'
 import { adminService, AdminActivity, ActivityCategory } from '../../services/AdminService'
+
+// 定义Category接口以匹配CategoryManagement组件的期望
+interface Category {
+  id: string
+  name: string
+  description: string
+  name_zh: string
+  name_zh_tw: string
+  name_en: string
+  name_vi: string
+  description_zh: string
+  description_zh_tw: string
+  description_en: string
+  description_vi: string
+  color: string
+  created_at: string
+  updated_at: string
+}
 
 interface PaginationInfo {
   page: number
@@ -22,7 +41,7 @@ const AdminActivities = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
   const [activities, setActivities] = useState<AdminActivity[]>([])
-  const [categories, setCategories] = useState<ActivityCategory[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [activeTab, setActiveTab] = useState<'activities' | 'categories'>('activities')
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState<PaginationInfo>({
@@ -53,8 +72,10 @@ const AdminActivities = () => {
       
       // 检查是否为认证失败错误
       if (error instanceof Error && error.name === 'AuthenticationError') {
-        alert('认证令牌已失效，请重新登录')
-        navigate('/admin')
+        toast.error('认证令牌已失效，请重新登录')
+        setTimeout(() => {
+          navigate('/admin')
+        }, 1000)
         return
       }
     } finally {
@@ -65,14 +86,33 @@ const AdminActivities = () => {
   const loadCategories = async () => {
     try {
       const data = await adminService.getCategories()
-      setCategories(data)
+      // 将ActivityCategory转换为Category类型
+      const convertedCategories: Category[] = data.map((cat: ActivityCategory) => ({
+        id: cat.id,
+        name: cat.name,
+        description: cat.description || '',
+        name_zh: cat.name_zh || cat.name,
+        name_zh_tw: cat.name_zh_tw || cat.name,
+        name_en: cat.name_en || cat.name,
+        name_vi: cat.name_vi || cat.name,
+        description_zh: cat.description_zh || cat.description || '',
+        description_zh_tw: cat.description_zh_tw || cat.description || '',
+        description_en: cat.description_en || cat.description || '',
+        description_vi: cat.description_vi || cat.description || '',
+        color: cat.color,
+        created_at: cat.created_at || new Date().toISOString(),
+        updated_at: cat.updated_at || new Date().toISOString()
+      }))
+      setCategories(convertedCategories)
     } catch (error) {
       console.error('Failed to load categories:', error)
       
       // 检查是否为认证失败错误
       if (error instanceof Error && error.name === 'AuthenticationError') {
-        alert('认证令牌已失效，请重新登录')
-        navigate('/admin')
+        toast.error('认证令牌已失效，请重新登录')
+        setTimeout(() => {
+          navigate('/admin')
+        }, 1000)
         return
       }
     }
@@ -117,8 +157,10 @@ const AdminActivities = () => {
     } catch (error) {
       console.error('Failed to delete activity:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
-        alert('认证令牌已失效，请重新登录')
-        navigate('/admin')
+        toast.error('认证令牌已失效，请重新登录')
+        setTimeout(() => {
+          navigate('/admin')
+        }, 1000)
         return
       }
     }
@@ -132,8 +174,10 @@ const AdminActivities = () => {
     } catch (error) {
       console.error('切换推荐状态失败:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
-        alert('认证令牌已失效，请重新登录')
-        navigate('/admin')
+        toast.error('认证令牌已失效，请重新登录')
+        setTimeout(() => {
+          navigate('/admin')
+        }, 1000)
         return
       }
     }

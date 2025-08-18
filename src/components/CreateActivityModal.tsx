@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin, Users, Tag, Image, FileText } from 'lucide-react';
-import { ActivityService } from '../lib/activityService';
+import { ActivityService, ActivityCategory } from '../lib/activityService';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/language';
+import { getCategoryName } from '../utils/categoryUtils';
 import { toast } from 'sonner';
 
 interface CreateActivityModalProps {
@@ -16,7 +18,9 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
   onActivityCreated
 }) => {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<ActivityCategory[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -28,18 +32,33 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
     category: ''
   });
 
-  const categories = [
-    '文化交流',
-    '技术分享',
-    '户外运动',
-    '美食聚会',
-    '学习交流',
-    '娱乐活动',
-    '志愿服务',
-    '商务网络',
-    '艺术创作',
-    '其他'
-  ];
+  // 获取分类数据
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoryData = await ActivityService.getActivityCategories(language);
+        setCategories(categoryData);
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+        // 降级到硬编码分类
+        const fallbackCategories: ActivityCategory[] = [
+          { id: '1', name: '文化交流', description: '', color: '', icon: '' },
+          { id: '2', name: '技术分享', description: '', color: '', icon: '' },
+          { id: '3', name: '户外运动', description: '', color: '', icon: '' },
+          { id: '4', name: '美食聚会', description: '', color: '', icon: '' },
+          { id: '5', name: '学习交流', description: '', color: '', icon: '' },
+          { id: '6', name: '娱乐活动', description: '', color: '', icon: '' },
+          { id: '7', name: '志愿服务', description: '', color: '', icon: '' },
+          { id: '8', name: '商务网络', description: '', color: '', icon: '' },
+          { id: '9', name: '艺术创作', description: '', color: '', icon: '' },
+          { id: '10', name: '其他', description: '', color: '', icon: '' }
+        ];
+        setCategories(fallbackCategories);
+      }
+    };
+    
+    loadCategories();
+  }, [language]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -53,7 +72,7 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
     e.preventDefault();
     
     if (!user) {
-      toast.error('请先登录');
+      toast.error(t('activities.messages.loginRequired'));
       return;
     }
 
@@ -103,16 +122,17 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
       await ActivityService.createActivity({
         title: formData.title,
         description: formData.description,
-        image_url: formData.image_url,
+        category: formData.category,
         start_date: formData.start_date,
         end_date: formData.end_date,
         location: formData.location,
         max_participants: formData.max_participants,
-        category: formData.category,
-        user_id: '' // 后端会自动使用认证用户的ID，这里传空字符串
+        status: 'published',
+        updated_at: new Date().toISOString(),
+        user_id: '' // 后端会自动设置
       });
       
-      toast.success('活动创建成功！');
+      toast.success(t('activities.messages.createSuccess'));
       onActivityCreated?.();
       onClose();
       
@@ -131,12 +151,12 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
       console.error('Error creating activity:', error);
       
       // 根据错误类型提供具体的用户反馈
-      let errorMessage = '创建活动失败，请重试';
+      let errorMessage = t('activities.messages.createFailed');
       
       if (error?.response?.data?.error) {
         errorMessage = error.response.data.error;
       } else if (error?.response?.status === 401) {
-        errorMessage = '登录已过期，请重新登录';
+        errorMessage = t('activities.messages.loginRequired');
         // 可以在这里添加跳转到登录页面的逻辑
       } else if (error?.response?.status === 400) {
         errorMessage = '输入信息有误，请检查后重试';
@@ -159,7 +179,7 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
       <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* 头部 */}
         <div className="flex items-center justify-between p-6 border-b border-white/20">
-          <h2 className="text-2xl font-bold text-white">创建活动</h2>
+          <h2 className="text-2xl font-bold text-white">{t('activities.create.title')}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
@@ -174,14 +194,14 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
           <div>
             <label className="block text-white font-medium mb-2">
               <FileText className="w-4 h-4 inline mr-2" />
-              活动标题 *
+              {t('activities.create.name')} {t('activities.ui.required')}
             </label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              placeholder="输入活动标题"
+              placeholder={t('activities.ui.inputTitle')}
               className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors"
               required
             />
@@ -190,13 +210,13 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
           {/* 活动描述 */}
           <div>
             <label className="block text-white font-medium mb-2">
-              活动描述 *
+              {t('activities.create.description')} {t('activities.ui.required')}
             </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              placeholder="详细描述活动内容、目的和注意事项"
+              placeholder={t('activities.ui.inputDescription')}
               rows={4}
               className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors resize-none"
               required
@@ -207,14 +227,14 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
           <div>
             <label className="block text-white font-medium mb-2">
               <Image className="w-4 h-4 inline mr-2" />
-              活动图片链接
+              {t('activities.create.image')}
             </label>
             <input
               type="url"
               name="image_url"
               value={formData.image_url}
               onChange={handleInputChange}
-              placeholder="输入图片链接（可选）"
+              placeholder={t('activities.ui.inputImageUrl')}
               className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors"
             />
           </div>
@@ -224,7 +244,7 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
             <div>
               <label className="block text-white font-medium mb-2">
                 <Calendar className="w-4 h-4 inline mr-2" />
-                开始时间 *
+                {t('activities.create.startTime')} {t('activities.ui.required')}
               </label>
               <input
                 type="datetime-local"
@@ -239,7 +259,7 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
             <div>
               <label className="block text-white font-medium mb-2">
                 <Calendar className="w-4 h-4 inline mr-2" />
-                结束时间 *
+                {t('activities.create.endTime')} {t('activities.ui.required')}
               </label>
               <input
                 type="datetime-local"
@@ -257,14 +277,14 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
             <div>
               <label className="block text-white font-medium mb-2">
                 <MapPin className="w-4 h-4 inline mr-2" />
-                活动地点 *
+                {t('activities.create.location')} {t('activities.ui.required')}
               </label>
               <input
                 type="text"
                 name="location"
                 value={formData.location}
                 onChange={handleInputChange}
-                placeholder="输入活动地点"
+                placeholder={t('activities.ui.inputLocation')}
                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors"
                 required
               />
@@ -273,7 +293,7 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
             <div>
               <label className="block text-white font-medium mb-2">
                 <Users className="w-4 h-4 inline mr-2" />
-                最大参与人数 *
+                {t('activities.create.maxParticipants')} {t('activities.ui.required')}
               </label>
               <input
                 type="number"
@@ -292,7 +312,7 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
           <div>
             <label className="block text-white font-medium mb-2">
               <Tag className="w-4 h-4 inline mr-2" />
-              活动分类 *
+              {t('activities.create.category')} {t('activities.ui.required')}
             </label>
             <select
               name="category"
@@ -301,10 +321,10 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
               className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-purple-400 transition-colors"
               required
             >
-              <option value="" className="bg-gray-800">选择活动分类</option>
+              <option value="" className="bg-gray-800">{t('activities.ui.selectCategory')}</option>
               {categories.map(category => (
-                <option key={category} value={category} className="bg-gray-800">
-                  {category}
+                <option key={category.id} value={category.name} className="bg-gray-800">
+                  {getCategoryName(category, language)}
                 </option>
               ))}
             </select>
@@ -317,14 +337,14 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
               onClick={onClose}
               className="flex-1 py-3 px-6 bg-gray-500/20 text-gray-300 rounded-lg hover:bg-gray-500/30 transition-colors"
             >
-              取消
+              {t('activities.create.cancel')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 py-3 px-6 bg-purple-500/20 text-purple-200 border border-purple-500/30 rounded-lg hover:bg-purple-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? '创建中...' : '创建活动'}
+              {isSubmitting ? t('activities.ui.creating') : t('activities.create.submit')}
             </button>
           </div>
         </form>

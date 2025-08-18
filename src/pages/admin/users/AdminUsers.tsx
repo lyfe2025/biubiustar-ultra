@@ -1,5 +1,5 @@
 import React from 'react'
-import { UserPlus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { UserPlus, ChevronLeft, ChevronRight, X, Trash2, User } from 'lucide-react'
 import AdminLayout from '../../../components/AdminLayout'
 import { useLanguage } from '../../../contexts/language'
 import UserFilters from './UserFilters'
@@ -57,9 +57,7 @@ const AdminUsers = () => {
   }
 
   const handleDeleteUser = async (user: any) => {
-    if (window.confirm(`确定要删除用户 ${user.username} 吗？此操作无法撤销。`)) {
-      await deleteUser(user)
-    }
+    await deleteUser(user)
   }
 
   const handleCreateUser = async (userData: any) => {
@@ -108,7 +106,7 @@ const AdminUsers = () => {
           users={users}
           loading={loading}
           onEdit={openUserModal}
-          onDelete={handleDeleteUser}
+          onDelete={openDeleteConfirm}
           onUpdateStatus={updateUserStatus}
           onUpdateRole={updateUserRole}
           onChangePassword={openPasswordModal}
@@ -188,7 +186,7 @@ const AdminUsers = () => {
           isOpen={showUserModal}
           onClose={closeAllModals}
           onSave={handleSaveUser}
-          onDelete={handleDeleteUser}
+          onDelete={openDeleteConfirm}
           loading={isSubmitting}
         />
 
@@ -211,14 +209,47 @@ const AdminUsers = () => {
         {showDeleteConfirm && selectedUser && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeAllModals} />
-            <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('admin.users.confirmDelete')}
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {t('admin.users.confirmDeleteMessage').replace('{username}', selectedUser.username)}
-              </p>
-              <div className="flex justify-end space-x-3">
+            <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+              <div className="flex items-center justify-between p-6 border-b">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {t('admin.users.confirmDelete')}
+                </h3>
+                <button onClick={closeAllModals} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                    <Trash2 className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="text-gray-900 font-medium">删除用户确认</p>
+                    <p className="text-sm text-gray-500">此操作无法撤销</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  {t('admin.users.confirmDeleteMessage').replace('{username}', selectedUser.username)}
+                </p>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    {selectedUser.avatar ? (
+                      <img className="h-8 w-8 rounded-full" src={selectedUser.avatar} alt="" />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                        <User className="h-4 w-4 text-gray-600" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{selectedUser.username}</p>
+                      <p className="text-sm text-gray-600">{selectedUser.email}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 px-6 py-4 border-t bg-gray-50">
                 <button
                   onClick={closeAllModals}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
@@ -227,9 +258,20 @@ const AdminUsers = () => {
                 </button>
                 <button
                   onClick={() => handleDeleteUser(selectedUser)}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  disabled={isSubmitting}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                 >
-                  {t('admin.users.delete')}
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>删除中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>{t('admin.users.delete')}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

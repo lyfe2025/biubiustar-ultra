@@ -288,7 +288,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('admin.users.role')}
+                {t('admin.users.table.role')}
               </label>
               <select
                 value={userData.role}
@@ -303,7 +303,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('admin.users.status')}
+                {t('admin.users.table.status')}
               </label>
               <select
                 value={userData.status}

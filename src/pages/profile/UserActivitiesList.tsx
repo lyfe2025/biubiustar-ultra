@@ -1,11 +1,27 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Calendar, MapPin, Users, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { useLanguage } from '../../contexts/language'
 import { UserActivitiesListProps } from './types'
+import { ActivityCategory, ActivityService } from '../../lib/activityService'
+import { getCategoryName } from '../../utils/categoryUtils'
 
 const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isLoading }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+  const [categories, setCategories] = useState<ActivityCategory[]>([])
+
+  // 加载分类数据
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoryData = await ActivityService.getActivityCategories(language);
+        setCategories(categoryData);
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+      }
+    };
+    loadCategories();
+  }, [language]);
 
   if (isLoading) {
     return (
@@ -122,7 +138,10 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
               {activity.category && (
                 <div className="flex items-center space-x-2">
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                    {activity.category}
+                    {(() => {
+                      const category = categories.find(cat => cat.name === activity.category);
+                      return category ? getCategoryName(category, language) : activity.category;
+                    })()}
                   </span>
                 </div>
               )}

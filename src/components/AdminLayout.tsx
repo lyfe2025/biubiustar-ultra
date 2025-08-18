@@ -6,6 +6,7 @@ import { useSiteInfo } from '../hooks/useSettings'
 import { usePageTitle } from '../hooks/usePageTitle'
 
 import { AdminService } from '../services/AdminService'
+import { toast } from 'sonner'
 import {
   LayoutDashboard,
   FileText,
@@ -46,9 +47,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   useEffect(() => {
     const handleAuthError = () => {
       // 显示友好提示
-      alert(t('admin.tokenExpired'))
-      // 跳转到登录页
-      navigate('/admin')
+      toast.error(t('admin.tokenExpired'))
+      // 延迟跳转，避免重复触发
+      setTimeout(() => {
+        navigate('/admin')
+      }, 1000)
     }
 
     AdminService.setAuthErrorCallback(handleAuthError)

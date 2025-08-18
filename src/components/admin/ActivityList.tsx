@@ -1,6 +1,7 @@
 import React from 'react'
 import { Search, Filter, Eye, Edit2, Star, StarOff, Trash2, Plus } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
+import { getCategoryName } from '@/utils/categoryUtils'
 
 import { AdminActivity } from '../../services/AdminService'
 
@@ -39,7 +40,7 @@ const ActivityList: React.FC<ActivityListProps> = ({
   onDeleteActivity,
   onCreateActivity
 }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -123,7 +124,7 @@ const ActivityList: React.FC<ActivityListProps> = ({
             >
               <option value="all">{t('admin.activities.filter.allCategories')}</option>
               {categories.map(category => (
-                <option key={category.id} value={category.name}>{category.name}</option>
+                <option key={category.id} value={category.name}>{getCategoryName(category, language)}</option>
               ))}
             </select>
           </div>
@@ -176,7 +177,12 @@ const ActivityList: React.FC<ActivityListProps> = ({
                           )}
                         </div>
                         <div className="text-sm text-gray-500">{activity.location}</div>
-                        <div className="text-xs text-gray-400">{activity.category}</div>
+                        <div className="text-xs text-gray-400">
+                          {(() => {
+                            const category = categories.find(cat => cat.name === activity.category);
+                            return category ? getCategoryName(category, language) : activity.category;
+                          })()}
+                        </div>
                       </div>
                     </div>
                   </td>

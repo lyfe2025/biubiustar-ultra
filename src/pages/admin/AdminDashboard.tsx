@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { 
   Users, 
   FileText, 
@@ -275,8 +276,10 @@ const AdminDashboard = () => {
         
         // 检查是否为认证失败错误
         if (error instanceof Error && error.name === 'AuthenticationError') {
-          alert('认证令牌已失效，请重新登录')
-          navigate('/admin')
+          toast.error('认证令牌已失效，请重新登录')
+          setTimeout(() => {
+            navigate('/admin')
+          }, 1000)
           return
         }
         

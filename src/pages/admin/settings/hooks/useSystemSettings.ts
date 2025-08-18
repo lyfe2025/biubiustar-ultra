@@ -21,7 +21,7 @@ export const useSystemSettings = () => {
     } catch (error) {
       console.error('获取系统设置失败:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
-        alert('认证令牌已失效，请重新登录')
+        toast.error('认证令牌已失效，请重新登录')
         navigate('/admin')
         return
       }
@@ -52,7 +52,7 @@ export const useSystemSettings = () => {
     } catch (error) {
       console.error('保存设置失败:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
-        alert('认证令牌已失效，请重新登录')
+        toast.error('认证令牌已失效，请重新登录')
         navigate('/admin')
         return
       }

@@ -55,22 +55,24 @@ export interface Comment {
 }
 
 export interface Activity {
-  id: string;
-  title: string;
-  description: string;
-  image_url?: string;
-  start_date: string;
-  end_date: string;
-  location: string;
-  max_participants: number;
-  current_participants: number;
-  category: string;
-  user_id: string;
-  created_at: string;
-  author?: {
-    id: string;
-    username: string;
-    full_name: string;
-    avatar_url?: string;
-  };
+  id: string
+  title: string
+  description?: string
+  image_url?: string
+  category: string
+  category_id?: number
+  start_date: string
+  end_date?: string
+  location?: string
+  max_participants?: number
+  current_participants: number
+  created_at: string
+  updated_at: string
+  user_id: string
+  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled' | 'published' | 'draft'
+  author: {
+    id: string
+    username: string
+    full_name?: string
+  }
 }

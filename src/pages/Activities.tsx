@@ -4,10 +4,11 @@ import { ActivityCard } from '../components/ActivityCard';
 import { useLanguage } from '../contexts/language';
 import { toast } from 'sonner';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { getCategoryName } from '../utils/categoryUtils';
 
 
 const Activities = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   usePageTitle(t('activities.title'));
   const [activities, setActivities] = useState<Activity[]>([]);
   const [categories, setCategories] = useState<ActivityCategory[]>([]);
@@ -25,26 +26,12 @@ const Activities = () => {
     loadCategories();
   }, []);
 
-  // 监听categories状态变化
+  // 监听语言变化，重新加载分类
   useEffect(() => {
-    console.log('🔄 categories状态已更新:', categories);
-    console.log('🔄 categories长度:', categories.length);
-    if (categories.length > 0) {
-      console.log('✅ 成功获取到', categories.length, '个分类');
-      console.log('🔄 状态更新完成，组件将重新渲染');
-    }
-  }, [categories]);
+    loadCategories();
+  }, [language]);
 
-  // 监听加载状态变化
-  useEffect(() => {
-    console.log('🎯 加载状态变化 - isCategoriesLoading:', isCategoriesLoading);
-  }, [isCategoriesLoading]);
-
-  // 添加调试信息显示（每次渲染都执行）
-  useEffect(() => {
-    console.log('🎯 组件重新渲染 - categories:', categories.length, 'loading:', isCategoriesLoading);
-    console.log('🎯 当前displayCategories:', displayCategories);
-  });
+  // 清理调试代码
 
   const loadActivities = async () => {
     setIsLoading(true);
@@ -54,29 +41,21 @@ const Activities = () => {
       setActivities(data);
     } catch (error) {
       console.error('Error loading activities:', error);
-      toast.error('加载活动失败');
+      toast.error(t('activities.messages.loadFailed'));
     } finally {
       setIsLoading(false);
     }
   };
 
   const loadCategories = async () => {
-    console.log('🔄 开始加载分类...');
     setIsCategoriesLoading(true);
     
     try {
-      const categoriesData = await ActivityService.getActivityCategories();
-      console.log('📊 获取到的分类数据:', categoriesData);
-      console.log('📊 数据类型:', typeof categoriesData);
-      console.log('📊 是否为数组:', Array.isArray(categoriesData));
-      console.log('📊 数组长度:', categoriesData?.length);
+      const categoriesData = await ActivityService.getActivityCategories(language);
       
       if (Array.isArray(categoriesData) && categoriesData.length > 0) {
-        console.log('✅ 即将设置分类数据:', categoriesData.length, '个分类');
         setCategories(categoriesData);
-        console.log('✅ setCategories调用完成');
       } else {
-        console.log('⚠️ 分类数据为空或无效，设置为空数组');
         setCategories([]);
       }
     } catch (error) {
@@ -84,8 +63,6 @@ const Activities = () => {
       setCategories([]);
     }
     
-    // 在状态更新后设置加载完成
-    console.log('🔄 设置加载状态为false');
     setIsCategoriesLoading(false);
   };
 
@@ -110,33 +87,32 @@ const Activities = () => {
 
   // 获取显示的分类列表（API分类 + 降级处理）
   const displayCategories = useMemo(() => {
-    console.log('🎯 useMemo重新计算分类列表:');
-    console.log('🎯 isCategoriesLoading:', isCategoriesLoading);
-    console.log('🎯 categories状态:', categories);
-    console.log('🎯 categories长度:', categories.length);
-    
     if (isCategoriesLoading) {
-      console.log('🎯 返回加载中状态: ["全部"]');
       return ['全部']; // 加载中只显示全部
     }
     
     if (categories.length > 0) {
-      const result = ['全部', ...categories.map(cat => cat.name)];
-      console.log('🎯 返回API分类:', result);
-      console.log('🎯 API分类详情:', categories);
-      return result;
+      return ['全部', ...categories.map(cat => getCategoryName(cat, language))];
     }
     
     // 降级到硬编码分类
-    console.log('🎯 降级到硬编码分类:', fallbackCategories);
     return fallbackCategories;
-  }, [categories, isCategoriesLoading]);
-
-  // 实时显示当前状态
-  console.log('🔥 当前显示的分类:', displayCategories);
+  }, [categories, isCategoriesLoading, language]);
 
   const filteredActivities = activities.filter(activity => {
-    const categoryMatch = selectedCategory === '全部' || activity.category === selectedCategory;
+    let categoryMatch = selectedCategory === '全部';
+    
+    if (!categoryMatch) {
+      // 如果有API分类数据，根据本地化名称匹配
+      if (categories.length > 0) {
+        const matchedCategory = categories.find(cat => getCategoryName(cat, language) === selectedCategory);
+        categoryMatch = matchedCategory ? activity.category === matchedCategory.name : false;
+      } else {
+        // 降级到直接匹配
+        categoryMatch = activity.category === selectedCategory;
+      }
+    }
+    
     const statusMatch = selectedStatus === '全部' || getActivityStatus(activity) === selectedStatus;
     return categoryMatch && statusMatch;
   });
@@ -184,7 +160,7 @@ const Activities = () => {
             <div className="mb-6 md:mb-8">
               <div className="text-center mb-4 md:mb-6">
                 <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
-                  按分类筛选
+                  {t('activities.ui.filterByCategory')}
                 </h3>
                 <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
               </div>
@@ -201,7 +177,7 @@ const Activities = () => {
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <span className="relative z-10 font-medium">
-                      {category === '全部' ? category : (t(`activities.categories.${category}`) || category)}
+                      {category}
                     </span>
                     {selectedCategory !== category && (
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-600/0 group-hover:from-purple-500/10 group-hover:to-purple-600/10 rounded-2xl transition-all duration-300"></div>
@@ -215,7 +191,7 @@ const Activities = () => {
             <div>
               <div className="text-center mb-4 md:mb-6">
                 <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
-                  按状态筛选
+                  {t('activities.ui.filterByStatus')}
                 </h3>
                 <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
               </div>
@@ -252,7 +228,7 @@ const Activities = () => {
                 <div className="animate-spin rounded-full h-12 md:h-16 w-12 md:w-16 border-4 border-purple-200"></div>
                 <div className="animate-spin rounded-full h-12 md:h-16 w-12 md:w-16 border-4 border-purple-600 border-t-transparent absolute top-0 left-0"></div>
               </div>
-              <p className="mt-4 md:mt-6 text-base md:text-lg text-gray-600 font-medium">正在加载精彩活动...</p>
+              <p className="mt-4 md:mt-6 text-base md:text-lg text-gray-600 font-medium">{t('activities.ui.loading')}</p>
             </div>
           ) : filteredActivities.length === 0 ? (
             <div className="text-center py-16 md:py-24">
@@ -260,8 +236,8 @@ const Activities = () => {
                 <div className="text-6xl md:text-8xl mb-4 md:mb-6 animate-bounce">🎯</div>
                 <div className="absolute -top-2 -right-2 w-4 md:w-6 h-4 md:h-6 bg-purple-500 rounded-full animate-ping"></div>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-gray-700 mb-4">暂无符合条件的活动</h3>
-              <p className="text-base md:text-lg text-gray-500 mb-6 md:mb-8 max-w-md mx-auto">请尝试调整筛选条件或稍后再来看看更多精彩活动</p>
+              <h3 className="text-xl md:text-2xl font-bold text-gray-700 mb-4">{t('activities.ui.noMatchingActivities')}</h3>
+              <p className="text-base md:text-lg text-gray-500 mb-6 md:mb-8 max-w-md mx-auto">{t('activities.ui.tryAdjustFilters')}</p>
               <button 
                 onClick={() => {
                   setSelectedCategory('全部');
@@ -269,19 +245,19 @@ const Activities = () => {
                 }}
                 className="px-6 md:px-8 py-2 md:py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl font-medium hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-sm md:text-base"
               >
-                重置筛选条件
+{t('activities.ui.resetFilters')}
               </button>
             </div>
           ) : (
             <div className="space-y-6 md:space-y-8">
               <div className="text-center">
                 <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
-                  发现 {filteredActivities.length} 个精彩活动
+                  {t('activities.ui.foundActivities').replace('{count}', filteredActivities.length.toString())}
                 </h2>
                 <div className="w-32 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
                 {filteredActivities.map((activity, index) => (
                   <div 
                     key={activity.id} 

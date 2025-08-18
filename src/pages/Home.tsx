@@ -12,6 +12,7 @@ import PostCard from '../components/PostCard'
 import CommentModal from '../components/CommentModal'
 import CreatePostModal from '../components/CreatePostModal'
 import AuthModal from '../components/AuthModal'
+import { ActivityCard } from '../components/ActivityCard'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useSiteInfo, useLocalizedSiteDescription } from '../hooks/useSettings'
 import { useMetaDescription, useSocialMetaTags } from '../hooks/useMetaDescription'
@@ -313,34 +314,11 @@ const Home = () => {
           ) : (
             <div className="grid md:grid-cols-2 gap-8">
               {activities.map((activity) => (
-                <div key={activity.id} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-purple-100">
-                  <div className="aspect-video overflow-hidden">
-                    <img
-                      src={activity.image_url || 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=community%20activity%20event&image_size=landscape_4_3'}
-                      alt={activity.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{activity.title}</h3>
-                    <div className="flex items-center text-gray-600 mb-4">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      <span>{new Date(activity.start_date).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-gray-600">
-                        <Users className="w-4 h-4 mr-2" />
-                        <span>{activity.current_participants} {t('home.participants')}</span>
-                      </div>
-                      <Link
-                        to="/activities"
-                        className="px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 text-sm"
-                      >
-                        {t('home.learnMore')}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <ActivityCard
+                  key={activity.id}
+                  activity={activity}
+                  simplified={true}
+                />
               ))}
             </div>
           )}

@@ -2,26 +2,46 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Clock, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { Link } from 'react-router-dom';
 import { Activity, ActivityService } from '../lib/activityService';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/language';
+import { getCategoryName } from '../utils/categoryUtils';
 import { toast } from 'sonner';
 
 interface ActivityCardProps {
   activity: Activity;
   onParticipationChange?: () => void;
+  simplified?: boolean; // 新增：是否为简化模式
 }
 
-export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipationChange }) => {
+export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipationChange, simplified = false }) => {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
   const [isParticipating, setIsParticipating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [participantCount, setParticipantCount] = useState(activity.current_participants || 0);
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
       checkParticipation();
     }
   }, [user, activity.id]);
+
+  useEffect(() => {
+    loadCategories();
+  }, [language]);
+
+  const loadCategories = async () => {
+    try {
+      const categoriesData = await ActivityService.getActivityCategories(language);
+      setCategories(categoriesData || []);
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+      setCategories([]);
+    }
+  };
 
   const checkParticipation = async () => {
     if (!user) return;
@@ -36,7 +56,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
 
   const handleParticipation = async () => {
     if (!user) {
-      toast.error('请先登录');
+      toast.error(t('activities.messages.loginRequired'));
       return;
     }
 
@@ -64,15 +84,15 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
         if (success) {
           setIsParticipating(true);
           setParticipantCount(prev => prev + 1);
-          toast.success('成功参加活动');
+          toast.success(t('activities.messages.joinSuccess'));
           onParticipationChange?.();
         } else {
-          toast.error('参加活动失败');
+          toast.error(t('activities.messages.joinFailed'));
         }
       }
     } catch (error) {
       console.error('Error handling participation:', error);
-      toast.error('操作失败，请重试');
+      toast.error(t('activities.messages.operationFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -105,128 +125,235 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
   const isActivityFull = participantCount >= activity.max_participants;
   const isActivityPast = activityStatus.status === '已结束';
 
-  return (
-    <div className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-6 border border-white/20 hover:border-purple-400/40 hover:bg-white/15 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1 animate-fade-in-up">
-      {/* 活动图片 */}
-      {activity.image_url && (
-        <div className="mb-3 md:mb-4 rounded-xl overflow-hidden relative group">
+  // 简化模式渲染
+  if (simplified) {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-purple-200 group">
+        {/* 活动图片 */}
+        <div className="aspect-video overflow-hidden relative">
           <img
-            src={activity.image_url}
+            src={activity.image_url || '/images/placeholder-activity.svg'}
             alt={activity.title}
-            className="w-full h-32 md:h-48 object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
-      )}
-
-      {/* 活动标题和分类 */}
-      <div className="mb-3 md:mb-4">
-        <div className="flex items-start justify-between mb-2 md:mb-3">
-          <h3 className="text-base md:text-xl font-bold text-white group-hover:text-purple-200 transition-colors duration-300 flex-1 mr-2 md:mr-4">{activity.title}</h3>
-          <div className="flex flex-col gap-1 md:gap-2 items-end">
-            <span className={`px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs font-medium backdrop-blur-sm border ${activityStatus.color} ${activityStatus.status === '进行中' ? 'border-green-400/30 animate-pulse' : activityStatus.status === '即将开始' ? 'border-blue-400/30' : 'border-gray-400/30'}`}>
+          {/* 状态标签 */}
+          <div className="absolute top-3 left-3">
+            <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+              activityStatus.status === '进行中' 
+                ? 'bg-green-100 text-green-800 border border-green-200'
+                : activityStatus.status === '即将开始' 
+                ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+            }`}>
               {activityStatus.status}
             </span>
-            <span className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-purple-500/30 to-purple-600/30 text-purple-200 rounded-full text-xs font-medium border border-purple-400/30 backdrop-blur-sm hover:from-purple-500/40 hover:to-purple-600/40 transition-all duration-300">
-              {activity.category}
-            </span>
           </div>
         </div>
-        
-        {/* 作者信息 */}
-        {activity.author && (
-          <div className="flex items-center text-gray-300 text-xs md:text-sm mb-2 md:mb-3 group-hover:text-gray-200 transition-colors duration-300">
-            <div className="w-5 md:w-6 h-5 md:h-6 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mr-2">
-              <User className="w-2.5 md:w-3 h-2.5 md:h-3 text-white" />
+
+        <div className="p-6">
+          {/* 活动标题 */}
+          <h3 className="text-xl font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-purple-700 transition-colors">
+            {activity.title}
+          </h3>
+          
+          {/* 关键信息 */}
+          <div className="space-y-4 mb-6">
+            {/* 时间 */}
+            <div className="flex items-center text-gray-600">
+              <Calendar className="w-4 h-4 mr-2 text-purple-600" />
+              <span className="text-sm">{new Date(activity.start_date).toLocaleDateString()}</span>
             </div>
-            <span>由 <span className="font-medium text-purple-300">{activity.author.full_name || activity.author.username}</span> 发起</span>
+            
+            {/* 参与人数 */}
+            <div className="flex items-center text-gray-600">
+              <Users className="w-4 h-4 mr-2 text-purple-600" />
+              <span className="text-sm">{participantCount} 人参加</span>
+            </div>
           </div>
-        )}
+
+          {/* 了解更多按钮 */}
+          <Link
+            to="/activities"
+            className="block w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 text-sm font-semibold text-center"
+          >
+            {t('activities.ui.learnMore')}
+          </Link>
+        </div>
       </div>
+    );
+  }
 
-      {/* 活动描述 */}
-      <p className="text-gray-300 text-xs md:text-sm mb-3 md:mb-5 line-clamp-2 md:line-clamp-3 leading-relaxed group-hover:text-gray-200 transition-colors duration-300">{activity.description}</p>
-
-      {/* 活动信息 */}
-      <div className="space-y-2 md:space-y-3 mb-4 md:mb-6 bg-black/10 rounded-xl p-3 md:p-4 border border-white/10">
-        <div className="flex items-center text-gray-300 group-hover:text-gray-200 transition-colors duration-300">
-          <div className="w-6 md:w-8 h-6 md:h-8 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-lg flex items-center justify-center mr-2 md:mr-3 border border-purple-400/20">
-            <Calendar className="w-3 md:w-4 h-3 md:h-4 text-purple-300" />
-          </div>
-          <span className="text-xs md:text-sm font-medium">
-            {formatDate(activity.start_date)}
+  // 完整模式渲染
+  return (
+    <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-50 hover:border-purple-100 group transform hover:-translate-y-2">
+      {/* 活动图片 */}
+      <div className="relative overflow-hidden">
+        <img
+          src={activity.image_url || '/images/placeholder-activity.svg'}
+          alt={activity.title}
+          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+        />
+        {/* 渐变遮罩 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        
+        {/* 状态标签 */}
+        <div className="absolute top-4 left-4">
+          <span className={`px-4 py-2 rounded-full text-sm font-bold backdrop-blur-md border-2 ${
+            activityStatus.status === '进行中' 
+              ? 'bg-green-50/90 text-green-800 border-green-200 shadow-lg shadow-green-200/50'
+              : activityStatus.status === '即将开始' 
+              ? 'bg-blue-50/90 text-blue-800 border-blue-200 shadow-lg shadow-blue-200/50'
+              : 'bg-gray-50/90 text-gray-600 border-gray-200 shadow-lg shadow-gray-200/50'
+          }`}>
+            {activityStatus.status}
+          </span>
+        </div>
+        {/* 分类标签 */}
+        <div className="absolute top-4 right-4">
+          <span className="px-4 py-2 bg-purple-600/90 text-white rounded-full text-sm font-bold backdrop-blur-md border-2 border-white/20 shadow-lg shadow-purple-600/30">
+            {(() => {
+              let matchedCategory = null;
+              
+              // 优先使用category_id进行匹配
+              if (activity.category_id) {
+                matchedCategory = categories.find(cat => cat.id === activity.category_id);
+              }
+              
+              // 如果category_id匹配失败，尝试字符串匹配
+              if (!matchedCategory && activity.category) {
+                matchedCategory = categories.find(cat => 
+                  cat.name === activity.category ||
+                  cat.name_zh === activity.category ||
+                  cat.name_en === activity.category ||
+                  cat.name_zh_tw === activity.category ||
+                  cat.id === activity.category
+                );
+              }
+              
+              const result = matchedCategory ? getCategoryName(matchedCategory, language) : activity.category;
+              
+              // 简化的调试信息
+              console.log('ActivityCard分类匹配:', {
+                category_id: activity.category_id,
+                category_string: activity.category,
+                matched: !!matchedCategory,
+                final_result: result
+              });
+              
+              return result;
+            })()}
           </span>
         </div>
         
-        <div className="flex items-center text-gray-300 group-hover:text-gray-200 transition-colors duration-300">
-          <div className="w-6 md:w-8 h-6 md:h-8 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-lg flex items-center justify-center mr-2 md:mr-3 border border-purple-400/20">
-            <MapPin className="w-3 md:w-4 h-3 md:h-4 text-purple-300" />
-          </div>
-          <span className="text-xs md:text-sm font-medium">{activity.location}</span>
-        </div>
-        
-        <div className="flex items-center text-gray-300 group-hover:text-gray-200 transition-colors duration-300">
-          <div className="w-6 md:w-8 h-6 md:h-8 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-lg flex items-center justify-center mr-2 md:mr-3 border border-purple-400/20">
-            <Users className="w-3 md:w-4 h-3 md:h-4 text-purple-300" />
-          </div>
-          <div className="flex items-center gap-1 md:gap-2">
-            <span className="text-xs md:text-sm font-medium">
-              {participantCount}/{activity.max_participants} 人参加
-            </span>
+        {/* 参与人数快速显示 */}
+        <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md rounded-full px-4 py-2 border border-white/50 shadow-lg">
+          <div className="flex items-center text-gray-700">
+            <Users className="w-4 h-4 mr-2 text-purple-600" />
+            <span className="text-sm font-semibold">{participantCount}/{activity.max_participants}</span>
             {isActivityFull && (
-              <span className="px-1.5 md:px-2 py-0.5 md:py-1 bg-gradient-to-r from-red-500/30 to-red-600/30 text-red-200 rounded-full text-xs font-medium border border-red-400/30 animate-pulse">
-                已满
+              <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-bold">
+                {t('activities.ui.full')}
               </span>
             )}
           </div>
         </div>
-        
-        <div className="flex items-center text-gray-300 group-hover:text-gray-200 transition-colors duration-300">
-          <div className="w-6 md:w-8 h-6 md:h-8 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-lg flex items-center justify-center mr-2 md:mr-3 border border-purple-400/20">
-            <Clock className="w-3 md:w-4 h-3 md:h-4 text-purple-300" />
-          </div>
-          <span className={`text-xs md:text-sm font-medium ${
-            activityStatus.status === '进行中' ? 'text-green-300' :
-            activityStatus.status === '即将开始' ? 'text-blue-300' :
-            'text-gray-400'
-          }`}>
-            状态：{activityStatus.status}
-          </span>
-        </div>
       </div>
 
-      {/* 参与按钮 */}
-      {!isActivityPast && (
-        <button
-          onClick={handleParticipation}
-          disabled={isLoading || (!isParticipating && isActivityFull)}
-          className={`relative w-full py-2 md:py-3 px-4 md:px-6 rounded-xl font-medium transition-all duration-300 overflow-hidden group/btn text-sm md:text-base ${
-            isParticipating
-              ? 'bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-200 border border-red-500/30 hover:from-red-500/30 hover:to-red-600/30 hover:border-red-400/50 hover:shadow-lg hover:shadow-red-500/20'
-              : isActivityFull
-              ? 'bg-gray-500/20 text-gray-400 border border-gray-500/30 cursor-not-allowed'
-              : 'bg-gradient-to-r from-purple-500/20 to-purple-600/20 text-purple-200 border border-purple-500/30 hover:from-purple-500/30 hover:to-purple-600/30 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-0.5'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <span className="relative z-10">
-            {isLoading
-              ? '处理中...'
-              : isParticipating
-              ? '退出活动'
-              : isActivityFull
-              ? '活动已满'
-              : '参加活动'
-            }
-          </span>
-          {!isActivityFull && !isLoading && (
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-purple-400/10 to-purple-400/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700"></div>
-          )}
-        </button>
-      )}
-      
-      {/* 装饰性元素 */}
-      <div className="absolute top-2 md:top-4 right-2 md:right-4 w-12 md:w-20 h-12 md:h-20 bg-gradient-to-br from-purple-500/5 to-purple-600/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 w-10 md:w-16 h-10 md:h-16 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+      <div className="p-8">
+        {/* 活动标题 */}
+        <h3 className="text-2xl font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-purple-700 transition-colors leading-tight">
+          {activity.title}
+        </h3>
+
+        {/* 活动描述 */}
+        <p className="text-gray-600 text-base mb-6 line-clamp-3 leading-relaxed">
+          {activity.description}
+        </p>
+
+        {/* 关键信息 - 更大气的布局 */}
+        <div className="space-y-4 mb-6">
+          {/* 时间 */}
+          <div className="flex items-center text-gray-700 bg-gray-50 rounded-xl p-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+              <Calendar className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <div className="text-sm text-gray-500 font-medium">{t('activities.ui.activityTime')}</div>
+              <div className="text-base font-bold text-gray-800">
+                {formatDate(activity.start_date)}
+              </div>
+            </div>
+          </div>
+          
+          {/* 地点 */}
+          <div className="flex items-center text-gray-700 bg-gray-50 rounded-xl p-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+              <MapPin className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm text-gray-500 font-medium">{t('activities.ui.activityLocation')}</div>
+              <div className="text-base font-bold text-gray-800 truncate">{activity.location}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 作者信息 */}
+        {activity.author && (
+          <div className="flex items-center text-gray-500 mb-6 pb-6 border-b border-gray-100">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center mr-3 shadow-md">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="text-sm text-gray-500">{t('activities.ui.organizer')}</div>
+              <div className="font-bold text-gray-800">{activity.author.full_name || activity.author.username}</div>
+            </div>
+          </div>
+        )}
+
+        {/* 参与按钮 */}
+        {!isActivityPast && (
+          <button
+            onClick={handleParticipation}
+            disabled={isLoading || (!isParticipating && isActivityFull)}
+            className={`relative w-full py-4 px-6 rounded-2xl font-bold transition-all duration-300 text-base overflow-hidden group/btn ${
+              isParticipating
+                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-lg hover:shadow-red-500/25 transform hover:-translate-y-1'
+                : isActivityFull
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 shadow-xl hover:shadow-purple-500/30 transform hover:-translate-y-1'
+            } ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+          >
+            <span className="relative z-10 flex items-center justify-center">
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  {t('activities.ui.processing')}
+                </>
+              ) : isParticipating ? (
+                t('activities.actions.leave')
+              ) : isActivityFull ? (
+                t('activities.messages.activityFull')
+              ) : (
+                <>
+                  <Users className="w-5 h-5 mr-2" />
+                  {t('activities.actions.join')}
+                </>
+              )}
+            </span>
+            {!isActivityFull && !isLoading && (
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700"></div>
+            )}
+          </button>
+        )}
+
+        {/* 活动已结束提示 */}
+        {isActivityPast && (
+          <div className="w-full py-4 px-6 bg-gray-100 text-gray-600 rounded-2xl text-center text-base font-bold border border-gray-200">
+            <Clock className="w-5 h-5 inline mr-2" />
+            {t('activities.ui.activityEnded')}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

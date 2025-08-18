@@ -71,7 +71,7 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
         id: activity.id,
         title: activity.title,
         description: activity.description,
-        image: activity.image_url,
+        image_url: activity.image_url, // 保持与Activity类型一致
         location: activity.location,
         start_date: activity.start_date,
         end_date: activity.end_date,

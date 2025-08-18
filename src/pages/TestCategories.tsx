@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityService, ActivityCategory } from '../lib/activityService';
+import { useLanguage } from '../contexts/language';
 
 const TestCategories = () => {
+  const { language } = useLanguage();
   const [categories, setCategories] = useState<ActivityCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -10,7 +12,7 @@ const TestCategories = () => {
     const loadCategories = async () => {
       try {
         console.log('🧪 测试页面: 开始加载分类...');
-        const data = await ActivityService.getActivityCategories();
+        const data = await ActivityService.getActivityCategories(language);
         console.log('🧪 测试页面: 获取到的数据:', data);
         console.log('🧪 测试页面: 数据类型:', typeof data);
         console.log('🧪 测试页面: 是否为数组:', Array.isArray(data));
@@ -27,7 +29,7 @@ const TestCategories = () => {
     };
 
     loadCategories();
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     console.log('🧪 测试页面: categories状态更新:', categories);

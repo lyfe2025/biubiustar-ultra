@@ -53,8 +53,11 @@ export const useUserManagement = () => {
       console.error('获取用户数据失败:', error)
       
       if (error instanceof Error && error.name === 'AuthenticationError') {
-        alert('认证令牌已失效，请重新登录')
-        navigate('/admin')
+        toast.error('认证令牌已失效，请重新登录')
+        // 延迟跳转，避免重复触发
+        setTimeout(() => {
+          navigate('/admin')
+        }, 1000)
         return
       }
     } finally {
@@ -128,6 +131,7 @@ export const useUserManagement = () => {
   // 删除用户
   const deleteUser = async (user: User) => {
     try {
+      setIsSubmitting(true)
       await adminService.deleteUser(user.id)
       await fetchUsers()
       setShowDeleteConfirm(false)
@@ -136,6 +140,8 @@ export const useUserManagement = () => {
     } catch (error) {
       console.error('删除用户失败:', error)
       toast.error('删除用户失败')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
