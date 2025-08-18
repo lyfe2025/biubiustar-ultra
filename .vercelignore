@@ -56,7 +56,6 @@ test_*.js
 test_*.json
 *.md
 !README.md
-project.sh
 .deployment-check.cjs
 
 # 🧪 测试文件和开发工具

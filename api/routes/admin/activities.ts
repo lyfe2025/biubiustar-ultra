@@ -151,8 +151,18 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
     } = req.body
 
     // 验证必填字段
-    if (!title || !description || !location || !start_date || !end_date) {
-      return res.status(400).json({ error: '标题、描述、地点、开始时间、结束时间为必填项' })
+    const missingFields = []
+    if (!title || !title.trim()) missingFields.push('标题')
+    if (!description || !description.trim()) missingFields.push('描述')
+    if (!location || !location.trim()) missingFields.push('地点')
+    if (!start_date) missingFields.push('开始时间')
+    if (!end_date) missingFields.push('结束时间')
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        error: `缺少必填字段: ${missingFields.join('、')}`,
+        missingFields
+      })
     }
 
     // 处理分类字段 - 如果category为空，设置为默认值
@@ -163,17 +173,50 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
     const endDate = new Date(end_date)
     const now = new Date()
 
+    // 验证时间格式
+    if (isNaN(startDate.getTime())) {
+      return res.status(400).json({ 
+        error: '开始时间格式错误',
+        field: 'start_date',
+        value: start_date
+      })
+    }
+
+    if (isNaN(endDate.getTime())) {
+      return res.status(400).json({ 
+        error: '结束时间格式错误',
+        field: 'end_date',
+        value: end_date
+      })
+    }
+
     if (startDate < now) {
-      return res.status(400).json({ error: '开始时间不能早于当前时间' })
+      return res.status(400).json({ 
+        error: '开始时间不能早于当前时间',
+        field: 'start_date',
+        current_time: now.toISOString(),
+        provided_time: startDate.toISOString()
+      })
     }
 
     if (endDate <= startDate) {
-      return res.status(400).json({ error: '结束时间必须晚于开始时间' })
+      return res.status(400).json({ 
+        error: '结束时间必须晚于开始时间',
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString()
+      })
     }
 
     // 验证最大参与人数
-    if (max_participants && (max_participants < 1 || max_participants > 10000)) {
-      return res.status(400).json({ error: '最大参与人数必须在1-10000之间' })
+    if (max_participants !== null && max_participants !== undefined) {
+      const maxParticipantsNum = Number(max_participants)
+      if (isNaN(maxParticipantsNum) || maxParticipantsNum < 1 || maxParticipantsNum > 10000) {
+        return res.status(400).json({ 
+          error: '最大参与人数必须在1-10000之间的数字',
+          field: 'max_participants',
+          value: max_participants
+        })
+      }
     }
 
     // 创建活动
@@ -198,7 +241,28 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
 
     if (error) {
       console.error('创建活动失败:', error)
-      return res.status(500).json({ error: '创建活动失败' })
+      
+      // 提供更详细的错误信息
+      let errorMessage = '创建活动失败'
+      
+      // 根据错误类型提供具体信息
+      if (error.code === '23505') {
+        errorMessage = '活动标题或其他唯一字段已存在，请修改后重试'
+      } else if (error.code === '23502') {
+        errorMessage = '缺少必需的字段信息'
+      } else if (error.code === '23514') {
+        errorMessage = '输入数据不符合约束条件'
+      } else if (error.code === '42703') {
+        errorMessage = '字段名称错误'
+      } else if (error.message) {
+        errorMessage = `创建活动失败: ${error.message}`
+      }
+      
+      return res.status(500).json({ 
+        error: errorMessage,
+        details: error.message || '数据库操作失败',
+        code: error.code
+      })
     }
 
     // 获取组织者信息

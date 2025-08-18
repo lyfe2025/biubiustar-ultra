@@ -96,6 +96,92 @@ router.post('/image', upload.single('image'), async (req: Request, res: Response
   }
 })
 
+// 活动图片专用上传端点
+router.post('/activity-image', async (req: Request, res: Response): Promise<Response | void> => {
+  try {
+    // 创建活动图片专用的存储配置
+    const activityStorage = multer.diskStorage({
+      destination: (req, file, cb) => {
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'activities')
+        
+        // 确保activities目录存在
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true })
+        }
+        
+        cb(null, uploadDir)
+      },
+      filename: (req, file, cb) => {
+        // 生成唯一文件名：时间戳 + 随机数 + 原扩展名
+        const timestamp = Date.now()
+        const random = Math.round(Math.random() * 1E9)
+        const ext = path.extname(file.originalname).toLowerCase()
+        const filename = `${timestamp}-${random}${ext}`
+        
+        cb(null, filename)
+      }
+    })
+
+    // 配置活动图片上传
+    const activityUpload = multer({
+      storage: activityStorage,
+      fileFilter,
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB限制
+        files: 1 // 一次只能上传一个文件
+      }
+    })
+
+    // 使用活动图片上传配置处理文件
+    activityUpload.single('image')(req, res, async (err) => {
+      if (err) {
+        console.error('活动图片上传失败:', err)
+        return res.status(500).json({
+          error: '活动图片上传失败',
+          details: err.message
+        })
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: '未选择文件' })
+      }
+
+      try {
+        // 返回活动图片的相对路径
+        const relativePath = `/uploads/activities/${req.file.filename}`
+        
+        console.log(`活动图片上传成功: ${req.file.filename}, 大小: ${req.file.size} bytes`)
+        
+        res.json({
+          success: true,
+          message: '活动图片上传成功',
+          data: {
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            size: req.file.size,
+            mimetype: req.file.mimetype,
+            path: relativePath,
+            url: `${req.protocol}://${req.get('host')}${relativePath}`,
+            type: 'activity'
+          }
+        })
+      } catch (error) {
+        console.error('活动图片处理失败:', error)
+        res.status(500).json({
+          error: '活动图片处理失败',
+          details: error instanceof Error ? error.message : '未知错误'
+        })
+      }
+    })
+  } catch (error) {
+    console.error('活动图片上传失败:', error)
+    res.status(500).json({ 
+      error: '活动图片上传失败',
+      details: error instanceof Error ? error.message : '未知错误'
+    })
+  }
+})
+
 // 专门用于站点Logo和Favicon上传的端点
 router.post('/site-asset', (req, res) => {
   

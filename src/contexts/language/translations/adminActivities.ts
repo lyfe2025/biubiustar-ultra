@@ -8,10 +8,16 @@ export const adminActivitiesTranslations = {
         description: '管理平台活动',
         create: '创建活动',
         edit: '编辑活动',
-        status: '状态',
+        statusLabel: '状态',
         upcoming: '即将开始',
         ongoing: '进行中',
         completed: '已结束',
+        // 活动状态
+        status: {
+          draft: '草稿',
+          published: '已发布',
+          cancelled: '已取消'
+        },
         participants: '参与者',
         totalActivities: '活动总数',
         activeActivities: '进行中活动',
@@ -128,10 +134,16 @@ export const adminActivitiesTranslations = {
         description: '管理平台活動',
         create: '創建活動',
         edit: '編輯活動',
-        status: '狀態',
+        statusLabel: '狀態',
         upcoming: '即將開始',
         ongoing: '進行中',
         completed: '已結束',
+        // 活動狀態
+        status: {
+          draft: '草稿',
+          published: '已發布',
+          cancelled: '已取消'
+        },
         participants: '參與者',
         totalActivities: '活動總數',
         activeActivities: '進行中活動',
@@ -245,10 +257,16 @@ export const adminActivitiesTranslations = {
         description: 'Manage platform activities',
         create: 'Create Activity',
         edit: 'Edit Activity',
-        status: 'Status',
+        statusLabel: 'Status',
         upcoming: 'Upcoming',
         ongoing: 'Ongoing',
         completed: 'Completed',
+        // Activity Status
+        status: {
+          draft: 'Draft',
+          published: 'Published',
+          cancelled: 'Cancelled'
+        },
         participants: 'Participants',
         totalActivities: 'Total Activities',
         activeActivities: 'Active Activities',
@@ -361,10 +379,16 @@ export const adminActivitiesTranslations = {
         description: 'Quản lý hoạt động nền tảng',
         create: 'Tạo hoạt động',
         edit: 'Chỉnh sửa hoạt động',
-        status: 'Trạng thái',
+        statusLabel: 'Trạng thái',
         upcoming: 'Sắp diễn ra',
         ongoing: 'Đang diễn ra',
         completed: 'Hoàn thành',
+        // Trạng thái hoạt động
+        status: {
+          draft: 'Bản nháp',
+          published: 'Đã xuất bản',
+          cancelled: 'Đã hủy'
+        },
         participants: 'Người tham gia',
         totalActivities: 'Tổng số hoạt động',
         activeActivities: 'Hoạt động đang diễn ra',

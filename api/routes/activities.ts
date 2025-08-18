@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { supabase } from '../lib/supabase';
+import { supabase, createUserClient } from '../lib/supabase';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
@@ -154,7 +155,7 @@ router.get('/:id/participants', async (req: Request, res: Response): Promise<Res
 });
 
 // POST /api/activities - 创建活动
-router.post('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/', authenticateToken, async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const {
       title,
@@ -164,16 +165,39 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
       end_date,
       location,
       max_participants,
-      user_id,
       category
     } = req.body;
 
     // 输入验证
-    if (!title || !description || !start_date || !user_id) {
+    const missingFields = []
+    if (!title || !title.trim()) missingFields.push('标题(title)')
+    if (!description || !description.trim()) missingFields.push('描述(description)')
+    if (!start_date) missingFields.push('开始时间(start_date)')
+    
+    if (missingFields.length > 0) {
       return res.status(400).json({ 
-        error: 'Missing required fields: title, description, start_date, user_id' 
+        error: `缺少必填字段: ${missingFields.join('、')}`,
+        missingFields: missingFields.map(field => field.split('(')[1].replace(')', ''))
       });
     }
+
+    // 从认证中间件获取用户ID
+    const user_id = req.user?.id;
+    if (!user_id) {
+      return res.status(401).json({ error: '用户认证失败' });
+    }
+
+
+
+    // 从请求头获取token
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: '缺少认证令牌' });
+    }
+    const token = authHeader.substring(7);
+
+    // 使用用户token创建客户端
+    const userSupabase = createUserClient(token);
 
     const activityData = {
       title,
@@ -189,7 +213,7 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
       status: 'active'
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await userSupabase
       .from('activities')
       .insert([activityData])
       .select()
@@ -197,7 +221,28 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
 
     if (error) {
       console.error('Error creating activity:', error);
-      return res.status(500).json({ error: 'Failed to create activity' });
+      
+      // 提供更详细的错误信息
+      let errorMessage = '创建活动失败'
+      
+      // 根据错误类型提供具体信息
+      if (error.code === '23505') {
+        errorMessage = '活动标题或其他唯一字段已存在，请修改后重试'
+      } else if (error.code === '23502') {
+        errorMessage = '缺少必需的字段信息'
+      } else if (error.code === '23514') {
+        errorMessage = '输入数据不符合约束条件'
+      } else if (error.code === '42501') {
+        errorMessage = '权限不足，无法创建活动'
+      } else if (error.message) {
+        errorMessage = `创建活动失败: ${error.message}`
+      }
+      
+      return res.status(500).json({ 
+        error: errorMessage,
+        details: error.message || '数据库操作失败',
+        code: error.code
+      });
     }
 
     res.status(201).json(data);

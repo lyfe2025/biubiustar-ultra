@@ -148,20 +148,46 @@ class AdminService {
         
         // 尝试解析响应体中的错误信息
         let errorMessage = `API request failed: ${response.statusText}`
+        let errorDetails = null
         
         try {
           const errorData = await response.json()
+          
+          // 优先使用后端返回的error字段
           if (errorData.error) {
             errorMessage = errorData.error
+            
+            // 如果有更详细的信息，添加到错误消息中
+            if (errorData.details && errorData.details !== errorData.error) {
+              errorMessage += ` (详细信息: ${errorData.details})`
+            }
+            
+            // 如果有字段相关的错误信息
+            if (errorData.field) {
+              errorMessage += ` [字段: ${errorData.field}]`
+            }
+            
+            // 如果有缺失字段信息
+            if (errorData.missingFields && Array.isArray(errorData.missingFields)) {
+              errorMessage += ` [缺失字段: ${errorData.missingFields.join(', ')}]`
+            }
           } else if (errorData.message) {
             errorMessage = errorData.message
           }
+          
+          // 保存完整的错误数据用于调试
+          errorDetails = errorData
         } catch (parseError) {
           // 如果无法解析JSON，使用默认错误信息
           console.warn('无法解析错误响应:', parseError)
         }
         
-        throw new Error(errorMessage)
+        const error = new Error(errorMessage)
+        // 将错误详情附加到错误对象上，方便前端组件使用
+        if (errorDetails) {
+          ;(error as any).details = errorDetails
+        }
+        throw error
       }
 
       return response.json()
@@ -496,7 +522,8 @@ class AdminService {
 
   // 添加缺失的系统设置方法
   async getSystemSettings(): Promise<Record<string, unknown>> {
-    return await this.request('/admin/settings')
+    const response = await this.request<{ success: boolean; data: Record<string, unknown> }>('/admin/settings')
+    return response.data
   }
 
   async updateSystemSettings(settings: Record<string, unknown>): Promise<void> {
@@ -522,7 +549,8 @@ class AdminService {
   }
 
   async exportSystemSettings(): Promise<Record<string, unknown>> {
-    return await this.request('/admin/settings/export')
+    const response = await this.request<{ success: boolean; data: Record<string, unknown> }>('/admin/settings/export')
+    return response.data
   }
 
   async importSystemSettings(settings: Record<string, unknown>): Promise<void> {

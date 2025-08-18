@@ -28,10 +28,10 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
       return res.status(500).json({ error: '获取系统设置失败' })
     }
 
-    // 转换为前端期望的嵌套对象格式
-    const result: Record<string, Record<string, unknown>> = {};
+    // 转换为前端期望的格式：{ "category.key": { value, type, description, is_public } }
+    const result: Record<string, { value: any; type: string; description: string; is_public: boolean }> = {};
     settings?.forEach(setting => {
-      const { category, setting_key, setting_value, setting_type } = setting;
+      const { category, setting_key, setting_value, setting_type, description, is_public } = setting;
       
       // 先尝试解析 setting_value，可能包含嵌套的元数据
       let rawValue = setting_value;
@@ -82,11 +82,16 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
       if (setting_key === 'site_keywords') camelKey = 'siteKeywords';
       if (setting_key === 'tech_stack') camelKey = 'techStack';
       
-      // 创建嵌套对象结构
-      if (!result[category]) {
-        result[category] = {};
-      }
-      result[category][camelKey] = convertedValue;
+      // 创建 category.key 格式的键名
+      const fullKey = `${category}.${camelKey}`;
+      
+      // 创建符合前端期望的数据结构
+      result[fullKey] = {
+        value: convertedValue,
+        type: setting_type,
+        description: description || `Setting: ${setting_key}`,
+        is_public: is_public || false
+      };
     });
     res.json({ success: true, data: result });
   } catch (error) {

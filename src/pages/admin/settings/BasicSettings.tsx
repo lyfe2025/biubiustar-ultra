@@ -472,11 +472,9 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
           placeholder={t('admin.settings.basic.siteDomainPlaceholder')}
         />
         <p className="mt-1 text-sm text-gray-500">
-           {t('admin.settings.basic.siteDomainDescription')}
-         </p>
+          {t('admin.settings.basic.siteDomainDescription')}
+        </p>
       </div>
-
-
     </div>
   )
 })
