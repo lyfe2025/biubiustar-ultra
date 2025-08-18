@@ -3,11 +3,16 @@ export const adminAuthTranslations = {
   zh: {
     admin: {
       // 基础导航
-      title: '管理控制台',
+      title: '管理后台',
       console: '控制台',
       logout: '退出登录',
       backToFrontend: '返回前台',
       tokenExpired: '登录已过期，请重新登录',
+      
+      // 认证相关
+      auth: {
+        sessionExpired: '会话已过期，请重新登录'
+      },
       
       // 管理员登录
       login: {
@@ -31,11 +36,16 @@ export const adminAuthTranslations = {
   
   'zh-TW': {
     admin: {
-      title: '管理控制台',
+      title: '管理後台',
       console: '控制台',
       logout: '退出登錄',
       backToFrontend: '返回前台',
       tokenExpired: '登錄已過期，請重新登錄',
+      
+      // 認證相關
+      auth: {
+        sessionExpired: '會話已過期，請重新登錄'
+      },
       
       login: {
         title: '管理員登錄',
@@ -58,11 +68,16 @@ export const adminAuthTranslations = {
   
   en: {
     admin: {
-      title: 'Admin Console',
+      title: 'Admin Dashboard',
       console: 'Console',
       logout: 'Logout',
       backToFrontend: 'Back to Frontend',
       tokenExpired: 'Login expired, please login again',
+      
+      // Authentication
+      auth: {
+        sessionExpired: 'Session expired, please login again'
+      },
       
       login: {
         title: 'Admin Login',
@@ -85,11 +100,16 @@ export const adminAuthTranslations = {
   
   vi: {
     admin: {
-      title: 'Bảng quản trị',
+      title: 'Quản trị viên',
       console: 'Bảng điều khiển',
       logout: 'Đăng xuất',
       backToFrontend: 'Trở về giao diện',
       tokenExpired: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại',
+      
+      // Xác thực
+      auth: {
+        sessionExpired: 'Phiên đã hết hạn, vui lòng đăng nhập lại'
+      },
       
       login: {
         title: 'Đăng nhập quản trị',

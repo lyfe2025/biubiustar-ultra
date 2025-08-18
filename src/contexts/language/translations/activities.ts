@@ -22,7 +22,11 @@ export const activitiesTranslations = {
         upcoming: '即将开始',
         ongoing: '进行中',
         completed: '已结束',
-        cancelled: '已取消'
+        cancelled: '已取消',
+        全部: '全部',
+        即将开始: '即将开始',
+        进行中: '进行中',
+        已结束: '已结束'
       },
 
       // 活动分类
@@ -111,7 +115,11 @@ export const activitiesTranslations = {
         upcoming: '即將開始',
         ongoing: '進行中',
         completed: '已結束',
-        cancelled: '已取消'
+        cancelled: '已取消',
+        全部: '全部',
+        即将开始: '即將開始',
+        进行中: '進行中',
+        已结束: '已結束'
       },
 
       // 活動分類
@@ -196,7 +204,11 @@ export const activitiesTranslations = {
         upcoming: 'Upcoming',
         ongoing: 'Ongoing',
         completed: 'Completed',
-        cancelled: 'Cancelled'
+        cancelled: 'Cancelled',
+        全部: 'All',
+        即将开始: 'Upcoming',
+        进行中: 'Ongoing',
+        已结束: 'Completed'
       },
 
       // Activity Categories
@@ -281,7 +293,11 @@ export const activitiesTranslations = {
         upcoming: 'Sắp diễn ra',
         ongoing: 'Đang diễn ra',
         completed: 'Đã hoàn thành',
-        cancelled: 'Đã hủy'
+        cancelled: 'Đã hủy',
+        全部: 'Tất cả',
+        即将开始: 'Sắp diễn ra',
+        进行中: 'Đang diễn ra',
+        已结束: 'Đã hoàn thành'
       },
 
       // Danh mục hoạt động

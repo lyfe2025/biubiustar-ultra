@@ -17,6 +17,7 @@ interface NewActivityData {
   description: string
   location: string
   category: string
+  status: 'published' | 'draft' | 'cancelled'
   start_date: string
   end_date: string
   max_participants: string
@@ -41,6 +42,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
     description: '',
     location: '',
     category: 'general', // 统一使用 'general' 作为默认值
+    status: 'published',
     start_date: '',
     end_date: '',
     max_participants: '',
@@ -54,6 +56,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
       description: '',
       location: '',
       category: 'general', // 统一使用 'general' 作为默认值
+      status: 'published',
       start_date: '',
       end_date: '',
       max_participants: '',
@@ -179,7 +182,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
         max_participants: newActivityData.max_participants ? parseInt(newActivityData.max_participants) : null,
         image_url: newActivityData.image, // 后端期望的字段名是 image_url
         user_id: null, // 管理员创建的活动，user_id 设为 null
-        status: 'draft' as const // 添加必需的status字段
+        status: newActivityData.status
       }
 
       await adminService.createActivity(activityData)
@@ -345,7 +348,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
                 type="text"
                 value={newActivityData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder={t('admin.activities.form.placeholders.title')}
                 disabled={isLoading}
               />
@@ -362,7 +365,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
                 value={newActivityData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder={t('admin.activities.form.placeholders.description')}
                 disabled={isLoading}
               />
@@ -379,7 +382,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
                 type="text"
                 value={newActivityData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder={t('admin.activities.form.placeholders.location')}
                 disabled={isLoading}
               />
@@ -395,7 +398,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
               <select
                 value={newActivityData.category}
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 disabled={isLoading}
               >
                 <option value="general">{t('admin.activities.categories.general')}</option>
@@ -404,6 +407,25 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
                     {category.name}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* 活动状态 */}
+            <div>
+              <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                <Tag className="w-4 h-4 mr-2" />
+                {t('admin.activities.form.status')}
+                <span className="text-red-500 ml-1">*</span>
+              </label>
+              <select
+                value={newActivityData.status}
+                onChange={(e) => handleInputChange('status', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                disabled={isLoading}
+              >
+                <option value="draft">{t('admin.activities.status.draft')}</option>
+                <option value="published">{t('admin.activities.status.published')}</option>
+                <option value="cancelled">{t('admin.activities.status.cancelled')}</option>
               </select>
             </div>
 
@@ -419,7 +441,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
                   type="datetime-local"
                   value={newActivityData.start_date}
                   onChange={(e) => handleInputChange('start_date', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   disabled={isLoading}
                 />
               </div>
@@ -433,7 +455,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
                   type="datetime-local"
                   value={newActivityData.end_date}
                   onChange={(e) => handleInputChange('end_date', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   disabled={isLoading}
                 />
               </div>
@@ -449,7 +471,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
                 type="number"
                 value={newActivityData.max_participants}
                 onChange={(e) => handleInputChange('max_participants', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder={t('admin.activities.form.placeholders.maxParticipants')}
                 min="1"
                 disabled={isLoading}
@@ -465,22 +487,35 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
               
               {/* 图片预览 */}
               {newActivityData.image && (
-                <div className="mb-3">
+                <div className="mb-4 relative inline-block">
                   <img 
-                    src={newActivityData.image} 
+                    src={newActivityData.image.startsWith('/') ? `${window.location.origin}${newActivityData.image}` : newActivityData.image}
                     alt="活动图片预览" 
                     className="w-32 h-32 object-cover border border-gray-300 rounded-lg"
                     onError={(e) => {
-                      console.error('图片加载失败:', newActivityData.image)
-                      // 可以设置一个默认图片或者显示错误状态
-                      e.currentTarget.style.display = 'none'
+                      console.warn('图片加载失败:', newActivityData.image)
+                      const target = e.target as HTMLImageElement
+                      target.src = '/images/placeholder-activity.svg'
+                      target.onerror = () => {
+                        target.style.display = 'none'
+                        console.error('备用图片也加载失败')
+                      }
                     }}
                     onLoad={() => {
                       console.log('图片加载成功:', newActivityData.image)
                     }}
                   />
+                  <button
+                    type="button"
+                    onClick={() => handleInputChange('image', '')}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                    disabled={isLoading}
+                    title="删除图片"
+                  >
+                    <XCircle className="w-4 h-4" />
+                  </button>
                   {/* 显示图片URL用于调试 */}
-                  <p className="text-xs text-gray-500 mt-1 break-all">
+                  <p className="text-xs text-gray-500 mt-1 break-all max-w-32">
                     图片URL: {newActivityData.image}
                   </p>
                 </div>
@@ -507,7 +542,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
                   >
                     {uploading.image ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
                         <span>上传中...</span>
                       </>
                     ) : (
@@ -564,7 +599,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
             <button
               onClick={handleCreateActivity}
               disabled={isLoading}
-              className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {isLoading ? (
                 <>

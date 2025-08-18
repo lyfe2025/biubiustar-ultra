@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Bell, Mail, Smartphone, LogOut, Shield, Globe } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
 import { ProfileSettingsProps } from './types'
@@ -9,6 +9,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   onSignOut
 }) => {
   const { t } = useLanguage()
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   const handleNotificationToggle = (type: keyof typeof notificationSettings) => {
     onNotificationSettingsChange({
@@ -17,10 +18,17 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
     })
   }
 
-  const handleSignOut = async () => {
-    if (window.confirm(t('profile.confirmSignOut'))) {
-      await onSignOut()
-    }
+  const handleSignOutClick = () => {
+    setShowLogoutConfirm(true)
+  }
+
+  const confirmSignOut = async () => {
+    setShowLogoutConfirm(false)
+    await onSignOut()
+  }
+
+  const cancelSignOut = () => {
+    setShowLogoutConfirm(false)
   }
 
   return (
@@ -159,7 +167,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
 
         <div className="space-y-4">
           <button
-            onClick={handleSignOut}
+            onClick={handleSignOutClick}
             className="flex items-center space-x-2 w-full px-4 py-3 text-left text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
           >
             <LogOut className="w-5 h-5" />
@@ -171,6 +179,33 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">{t('profile.settings.signOut')}</h3>
+            <p className="text-gray-600 mb-6">
+              {t('profile.confirmSignOut')}
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={cancelSignOut}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={confirmSignOut}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                {t('profile.settings.signOut')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

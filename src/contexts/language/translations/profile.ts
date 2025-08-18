@@ -20,6 +20,14 @@ export const profileTranslations = {
       endsOn: '结束于',
       noPosts: '暂无帖子',
       createFirstPost: '发布第一篇帖子',
+      myPosts: '我的帖子',
+      untitledPost: '未命名帖子',
+      confirmDeletePost: '确定要删除这篇帖子吗？',
+      deletePost: '删除帖子',
+      edit: '编辑',
+      fullName: '全名',
+      changeAvatar: '更换头像',
+      userProfile: '用户资料',
       
       // 标签页
       tabs: {
@@ -80,12 +88,48 @@ export const profileTranslations = {
 
       // 设置
       settings: {
-        notifications: '通知设置'
+        notifications: '通知设置',
+        emailNotifications: '邮件通知',
+        emailNotificationsDesc: '接收重要更新和活动信息的邮件通知',
+        pushNotifications: '推送通知',
+        pushNotificationsDesc: '在设备上接收即时通知',
+        smsNotifications: '短信通知',
+        smsNotificationsDesc: '接收重要通知的短信提醒',
+        privacy: '隐私设置',
+        profileVisibility: '个人资料可见性',
+        profileVisibilityDesc: '控制谁可以查看您的个人资料',
+        visibility: {
+          public: '公开',
+          friends: '仅好友',
+          private: '私密'
+        },
+        activityPrivacy: '活动隐私',
+        activityPrivacyDesc: '控制您的活动参与信息是否公开显示',
+        showOnlineStatus: '显示在线状态',
+        language: '语言设置',
+        preferredLanguage: '首选语言',
+        preferredLanguageDesc: '选择您在应用中使用的语言',
+        languages: {
+          chinese: '简体中文',
+          traditionalChinese: '繁体中文',
+          english: 'English',
+          vietnamese: 'Tiếng Việt'
+        },
+        account: '账户管理',
+        signOut: '退出登录',
+        accountNote: '管理您的账户设置和登录信息'
       },
 
       // 通知设置
       notifications: {
-        title: '通知设置',
+        title: '通知',
+        unread: '未读',
+        markAllRead: '标记全部已读',
+        markAsRead: '标记为已读',
+        noNotifications: '暂无通知',
+        noNotificationsDesc: '您目前没有新的通知',
+        delete: '删除',
+        loadMore: '加载更多',
         email: '邮件通知',
         push: '推送通知',
         sms: '短信通知',
@@ -146,8 +190,33 @@ export const profileTranslations = {
   'zh-TW': {
     profile: {
       title: '個人資料',
+      subtitle: '管理您的個人信息和設置',
+      noProfile: '暫無個人資料',
+      createProfile: '創建個人資料',
       editProfile: '編輯資料',
       viewProfile: '查看資料',
+      createPost: '發布帖子',
+      notLoggedIn: '您尚未登入',
+      pleaseLogin: '請先登入以查看個人資料',
+      statistics: '統計信息',
+      noActivities: '暫無活動',
+      joinFirstActivity: '參與第一個活動',
+      myActivities: '我的活動',
+      untitledActivity: '未命名活動',
+      participants: '參與者',
+      endsOn: '結束於',
+      noPosts: '暫無帖子',
+      createFirstPost: '發布第一篇帖子',
+      confirmSignOut: '確定要退出登入嗎？',
+      
+      // 標籤頁
+      tabs: {
+        overview: '概覽',
+        content: '內容',
+        social: '社交',
+        settings: '設置',
+        notifications: '通知'
+      },
       
       basic: {
         username: '用戶名',
@@ -181,6 +250,15 @@ export const profileTranslations = {
         createFirst: '發布第一個帖子'
       },
 
+      myPosts: '我的帖子',
+      untitledPost: '未命名帖子',
+      confirmDeletePost: '確定要刪除這篇帖子嗎？',
+      deletePost: '刪除帖子',
+      edit: '編輯',
+      fullName: '全名',
+      changeAvatar: '更換頭像',
+      userProfile: '用戶資料',
+
       activities: {
         title: '我的活動',
         created: '創建的',
@@ -191,8 +269,49 @@ export const profileTranslations = {
         joinFirst: '參與第一個活動'
       },
 
+      // 設置
+      settings: {
+        notifications: '通知設置',
+        emailNotifications: '郵件通知',
+        emailNotificationsDesc: '接收重要更新和活動信息的郵件通知',
+        pushNotifications: '推送通知',
+        pushNotificationsDesc: '在設備上接收即時通知',
+        smsNotifications: '短信通知',
+        smsNotificationsDesc: '接收重要通知的短信提醒',
+        privacy: '隱私設置',
+        profileVisibility: '個人資料可見性',
+        profileVisibilityDesc: '控制誰可以查看您的個人資料',
+        visibility: {
+          public: '公開',
+          friends: '僅好友',
+          private: '私密'
+        },
+        activityPrivacy: '活動隱私',
+        activityPrivacyDesc: '控制您的活動參與信息是否公開顯示',
+        showOnlineStatus: '顯示在線狀態',
+        language: '語言設置',
+        preferredLanguage: '首選語言',
+        preferredLanguageDesc: '選擇您在應用中使用的語言',
+        languages: {
+          chinese: '簡體中文',
+          traditionalChinese: '繁體中文',
+          english: 'English',
+          vietnamese: 'Tiếng Việt'
+        },
+        account: '帳戶管理',
+        signOut: '退出登錄',
+        accountNote: '管理您的帳戶設置和登錄信息'
+      },
+
       notifications: {
-        title: '通知設置',
+        title: '通知',
+        unread: '未讀',
+        markAllRead: '標記全部已讀',
+        markAsRead: '標記為已讀',
+        noNotifications: '暫無通知',
+        noNotificationsDesc: '您目前沒有新的通知',
+        delete: '刪除',
+        loadMore: '加載更多',
         email: '郵件通知',
         push: '推送通知',
         sms: '短信通知',
@@ -249,8 +368,33 @@ export const profileTranslations = {
   en: {
     profile: {
       title: 'Profile',
+      subtitle: 'Manage your personal information and settings',
+      noProfile: 'No profile yet',
+      createProfile: 'Create Profile',
       editProfile: 'Edit Profile',
       viewProfile: 'View Profile',
+      createPost: 'Create Post',
+      notLoggedIn: 'You are not logged in',
+      pleaseLogin: 'Please log in first to view your profile',
+      statistics: 'Statistics',
+      noActivities: 'No activities yet',
+      joinFirstActivity: 'Join your first activity',
+      myActivities: 'My Activities',
+      untitledActivity: 'Untitled Activity',
+      participants: 'Participants',
+      endsOn: 'Ends on',
+      noPosts: 'No posts yet',
+      createFirstPost: 'Create your first post',
+      confirmSignOut: 'Are you sure you want to sign out?',
+      
+      // Tabs
+      tabs: {
+        overview: 'Overview',
+        content: 'Content',
+        social: 'Social',
+        settings: 'Settings',
+        notifications: 'Notifications'
+      },
       
       basic: {
         username: 'Username',
@@ -284,6 +428,15 @@ export const profileTranslations = {
         createFirst: 'Create your first post'
       },
 
+      myPosts: 'My Posts',
+      untitledPost: 'Untitled Post',
+      confirmDeletePost: 'Are you sure you want to delete this post?',
+      deletePost: 'Delete Post',
+      edit: 'Edit',
+      fullName: 'Full Name',
+      changeAvatar: 'Change Avatar',
+      userProfile: 'User Profile',
+
       activities: {
         title: 'My Activities',
         created: 'Created',
@@ -295,7 +448,14 @@ export const profileTranslations = {
       },
 
       notifications: {
-        title: 'Notification Settings',
+        title: 'Notifications',
+        unread: 'Unread',
+        markAllRead: 'Mark All as Read',
+        markAsRead: 'Mark as Read',
+        noNotifications: 'No Notifications',
+        noNotificationsDesc: 'You have no new notifications at the moment',
+        delete: 'Delete',
+        loadMore: 'Load More',
         email: 'Email Notifications',
         push: 'Push Notifications',
         sms: 'SMS Notifications',
@@ -338,6 +498,40 @@ export const profileTranslations = {
         share: 'Share Profile'
       },
 
+      // 设置
+      settings: {
+        notifications: 'Notification Settings',
+        emailNotifications: 'Email Notifications',
+        emailNotificationsDesc: 'Receive email notifications for important updates and activity information',
+        pushNotifications: 'Push Notifications',
+        pushNotificationsDesc: 'Receive instant notifications on your device',
+        smsNotifications: 'SMS Notifications',
+        smsNotificationsDesc: 'Receive SMS alerts for important notifications',
+        privacy: 'Privacy Settings',
+        profileVisibility: 'Profile Visibility',
+        profileVisibilityDesc: 'Control who can view your profile',
+        visibility: {
+          public: 'Public',
+          friends: 'Friends Only',
+          private: 'Private'
+        },
+        activityPrivacy: 'Activity Privacy',
+        activityPrivacyDesc: 'Control whether your activity participation is publicly displayed',
+        showOnlineStatus: 'Show Online Status',
+        language: 'Language Settings',
+        preferredLanguage: 'Preferred Language',
+        preferredLanguageDesc: 'Choose the language you use in the app',
+        languages: {
+          chinese: '简体中文',
+          traditionalChinese: '繁体中文',
+          english: 'English',
+          vietnamese: 'Tiếng Việt'
+        },
+        account: 'Account Management',
+        signOut: 'Sign Out',
+        accountNote: 'Manage your account settings and login information'
+      },
+
       messages: {
         updateSuccess: 'Profile updated successfully',
         updateFailed: 'Profile update failed',
@@ -352,8 +546,33 @@ export const profileTranslations = {
   vi: {
     profile: {
       title: 'Hồ sơ',
+      subtitle: 'Quản lý thông tin cá nhân và cài đặt của bạn',
+      noProfile: 'Chưa có hồ sơ',
+      createProfile: 'Tạo hồ sơ',
       editProfile: 'Chỉnh sửa hồ sơ',
       viewProfile: 'Xem hồ sơ',
+      createPost: 'Tạo bài viết',
+      notLoggedIn: 'Bạn chưa đăng nhập',
+      pleaseLogin: 'Vui lòng đăng nhập trước để xem hồ sơ',
+      statistics: 'Thống kê',
+      noActivities: 'Chưa có hoạt động nào',
+      joinFirstActivity: 'Tham gia hoạt động đầu tiên',
+      myActivities: 'Hoạt động của tôi',
+      untitledActivity: 'Hoạt động không tiêu đề',
+      participants: 'Người tham gia',
+      endsOn: 'Kết thúc vào',
+      noPosts: 'Chưa có bài viết nào',
+      createFirstPost: 'Tạo bài viết đầu tiên',
+      confirmSignOut: 'Bạn có chắc chắn muốn đăng xuất?',
+      
+      // Các tab
+      tabs: {
+        overview: 'Tổng quan',
+        content: 'Nội dung',
+        social: 'Xã hội',
+        settings: 'Cài đặt',
+        notifications: 'Thông báo'
+      },
       
       basic: {
         username: 'Tên người dùng',
@@ -387,6 +606,15 @@ export const profileTranslations = {
         createFirst: 'Tạo bài viết đầu tiên'
       },
 
+      myPosts: 'Bài viết của tôi',
+      untitledPost: 'Bài viết chưa có tiêu đề',
+      confirmDeletePost: 'Bạn có chắc chắn muốn xóa bài viết này?',
+      deletePost: 'Xóa bài viết',
+      edit: 'Chỉnh sửa',
+      fullName: 'Họ và tên',
+      changeAvatar: 'Thay đổi ảnh đại diện',
+      userProfile: 'Hồ sơ người dùng',
+
       activities: {
         title: 'Hoạt động của tôi',
         created: 'Đã tạo',
@@ -398,7 +626,14 @@ export const profileTranslations = {
       },
 
       notifications: {
-        title: 'Cài đặt thông báo',
+        title: 'Thông báo',
+        unread: 'Chưa đọc',
+        markAllRead: 'Đánh dấu tất cả là đã đọc',
+        markAsRead: 'Đánh dấu là đã đọc',
+        noNotifications: 'Không có thông báo',
+        noNotificationsDesc: 'Bạn hiện tại không có thông báo mới nào',
+        delete: 'Xóa',
+        loadMore: 'Tải thêm',
         email: 'Thông báo email',
         push: 'Thông báo đẩy',
         sms: 'Thông báo SMS',
@@ -439,6 +674,40 @@ export const profileTranslations = {
         report: 'Báo cáo',
         message: 'Nhắn tin',
         share: 'Chia sẻ hồ sơ'
+      },
+
+      // 设置
+      settings: {
+        notifications: 'Cài đặt thông báo',
+        emailNotifications: 'Thông báo email',
+        emailNotificationsDesc: 'Nhận thông báo email về các cập nhật quan trọng và thông tin hoạt động',
+        pushNotifications: 'Thông báo đẩy',
+        pushNotificationsDesc: 'Nhận thông báo tức thì trên thiết bị của bạn',
+        smsNotifications: 'Thông báo SMS',
+        smsNotificationsDesc: 'Nhận cảnh báo SMS cho các thông báo quan trọng',
+        privacy: 'Cài đặt riêng tư',
+        profileVisibility: 'Hiển thị hồ sơ',
+        profileVisibilityDesc: 'Kiểm soát ai có thể xem hồ sơ của bạn',
+        visibility: {
+          public: 'Công khai',
+          friends: 'Chỉ bạn bè',
+          private: 'Riêng tư'
+        },
+        activityPrivacy: 'Quyền riêng tư hoạt động',
+        activityPrivacyDesc: 'Kiểm soát việc hiển thị công khai thông tin tham gia hoạt động của bạn',
+        showOnlineStatus: 'Hiển thị trạng thái trực tuyến',
+        language: 'Cài đặt ngôn ngữ',
+        preferredLanguage: 'Ngôn ngữ ưa thích',
+        preferredLanguageDesc: 'Chọn ngôn ngữ bạn sử dụng trong ứng dụng',
+        languages: {
+          chinese: '简体中文',
+          traditionalChinese: '繁体中文',
+          english: 'English',
+          vietnamese: 'Tiếng Việt'
+        },
+        account: 'Quản lý tài khoản',
+        signOut: 'Đăng xuất',
+        accountNote: 'Quản lý cài đặt tài khoản và thông tin đăng nhập'
       },
 
       messages: {

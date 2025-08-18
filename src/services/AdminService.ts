@@ -62,6 +62,7 @@ import { Activity } from '../types/activity'
 export interface AdminActivity extends Activity {
   status: 'draft' | 'published' | 'cancelled'
   category_id?: string
+  image?: string // 兼容性字段，支持旧数据
   organizer: {
     id: string
     username: string
@@ -314,8 +315,29 @@ class AdminService {
   }
 
   // 用户管理相关API
-  async getUsers(page: number = 1, limit: number = 10): Promise<{ users: User[], pagination: { page: number, limit: number, total: number, totalPages: number } }> {
-    return this.request<{ users: User[], pagination: { page: number, limit: number, total: number, totalPages: number } }>(`/admin/users?page=${page}&limit=${limit}`)
+  async getUsers(
+    page: number = 1, 
+    limit: number = 10, 
+    search?: string, 
+    status?: string, 
+    role?: string
+  ): Promise<{ users: User[], pagination: { page: number, limit: number, total: number, totalPages: number } }> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString()
+    })
+    
+    if (search && search.trim()) {
+      params.append('search', search.trim())
+    }
+    if (status && status !== 'all') {
+      params.append('status', status)
+    }
+    if (role && role !== 'all') {
+      params.append('role', role)
+    }
+    
+    return this.request<{ users: User[], pagination: { page: number, limit: number, total: number, totalPages: number } }>(`/admin/users?${params.toString()}`)
   }
 
   async updateUserStatus(userId: string, status: User['status']): Promise<{ success: boolean }> {

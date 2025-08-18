@@ -100,6 +100,14 @@ export const authTranslations = {
         usernameInvalid: '用户名格式不正确'
       },
 
+      // 状态信息
+      loggingIn: '正在登录...',
+
+      // 成功消息
+      success: {
+        loginSuccess: '登录成功！'
+      },
+
       // 消息提示
       messages: {
         loginSuccess: '登录成功！',
@@ -204,6 +212,14 @@ export const authTranslations = {
         usernameValid: '用戶名格式正確',
         usernameTooShort: '用戶名至少3個字符',
         usernameInvalid: '用戶名格式不正確'
+      },
+
+      // 狀態信息
+      loggingIn: '正在登入...',
+
+      // 成功消息
+      success: {
+        loginSuccess: '登入成功！'
       },
 
       messages: {
@@ -311,6 +327,14 @@ export const authTranslations = {
         usernameInvalid: 'Invalid username format'
       },
 
+      // Status information
+      loggingIn: 'Logging in...',
+
+      // Success messages
+      success: {
+        loginSuccess: 'Login successful!'
+      },
+
       messages: {
         loginSuccess: 'Login successful!',
         loginFailed: 'Login failed, please check your email and password',
@@ -414,6 +438,14 @@ export const authTranslations = {
         usernameValid: 'Định dạng tên người dùng hợp lệ',
         usernameTooShort: 'Tên người dùng phải có ít nhất 3 ký tự',
         usernameInvalid: 'Định dạng tên người dùng không hợp lệ'
+      },
+
+      // Thông tin trạng thái
+      loggingIn: 'Đang đăng nhập...',
+
+      // Thông báo thành công
+      success: {
+        loginSuccess: 'Đăng nhập thành công!'
       },
 
       messages: {

@@ -16,6 +16,7 @@ import AdminContacts from './pages/admin/AdminContacts'
 import AdminSettings from './pages/admin/AdminSettings'
 import AdminSecurity from './pages/admin/AdminSecurity'
 import AdminLogs from './pages/admin/AdminLogs'
+import TestCategories from './pages/TestCategories'
 import AdminAuthGuard from './components/AdminAuthGuard'
 import Footer from './components/Footer'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -39,6 +40,7 @@ function AppContent() {
                   <Route path="/" element={<Home />} />
                   <Route path="/trending" element={<Trending />} />
                   <Route path="/activities" element={<Activities />} />
+                  <Route path="/test-categories" element={<TestCategories />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/admin" element={<AdminLogin />} />

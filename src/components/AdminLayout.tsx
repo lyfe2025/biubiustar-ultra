@@ -2,6 +2,8 @@ import React, { useState, useEffect, ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import { useLanguage } from '../contexts/language'
+import { useSiteInfo } from '../hooks/useSettings'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 import { AdminService } from '../services/AdminService'
 import {
@@ -26,10 +28,14 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { t, language, setLanguage } = useLanguage()
+  const { siteName } = useSiteInfo()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+  
+  // 设置管理后台页面标题
+  usePageTitle(t('admin.title'))
 
   const handleLogout = () => {
     AdminService.clearAuth()
@@ -127,7 +133,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 </div>
                 <div>
                   <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    {t('admin.title')}
+                    {siteName || 'BiuBiuStar'} {t('admin.title')}
                   </span>
                   <div className="text-xs text-gray-500">{t('admin.console')}</div>
                 </div>

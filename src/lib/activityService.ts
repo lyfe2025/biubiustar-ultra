@@ -15,6 +15,14 @@ export interface ActivityParticipant {
   };
 }
 
+export interface ActivityCategory {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+}
+
 export class ActivityService {
   // 获取所有活动
   async getActivities(): Promise<Activity[]> {
@@ -194,6 +202,33 @@ export class ActivityService {
       return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Error fetching upcoming activities:', error);
+      return []; // 返回空数组而不是抛出错误
+    }
+  }
+
+  // 获取活动分类
+  static async getActivityCategories(): Promise<ActivityCategory[]> {
+    try {
+      console.log('🌐 ActivityService: 开始调用API /api/categories/activity');
+      const response = await fetch('/api/categories/activity');
+      console.log('🌐 ActivityService: API响应状态:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const response_data = await response.json();
+      console.log('🌐 ActivityService: API原始响应数据:', response_data);
+      console.log('🌐 ActivityService: response_data.data:', response_data.data);
+      console.log('🌐 ActivityService: response_data.data.data:', response_data.data?.data);
+      console.log('🌐 ActivityService: response_data.data.total:', response_data.data?.total);
+      console.log('🌐 ActivityService: categories长度:', response_data.data?.data?.length);
+      
+      const categories = response_data.data?.data || [];
+      console.log('🌐 ActivityService: 最终返回的categories:', categories);
+      return categories;
+    } catch (error) {
+      console.error('❌ ActivityService: Error fetching activity categories:', error);
       return []; // 返回空数组而不是抛出错误
     }
   }

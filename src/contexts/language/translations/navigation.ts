@@ -10,6 +10,7 @@ export const navigationTranslations = {
       login: '登录',
       register: '注册',
       logout: '退出登录',
+      confirmLogout: '确认退出登录',
       logoutFailed: '登出失败',
       welcome: '欢迎',
       admin: '管理后台'
@@ -25,6 +26,7 @@ export const navigationTranslations = {
       login: '登入',
       register: '註冊',
       logout: '退出登入',
+      confirmLogout: '確認退出登入',
       logoutFailed: '登出失敗',
       welcome: '歡迎',
       admin: '管理後台'
@@ -40,6 +42,7 @@ export const navigationTranslations = {
       login: 'Login',
       register: 'Register',
       logout: 'Logout',
+      confirmLogout: 'Confirm Logout',
       logoutFailed: 'Logout failed',
       welcome: 'Welcome',
       admin: 'Admin'
@@ -55,6 +58,7 @@ export const navigationTranslations = {
       login: 'Đăng nhập',
       register: 'Đăng ký',
       logout: 'Đăng xuất',
+      confirmLogout: 'Xác nhận đăng xuất',
       logoutFailed: 'Đăng xuất thất bại',
       welcome: 'Chào mừng',
       admin: 'Quản trị'

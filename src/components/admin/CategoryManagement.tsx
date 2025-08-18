@@ -132,7 +132,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
       <div className="flex justify-between items-center">
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           {t('admin.activities.createCategory')}
@@ -145,7 +145,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
             placeholder={t('admin.activities.searchCategories')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
         </div>
       </div>
@@ -153,7 +153,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
       {/* 分类列表 */}
       {loading ? (
         <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">{t('common.loading')}</p>
         </div>
       ) : (
@@ -171,7 +171,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
                   {t('admin.activities.createdAt')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('admin.activities.actions')}
+                  {t('admin.activities.table.actions')}
                 </th>
               </tr>
             </thead>
@@ -193,7 +193,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => openEditModal(category)}
-                        className="text-blue-600 hover:text-blue-900 p-1"
+                        className="text-purple-600 hover:text-purple-900 p-1"
                         title={t('admin.activities.edit')}
                       >
                         <Edit className="w-4 h-4" />
@@ -235,7 +235,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
                   type="text"
                   value={newCategoryData.name}
                   onChange={(e) => setNewCategoryData({ ...newCategoryData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder={t('admin.activities.enterCategoryName')}
                 />
               </div>
@@ -247,7 +247,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
                 <textarea
                   value={newCategoryData.description}
                   onChange={(e) => setNewCategoryData({ ...newCategoryData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   rows={3}
                   placeholder={t('admin.activities.enterDescription')}
                 />
@@ -266,7 +266,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
               </button>
               <button
                 onClick={handleCreateCategory}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
               >
                 {t('common.create')}
               </button>
@@ -290,7 +290,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
                   type="text"
                   value={editCategoryData.name}
                   onChange={(e) => setEditCategoryData({ ...editCategoryData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder={t('admin.activities.enterCategoryName')}
                 />
               </div>
@@ -302,7 +302,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
                 <textarea
                   value={editCategoryData.description}
                   onChange={(e) => setEditCategoryData({ ...editCategoryData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   rows={3}
                   placeholder={t('admin.activities.enterDescription')}
                 />
@@ -322,7 +322,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
               </button>
               <button
                 onClick={handleEditCategory}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
               >
                 {t('common.save')}
               </button>

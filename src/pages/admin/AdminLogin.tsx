@@ -3,9 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { Shield, Eye, EyeOff, AlertTriangle, Clock } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useLanguage } from '../../contexts/language'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { adminService } from '../../services/AdminService'
 
 const AdminLogin = () => {
+  const { t } = useLanguage()
+  
+  // 设置登录页面标题
+  usePageTitle(t('admin.login.title'))
+  
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -21,7 +27,6 @@ const AdminLogin = () => {
     showSecurityWarning: false
   })
   const navigate = useNavigate()
-  const { t } = useLanguage()
 
   // 检查IP安全状态
   const checkSecurityStatus = async () => {

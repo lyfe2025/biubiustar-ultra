@@ -41,6 +41,9 @@ export const adminActivitiesTranslations = {
           time: '时间',
           actions: '操作'
         },
+        actionsLabel: '操作',
+        enterCategoryName: '请输入分类名称',
+        enterDescription: '请输入描述',
         filter: {
           allStatus: '所有状态',
           allCategories: '所有分类'
@@ -67,9 +70,12 @@ export const adminActivitiesTranslations = {
         createCategoryFailed: '创建分类失败',
         updateCategoryFailed: '更新分类失败',
         deleteCategoryFailed: '删除分类失败',
+        noDescription: '暂无描述',
         deleteCategory: '删除分类',
         deleteCategoryConfirm: '确定要删除这个分类吗？',
         editCategory: '编辑分类',
+        deleteActivity: '删除活动',
+        deleteActivityConfirm: '确定要删除这个活动吗？删除后无法恢复。',
         // 表单相关
         form: {
           title: '活动标题',
@@ -117,7 +123,9 @@ export const adminActivitiesTranslations = {
           edit: '编辑',
           delete: '删除',
           view: '查看',
-          creating: '创建中...'
+          creating: '创建中...',
+          update: '更新',
+          close: '关闭'
         },
         // 消息提示
         messages: {
@@ -169,6 +177,9 @@ export const adminActivitiesTranslations = {
           time: '時間',
           actions: '操作'
         },
+        actionsLabel: '操作',
+        enterCategoryName: '請輸入分類名稱',
+        enterDescription: '請輸入描述',
         filter: {
           allStatus: '所有狀態',
           allCategories: '所有分類'
@@ -195,9 +206,12 @@ export const adminActivitiesTranslations = {
         createCategoryFailed: '創建分類失敗',
         updateCategoryFailed: '更新分類失敗',
         deleteCategoryFailed: '刪除分類失敗',
+        noDescription: '暫無描述',
         deleteCategory: '刪除分類',
         deleteCategoryConfirm: '確定要刪除這個分類嗎？',
         editCategory: '編輯分類',
+        deleteActivity: '刪除活動',
+        deleteActivityConfirm: '確定要刪除這個活動嗎？刪除後無法恢復。',
         // 表單相關
         form: {
           title: '活動標題',
@@ -245,7 +259,9 @@ export const adminActivitiesTranslations = {
           edit: '編輯',
           delete: '刪除',
           view: '查看',
-          creating: '創建中...'
+          creating: '創建中...',
+          update: '更新',
+          close: '關閉'
         },
         // 消息提示
         messages: {
@@ -296,6 +312,9 @@ export const adminActivitiesTranslations = {
           time: 'Time',
           actions: 'Actions'
         },
+        actionsLabel: 'Actions',
+        enterCategoryName: 'Enter category name',
+        enterDescription: 'Enter description',
         filter: {
           allStatus: 'All Status',
           allCategories: 'All Categories'
@@ -322,9 +341,12 @@ export const adminActivitiesTranslations = {
         createCategoryFailed: 'Failed to create category',
         updateCategoryFailed: 'Failed to update category',
         deleteCategoryFailed: 'Failed to delete category',
+        noDescription: 'No description',
         deleteCategory: 'Delete Category',
         deleteCategoryConfirm: 'Are you sure you want to delete this category?',
         editCategory: 'Edit Category',
+        deleteActivity: 'Delete Activity',
+        deleteActivityConfirm: 'Are you sure you want to delete this activity? This action cannot be undone.',
         // Form related
         form: {
           title: 'Activity Title',
@@ -372,7 +394,9 @@ export const adminActivitiesTranslations = {
           edit: 'Edit',
           delete: 'Delete',
           view: 'View',
-          creating: 'Creating...'
+          creating: 'Creating...',
+          update: 'Update',
+          close: 'Close'
         },
         // Messages
         messages: {
@@ -423,6 +447,9 @@ export const adminActivitiesTranslations = {
           time: 'Thời gian',
           actions: 'Thao tác'
         },
+        actionsLabel: 'Thao tác',
+        enterCategoryName: 'Nhập tên danh mục',
+        enterDescription: 'Nhập mô tả',
         filter: {
           allStatus: 'Tất cả trạng thái',
           allCategories: 'Tất cả danh mục'
@@ -449,9 +476,12 @@ export const adminActivitiesTranslations = {
         createCategoryFailed: 'Tạo danh mục thất bại',
         updateCategoryFailed: 'Cập nhật danh mục thất bại',
         deleteCategoryFailed: 'Xóa danh mục thất bại',
+        noDescription: 'Không có mô tả',
         deleteCategory: 'Xóa danh mục',
         deleteCategoryConfirm: 'Bạn có chắc chắn muốn xóa danh mục này?',
         editCategory: 'Chỉnh sửa danh mục',
+        deleteActivity: 'Xóa hoạt động',
+        deleteActivityConfirm: 'Bạn có chắc chắn muốn xóa hoạt động này? Hành động này không thể hoàn tác.',
         // Biểu mẫu liên quan
         form: {
           title: 'Tiêu đề hoạt động',
@@ -499,7 +529,9 @@ export const adminActivitiesTranslations = {
           edit: 'Chỉnh sửa',
           delete: 'Xóa',
           view: 'Xem',
-          creating: 'Đang tạo...'
+          creating: 'Đang tạo...',
+          update: 'Cập nhật',
+          close: 'Đóng'
         },
         // Thông báo
         messages: {

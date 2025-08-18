@@ -9,6 +9,7 @@ import usersRoutes from './routes/users/index.js';
 import commentsRoutes from './routes/comments/index.js';
 import adminRoutes from './routes/admin/index.js';
 import activitiesRoutes from './routes/activities.js';
+import categoriesRoutes from './routes/categories/index.js';
 import followsRoutes from './routes/follows.js';
 import contactRoutes from './routes/contact.js';
 import settingsRoutes from './routes/settings.js';
@@ -55,6 +56,8 @@ app.use('/api/posts', postsRoutes);
 app.use('/api/comments', commentsRoutes);
 
 app.use('/api/activities', activitiesRoutes);
+
+app.use('/api/categories', categoriesRoutes);
 
 // Users API routes
 app.use('/api/users', usersRoutes);

@@ -12,6 +12,7 @@ const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalType, setAuthModalType] = useState<'login' | 'register'>('login')
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const { user, logout } = useAuth()
   const { t } = useLanguage()
   const location = useLocation()
@@ -20,6 +21,19 @@ const Navbar: React.FC = () => {
   const openAuthModal = (type: 'login' | 'register') => {
     setAuthModalType(type)
     setIsAuthModalOpen(true)
+  }
+
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true)
+  }
+
+  const confirmLogout = async () => {
+    setShowLogoutConfirm(false)
+    await logout()
+  }
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false)
   }
 
   const navItems = [
@@ -91,7 +105,7 @@ const Navbar: React.FC = () => {
                     <span className="text-sm font-medium">{t('nav.profile')}</span>
                   </Link>
                   <button
-                    onClick={logout}
+                    onClick={handleLogoutClick}
                     className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
                   >
                     <LogOut className="w-4 h-4" />
@@ -160,8 +174,8 @@ const Navbar: React.FC = () => {
                       </Link>
                       <button
                         onClick={() => {
-                          logout()
                           setIsMenuOpen(false)
+                          handleLogoutClick()
                         }}
                         className="flex items-center space-x-2 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors duration-200 w-full text-left"
                       >
@@ -204,6 +218,33 @@ const Navbar: React.FC = () => {
         onClose={() => setIsAuthModalOpen(false)}
         type={authModalType}
       />
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">{t('nav.confirmLogout')}</h3>
+            <p className="text-gray-600 mb-6">
+              {t('profile.confirmSignOut')}
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={cancelLogout}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                {t('nav.logout')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

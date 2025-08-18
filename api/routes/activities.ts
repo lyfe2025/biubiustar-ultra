@@ -11,7 +11,7 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
       limit = 10, 
       offset = 0, 
       category, 
-      status = 'active',
+      status = 'published',
       upcoming = false 
     } = req.query;
 
@@ -58,7 +58,7 @@ router.get('/upcoming', async (req: Request, res: Response): Promise<Response | 
     const { data, error } = await supabase
       .from('activities')
       .select('*')
-      .eq('status', 'active')
+      .eq('status', 'published')
       .gte('start_date', now)
       .order('start_date', { ascending: true })
       .limit(Number(limit));

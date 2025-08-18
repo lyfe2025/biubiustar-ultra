@@ -33,10 +33,20 @@ export const useUserManagement = () => {
   const navigate = useNavigate()
 
   // 获取用户数据
-  const fetchUsers = useCallback(async (page: number = pagination.page, limit: number = pagination.limit) => {
+  const fetchUsers = useCallback(async (
+    page: number = pagination.page, 
+    limit: number = pagination.limit,
+    forceSearch: boolean = false
+  ) => {
     try {
       setLoading(true)
-      const response = await adminService.getUsers(page, limit)
+      const response = await adminService.getUsers(
+        page, 
+        limit, 
+        searchTerm, 
+        selectedStatus, 
+        selectedRole
+      )
       setUsers(response.users)
       setPagination(response.pagination)
     } catch (error) {
@@ -50,7 +60,7 @@ export const useUserManagement = () => {
     } finally {
       setLoading(false)
     }
-  }, [pagination.page, pagination.limit, navigate])
+  }, [pagination.page, pagination.limit, searchTerm, selectedStatus, selectedRole, navigate])
 
   // 切换页面
   const changePage = (page: number) => {
@@ -62,23 +72,29 @@ export const useUserManagement = () => {
     fetchUsers(1, limit)
   }
 
+  // 搜索和筛选改变时重新搜索（重置到第一页）
+  const performSearch = useCallback(() => {
+    fetchUsers(1, pagination.limit, true)
+  }, [fetchUsers, pagination.limit])
+
   // 初始加载
   useEffect(() => {
     fetchUsers()
   }, [fetchUsers])
 
-  // 过滤用户（现在在后端处理分页，前端只做简单筛选）
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = searchTerm === '' || 
-                         user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (user.full_name && user.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
-    
-    const matchesStatus = selectedStatus === 'all' || user.status === selectedStatus
-    const matchesRole = selectedRole === 'all' || user.role === selectedRole
-    
-    return matchesSearch && matchesStatus && matchesRole
-  })
+  // 当搜索条件改变时，延迟搜索以避免频繁请求
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm !== '' || selectedStatus !== 'all' || selectedRole !== 'all') {
+        performSearch()
+      } else {
+        // 如果所有条件都重置了，也要重新获取数据
+        fetchUsers(1, pagination.limit)
+      }
+    }, 500) // 500ms延迟
+
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm, selectedStatus, selectedRole, performSearch, fetchUsers, pagination.limit])
 
   // 更新用户状态
   const updateUserStatus = async (userId: string, status: User['status']) => {
@@ -185,8 +201,7 @@ export const useUserManagement = () => {
 
   return {
     // 数据
-    users: filteredUsers,
-    allUsers: users,
+    users, // 现在直接返回从后端获取的已筛选数据
     loading,
     selectedUser,
     isSubmitting,

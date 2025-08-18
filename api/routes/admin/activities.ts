@@ -392,7 +392,7 @@ router.put('/:id', async (req: Request, res: Response): Promise<Response | void>
       end_date: activity.end_date,
       category: activity.category,
       max_participants: activity.max_participants,
-      image: activity.image_url,
+      image_url: activity.image_url,
       status: activity.status,
       current_participants: 0, // 需要单独查询
       created_at: activity.created_at,

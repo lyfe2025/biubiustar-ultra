@@ -15,21 +15,15 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 10
     const offset = (page - 1) * limit
-
-    // 获取总用户数
-    const { count: totalUsers, error: countError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('*', { count: 'exact', head: true })
     
-    if (countError) {
-      console.error('获取用户总数失败:', countError)
-      return res.status(500).json({ error: '获取用户总数失败' })
-    }
+    // 获取搜索和筛选参数
+    const search = req.query.search as string || ''
+    const status = req.query.status as string || 'all'
+    const role = req.query.role as string || 'all'
 
-    // 从user_profiles表获取用户资料信息（分页）
-    const { data: userProfiles, error: profilesError } = await supabaseAdmin
-      .from('user_profiles')
-      .select(`
+    // 构建查询条件
+    let countQuery = supabaseAdmin.from('user_profiles').select('*', { count: 'exact', head: true })
+    let dataQuery = supabaseAdmin.from('user_profiles').select(`
         id,
         username,
         full_name,
@@ -46,6 +40,36 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
         created_at,
         updated_at
       `)
+
+    // 添加搜索条件（支持用户名和全名搜索）
+    if (search.trim()) {
+      const searchCondition = `username.ilike.%${search}%,full_name.ilike.%${search}%`
+      countQuery = countQuery.or(searchCondition)
+      dataQuery = dataQuery.or(searchCondition)
+    }
+
+    // 添加状态筛选条件
+    if (status !== 'all') {
+      countQuery = countQuery.eq('status', status)
+      dataQuery = dataQuery.eq('status', status)
+    }
+
+    // 添加角色筛选条件
+    if (role !== 'all') {
+      countQuery = countQuery.eq('role', role)
+      dataQuery = dataQuery.eq('role', role)
+    }
+
+    // 获取总用户数
+    const { count: totalUsers, error: countError } = await countQuery
+    
+    if (countError) {
+      console.error('获取用户总数失败:', countError)
+      return res.status(500).json({ error: '获取用户总数失败' })
+    }
+
+    // 从user_profiles表获取用户资料信息（分页）
+    const { data: userProfiles, error: profilesError } = await dataQuery
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
     
