@@ -113,6 +113,7 @@ export interface SecurityStatus {
 class AdminService {
   private baseURL = '/api'
   private static authErrorCallback: (() => void) | null = null
+  private static isHandlingAuthError = false // 防止重复处理认证错误
 
   // 设置认证错误回调函数
   static setAuthErrorCallback(callback: () => void) {
@@ -175,6 +176,15 @@ class AdminService {
 
   // 统一处理认证错误
   private handleAuthError(message: string): never {
+    // 防止重复处理认证错误
+    if (AdminService.isHandlingAuthError) {
+      const authError = new Error(message)
+      authError.name = 'AuthenticationError'
+      throw authError
+    }
+    
+    AdminService.isHandlingAuthError = true
+    
     // 清除本地存储的认证token
     localStorage.removeItem('adminToken')
     localStorage.removeItem('adminUser')
@@ -182,8 +192,17 @@ class AdminService {
     
     // 如果有注册的回调函数，调用它
     if (AdminService.authErrorCallback) {
-      AdminService.authErrorCallback()
+      try {
+        AdminService.authErrorCallback()
+      } catch (error) {
+        console.error('认证错误回调函数执行失败:', error)
+      }
     }
+    
+    // 延迟重置标志，防止立即重复处理
+    setTimeout(() => {
+      AdminService.isHandlingAuthError = false
+    }, 1000)
     
     // 抛出特定的认证失败错误
     const authError = new Error(message)
@@ -362,7 +381,7 @@ class AdminService {
 
   // 活动分类管理相关API
   async getCategories(): Promise<ActivityCategory[]> {
-    return this.request<ActivityCategory[]>('/admin/categories')
+    return this.request<ActivityCategory[]>('/admin/categories/activity')
   }
 
   async createCategory(categoryData: {
@@ -371,7 +390,7 @@ class AdminService {
     color?: string
     icon?: string
   }): Promise<ActivityCategory> {
-    return this.request<ActivityCategory>('/admin/categories', {
+    return this.request<ActivityCategory>('/admin/categories/activity', {
       method: 'POST',
       body: JSON.stringify(categoryData),
     })
@@ -384,20 +403,20 @@ class AdminService {
     icon?: string
     is_active?: boolean
   }): Promise<ActivityCategory> {
-    return this.request<ActivityCategory>(`/admin/categories/${categoryId}`, {
+    return this.request<ActivityCategory>(`/admin/categories/activity/${categoryId}`, {
       method: 'PUT',
       body: JSON.stringify(categoryData),
     })
   }
 
   async deleteCategory(categoryId: string): Promise<{ success: boolean }> {
-    return this.request<{ success: boolean }>(`/admin/categories/${categoryId}`, {
+    return this.request<{ success: boolean }>(`/admin/categories/activity/${categoryId}`, {
       method: 'DELETE',
     })
   }
 
   async toggleCategoryStatus(categoryId: string): Promise<ActivityCategory> {
-    return this.request<ActivityCategory>(`/admin/categories/${categoryId}/toggle`, {
+    return this.request<ActivityCategory>(`/admin/categories/activity/${categoryId}/toggle`, {
       method: 'PUT',
     })
   }

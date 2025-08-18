@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Shield, AlertTriangle, LogIn } from 'lucide-react'
 // import { useLanguage } from '../contexts/language'
 import { adminService } from '../services/AdminService'
+import AuthGuardState from '../utils/authGuard'
 
 interface AdminAuthGuardProps {
   children: ReactNode
@@ -87,6 +88,7 @@ const AuthLoadingScreen: React.FC = () => {
  * 2. token过期时显示友好提示弹窗
  * 3. 自动跳转到登录页面
  * 4. 提供统一的认证状态管理
+ * 5. 防止循环认证检查
  */
 const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
   // const { t } = useLanguage()
@@ -94,11 +96,19 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
   const [isChecking, setIsChecking] = useState(true)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authError, setAuthError] = useState<string>('')
+  const [isAuthChecked, setIsAuthChecked] = useState(false) // 防止重复检查
+  const [isNavigating, setIsNavigating] = useState(false) // 防止重复导航
 
   // 检查认证状态
   const checkAuth = async () => {
+    // 使用全局状态防止重复检查
+    if (isAuthChecked || isNavigating || !AuthGuardState.canCheckAuth()) {
+      return
+    }
+
     try {
       setIsChecking(true)
+      AuthGuardState.startChecking()
       
       // 首先检查本地是否有token
       const adminToken = localStorage.getItem('adminToken')
@@ -110,7 +120,9 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
       await adminService.getStats()
       
       // 如果到这里说明认证成功
+      setIsAuthChecked(true)
       setIsChecking(false)
+      AuthGuardState.checkSuccess()
     } catch (error) {
       console.error('管理员认证检查失败:', error)
       
@@ -127,38 +139,67 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
       setAuthError(errorMessage)
       setShowAuthModal(true)
       setIsChecking(false)
+      setIsAuthChecked(true) // 标记已检查，防止循环
+      AuthGuardState.checkFailed()
     }
   }
 
   // 处理重新登录
   const handleLogin = () => {
+    if (isNavigating) return // 防止重复导航
+    
+    setIsNavigating(true)
     setShowAuthModal(false)
+    
     // 清除可能存在的无效token
     localStorage.removeItem('adminToken')
     localStorage.removeItem('adminUser')
-    // 跳转到管理员登录页面
-    navigate('/admin')
+    localStorage.removeItem('supabase.auth.token')
+    
+    // 重置全局认证状态
+    AuthGuardState.reset()
+    
+    // 延迟导航，确保状态更新
+    setTimeout(() => {
+      navigate('/admin', { replace: true })
+    }, 100)
   }
 
-  // 关闭弹窗（但不跳转，让用户选择）
+  // 关闭弹窗
   const handleCloseModal = () => {
+    if (isNavigating) return // 防止重复导航
+    
+    setIsNavigating(true)
     setShowAuthModal(false)
-    // 跳转到管理员登录页面
-    navigate('/admin')
+    
+    // 清除可能存在的无效token
+    localStorage.removeItem('adminToken')
+    localStorage.removeItem('adminUser')
+    localStorage.removeItem('supabase.auth.token')
+    
+    // 重置全局认证状态
+    AuthGuardState.reset()
+    
+    // 延迟导航，确保状态更新
+    setTimeout(() => {
+      navigate('/admin', { replace: true })
+    }, 100)
   }
 
   // 组件挂载时检查认证
   useEffect(() => {
-    checkAuth()
-  }, [])
+    if (!isAuthChecked && !isNavigating) {
+      checkAuth()
+    }
+  }, [isAuthChecked, isNavigating])
 
   // 如果正在检查认证状态，显示加载界面
   if (isChecking) {
     return <AuthLoadingScreen />
   }
 
-  // 如果认证失败，显示提示弹窗
-  if (showAuthModal) {
+  // 如果正在导航或认证失败，显示提示弹窗
+  if (showAuthModal || isNavigating) {
     return (
       <>
         {/* 背景 */}
@@ -166,7 +207,7 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
         
         {/* 认证失败弹窗 */}
         <AuthModal
-          isOpen={showAuthModal}
+          isOpen={showAuthModal && !isNavigating}
           onClose={handleCloseModal}
           onLogin={handleLogin}
           title="认证失败"

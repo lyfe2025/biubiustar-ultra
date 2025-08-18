@@ -23,6 +23,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
 import { useFavicon } from './hooks/useFavicon'
+import './utils/debugAuth' // 加载调试工具
 
 function AppContent() {
   const location = useLocation()

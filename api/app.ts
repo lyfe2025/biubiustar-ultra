@@ -11,6 +11,7 @@ import adminRoutes from './routes/admin/index.js';
 import activitiesRoutes from './routes/activities.js';
 import followsRoutes from './routes/follows.js';
 import contactRoutes from './routes/contact.js';
+import settingsRoutes from './routes/settings.js';
 
 // for esm mode
 const __filename = fileURLToPath(import.meta.url);
@@ -60,9 +61,9 @@ app.use('/api/users', usersRoutes);
 
 app.use('/api/follows', followsRoutes);
 
-app.use('/api/admin', adminRoutes);
+app.use('/api/settings', settingsRoutes);
 
-// Settings routes are handled within admin routes
+app.use('/api/admin', adminRoutes);
 
 app.use('/api/contact', contactRoutes);
 
