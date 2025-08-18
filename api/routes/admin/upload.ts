@@ -1,8 +1,10 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import multer from 'multer'
+
+import { requireAdmin } from './auth.js'
 import path from 'path'
 import fs from 'fs'
-import { requireAdmin } from './auth'
+
 
 const router = Router()
 
@@ -33,7 +35,7 @@ const storage = multer.diskStorage({
 })
 
 // 文件过滤器
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   // 检查文件类型
   const allowedMimeTypes = [
     'image/jpeg',
@@ -61,8 +63,8 @@ const upload = multer({
   }
 })
 
-// 上传单个文件的端点
-router.post('/image', upload.single('image'), async (req, res) => {
+// 上传图片
+router.post('/image', upload.single('image'), async (req: Request, res: Response): Promise<Response | void> => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: '未选择文件' })
@@ -95,7 +97,7 @@ router.post('/image', upload.single('image'), async (req, res) => {
 })
 
 // 专门用于站点Logo和Favicon上传的端点
-router.post('/site-asset', (req, res, next) => {
+router.post('/site-asset', (req, res) => {
   
   // 先用临时文件名上传，然后根据type重命名
   const tempStorage = multer.diskStorage({
@@ -210,8 +212,8 @@ router.post('/site-asset', (req, res, next) => {
   })
 })
 
-// 删除文件的端点
-router.delete('/image', async (req, res) => {
+// 删除图片
+router.delete('/image', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { filename } = req.body
     
@@ -243,8 +245,8 @@ router.delete('/image', async (req, res) => {
   }
 })
 
-// 获取uploads目录中的所有文件列表
-router.get('/files', async (req, res) => {
+// 获取文件列表
+router.get('/files', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
     
@@ -282,8 +284,8 @@ router.get('/files', async (req, res) => {
   }
 })
 
-// 清理旧文件（删除超过30天的文件）
-router.post('/cleanup', async (req, res) => {
+// 清理未使用的文件
+router.post('/cleanup', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
     

@@ -2,19 +2,17 @@ import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../lib/supabase'
 import { requireAdmin } from './auth';
 import { logSecurityEvent, logActivityEvent, getClientIP } from '../../middleware/security'
+import { User } from '@supabase/supabase-js'
 
 // 扩展Request接口以包含user属性
 interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-  };
+  user?: User;
 }
 
 const router = Router()
 
 // 获取登录尝试记录（分页）
-router.get('/login-attempts', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/login-attempts', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
   try {
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
@@ -53,7 +51,7 @@ router.get('/login-attempts', requireAdmin, async (req: AuthenticatedRequest, re
 })
 
 // 获取IP黑名单（分页）
-router.get('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
   try {
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
@@ -92,7 +90,7 @@ router.get('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res:
 })
 
 // 获取安全日志（分页）
-router.get('/security-logs', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/security-logs', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
   try {
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
@@ -154,7 +152,7 @@ router.get('/security-logs', requireAdmin, async (req: AuthenticatedRequest, res
 })
 
 // 手动解锁IP
-router.delete('/ip-blacklist/:ip', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.delete('/ip-blacklist/:ip', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
   try {
     const { ip } = req.params
     const adminIP = getClientIP(req)
@@ -201,7 +199,7 @@ router.delete('/ip-blacklist/:ip', requireAdmin, async (req: AuthenticatedReques
 })
 
 // 手动添加IP到黑名单
-router.post('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
   try {
     const { ip_address, reason } = req.body
     const adminIP = getClientIP(req)
@@ -263,7 +261,7 @@ router.post('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res
 })
 
 // 获取安全统计数据
-router.get('/stats', requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/stats', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
   try {
     const now = new Date()
     const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)

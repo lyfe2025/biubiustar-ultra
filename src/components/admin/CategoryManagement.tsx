@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/language';
 import { adminService } from '../../services/AdminService';
@@ -19,7 +19,7 @@ interface CategoryManagementProps {
 
 const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onCategoriesUpdated, onCategoryChange }) => {
   const { t } = useLanguage();
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -53,10 +53,10 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
       onCategoryChange?.();
     } catch (error: any) {
       console.error('创建分类失败:', error);
-      if (error.name === 'AuthenticationError') {
+      if (error?.name === 'AuthenticationError') {
         toast.error(t('common.authenticationFailed'));
       } else {
-        const errorMessage = error.message || t('admin.activities.createCategoryFailed');
+        const errorMessage = error?.message || t('admin.activities.createCategoryFailed');
         toast.error(errorMessage);
       }
     }
@@ -78,10 +78,10 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
       onCategoryChange?.();
     } catch (error: any) {
       console.error('更新分类失败:', error);
-      if (error.name === 'AuthenticationError') {
+      if (error?.name === 'AuthenticationError') {
         toast.error(t('common.authenticationFailed'));
       } else {
-        const errorMessage = error.message || t('admin.activities.updateCategoryFailed');
+        const errorMessage = error?.message || t('admin.activities.updateCategoryFailed');
         toast.error(errorMessage);
       }
     }
@@ -99,10 +99,10 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({ categories, onC
       onCategoryChange?.();
     } catch (error: any) {
       console.error('删除分类失败:', error);
-      if (error.name === 'AuthenticationError') {
+      if (error?.name === 'AuthenticationError') {
         toast.error(t('common.authenticationFailed'));
       } else {
-        const errorMessage = error.message || t('admin.activities.deleteCategoryFailed');
+        const errorMessage = error?.message || t('admin.activities.deleteCategoryFailed');
         toast.error(errorMessage);
       }
     }

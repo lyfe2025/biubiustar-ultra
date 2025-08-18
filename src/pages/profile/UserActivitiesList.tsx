@@ -48,8 +48,8 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
 
   const getActivityStatus = (activity: any) => {
     const now = new Date()
-    const startDate = new Date(activity.start_time || activity.created_at)
-    const endDate = activity.end_time ? new Date(activity.end_time) : null
+    const startDate = new Date(activity.start_date || activity.created_at)
+    const endDate = activity.end_date ? new Date(activity.end_date) : null
 
     if (endDate && now > endDate) {
       return { status: 'ended', color: 'bg-gray-100 text-gray-800' }
@@ -89,10 +89,10 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
 
               {/* 活动详情 */}
               <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-3">
-                {activity.start_time && (
-                  <div className="flex items-center space-x-1">
+                {activity.start_date && (
+                  <div className="flex items-center space-x-1 text-gray-500">
                     <Calendar className="w-4 h-4" />
-                    <span>{formatDate(activity.start_time)}</span>
+                    <span>{formatDate(activity.start_date)}</span>
                   </div>
                 )}
 
@@ -103,17 +103,17 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
                   </div>
                 )}
 
-                {activity.participants_count !== undefined && (
-                  <div className="flex items-center space-x-1">
+                {activity.max_participants !== undefined && (
+                  <div className="flex items-center space-x-1 text-gray-500">
                     <Users className="w-4 h-4" />
-                    <span>{activity.participants_count} {t('profile.participants')}</span>
+                    <span>{activity.max_participants} {t('profile.participants')}</span>
                   </div>
                 )}
 
-                {activity.end_time && (
+                {activity.end_date && (
                   <div className="flex items-center space-x-1">
                     <Clock className="w-4 h-4" />
-                    <span>{t('profile.endsOn')} {formatDate(activity.end_time)}</span>
+                    <span>{t('profile.endsOn')} {formatDate(activity.end_date)}</span>
                   </div>
                 )}
               </div>

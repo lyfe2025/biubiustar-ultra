@@ -18,6 +18,7 @@ import AdminSecurity from './pages/admin/AdminSecurity'
 import AdminLogs from './pages/admin/AdminLogs'
 import AdminAuthGuard from './components/AdminAuthGuard'
 import Footer from './components/Footer'
+import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
@@ -29,28 +30,32 @@ function AppContent() {
   useFavicon() // 使网站图标响应系统设置
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      {!isAdminRoute && <Navbar />}
-      <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/trending" element={<Trending />} />
-              <Route path="/activities" element={<Activities />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminAuthGuard><AdminDashboard /></AdminAuthGuard>} />
-              <Route path="/admin/content" element={<AdminAuthGuard><AdminContent /></AdminAuthGuard>} />
-              <Route path="/admin/users" element={<AdminAuthGuard><AdminUsers /></AdminAuthGuard>} />
-              <Route path="/admin/activities" element={<AdminAuthGuard><AdminActivities /></AdminAuthGuard>} />
-              <Route path="/admin/categories" element={<AdminAuthGuard><AdminCategories /></AdminAuthGuard>} />
-              <Route path="/admin/contacts" element={<AdminAuthGuard><AdminContacts /></AdminAuthGuard>} />
-              <Route path="/admin/settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
-              <Route path="/admin/security" element={<AdminAuthGuard><AdminSecurity /></AdminAuthGuard>} />
-              <Route path="/admin/logs" element={<AdminAuthGuard><AdminLogs /></AdminAuthGuard>} />
-      </Routes>
-      {!isAdminRoute && <Footer />}
-      <Toaster position="top-right" richColors />
-    </div>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        {!isAdminRoute && <Navbar />}
+        <ErrorBoundary>
+          <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/trending" element={<Trending />} />
+                  <Route path="/activities" element={<Activities />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/admin" element={<AdminLogin />} />
+                  <Route path="/admin/dashboard" element={<AdminAuthGuard><AdminDashboard /></AdminAuthGuard>} />
+                  <Route path="/admin/content" element={<AdminAuthGuard><AdminContent /></AdminAuthGuard>} />
+                  <Route path="/admin/users" element={<AdminAuthGuard><AdminUsers /></AdminAuthGuard>} />
+                  <Route path="/admin/activities" element={<AdminAuthGuard><AdminActivities /></AdminAuthGuard>} />
+                  <Route path="/admin/categories" element={<AdminAuthGuard><AdminCategories /></AdminAuthGuard>} />
+                  <Route path="/admin/contacts" element={<AdminAuthGuard><AdminContacts /></AdminAuthGuard>} />
+                  <Route path="/admin/settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
+                  <Route path="/admin/security" element={<AdminAuthGuard><AdminSecurity /></AdminAuthGuard>} />
+                  <Route path="/admin/logs" element={<AdminAuthGuard><AdminLogs /></AdminAuthGuard>} />
+          </Routes>
+        </ErrorBoundary>
+        {!isAdminRoute && <Footer />}
+        <Toaster position="top-right" richColors />
+      </div>
+    </ErrorBoundary>
   )
 }
 

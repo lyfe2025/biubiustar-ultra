@@ -92,10 +92,10 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
             </div>
 
             {/* 帖子媒体 */}
-            {post.image && (
+            {post.image_url && (
               <div className="mb-4">
                 <img
-                  src={post.image}
+                  src={post.image_url}
                   alt="Post image"
                   className="max-w-full h-auto rounded-lg border border-gray-200"
                   style={{ maxHeight: '300px' }}
@@ -121,7 +121,7 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
 
                 <div className="flex items-center space-x-1">
                   <Eye className="w-4 h-4" />
-                  <span>{post.views_count || 0}</span>
+                  <span>{post.likes_count || 0}</span>
                 </div>
               </div>
 

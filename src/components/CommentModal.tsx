@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Send, Heart, Trash2, User } from 'lucide-react'
+import { X, Send, Trash2, User } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
 import { socialService } from '../lib/socialService'
@@ -21,12 +21,6 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    if (isOpen && postId) {
-      loadComments()
-    }
-  }, [isOpen, postId])
-
   const loadComments = async () => {
     setIsLoading(true)
     try {
@@ -38,6 +32,12 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (isOpen && postId) {
+      loadComments()
+    }
+  }, [isOpen, postId, loadComments])
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -2,14 +2,14 @@ import React, { useState, useEffect, ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import { useLanguage } from '../contexts/language'
-import { useTranslation } from '../contexts/language'
+
 import { AdminService } from '../services/AdminService'
 import {
   LayoutDashboard,
   FileText,
   Users,
   Calendar,
-  Tag,
+
   Settings,
   Shield,
   LogOut,
@@ -68,7 +68,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     const interval = setInterval(checkTokenValidity, 5 * 60 * 1000)
 
     return () => clearInterval(interval)
-  }, [])
+    }, [handleLogout])
 
   const navigation = [
     {

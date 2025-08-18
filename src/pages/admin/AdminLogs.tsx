@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/language';
-import { Activity, Search, Calendar, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Activity, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { adminService } from '../../services/AdminService';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 
 interface ActivityLog {
   id: string;

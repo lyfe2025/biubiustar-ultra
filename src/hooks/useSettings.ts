@@ -6,8 +6,8 @@ interface UseSettingsReturn {
   settings: Partial<SystemSettings>
   loading: boolean
   error: string | null
-  getSetting: <T = any>(key: keyof SystemSettings) => T | null
-  getSettings: <T = any>(keys: (keyof SystemSettings)[]) => Partial<Record<keyof SystemSettings, T>>
+  getSetting: <T = unknown>(key: keyof SystemSettings) => T | null
+  getSettings: <T = unknown>(keys: (keyof SystemSettings)[]) => Partial<Record<keyof SystemSettings, T>>
   refreshSettings: () => Promise<void>
 }
 
@@ -34,11 +34,11 @@ export function useSettings(): UseSettingsReturn {
     }
   }, [])
 
-  const getSetting = useCallback(<T = any>(key: keyof SystemSettings): T | null => {
+  const getSetting = useCallback(<T = unknown>(key: keyof SystemSettings): T | null => {
     return (settings[key] as T) || null
   }, [settings])
 
-  const getSettings = useCallback(<T = any>(keys: (keyof SystemSettings)[]): Partial<Record<keyof SystemSettings, T>> => {
+  const getSettings = useCallback(<T = unknown>(keys: (keyof SystemSettings)[]): Partial<Record<keyof SystemSettings, T>> => {
     const result: Partial<Record<keyof SystemSettings, T>> = {}
     keys.forEach(key => {
       if (settings[key] !== undefined) {
@@ -70,7 +70,7 @@ export function useSettings(): UseSettingsReturn {
 /**
  * 获取特定设置项的Hook
  */
-export function useSetting<T = any>(key: keyof SystemSettings, defaultValue?: T): {
+export function useSetting<T = unknown>(key: keyof SystemSettings, defaultValue?: T): {
   value: T | null
   loading: boolean
   error: string | null
@@ -155,7 +155,7 @@ export function useLocalizedSiteDescription() {
     error 
   } = useSiteInfo()
   
-  const getLocalizedDescription = () => {
+  const getLocalizedDescription = useCallback(() => {
     switch (language) {
       case 'zh':
         return siteDescriptionZh || siteDescription || '一个现代化的社交平台'
@@ -168,7 +168,7 @@ export function useLocalizedSiteDescription() {
       default:
         return siteDescription || '一个现代化的社交平台'
     }
-  }
+  }, [language, siteDescriptionZh, siteDescriptionZhTw, siteDescriptionEn, siteDescriptionVi, siteDescription])
   
   return {
     localizedDescription: getLocalizedDescription(),

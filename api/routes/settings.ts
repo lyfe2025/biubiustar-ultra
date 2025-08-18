@@ -2,13 +2,13 @@
  * Public Settings API routes
  * Handle public system settings for frontend
  */
-import { Router } from 'express';
-import { supabaseAdmin } from '../lib/supabase.js';
+import { Router, Request, Response } from 'express';
+import { supabaseAdmin } from '../lib/supabase';
 
 const router = Router();
 
 // GET /api/settings/public - 获取公开的系统设置（供前台使用）
-router.get('/public', async (req, res) => {
+router.get('/public', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { data: settings, error } = await supabaseAdmin
       .from('system_settings')
@@ -33,7 +33,7 @@ router.get('/public', async (req, res) => {
       } else if (setting.setting_type === 'json') {
         try {
           value = JSON.parse(value)
-        } catch (e) {
+        } catch {
           value = null
         }
       }

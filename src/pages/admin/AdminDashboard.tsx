@@ -12,7 +12,7 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  BarChart3,
+
   Shield
 } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
@@ -121,25 +121,28 @@ const formatActivityMessage = (type: string, details: string, userEmail?: string
     const browserInfo = getBrowserInfo(browser)
 
     switch (type) {
-      case 'admin_login_success':
+      case 'admin_login_success': {
         const loginDetails = [`管理员 ${username} 登录成功`]
         if (ip !== '未知IP') loginDetails.push(`来自 ${ip}`)
         if (browserInfo) loginDetails.push(`使用 ${browserInfo}`)
         return loginDetails.join(' ')
+      }
       
-      case 'unauthorized_admin_access_attempt':
+      case 'unauthorized_admin_access_attempt': {
         const attemptDetails = [`非管理员用户 ${username} 尝试访问管理后台`]
         if (ip !== '未知IP') attemptDetails.push(`来自 ${ip}`)
         if (browserInfo) attemptDetails.push(`使用 ${browserInfo}`)
         return attemptDetails.join(' ')
+      }
       
-      case 'login_system_error':
+      case 'login_system_error': {
         const errorDetails = [`登录系统发生错误`]
         if (parsedDetails.error) errorDetails.push(`: ${parsedDetails.error}`)
         if (ip !== '未知IP') errorDetails.push(`，来源IP: ${ip}`)
         return errorDetails.join('')
+      }
       
-      case 'ip_blocked':
+      case 'ip_blocked': {
         const blockDetails = [`IP地址 ${ip} 被临时封禁`]
         if (parsedDetails.reason) blockDetails.push(`，原因: ${parsedDetails.reason}`)
         if (parsedDetails.failed_attempts) blockDetails.push(`，失败尝试: ${parsedDetails.failed_attempts}次`)
@@ -148,46 +151,55 @@ const formatActivityMessage = (type: string, details: string, userEmail?: string
           blockDetails.push(`，解锁时间: ${blockedUntil}`)
         }
         return blockDetails.join('')
+      }
       
-      case 'ip_permanently_blocked':
+      case 'ip_permanently_blocked': {
         const permBlockDetails = [`IP地址 ${ip} 被永久封禁`]
         if (parsedDetails.reason) permBlockDetails.push(`，原因: ${parsedDetails.reason}`)
         if (parsedDetails.blocked_by) permBlockDetails.push(`，操作者: ${parsedDetails.blocked_by}`)
         return permBlockDetails.join('')
+      }
       
-      case 'ip_auto_unblocked':
+      case 'ip_auto_unblocked': {
         const unblockDetails = [`IP地址 ${ip} 自动解锁`]
         if (parsedDetails.reason) unblockDetails.push(`，原因: ${parsedDetails.reason}`)
         return unblockDetails.join('')
+      }
       
-      case 'blacklist_cleanup':
+      case 'blacklist_cleanup': {
         const blacklistCount = parsedDetails.blacklist_cleaned || 0
         return `系统清理了 ${blacklistCount} 个过期IP黑名单记录`
+      }
       
-      case 'login_attempts_cleanup':
+      case 'login_attempts_cleanup': {
         const attemptsCount = parsedDetails.login_attempts_cleaned || 0
         return `系统清理了 ${attemptsCount} 个过期登录尝试记录`
+      }
       
-      case 'security_cleanup_summary':
+      case 'security_cleanup_summary': {
         const blacklistCleaned = parsedDetails.blacklist_cleaned || 0
         const attemptsCleaned = parsedDetails.login_attempts_cleaned || 0
         const totalCleaned = blacklistCleaned + attemptsCleaned
         return `安全数据清理完成，清理IP黑名单 ${blacklistCleaned} 条，登录尝试记录 ${attemptsCleaned} 条，共 ${totalCleaned} 条记录`
+      }
       
-      case 'security_cleanup_failed':
+      case 'security_cleanup_failed': {
         const failDetails = [`安全数据清理失败`]
         if (parsedDetails.error) failDetails.push(`: ${parsedDetails.error}`)
         return failDetails.join('')
+      }
       
-      case 'user_register':
+      case 'user_register': {
         const regDetails = [`新用户 ${username} 注册`]
         if (ip !== '未知IP') regDetails.push(`，来自 ${ip}`)
         return regDetails.join('')
+      }
       
-      case 'post_create':
+      case 'post_create': {
         const postDetails = [`用户 ${username} 发布了新帖子`]
         if (parsedDetails.title) postDetails.push(`: ${parsedDetails.title}`)
         return postDetails.join('')
+      }
       
       default:
         // 如果无法识别类型，显示通用描述
@@ -196,7 +208,7 @@ const formatActivityMessage = (type: string, details: string, userEmail?: string
         }
         return `系统活动: ${type}${ip !== '未知IP' ? ` (${ip})` : ''}`
     }
-  } catch (error) {
+  } catch {
     // 如果处理过程中出现任何错误，返回通用描述
     return `系统活动: ${type}`
   }

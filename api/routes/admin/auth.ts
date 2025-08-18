@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request, Response, NextFunction } from 'express'
 import { supabaseAdmin } from '../../lib/supabase'
 import { 
   ipSecurityCheck, 
@@ -11,7 +11,7 @@ import {
 const router = Router()
 
 // 管理员权限验证中间件
-export const requireAdmin = async (req: any, res: any, next: any) => {
+export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -45,7 +45,7 @@ export const requireAdmin = async (req: any, res: any, next: any) => {
 }
 
 // 管理员登录API（应用安全检查中间件）
-router.post('/login', ipSecurityCheck, async (req, res) => {
+router.post('/login', ipSecurityCheck, async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { email, password } = req.body
     const ipAddress = req.clientIP || getClientIP(req)
@@ -197,8 +197,8 @@ router.post('/login', ipSecurityCheck, async (req, res) => {
   }
 })
 
-// 获取管理后台统计数据
-router.get('/stats', requireAdmin, async (req, res) => {
+// 获取管理员统计信息
+router.get('/stats', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // 获取用户统计
     const { data: usersData, error: usersError } = await supabaseAdmin
@@ -289,8 +289,8 @@ router.get('/stats', requireAdmin, async (req, res) => {
   }
 })
 
-// 获取最近活动日志
-router.get('/recent-activities', requireAdmin, async (req, res) => {
+// 获取最近活动
+router.get('/recent-activities', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const activities = []
 

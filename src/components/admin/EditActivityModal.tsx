@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { XCircle, Upload, Calendar, MapPin, Users, Tag, FileText } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
 import { toast } from 'sonner'
-import { Activity } from '../../types/activity'
+
 import { adminService, AdminActivity } from '../../services/AdminService'
 
 interface EditActivityModalProps {
@@ -132,15 +132,16 @@ const EditActivityModal: React.FC<EditActivityModalProps> = ({
       resetForm()
       onSuccess()
       onClose()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('更新活动失败:', error)
       
       // 处理不同类型的错误
-      if (error.name === 'AuthenticationError') {
+      const err = error as any
+      if (err.name === 'AuthenticationError') {
         toast.error(t('admin.auth.sessionExpired'))
       } else {
         // 尝试显示后端返回的具体错误信息
-        const errorMessage = error.message || t('admin.activities.messages.updateFailed')
+        const errorMessage = err.message || t('admin.activities.messages.updateFailed')
         toast.error(errorMessage)
       }
     } finally {

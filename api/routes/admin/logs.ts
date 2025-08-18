@@ -4,17 +4,7 @@ import { supabaseAdmin } from '../../lib/supabase';
 
 const router = Router();
 
-// 活动日志接口
-interface ActivityLog {
-  id: string;
-  type: string;
-  action: string;
-  details: string;
-  user_id?: string;
-  user_email?: string;
-  ip_address?: string;
-  created_at: string;
-}
+
 
 // 获取活动日志列表
 router.get('/', requireAdmin, async (req: Request, res: Response) => {
@@ -67,8 +57,8 @@ router.get('/', requireAdmin, async (req: Request, res: Response) => {
 
     // 计算分页信息
     const totalPages = Math.ceil((count || 0) / limitNum);
-    const hasNextPage = pageNum < totalPages;
-    const hasPrevPage = pageNum > 1;
+    // const hasNextPage = pageNum < totalPages;
+    // const hasPrevPage = pageNum > 1;
 
     res.json({
       data: data || [],

@@ -60,8 +60,8 @@ const ContentPreview: React.FC<ContentPreviewProps> = ({
 
           {/* 作者信息 */}
           <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-            {post.author.avatar ? (
-              <img className="h-12 w-12 rounded-full" src={post.author.avatar} alt="" />
+            {post.author.avatar_url ? (
+              <img className="h-12 w-12 rounded-full" src={post.author.avatar_url} alt="" />
             ) : (
               <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
                 <User className="h-6 w-6 text-gray-600" />
@@ -74,7 +74,7 @@ const ContentPreview: React.FC<ContentPreviewProps> = ({
           </div>
 
           {/* 媒体内容 */}
-          {(post.image || post.video) && (
+          {(post.image_url || post.video) && (
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-gray-900 flex items-center space-x-2">
                 {post.video ? <Video className="w-4 h-4" /> : <Image className="w-4 h-4" />}
@@ -85,11 +85,11 @@ const ContentPreview: React.FC<ContentPreviewProps> = ({
                   src={post.video} 
                   controls 
                   className="w-full max-h-96 rounded-lg"
-                  poster={post.image}
+                  poster={post.image_url}
                 />
-              ) : post.image && (
+              ) : post.image_url && (
                 <img 
-                  src={post.image} 
+                  src={post.image_url} 
                   alt="内容图片" 
                   className="w-full max-h-96 object-contain rounded-lg"
                 />
@@ -126,7 +126,7 @@ const ContentPreview: React.FC<ContentPreviewProps> = ({
             <div className="text-center">
               <div className="flex items-center justify-center space-x-2 text-green-500 mb-1">
                 <Eye className="w-5 h-5" />
-                <span className="text-2xl font-bold text-gray-900">{post.views_count}</span>
+                <span className="text-2xl font-bold text-gray-900">{post.likes_count}</span>
               </div>
               <div className="text-sm text-gray-500">{t('admin.content.views')}</div>
             </div>

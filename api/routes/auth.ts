@@ -2,42 +2,15 @@
  * User authentication API routes
  * Handle user registration, login, logout, password reset, etc.
  */
-import { Router, type Request, type Response } from 'express';
-import { supabaseAdmin } from '../lib/supabase';
+import { Router, Request, Response } from 'express';
+import { supabaseAdmin } from '../lib/supabase.js';
+import { validateEmail, validatePassword } from '../utils/validation.js';
+import { sendResponse } from '../utils/response.js';
 
 const router = Router();
 
-// Input validation helpers
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-const validatePassword = (password: string): { valid: boolean; message?: string } => {
-  if (password.length < 6) {
-    return { valid: false, message: '密码长度至少6位' };
-  }
-  if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
-    return { valid: false, message: '密码必须包含字母和数字' };
-  }
-  return { valid: true };
-};
-
-// Standard API response format
-const sendResponse = (res: Response, success: boolean, data?: any, message?: string, statusCode = 200) => {
-  res.status(statusCode).json({
-    success,
-    data,
-    message,
-    timestamp: new Date().toISOString()
-  });
-};
-
-/**
- * User Registration
- * POST /api/auth/register
- */
-router.post('/register', async (req: Request, res: Response): Promise<void> => {
+// User Registration
+router.post('/register', async (req: Request, res: Response) => {
   try {
     const { email, password, username, full_name } = req.body;
 
@@ -60,7 +33,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
     // Check if email already exists
     const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
-    const userExists = existingUser?.users?.find((user: any) => user.email === email);
+    const userExists = existingUser?.users?.find((user: { email?: string }) => user.email === email);
     if (userExists) {
       sendResponse(res, false, null, '该邮箱已被注册', 409);
       return;
@@ -119,11 +92,8 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-/**
- * User Login
- * POST /api/auth/login
- */
-router.post('/login', async (req: Request, res: Response): Promise<void> => {
+// User Login
+router.post('/login', async (req: Request, res: Response) => {
   try {
     const { account, password } = req.body; // Changed from 'email' to 'account' to support both email and username
 
@@ -226,11 +196,8 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-/**
- * User Logout
- * POST /api/auth/logout
- */
-router.post('/logout', async (req: Request, res: Response): Promise<void> => {
+// User Logout
+router.post('/logout', async (req: Request, res: Response) => {
   try {
     const authHeader = req.headers.authorization;
     
@@ -259,11 +226,8 @@ router.post('/logout', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-/**
- * Password Reset Request
- * POST /api/auth/reset-password
- */
-router.post('/reset-password', async (req: Request, res: Response): Promise<void> => {
+// Password Reset Request
+router.post('/reset-password', async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
@@ -297,11 +261,8 @@ router.post('/reset-password', async (req: Request, res: Response): Promise<void
   }
 });
 
-/**
- * Update Password
- * POST /api/auth/update-password
- */
-router.post('/update-password', async (req: Request, res: Response): Promise<void> => {
+// Update Password
+router.post('/update-password', async (req: Request, res: Response) => {
   try {
     const { access_token, new_password } = req.body;
 
@@ -317,7 +278,7 @@ router.post('/update-password', async (req: Request, res: Response): Promise<voi
     }
 
     // Update user password
-    const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(
       access_token, // This should be user ID, need to get from token
       { password: new_password }
     );
@@ -336,11 +297,8 @@ router.post('/update-password', async (req: Request, res: Response): Promise<voi
   }
 });
 
-/**
- * Get Current User
- * GET /api/auth/me
- */
-router.get('/me', async (req: Request, res: Response): Promise<void> => {
+// Get Current User
+router.get('/me', async (req: Request, res: Response) => {
   try {
     const authHeader = req.headers.authorization;
     

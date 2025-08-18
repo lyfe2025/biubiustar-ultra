@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { adminService } from '../../../../services/AdminService'
 import { toast } from 'sonner'
@@ -33,7 +33,7 @@ export const useUserManagement = () => {
   const navigate = useNavigate()
 
   // 获取用户数据
-  const fetchUsers = async (page: number = pagination.page, limit: number = pagination.limit) => {
+  const fetchUsers = useCallback(async (page: number = pagination.page, limit: number = pagination.limit) => {
     try {
       setLoading(true)
       const response = await adminService.getUsers(page, limit)
@@ -50,7 +50,7 @@ export const useUserManagement = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination.page, pagination.limit, navigate])
 
   // 切换页面
   const changePage = (page: number) => {
@@ -65,7 +65,7 @@ export const useUserManagement = () => {
   // 初始加载
   useEffect(() => {
     fetchUsers()
-  }, [])
+  }, [fetchUsers])
 
   // 过滤用户（现在在后端处理分页，前端只做简单筛选）
   const filteredUsers = users.filter(user => {

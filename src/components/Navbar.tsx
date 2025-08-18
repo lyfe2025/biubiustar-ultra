@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Star, Menu, X, User, LogOut } from 'lucide-react'
+import { Menu, X, User, LogOut } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
 import LanguageSelector from './LanguageSelector'
@@ -31,13 +31,7 @@ const Navbar: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path
 
-  const handleSignOut = async () => {
-    try {
-      await logout()
-    } catch (error) {
-      console.error(t('nav.logoutFailed'), error)
-    }
-  }
+
 
   return (
     <>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Tag, Search } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
-import { useLanguage } from '../../contexts/language'
+// import { useLanguage } from '../../contexts/language'
 import { toast } from 'sonner'
 
 interface Category {
@@ -14,7 +14,7 @@ interface Category {
 }
 
 const AdminCategories: React.FC = () => {
-  const { t } = useLanguage()
+  // const { t } = useLanguage()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')

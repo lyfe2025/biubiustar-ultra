@@ -1,7 +1,7 @@
 import React from 'react'
 import { Search, Plus, Edit, Trash2, Folder, Eye, EyeOff } from 'lucide-react'
 import { useLanguage } from '../../../contexts/language'
-import { CategoryManagementProps, ContentCategory } from './types'
+import { CategoryManagementProps } from './types'
 
 const CategoryManagement: React.FC<CategoryManagementProps> = ({
   categories,

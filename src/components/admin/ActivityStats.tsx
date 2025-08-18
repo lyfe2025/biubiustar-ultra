@@ -17,7 +17,7 @@ interface ActivityStatsProps {
   refreshTrigger?: number;
 }
 
-const ActivityStats: React.FC<ActivityStatsProps> = ({ activities, refreshTrigger }) => {
+const ActivityStats: React.FC<ActivityStatsProps> = ({ refreshTrigger }) => {
   const { t } = useLanguage();
   const [stats, setStats] = useState<ActivityStatsData>({
     totalActivities: 0,

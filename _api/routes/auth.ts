@@ -24,7 +24,7 @@ const validatePassword = (password: string): { valid: boolean; message?: string 
 };
 
 // Standard API response format
-const sendResponse = (res: Response, success: boolean, data?: any, message?: string, statusCode = 200) => {
+const sendResponse = (res: Response, success: boolean, data?: unknown, message?: string, statusCode = 200) => {
   res.status(statusCode).json({
     success,
     data,
@@ -60,7 +60,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
     // Check if email already exists
     const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
-    const userExists = existingUser?.users?.find((user: any) => user.email === email);
+    const userExists = existingUser?.users?.find((user: { email: string }) => user.email === email);
     if (userExists) {
       sendResponse(res, false, null, '该邮箱已被注册', 409);
       return;
@@ -317,7 +317,7 @@ router.post('/update-password', async (req: Request, res: Response): Promise<voi
     }
 
     // Update user password
-    const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(
       access_token, // This should be user ID, need to get from token
       { password: new_password }
     );

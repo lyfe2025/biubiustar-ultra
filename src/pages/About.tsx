@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, Users, Globe, Heart, Mail, Phone, MapPin, Send, Building, Calendar, TrendingUp, Handshake } from 'lucide-react';
+import { Star, Users, Globe, Heart, Building, Calendar, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../contexts/language';
 import { contactService, type ContactFormData } from '../services/ContactService';
 import { toast } from 'sonner';
@@ -9,7 +9,7 @@ import { useMetaDescription, useSocialMetaTags } from '../hooks/useMetaDescripti
 
 export default function About() {
   const { t } = useLanguage();
-  const { siteDescription, siteName } = useSiteInfo();
+  const { siteName } = useSiteInfo();
   const { localizedDescription } = useLocalizedSiteDescription();
   usePageTitle(t('about.title'));
   useMetaDescription(localizedDescription);
@@ -169,6 +169,9 @@ export default function About() {
       icon: Star
     }
   ];
+
+  // Avoid unused variable warnings
+  void teamMembers; void stats; void values;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 pt-20">

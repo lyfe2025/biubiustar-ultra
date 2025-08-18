@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { supabaseAdmin, supabase } from '../../lib/supabase'
 import { requireAdmin } from './auth'
 
@@ -8,7 +8,7 @@ const router = Router()
 router.use(requireAdmin)
 
 // 获取所有帖子（内容管理）
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // 获取分页参数
     const page = parseInt(req.query.page as string) || 1
@@ -105,7 +105,7 @@ router.get('/', async (req, res) => {
 })
 
 // 更新帖子状态
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { status } = req.body
@@ -132,7 +132,7 @@ router.put('/:id/status', async (req, res) => {
 })
 
 // 删除帖子
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
 

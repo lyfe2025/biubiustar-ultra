@@ -52,7 +52,7 @@ export async function logSecurityEvent(
   ipAddress: string | null = null,
   userId: string | null = null,
   email: string | null = null,
-  details: any = {},
+  details: Record<string, unknown> = {},
   severity: 'info' | 'warning' | 'error' | 'critical' = 'info'
 ): Promise<void> {
   try {
@@ -75,7 +75,7 @@ export async function logSecurityEvent(
 export async function logActivityEvent(
   type: string,
   action: string,
-  details: any = {},
+  details: Record<string, unknown> = {},
   userId: string | null = null,
   userEmail: string | null = null,
   ipAddress: string | null = null,
@@ -566,16 +566,14 @@ export function startSecurityCleanupScheduler(): NodeJS.Timeout {
 }
 
 // 扩展Request接口以包含安全相关信息
-declare global {
-  namespace Express {
-    interface Request {
-      clientIP?: string;
-      loginAttempts?: {
-        totalAttempts: number;
-        failedAttempts: number;
-        recentFailedAttempts: number;
-        lastAttempt?: string;
-      };
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    clientIP?: string;
+    loginAttempts?: {
+      totalAttempts: number;
+      failedAttempts: number;
+      recentFailedAttempts: number;
+      lastAttempt?: string;
+    };
   }
 }

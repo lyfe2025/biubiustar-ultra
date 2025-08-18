@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, User, Mail, MapPin, Globe, FileText, Trash2, Key, Save } from 'lucide-react'
+import { X, User, Trash2, Key, Save } from 'lucide-react'
 import { useLanguage } from '../../../contexts/language'
 import { User as UserType, UserModalProps, AddUserModalProps, PasswordModalProps, NewUserData, PasswordData } from './types'
 

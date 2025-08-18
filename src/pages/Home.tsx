@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Plus, Calendar, Users, ArrowRight, TrendingUp, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { cn } from '../lib/utils'
+
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
-import { allTranslations } from '../contexts/language/translationLoader'
+
 import { socialService } from '../lib/socialService'
 import type { Post } from '../types'
 import { ActivityService, Activity as ActivityType } from '../lib/activityService'
@@ -19,7 +19,7 @@ import { useMetaDescription, useSocialMetaTags } from '../hooks/useMetaDescripti
 const Home = () => {
   const { user } = useAuth()
   const { t } = useLanguage()
-  const { siteDescription, siteName, siteLogo } = useSiteInfo()
+  const { siteName } = useSiteInfo()
   const { localizedDescription } = useLocalizedSiteDescription()
 
   
@@ -43,17 +43,27 @@ const Home = () => {
 
 
   useEffect(() => {
-    loadPosts()
-    loadActivities()
+    // 添加错误边界，确保即使API调用失败，页面也能渲染
+    const initializeData = async () => {
+      try {
+        await Promise.allSettled([loadPosts(), loadActivities()]);
+      } catch (error) {
+        console.error('Error initializing home page data:', error);
+      }
+    };
+    
+    initializeData();
   }, [])
 
   const loadPosts = async () => {
     try {
       setIsLoading(true);
       const data = await socialService.getPosts(1, 3); // 只获取前3个帖子
-      setPosts(data);
+      setPosts(data || []); // 确保即使返回null也设置为空数组
     } catch (error) {
       console.error('Error loading posts:', error);
+      // 设置空数组作为回退，确保组件能正常渲染
+      setPosts([]);
     } finally {
       setIsLoading(false);
     }
@@ -63,9 +73,11 @@ const Home = () => {
     try {
       setIsActivitiesLoading(true);
       const data = await ActivityService.getUpcomingActivities(2); // 获取前2个即将到来的活动
-      setActivities(data);
+      setActivities(data || []); // 确保即使返回null也设置为空数组
     } catch (error) {
       console.error('Error loading activities:', error);
+      // 设置空数组作为回退，确保组件能正常渲染
+      setActivities([]);
     } finally {
       setIsActivitiesLoading(false);
     }
@@ -88,8 +100,25 @@ const Home = () => {
 
 
 
+  // 调试信息（仅在开发环境中显示）
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Home component data:', {
+      postsCount: posts?.length,
+      activitiesCount: activities?.length,
+      isLoading,
+      isActivitiesLoading
+    });
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50">
+      {/* 开发调试信息 */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed top-0 left-0 bg-black/80 text-white text-xs p-2 z-50">
+          Posts: {posts?.length || 0} | Activities: {activities?.length || 0} | Loading: {isLoading ? 'Yes' : 'No'}
+        </div>
+      )}
+      
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* 背景图片 */}

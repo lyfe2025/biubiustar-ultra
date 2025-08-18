@@ -60,15 +60,17 @@ export interface UserStatsPanelProps {
   isLoading: boolean
 }
 
+import { Post, Activity } from '../../types'
+
 export interface UserPostsListProps {
-  posts: any[]
+  posts: Post[]
   isLoading: boolean
   onDeletePost: (postId: string) => void
   onLikePost: (postId: string) => void
 }
 
 export interface UserActivitiesListProps {
-  activities: any[]
+  activities: Activity[]
   isLoading: boolean
 }
 

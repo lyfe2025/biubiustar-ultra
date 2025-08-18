@@ -1,6 +1,87 @@
+# 🚫 CRITICAL: 大文件目录必须被排除
 node_modules
-build
-dist
-.git
+.pnpm
+.next
+.nuxt
+.cache
+.temp
+.tmp
+.turbo
+.swc
+.vite
+
+# 🔒 环境文件和敏感数据
+.env*
+!.env.example
+.DS_Store
+Thumbs.db
+
+# 💻 IDE 和编辑器文件
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# 📄 日志文件
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 🗃️ 缓存和临时目录
+coverage
+.nyc_output
+jspm_packages
+.npm
+.eslintcache
+.rpt2_cache_*
+.rts2_cache_*
+.node_repl_history
+*.tgz
+.yarn-integrity
+.parcel-cache
+.vscode-test
+
+# 🗂️ 项目特定的临时文件
 .trae
-.log
+.project.pid
+check_*.html
+check_*.js
+debug_*.html
+debug_*.js
+test_*.js
+test_*.json
+*.md
+!README.md
+project.sh
+.deployment-check.cjs
+
+# 🧪 测试文件和开发工具
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+eslint.config.js
+nodemon.json
+
+# 🗄️ 数据库迁移文件（在部署时不需要）
+supabase/migrations
+supabase/.temp
+supabase
+
+# 🖼️ 大型静态资源优化（如果文件过大）
+public/images/big-logo.png
+public/images/hero-background.svg
+public/images/partners
+
+# 📦 构建产物（Vercel会自己构建）
+dist
+build
+
+# 🎯 减少不必要文件上传
+pnpm-lock.yaml
+package-lock.json
+!package.json

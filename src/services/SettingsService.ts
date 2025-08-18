@@ -54,7 +54,7 @@ export interface SystemSettings {
 
 class SettingsService {
   private baseUrl: string
-  private cache: Map<string, { data: any; timestamp: number }> = new Map()
+  private cache: Map<string, { data: Partial<SystemSettings>; timestamp: number }> = new Map()
   private cacheTimeout = 5 * 60 * 1000 // 5分钟缓存
 
   constructor() {
@@ -104,7 +104,7 @@ class SettingsService {
   /**
    * 获取特定设置项
    */
-  async getSetting<T = any>(key: keyof SystemSettings): Promise<T | null> {
+  async getSetting<T = unknown>(key: keyof SystemSettings): Promise<T | null> {
     const settings = await this.getPublicSettings()
     return settings[key] as T || null
   }
@@ -112,7 +112,7 @@ class SettingsService {
   /**
    * 批量获取设置项
    */
-  async getSettings<T = any>(keys: (keyof SystemSettings)[]): Promise<Partial<Record<keyof SystemSettings, T>>> {
+  async getSettings<T = unknown>(keys: (keyof SystemSettings)[]): Promise<Partial<Record<keyof SystemSettings, T>>> {
     const settings = await this.getPublicSettings()
     const result: Partial<Record<keyof SystemSettings, T>> = {}
     
@@ -177,7 +177,7 @@ export const settingsService = new SettingsService()
 
 // 在全局对象上暴露清除缓存方法，供管理后台使用
 if (typeof window !== 'undefined') {
-  (window as any).clearSettingsCache = () => {
+  (window as unknown as Record<string, unknown>).clearSettingsCache = () => {
     console.log('清除前台设置缓存')
     settingsService.clearCache()
   }

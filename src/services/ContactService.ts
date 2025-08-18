@@ -227,8 +227,8 @@ class ContactService {
     
     // Phone validation (optional field)
     if (phone && phone.trim()) {
-      const phoneRegex = /^[\+]?[1-9][\d\s\-\(\)]{7,15}$/;
-      if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+      const phoneRegex = /^[+]?[1-9][\d\s\-()]{7,15}$/;
+      if (!phoneRegex.test(phone.replace(/[\s\-()]/g, ''))) {
         return { valid: false, message: '请输入有效的电话号码' };
       }
     }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Mail, Eye, Check, MessageSquare, Search, Filter, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
 import { useLanguage } from '../../contexts/language/LanguageContext'
-import { adminContactsTranslations } from '../../contexts/language/translations/adminContacts'
+// import { adminContactsTranslations } from '../../contexts/language/translations/adminContacts'
 import { aboutContactTranslations } from '../../contexts/language/translations/aboutContact'
 import { contactService, ContactSubmission } from '../../services/ContactService'
 

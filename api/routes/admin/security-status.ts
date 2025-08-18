@@ -1,11 +1,11 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { getClientIP, getLoginAttempts } from '../../middleware/security'
 import { supabaseAdmin } from '../../lib/supabase'
 
 const router = Router()
 
 // 获取当前IP的安全状态
-router.get('/security-status', async (req, res) => {
+router.get('/security-status', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const clientIP = getClientIP(req)
     

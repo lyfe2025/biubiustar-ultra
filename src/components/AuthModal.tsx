@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Mail, Lock, User, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../contexts/language';
 import { useAuth } from '../contexts/AuthContext';
-import AuthService from '../lib/supabase';
+
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 import { cn } from '../lib/utils';
 

@@ -13,7 +13,7 @@ import {
   MessageSquare,
   Trash2
 } from 'lucide-react'
-import { cn } from '../../../lib/utils'
+// import { cn } from '../../../lib/utils'
 import { useLanguage } from '../../../contexts/language'
 import { ContentListProps, Post } from './types'
 
@@ -46,7 +46,7 @@ const ContentList: React.FC<ContentListProps> = ({
 
   const getContentTypeIcon = (post: Post) => {
     if (post.video) return <Video className="w-4 h-4 text-blue-500" />
-    if (post.image) return <Image className="w-4 h-4 text-green-500" />
+    if (post.image_url) return <Image className="w-4 h-4 text-green-500" />
     return <FileText className="w-4 h-4 text-gray-500" />
   }
 
@@ -111,10 +111,10 @@ const ContentList: React.FC<ContentListProps> = ({
                       <div className="text-sm text-gray-500">
                         {truncateText(post.content, 80)}
                       </div>
-                      {post.image && (
+                      {post.image_url && (
                         <div className="mt-2">
                           <img 
-                            src={post.image} 
+                            src={post.image_url} 
                             alt="预览" 
                             className="w-16 h-16 object-cover rounded-md"
                           />
@@ -125,8 +125,8 @@ const ContentList: React.FC<ContentListProps> = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-3">
-                    {post.author.avatar ? (
-                      <img className="h-8 w-8 rounded-full" src={post.author.avatar} alt="" />
+                    {post.author.avatar_url ? (
+                          <img className="h-8 w-8 rounded-full" src={post.author.avatar_url} alt="" />
                     ) : (
                       <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
                         <User className="h-4 w-4 text-gray-600" />
@@ -152,7 +152,7 @@ const ContentList: React.FC<ContentListProps> = ({
                     </div>
                     <div className="flex items-center space-x-1">
                       <Eye className="h-3 w-3 text-green-500" />
-                      <span>{post.views_count}</span>
+                      <span>{post.likes_count}</span>
                     </div>
                   </div>
                 </td>

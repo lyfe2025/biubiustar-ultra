@@ -34,11 +34,20 @@ class SocialService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
-      return data.posts || data; // 兼容不同的返回格式
+      const result = await response.json();
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Posts API response:', result);
+      }
+      
+      // 适应新的API返回格式：{success: true, data: {posts: [], pagination: {}}}
+      if (result.success && result.data && result.data.posts) {
+        return result.data.posts;
+      }
+      // 兼容旧格式
+      return result.posts || result || [];
     } catch (error) {
       console.error('Error fetching posts:', error);
-      throw error;
+      return []; // 返回空数组而不是抛出错误
     }
   }
 
@@ -56,11 +65,23 @@ class SocialService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
-      return data;
+      const result = await response.json();
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Posts pagination API response:', result);
+      }
+      
+      // 适应新的API返回格式：{success: true, data: {posts: [], pagination: {}}}
+      if (result.success && result.data) {
+        return {
+          posts: result.data.posts || [],
+          total: result.data.pagination?.total_count || 0
+        };
+      }
+      // 兼容旧格式
+      return result || { posts: [], total: 0 };
     } catch (error) {
       console.error('Error fetching posts:', error);
-      throw error;
+      return { posts: [], total: 0 }; // 返回默认值而不是抛出错误
     }
   }
 
@@ -461,7 +482,7 @@ class SocialService {
   }
 
   // 获取用户关注的人列表
-  async getUserFollowing(userId: string): Promise<any[]> {
+  async getUserFollowing(userId: string): Promise<unknown[]> {
     try {
       const response = await fetch(`/api/users/${userId}/following`);
       if (!response.ok) {
@@ -477,7 +498,7 @@ class SocialService {
   }
 
   // 获取用户粉丝列表
-  async getUserFollowers(userId: string): Promise<any[]> {
+  async getUserFollowers(userId: string): Promise<unknown[]> {
     try {
       const response = await fetch(`/api/users/${userId}/followers`);
       if (!response.ok) {

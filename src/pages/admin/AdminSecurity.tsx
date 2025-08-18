@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useLanguage } from '../../contexts/language'
-import { Shield, AlertTriangle, Clock, Unlock, Ban, Eye, Filter } from 'lucide-react'
+import { Shield, AlertTriangle, Unlock, Ban, Eye } from 'lucide-react'
 import { adminService } from '../../services/AdminService'
 import { toast } from 'sonner'
 
@@ -49,7 +49,7 @@ interface PaginationInfo {
 }
 
 const AdminSecurity: React.FC = () => {
-  const { t } = useLanguage()
+  // const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<'attempts' | 'blacklist' | 'logs' | 'stats'>('stats')
   const [loading, setLoading] = useState(false)
   

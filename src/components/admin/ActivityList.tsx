@@ -1,8 +1,8 @@
 import React from 'react'
 import { Search, Filter, Eye, Edit2, Star, StarOff, Trash2, Plus } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
-import { Activity } from '../../types/activity'
-import { adminService, AdminActivity } from '../../services/AdminService'
+
+import { AdminActivity } from '../../services/AdminService'
 
 // 使用统一的Activity类型定义
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, AlertTriangle, LogIn } from 'lucide-react'
-import { useLanguage } from '../contexts/language'
+// import { useLanguage } from '../contexts/language'
 import { adminService } from '../services/AdminService'
 
 interface AdminAuthGuardProps {
@@ -89,7 +89,7 @@ const AuthLoadingScreen: React.FC = () => {
  * 4. 提供统一的认证状态管理
  */
 const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
-  const { t } = useLanguage()
+  // const { t } = useLanguage()
   const navigate = useNavigate()
   const [isChecking, setIsChecking] = useState(true)
   const [showAuthModal, setShowAuthModal] = useState(false)

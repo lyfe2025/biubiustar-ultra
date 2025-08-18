@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { socialService } from '../../../lib/socialService'
 import { ActivityService } from '../../../lib/activityService'
 import { supabase } from '../../../lib/supabase'
 import type { Post } from '../../admin/content/types'
+import type { Activity } from '../../../types'
 import { toast } from 'sonner'
 import type { UserProfile, UserStats, NotificationSettings, EditProfileForm, ProfileTab } from '../types'
 
@@ -17,8 +18,8 @@ export const useUserProfile = () => {
     followingCount: 0,
     likes: 0
   })
-  const [userPosts, setUserPosts] = useState<any[]>([])
-  const [userActivities, setUserActivities] = useState<any[]>([])
+  const [userPosts, setUserPosts] = useState<Post[]>([])
+  const [userActivities, setUserActivities] = useState<Activity[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
     email: true,
@@ -37,7 +38,7 @@ export const useUserProfile = () => {
   })
 
   // 加载用户数据
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     if (!user) return
     
     try {
@@ -85,7 +86,7 @@ export const useUserProfile = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user])
 
   // 保存用户资料
   const saveProfile = async () => {
@@ -134,7 +135,7 @@ export const useUserProfile = () => {
     
     try {
       const fileName = `avatar-${user.id}-${Date.now()}`
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('avatars')
         .upload(fileName, file)
 
@@ -169,7 +170,7 @@ export const useUserProfile = () => {
     if (user) {
       loadUserData()
     }
-  }, [user])
+  }, [user, loadUserData])
 
   return {
     // 数据状态

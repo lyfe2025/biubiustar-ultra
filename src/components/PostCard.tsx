@@ -19,7 +19,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(post.likes_count || 0)
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0)
-  const [showShareMenu, setShowShareMenu] = useState(false)
+  // const [showShareMenu, setShowShareMenu] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [sharesCount, setSharesCount] = useState(post.shares_count || 0)
   const [showShareOptions, setShowShareOptions] = useState(false)

@@ -2,7 +2,7 @@
  * Contact form API routes
  * Handle contact form submissions and data storage
  */
-import { Router, type Request, type Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { requireAdmin } from './admin/auth';
 
@@ -14,30 +14,36 @@ const validateEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-const validateContactForm = (data: any): { valid: boolean; message?: string } => {
+const validateContactForm = (data: Record<string, unknown>): { valid: boolean; message?: string } => {
   const { name, email, subject, message, phone } = data;
   
   if (!name || !email || !subject || !message) {
     return { valid: false, message: '所有字段都是必填的' };
   }
   
-  if (phone && phone.trim().length > 0 && phone.trim().length < 8) {
+  const nameStr = String(name);
+  const emailStr = String(email);
+  const subjectStr = String(subject);
+  const messageStr = String(message);
+  const phoneStr = phone ? String(phone) : '';
+  
+  if (phoneStr && phoneStr.trim().length > 0 && phoneStr.trim().length < 8) {
     return { valid: false, message: '电话号码格式不正确' };
   }
   
-  if (name.trim().length < 2) {
+  if (nameStr.trim().length < 2) {
     return { valid: false, message: '姓名至少需要2个字符' };
   }
   
-  if (!validateEmail(email)) {
+  if (!validateEmail(emailStr)) {
     return { valid: false, message: '请输入有效的邮箱地址' };
   }
   
-  if (subject.trim().length < 5) {
+  if (subjectStr.trim().length < 5) {
     return { valid: false, message: '主题至少需要5个字符' };
   }
   
-  if (message.trim().length < 10) {
+  if (messageStr.trim().length < 10) {
     return { valid: false, message: '消息内容至少需要10个字符' };
   }
   
@@ -45,7 +51,7 @@ const validateContactForm = (data: any): { valid: boolean; message?: string } =>
 };
 
 // Standard API response format
-const sendResponse = (res: Response, success: boolean, data?: any, message?: string, statusCode = 200) => {
+const sendResponse = (res: Response, success: boolean, data?: unknown, message?: string, statusCode = 200) => {
   res.status(statusCode).json({
     success,
     data,
@@ -124,7 +130,7 @@ const checkDuplicateSubmission = async (ip: string): Promise<boolean> => {
  * Submit Contact Form
  * POST /api/contact/submit
  */
-router.post('/submit', async (req: Request, res: Response): Promise<void> => {
+router.post('/submit', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { name, email, subject, message, phone } = req.body;
 
@@ -186,7 +192,7 @@ router.post('/submit', async (req: Request, res: Response): Promise<void> => {
  * Get Contact Submissions (Admin only)
  * GET /api/contact/submissions
  */
-router.get('/submissions', requireAdmin, async (req: Request, res: Response): Promise<void> => {
+router.get('/submissions', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
   try {
     
     const { page = 1, limit = 10, status } = req.query;
@@ -231,7 +237,7 @@ router.get('/submissions', requireAdmin, async (req: Request, res: Response): Pr
  * Update Contact Submission Status (Admin only)
  * PUT /api/contact/submissions/:id/status
  */
-router.put('/submissions/:id/status', requireAdmin, async (req: Request, res: Response): Promise<void> => {
+router.put('/submissions/:id/status', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
   try {
     
     const { id } = req.params;
@@ -272,7 +278,7 @@ router.put('/submissions/:id/status', requireAdmin, async (req: Request, res: Re
  * Delete Contact Submission (Admin only)
  * DELETE /api/contact/submissions/:id
  */
-router.delete('/submissions/:id', requireAdmin, async (req: Request, res: Response): Promise<void> => {
+router.delete('/submissions/:id', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 

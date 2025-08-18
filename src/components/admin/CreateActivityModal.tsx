@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { XCircle, Upload, Calendar, MapPin, Users, Tag, FileText } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
 import { toast } from 'sonner'
-import { Activity } from '../../types/activity'
-import { AdminActivity, adminService } from '../../services/AdminService'
+
+import { adminService } from '../../services/AdminService'
 
 interface CreateActivityModalProps {
   isOpen: boolean
@@ -109,15 +109,16 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
       resetForm()
       onSuccess()
       onClose()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('创建活动失败:', error)
       
       // 处理不同类型的错误
-      if (error.name === 'AuthenticationError') {
+      const err = error as any
+      if (err.name === 'AuthenticationError') {
         toast.error(t('admin.auth.sessionExpired'))
       } else {
         // 尝试显示后端返回的具体错误信息
-        const errorMessage = error.message || t('admin.activities.messages.createFailed')
+        const errorMessage = err.message || t('admin.activities.messages.createFailed')
         toast.error(errorMessage)
       }
     } finally {

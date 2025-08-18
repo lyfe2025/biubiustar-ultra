@@ -130,7 +130,7 @@ export class ActivityService {
   }
 
   // 获取活动参与者
-  static async getActivityParticipants(activityId: string): Promise<any[]> {
+  static async getActivityParticipants(activityId: string): Promise<unknown[]> {
     try {
       const response = await fetch(`/api/activities/${activityId}/participants`);
       if (!response.ok) {
@@ -186,10 +186,15 @@ export class ActivityService {
       }
       
       const data = await response.json();
-      return data || [];
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Activities API response:', data);
+      }
+      
+      // activities API 直接返回数组
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Error fetching upcoming activities:', error);
-      throw error;
+      return []; // 返回空数组而不是抛出错误
     }
   }
 }

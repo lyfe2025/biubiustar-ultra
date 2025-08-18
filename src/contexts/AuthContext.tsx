@@ -70,8 +70,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('supabase.auth.token', JSON.stringify(newSession));
         await fetchUserProfile(newUser.id);
       }
-    } catch (error) {
-      throw error;
     } finally {
       setLoading(false);
     }
@@ -90,8 +88,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('supabase.auth.token', JSON.stringify(newSession));
         await fetchUserProfile(signedInUser.id);
       }
-    } catch (error) {
-      throw error;
     } finally {
       setLoading(false);
     }
@@ -141,8 +137,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setSession(null);
       // 清除本地存储的会话信息
       localStorage.removeItem('supabase.auth.token');
-    } catch (error) {
-      throw error;
     } finally {
       setLoading(false);
     }
@@ -150,11 +144,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 重置密码
   const resetPassword = async (email: string) => {
-    try {
-      await AuthService.resetPassword(email);
-    } catch (error) {
-      throw error;
-    }
+    await AuthService.resetPassword(email);
   };
 
   // 更新密码
@@ -163,11 +153,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw new Error('用户未登录或会话已过期');
     }
     
-    try {
-      await AuthService.updatePassword(newPassword, session.access_token);
-    } catch (error) {
-      throw error;
-    }
+    await AuthService.updatePassword(newPassword, session.access_token);
   };
 
   // 更新用户资料
@@ -176,12 +162,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw new Error('用户未登录');
     }
 
-    try {
-      const updatedProfile = await AuthService.updateUserProfile(user.id, updates);
-      setUserProfile(updatedProfile);
-    } catch (error) {
-      throw error;
-    }
+    const updatedProfile = await AuthService.updateUserProfile(user.id, updates);
+    setUserProfile(updatedProfile);
   };
 
   // 初始化认证状态

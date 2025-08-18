@@ -2,16 +2,19 @@ export interface Post {
   id: string
   title: string
   content: string
-  image?: string
-  author: {
+  image_url?: string
+  author?: {
     id: string
     username: string
-    avatar?: string
+    full_name: string
+    avatar_url?: string
   }
   status: 'published' | 'draft' | 'pending' | 'rejected'
   likes_count: number
   comments_count: number
-  views_count: number
+  shares_count: number
+  user_id: string
+  category: string
   created_at: string
   updated_at: string
 }
@@ -321,7 +324,7 @@ class AdminService {
   }
 
   async updateActivityStatus(activityId: string, status: AdminActivity['status'], is_featured?: boolean): Promise<{ success: boolean }> {
-    const body: any = { status }
+    const body: { status: AdminActivity['status']; is_featured?: boolean } = { status }
     if (is_featured !== undefined) {
       body.is_featured = is_featured
     }
@@ -449,12 +452,12 @@ class AdminService {
   }
 
   // 系统设置相关API
-  async getSettings(category?: string): Promise<Record<string, any>> {
+  async getSettings(category?: string): Promise<Record<string, unknown>> {
     const url = category ? `/admin/settings?category=${category}` : '/admin/settings'
-    return this.request<Record<string, any>>(url)
+    return this.request<Record<string, unknown>>(url)
   }
 
-  async saveSettings(settings: Record<string, any>): Promise<{ success: boolean }> {
+  async saveSettings(settings: Record<string, unknown>): Promise<{ success: boolean }> {
     return this.request<{ success: boolean }>('/admin/settings', {
       method: 'PUT',
       body: JSON.stringify(settings),
@@ -468,16 +471,16 @@ class AdminService {
     })
   }
 
-  async getPublicSettings(): Promise<Record<string, any>> {
-    return this.request<Record<string, any>>('/admin/settings/public')
+  async getPublicSettings(): Promise<Record<string, unknown>> {
+    return this.request<Record<string, unknown>>('/admin/settings/public')
   }
 
   // 添加缺失的系统设置方法
-  async getSystemSettings(): Promise<any> {
+  async getSystemSettings(): Promise<Record<string, unknown>> {
     return await this.request('/admin/settings')
   }
 
-  async updateSystemSettings(settings: any): Promise<void> {
+  async updateSystemSettings(settings: Record<string, unknown>): Promise<void> {
     await this.request('/admin/settings', {
       method: 'PUT',
       body: JSON.stringify(settings)
@@ -485,8 +488,8 @@ class AdminService {
     
     // 保存成功后清除前台缓存
     try {
-      if (typeof window !== 'undefined' && (window as any).clearSettingsCache) {
-        (window as any).clearSettingsCache()
+      if (typeof window !== 'undefined' && (window as unknown as { clearSettingsCache?: () => void }).clearSettingsCache) {
+        (window as unknown as { clearSettingsCache: () => void }).clearSettingsCache()
       }
     } catch (error) {
       console.warn('清除前台缓存失败:', error)
@@ -499,18 +502,18 @@ class AdminService {
     })
   }
 
-  async exportSystemSettings(): Promise<any> {
+  async exportSystemSettings(): Promise<Record<string, unknown>> {
     return await this.request('/admin/settings/export')
   }
 
-  async importSystemSettings(settings: any): Promise<void> {
+  async importSystemSettings(settings: Record<string, unknown>): Promise<void> {
     await this.request('/admin/settings/import', {
       method: 'POST',
       body: JSON.stringify(settings)
     })
   }
 
-  async testEmailConfig(settings: any): Promise<void> {
+  async testEmailConfig(settings: Record<string, unknown>): Promise<void> {
     await this.request('/admin/settings/test-email', {
       method: 'POST',
       body: JSON.stringify(settings)
@@ -566,7 +569,7 @@ class AdminService {
       ip_address: string
       user_id: string | null
       user_email: string | null
-      event_data: any
+      event_data: Record<string, unknown>
       severity: 'info' | 'warning' | 'error'
       created_at: string
     }>
@@ -625,7 +628,7 @@ class AdminService {
       resource_id: string | null
       ip_address: string
       user_agent: string | null
-      details: any
+      details: Record<string, unknown>
       created_at: string
     }>
     pagination: { page: number, limit: number, total: number, totalPages: number }

@@ -17,7 +17,7 @@ export const useSystemSettings = () => {
     try {
       setLoading(true)
       const data = await adminService.getSystemSettings()
-      setSettings(data)
+      setSettings(data as SystemSettings)
     } catch (error) {
       console.error('获取系统设置失败:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {

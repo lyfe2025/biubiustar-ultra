@@ -1,14 +1,14 @@
-import { Router } from 'express'
-import { supabaseAdmin } from '../../lib/supabase'
-import { requireAdmin } from './auth'
+import { Router, Request, Response } from 'express'
+import { supabaseAdmin } from '../../lib/supabase.js'
+import { requireAdmin } from './auth.js'
 
 const router = Router()
 
 // 对所有路由应用权限验证
 router.use(requireAdmin)
 
-// 获取所有活动（活动管理）
-router.get('/', async (req, res) => {
+// 获取所有活动（管理员）
+router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // 获取分页参数
     const page = parseInt(req.query.page as string) || 1
@@ -109,7 +109,7 @@ router.get('/', async (req, res) => {
 })
 
 // 更新活动状态
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { status } = req.body
@@ -136,7 +136,7 @@ router.put('/:id/status', async (req, res) => {
 })
 
 // 创建活动
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { 
       title, 
@@ -250,7 +250,7 @@ router.post('/', async (req, res) => {
 })
 
 // 更新活动
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { 
@@ -335,7 +335,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // 删除活动
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
 

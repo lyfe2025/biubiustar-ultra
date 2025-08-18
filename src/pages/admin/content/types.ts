@@ -3,18 +3,21 @@ export interface Post {
   id: string
   title: string
   content: string
-  image?: string
+  image_url?: string
   video?: string
   status: 'pending' | 'published' | 'rejected' | 'draft'
   likes_count: number
   comments_count: number
-  views_count: number
+  shares_count: number
   created_at: string
   updated_at: string
-  author: {
+  user_id: string
+  category: string
+  author?: {
     id: string
     username: string
-    avatar?: string
+    full_name: string
+    avatar_url?: string
   }
 }
 

@@ -25,13 +25,13 @@ import {
 } from './translations'
 
 // 深度合并对象的辅助函数
-const deepMerge = (target: any, source: any): any => {
+const deepMerge = (target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> => {
   const result = { ...target }
   
   Object.keys(source).forEach(key => {
     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
       if (result[key] && typeof result[key] === 'object' && !Array.isArray(result[key])) {
-        result[key] = deepMerge(result[key], source[key])
+        result[key] = deepMerge(result[key] as Record<string, unknown>, source[key] as Record<string, unknown>)
       } else {
         result[key] = { ...source[key] }
       }
@@ -44,20 +44,20 @@ const deepMerge = (target: any, source: any): any => {
 }
 
 // 合并所有翻译模块
-export const mergeTranslations = (...translationModules: any[]): Translations => {
+export const mergeTranslations = (...translationModules: Record<string, unknown>[]): Translations => {
   const languages: Language[] = ['zh', 'zh-TW', 'en', 'vi']
-  const result: any = {}
+  const result: Record<string, Record<string, unknown>> = {}
 
   languages.forEach(lang => {
     result[lang] = {}
     translationModules.forEach(module => {
       if (module[lang]) {
-        result[lang] = deepMerge(result[lang], module[lang])
+        result[lang] = deepMerge(result[lang] as Record<string, unknown>, module[lang] as Record<string, unknown>)
       }
     })
   })
 
-  return result as Translations
+  return result as unknown as Translations
 }
 
 // 合并所有翻译
@@ -99,11 +99,11 @@ export const getTranslation = (key: string, language: Language): string => {
   }
   
   const keys = key.split('.')
-  let translation: any = allTranslations[language]
+  let translation: Record<string, unknown> = allTranslations[language] as Record<string, unknown>
 
   for (const k of keys) {
     if (translation && typeof translation === 'object' && k in translation) {
-      translation = translation[k]
+      translation = translation[k] as Record<string, unknown>
     } else {
       // 如果找不到翻译，尝试英文回退
       if (language !== 'en' && allTranslations?.en) {

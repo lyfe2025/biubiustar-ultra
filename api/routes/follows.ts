@@ -2,13 +2,13 @@
  * Follows API routes
  * Handle user follow/unfollow operations and related data
  */
-import { Router, type Request, type Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { supabase } from '../lib/supabase';
 
 const router = Router();
 
 // POST /api/follows - 关注用户
-router.post('/', async (req: Request, res: Response): Promise<void> => {
+router.post('/', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { follower_id, following_id } = req.body;
 
@@ -60,7 +60,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 });
 
 // DELETE /api/follows/:id - 取消关注
-router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
+router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 
@@ -83,7 +83,7 @@ router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
 });
 
 // DELETE /api/follows/unfollow - 通过用户ID取消关注
-router.delete('/unfollow', async (req: Request, res: Response): Promise<void> => {
+router.delete('/unfollow', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { follower_id, following_id } = req.body;
 
@@ -114,7 +114,7 @@ router.delete('/unfollow', async (req: Request, res: Response): Promise<void> =>
 
 
 // GET /api/follows/check - 检查关注状态
-router.get('/check', async (req: Request, res: Response): Promise<void> => {
+router.get('/check', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { follower_id, following_id } = req.query;
 

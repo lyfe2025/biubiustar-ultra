@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { Settings, Save, RefreshCw, Download, Upload, Trash2, RotateCcw, Mail, Trash } from 'lucide-react'
+import { Settings, Save, RefreshCw, Download, Upload } from 'lucide-react'
 import AdminLayout from '../../../components/AdminLayout'
 import { useLanguage } from '../../../contexts/language'
 import { useSystemSettings } from './hooks/useSystemSettings'
@@ -27,11 +27,11 @@ const AdminSettings = () => {
     
     // 操作方法
     updateSettings,
-    resetToDefaults,
+    // resetToDefaults,
     exportSettings,
     importSettings,
-    testEmailConfig,
-    clearCache,
+    // testEmailConfig,
+    // clearCache,
     fetchSettings
   } = useSystemSettings()
 

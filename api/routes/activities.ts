@@ -1,10 +1,10 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { supabase } from '../lib/supabase';
 
 const router = Router();
 
 // GET /api/activities - 获取活动列表
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { 
       limit = 10, 
@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/activities/upcoming - 获取即将到来的活动
-router.get('/upcoming', async (req, res) => {
+router.get('/upcoming', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { limit = 10 } = req.query;
     const now = new Date().toISOString();
@@ -75,7 +75,7 @@ router.get('/upcoming', async (req, res) => {
 });
 
 // GET /api/activities/:id - 获取单个活动
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 
@@ -101,7 +101,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // GET /api/activities/:id/participants - 获取活动参与者
-router.get('/:id/participants', async (req, res) => {
+router.get('/:id/participants', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { limit = 50, offset = 0 } = req.query;
@@ -130,18 +130,21 @@ router.get('/:id/participants', async (req, res) => {
     }
 
     // 格式化返回数据
-    const formattedParticipants = data?.map(participant => ({
-      id: participant.id,
-      activity_id: participant.activity_id,
-      user_id: participant.user_id,
-      joined_at: participant.joined_at,
-      user: {
-        id: (participant.user_profiles as any).id,
-        username: (participant.user_profiles as any).username,
-        full_name: (participant.user_profiles as any).full_name,
-        avatar_url: (participant.user_profiles as any).avatar_url
-      }
-    })) || [];
+    const formattedParticipants = (data as any[])?.map((participant: any) => {
+      const userProfile = participant.user_profiles as any;
+      return {
+        id: participant.id,
+        activity_id: participant.activity_id,
+        user_id: participant.user_id,
+        joined_at: participant.joined_at,
+        user: {
+          id: userProfile.id,
+          username: userProfile.username,
+          full_name: userProfile.full_name,
+          avatar_url: userProfile.avatar_url
+        }
+      };
+    }) || [];
 
     res.json(formattedParticipants);
   } catch (error) {
@@ -151,7 +154,7 @@ router.get('/:id/participants', async (req, res) => {
 });
 
 // POST /api/activities - 创建活动
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const {
       title,
@@ -205,7 +208,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/activities/:id - 更新活动
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -238,7 +241,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/activities/:id - 删除活动
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 
@@ -260,7 +263,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // POST /api/activities/:id/join - 加入活动
-router.post('/:id/join', async (req, res) => {
+router.post('/:id/join', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
@@ -325,7 +328,7 @@ router.post('/:id/join', async (req, res) => {
 });
 
 // DELETE /api/activities/:id/leave - 离开活动
-router.delete('/:id/leave', async (req, res) => {
+router.delete('/:id/leave', async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
