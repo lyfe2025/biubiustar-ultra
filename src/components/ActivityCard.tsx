@@ -223,35 +223,35 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
         <div className="absolute top-4 right-4">
           <span className="px-4 py-2 bg-purple-600/90 text-white rounded-full text-sm font-bold backdrop-blur-md border-2 border-white/20 shadow-lg shadow-purple-600/30">
             {(() => {
-              let matchedCategory = null;
-              
-              // 优先使用category_id进行匹配（处理类型转换）
-              if (activity.category_id) {
-                matchedCategory = categories.find(cat => cat.id === String(activity.category_id));
+              // 如果categories还没有加载完成，显示loading或者原始分类名
+              if (!categories || categories.length === 0) {
+                return activity.category || '未知分类';
               }
-              
-              // 如果category_id匹配失败，尝试字符串匹配
-              if (!matchedCategory && activity.category) {
-                matchedCategory = categories.find(cat => 
+
+              // 优先通过 category_id 匹配
+              if (activity.category_id) {
+                const foundCategory = categories.find(cat => String(cat.id) === String(activity.category_id));
+                if (foundCategory) {
+                  return getCategoryName(foundCategory, language);
+                }
+              }
+
+              // 如果没有找到，尝试通过字符串匹配
+              if (activity.category) {
+                const foundCategory = categories.find(cat => 
                   cat.name === activity.category ||
                   cat.name_zh === activity.category ||
                   cat.name_en === activity.category ||
                   cat.name_zh_tw === activity.category ||
-                  cat.id === activity.category
+                  cat.name_vi === activity.category ||
+                  String(cat.id) === activity.category
                 );
+                if (foundCategory) {
+                  return getCategoryName(foundCategory, language);
+                }
               }
-              
-              const result = matchedCategory ? getCategoryName(matchedCategory, language) : activity.category;
-              
-              // 简化的调试信息
-              console.log('ActivityCard分类匹配:', {
-                category_id: activity.category_id,
-                category_string: activity.category,
-                matched: !!matchedCategory,
-                final_result: result
-              });
-              
-              return result;
+
+              return activity.category || '未知分类';
             })()}
           </span>
         </div>

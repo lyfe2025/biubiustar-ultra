@@ -32,39 +32,20 @@ router.get('/', async (req, res) => {
       return sendError(res, '获取活动分类失败', 500);
     }
 
-    // 根据语言返回对应的名称和描述
+    // 返回完整的分类数据（包含所有多语言字段），让前端根据当前语言动态选择显示的分类名称
     const processedCategories = (categories || []).map(category => {
-      let localizedName = category.name;
-      let localizedDescription = category.description;
-
-      // 根据语言选择对应的字段
-      switch (lang) {
-        case 'zh':
-          localizedName = category.name_zh || category.name;
-          localizedDescription = category.description_zh || category.description;
-          break;
-        case 'zh-tw':
-          localizedName = category.name_zh_tw || category.name;
-          localizedDescription = category.description_zh_tw || category.description;
-          break;
-        case 'en':
-          localizedName = category.name_en || category.name;
-          localizedDescription = category.description_en || category.description;
-          break;
-        case 'vi':
-          localizedName = category.name_vi || category.name;
-          localizedDescription = category.description_vi || category.description;
-          break;
-        default:
-          // 默认使用中文
-          localizedName = category.name_zh || category.name;
-          localizedDescription = category.description_zh || category.description;
-      }
-
       return {
         id: category.id,
-        name: localizedName,
-        description: localizedDescription,
+        name: category.name,
+        description: category.description,
+        name_zh: category.name_zh,
+        name_zh_tw: category.name_zh_tw,
+        name_en: category.name_en,
+        name_vi: category.name_vi,
+        description_zh: category.description_zh,
+        description_zh_tw: category.description_zh_tw,
+        description_en: category.description_en,
+        description_vi: category.description_vi,
         color: category.color,
         icon: category.icon
       };

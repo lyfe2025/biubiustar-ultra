@@ -161,14 +161,14 @@ const ActivityDetail: React.FC = () => {
   };
 
   const getCategoryDisplay = () => {
-    if (!activity || !categories.length) return activity?.category || '';
+    if (!activity || !categories.length) return activity?.category || t('activities.ui.unknownCategory');
     
     let matchedCategory = null;
     
-    // 优先通过category_id匹配
+    // 优先通过category_id匹配（处理类型转换）
     if (activity.category_id) {
       matchedCategory = categories.find(cat => 
-        cat.id.toString() === activity.category_id?.toString()
+        String(cat.id) === String(activity.category_id)
       );
     }
     
@@ -179,12 +179,27 @@ const ActivityDetail: React.FC = () => {
         cat.name_zh === activity.category ||
         cat.name_en === activity.category ||
         cat.name_zh_tw === activity.category ||
+        cat.name_vi === activity.category ||
+        String(cat.id) === activity.category ||
         cat.id.toString() === activity.category
       );
     }
     
-    // 使用getCategoryName函数获取本地化名称
-    return matchedCategory ? getCategoryName(matchedCategory, language) : activity.category;
+    // 使用当前语言获取分类名称
+    const result = matchedCategory ? getCategoryName(matchedCategory, language) : (activity.category || t('activities.ui.unknownCategory'));
+    
+    // 调试信息
+    console.log('ActivityDetail分类匹配:', {
+      activity_id: activity.id,
+      category_id: activity.category_id,
+      category_string: activity.category,
+      current_language: language,
+      categories_count: categories.length,
+      matched_category: matchedCategory ? { id: matchedCategory.id, name: matchedCategory.name } : null,
+      final_result: result
+    });
+    
+    return result;
   };
 
   const isActivityPast = activity ? new Date() > new Date(activity.end_date) : false;
