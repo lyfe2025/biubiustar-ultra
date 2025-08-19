@@ -105,7 +105,9 @@ export const authTranslations = {
 
       // 成功消息
       success: {
-        loginSuccess: '登录成功！'
+        loginSuccess: '登录成功！',
+        registerSuccess: '注册成功！',
+        resetPasswordSent: '重置密码邮件已发送！'
       },
 
       // 消息提示
@@ -219,7 +221,9 @@ export const authTranslations = {
 
       // 成功消息
       success: {
-        loginSuccess: '登入成功！'
+        loginSuccess: '登入成功！',
+        registerSuccess: '註冊成功！',
+        resetPasswordSent: '重置密碼郵件已發送！'
       },
 
       messages: {
@@ -332,7 +336,9 @@ export const authTranslations = {
 
       // Success messages
       success: {
-        loginSuccess: 'Login successful!'
+        loginSuccess: 'Login successful!',
+        registerSuccess: 'Registration successful!',
+        resetPasswordSent: 'Reset password email sent!'
       },
 
       messages: {
@@ -445,7 +451,9 @@ export const authTranslations = {
 
       // Thông báo thành công
       success: {
-        loginSuccess: 'Đăng nhập thành công!'
+        loginSuccess: 'Đăng nhập thành công!',
+        registerSuccess: 'Đăng ký thành công!',
+        resetPasswordSent: 'Email đặt lại mật khẩu đã được gửi!'
       },
 
       messages: {

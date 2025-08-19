@@ -13,6 +13,7 @@ import categoriesRoutes from './routes/categories/index.js';
 import followsRoutes from './routes/follows.js';
 import contactRoutes from './routes/contact.js';
 import settingsRoutes from './routes/settings.js';
+import avatarRoutes from './routes/avatar.js';
 
 // for esm mode
 const __filename = fileURLToPath(import.meta.url);
@@ -69,6 +70,8 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use('/api/contact', contactRoutes);
+
+app.use('/api/avatar', avatarRoutes);
 
 // 静态文件服务
 const staticPath = path.join(__dirname, '../public');

@@ -2,6 +2,7 @@ import React from 'react'
 import { User, Edit3, Camera, MapPin, Globe, Calendar, Save, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { useLanguage } from '../../contexts/language'
+import { generateDefaultAvatarUrl, isDefaultAvatar } from '../../utils/avatarGenerator'
 import { UserProfileCardProps } from './types'
 
 const UserProfileCard: React.FC<UserProfileCardProps> = ({
@@ -12,7 +13,8 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   onEditFormChange,
   onSaveProfile,
   onCancelEdit,
-  onStartEdit
+  onStartEdit,
+  onAvatarUpload
 }) => {
   const { t } = useLanguage()
 
@@ -43,10 +45,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
     )
   }
 
-  const handleAvatarUpload = (file: File) => {
-    // 这个功能需要在父组件中实现
-    console.log('Upload avatar:', file)
-  }
+
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -66,16 +65,18 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
       <div className="flex items-start space-x-6">
         {/* 头像 */}
         <div className="relative">
-          {profile.avatar_url ? (
+          {profile.avatar_url && !isDefaultAvatar(profile.avatar_url) ? (
             <img
               src={profile.avatar_url}
               alt={profile.username}
               className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
             />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center border-4 border-white shadow-md">
-              <User className="w-10 h-10 text-gray-600" />
-            </div>
+            <img
+              src={generateDefaultAvatarUrl(profile.username)}
+              alt={profile.username}
+              className="w-24 h-24 rounded-full border-4 border-white shadow-md"
+            />
           )}
           
           {isEditingProfile && (
@@ -87,7 +88,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 input.accept = 'image/*'
                 input.onchange = (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0]
-                  if (file) handleAvatarUpload(file)
+                  if (file) onAvatarUpload(file)
                 }
                 input.click()
               }}

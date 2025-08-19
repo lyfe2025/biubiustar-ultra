@@ -481,7 +481,7 @@ class AdminService {
 
   // 内容分类管理相关API
   async getContentCategories(): Promise<ContentCategory[]> {
-    return this.request<ContentCategory[]>('/admin/content-categories')
+    return this.request<ContentCategory[]>('/admin/categories/content')
   }
 
   async createContentCategory(categoryData: {
@@ -491,7 +491,7 @@ class AdminService {
     icon?: string
     sort_order?: number
   }): Promise<ContentCategory> {
-    return this.request<ContentCategory>('/admin/content-categories', {
+    return this.request<ContentCategory>('/admin/categories/content', {
       method: 'POST',
       body: JSON.stringify(categoryData),
     })
@@ -505,20 +505,20 @@ class AdminService {
     sort_order?: number
     is_active?: boolean
   }): Promise<ContentCategory> {
-    return this.request<ContentCategory>(`/admin/content-categories/${categoryId}`, {
+    return this.request<ContentCategory>(`/admin/categories/content/${categoryId}`, {
       method: 'PUT',
       body: JSON.stringify(categoryData),
     })
   }
 
   async deleteContentCategory(categoryId: string): Promise<{ success: boolean }> {
-    return this.request<{ success: boolean }>(`/admin/content-categories/${categoryId}`, {
+    return this.request<{ success: boolean }>(`/admin/categories/content/${categoryId}`, {
       method: 'DELETE',
     })
   }
 
   async toggleContentCategoryStatus(categoryId: string): Promise<ContentCategory> {
-    return this.request<ContentCategory>(`/admin/content-categories/${categoryId}/toggle`, {
+    return this.request<ContentCategory>(`/admin/categories/content/${categoryId}/toggle`, {
       method: 'PUT',
     })
   }

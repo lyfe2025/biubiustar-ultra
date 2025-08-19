@@ -14,7 +14,8 @@ router.get('/', async (req: Request, res: Response) => {
       category, 
       status = 'published',
       user_id,
-      search 
+      search,
+      sort 
     } = req.query;
 
     const pageNum = parseInt(page as string);
@@ -27,9 +28,21 @@ router.get('/', async (req: Request, res: Response) => {
         *,
         likes(count)
       `, { count: 'exact' })
-      .eq('status', status)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limitNum - 1);
+      .eq('status', status);
+
+    // 处理排序逻辑
+    if (sort === 'trending') {
+      // 热门排序：先按点赞数排序，再按评论数，最后按浏览数
+      query = query.order('likes_count', { ascending: false, nullsFirst: false })
+                   .order('comments_count', { ascending: false, nullsFirst: false })
+                   .order('views_count', { ascending: false, nullsFirst: false })
+                   .order('created_at', { ascending: false });
+    } else {
+      // 默认按创建时间排序
+      query = query.order('created_at', { ascending: false });
+    }
+
+    query = query.range(offset, offset + limitNum - 1);
 
     if (category) {
       query = query.eq('category', category);

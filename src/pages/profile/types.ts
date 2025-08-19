@@ -53,6 +53,7 @@ export interface UserProfileCardProps {
   onSaveProfile: () => void
   onCancelEdit: () => void
   onStartEdit: () => void
+  onAvatarUpload: (file: File) => void
 }
 
 export interface UserStatsPanelProps {

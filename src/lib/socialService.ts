@@ -645,16 +645,46 @@ class SocialService {
   // 获取热门帖子
   async getTrendingPosts(limit: number = 20): Promise<Post[]> {
     try {
-      const response = await fetch(`/api/posts?limit=${limit}&sort=trending`);
+      const url = `/api/posts?limit=${limit}&sort=trending`;
+      console.log('getTrendingPosts: 请求URL:', url);
+      
+      const response = await fetch(url);
+      console.log('getTrendingPosts: 响应状态:', response.status, response.statusText);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
-      return data.posts || data;
+      console.log('getTrendingPosts: 原始响应数据:', data);
+      console.log('getTrendingPosts: 数据类型:', typeof data);
+      
+      // 正确处理API返回的数据格式：{success: true, data: {posts: [...]}}
+      let posts;
+      if (data.success && data.data && data.data.posts) {
+        posts = data.data.posts;
+      } else if (data.posts) {
+        posts = data.posts;
+      } else if (Array.isArray(data)) {
+        posts = data;
+      } else {
+        posts = [];
+      }
+      
+      console.log('getTrendingPosts: 提取的posts:', posts);
+      console.log('getTrendingPosts: posts是否为数组:', Array.isArray(posts));
+      
+      if (!Array.isArray(posts)) {
+        console.warn('getTrendingPosts: API returned non-array data, using empty array');
+        posts = [];
+      }
+      
+      console.log('getTrendingPosts: 最终返回的posts数量:', posts.length);
+      return posts;
     } catch (error) {
       console.error('Error fetching trending posts:', error);
-      throw error;
+      // 返回空数组而不是抛出错误，保持与其他方法一致
+      return [];
     }
   }
 

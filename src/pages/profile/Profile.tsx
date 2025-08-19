@@ -99,6 +99,7 @@ const Profile: React.FC = () => {
                 onSaveProfile={saveProfile}
                 onCancelEdit={cancelEdit}
                 onStartEdit={startEdit}
+                onAvatarUpload={uploadAvatar}
               />
 
               {/* 统计面板 */}

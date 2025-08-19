@@ -22,13 +22,26 @@ export default function Trending() {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
 
   useEffect(() => {
-    loadTrendingPosts()
-  }, [])
+    console.log('=== Trending页面已加载，开始调用API ===');
+    loadTrendingPosts();
+    
+    // 3秒后强制再次调用
+    const timer = setTimeout(() => {
+      console.log('=== 3秒后强制调用API ===');
+      loadTrendingPosts();
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const loadTrendingPosts = async () => {
     setIsLoading(true)
     try {
+      console.log('开始加载热门帖子...')
       const trendingData = await socialService.getTrendingPosts(20)
+      console.log('热门帖子数据:', trendingData)
+      console.log('数据类型:', typeof trendingData, '是否为数组:', Array.isArray(trendingData))
+      console.log('数据长度:', trendingData?.length)
       setPosts(trendingData)
     } catch (error) {
       console.error('加载热门帖子失败:', error)
@@ -110,6 +123,19 @@ export default function Trending() {
                 className="w-full pl-12 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
+          </div>
+
+          {/* Debug Button */}
+          <div className="flex justify-center mb-4">
+            <button
+              onClick={() => {
+                console.log('强制刷新热门帖子...')
+                loadTrendingPosts()
+              }}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              强制刷新数据
+            </button>
           </div>
 
           {/* Filters */}
