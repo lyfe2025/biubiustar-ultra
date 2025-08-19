@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { User, FileText, Users, Settings, Bell, Plus, UserCircle } from 'lucide-react'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { cn } from '../../lib/utils'
 import { useLanguage } from '../../contexts/language'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -15,6 +16,9 @@ import { useUserProfile } from './hooks/useUserProfile'
 
 const Profile: React.FC = () => {
   const { t } = useLanguage()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   usePageTitle(t('profile.title'))
   
   const {
@@ -50,6 +54,20 @@ const Profile: React.FC = () => {
     startEdit,
     cancelEdit
   } = useUserProfile()
+
+  // 从URL参数初始化标签页
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab')
+    if (tabFromUrl && ['overview', 'profile', 'content', 'social', 'settings', 'notifications'].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl as any)
+    }
+  }, [searchParams, setActiveTab])
+
+  // 处理标签页切换
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId as any)
+    setSearchParams({ tab: tabId })
+  }
 
   if (!user) {
     return (
@@ -100,7 +118,7 @@ const Profile: React.FC = () => {
                 isLoading={isLoading}
                 onStartEdit={() => {
                   startEdit()
-                  setActiveTab('profile')
+                  handleTabChange('profile')
                 }}
               />
 
@@ -123,7 +141,7 @@ const Profile: React.FC = () => {
                     return (
                       <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
+                        onClick={() => handleTabChange(tab.id)}
                         className={cn(
                           'py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2',
                           activeTab === tab.id

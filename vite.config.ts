@@ -44,7 +44,24 @@ export default defineConfig({
             console.log('代理响应:', proxyRes.statusCode, req.url);
           });
         },
-        }
+      },
+      '/uploads': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy) => {
+          // 代理错误处理
+          proxy.on('error', (err) => {
+            console.error('上传文件代理错误:', err);
+          });
+          proxy.on('proxyReq', (_proxyReq, req) => {
+            console.log('上传文件代理请求:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req) => {
+            console.log('上传文件代理响应:', proxyRes.statusCode, req.url);
+          });
+        },
+      }
     }
   }
 })

@@ -189,7 +189,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 // Create new post
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { title, content, category, tags, images, image_url, user_id } = req.body;
+    const { title, content, category, tags, images, image_url, video, thumbnail, user_id } = req.body;
 
     if (!title?.trim() || !content?.trim() || !user_id) {
       sendValidationError(res, '标题、内容和用户ID不能为空');
@@ -208,6 +208,8 @@ router.post('/', async (req: Request, res: Response) => {
       category: category || 'general',
       tags: tags || [],
       image_url: finalImageUrl || null,
+      video: video || null,
+      thumbnail: thumbnail || null,
       user_id,
       status: 'pending',
       created_at: new Date().toISOString(),
@@ -238,7 +240,7 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, content, category, tags, images, image_url, user_id } = req.body;
+    const { title, content, category, tags, images, image_url, video, thumbnail, user_id } = req.body;
 
     if (!user_id) {
       sendValidationError(res, '用户ID不能为空');
@@ -283,6 +285,16 @@ router.put('/:id', async (req: Request, res: Response) => {
         finalImageUrl = images[0];
       }
       updateData.image_url = finalImageUrl || null;
+    }
+    
+    // Handle video field
+    if (video !== undefined) {
+      updateData.video = video || null;
+    }
+    
+    // Handle thumbnail field
+    if (thumbnail !== undefined) {
+      updateData.thumbnail = thumbnail || null;
     }
 
     const { data: post, error } = await supabaseAdmin

@@ -5,6 +5,7 @@ import fs from 'fs'
 import { sendResponse, sendValidationError } from '../../utils/response.js'
 import { authenticateToken } from '../../middleware/auth.js'
 import { UploadSecurity, DEFAULT_UPLOAD_CONFIGS } from '../../utils/uploadSecurity.js'
+import { VideoThumbnailGenerator } from '../../utils/videoThumbnail.js'
 
 const router = Router()
 
@@ -33,13 +34,13 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: uploadConfig.maxFileSize, // 20MB
-    files: uploadConfig.maxFiles // 最多5个文件
+    fileSize: uploadConfig.maxFileSize, // 50MB
+    files: uploadConfig.maxFiles // 最多9个文件
   }
 })
 
 // 上传帖子媒体文件（图片和视频）
-router.post('/media', authenticateToken, upload.array('files', 5), async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/media', authenticateToken, upload.array('files', 9), async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const files = req.files as Express.Multer.File[]
     
@@ -82,14 +83,32 @@ router.post('/media', authenticateToken, upload.array('files', 5), async (req: R
         const isImage = file.mimetype.startsWith('image/')
         const isVideo = file.mimetype.startsWith('video/')
         
-        const fileInfo = {
+        const fileInfo: any = {
           filename: safeFilename,
           originalName: file.originalname,
           size: file.size,
           mimetype: file.mimetype,
           type: isImage ? 'image' : isVideo ? 'video' : 'unknown',
           path: `/uploads/posts/${safeFilename}`,
-          url: `${req.protocol}://${req.get('host')}/uploads/posts/${safeFilename}`
+          url: `/uploads/posts/${safeFilename}`
+        }
+        
+        // 如果是视频文件，生成封面图片
+        if (isVideo) {
+          try {
+            const thumbnailUrl = await VideoThumbnailGenerator.generateThumbnailForUpload(
+              safeFilename,
+              uploadDir
+            )
+            if (thumbnailUrl) {
+              fileInfo.thumbnail = thumbnailUrl
+              console.log(`[VIDEO_THUMBNAIL] 视频封面生成成功: ${thumbnailUrl}`)
+            } else {
+              console.warn(`[VIDEO_THUMBNAIL] 视频封面生成失败: ${safeFilename}`)
+            }
+          } catch (thumbnailError) {
+            console.error(`[VIDEO_THUMBNAIL] 生成视频封面时发生错误: ${safeFilename}`, thumbnailError)
+          }
         }
         
         uploadedFiles.push(fileInfo)
@@ -212,7 +231,7 @@ router.get('/media', async (req: Request, res: Response): Promise<Response | voi
           created: stats.birthtime,
           modified: stats.mtime,
           path: `/uploads/posts/${file}`,
-          url: `${req.protocol}://${req.get('host')}/uploads/posts/${file}`
+          url: `/uploads/posts/${file}`
         }
       })
       .sort((a, b) => b.modified.getTime() - a.modified.getTime()) // 按修改时间排序

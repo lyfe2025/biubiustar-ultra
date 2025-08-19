@@ -105,6 +105,60 @@
   animation: fade-in-up 0.8s ease-out;
 }
 
+/* 自定义滚动条样式 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 针对模态框的滚动条样式 */
+.modal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #a855f7 rgba(241, 245, 249, 0.8);
+}
+
+.modal-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.8);
+  border-radius: 4px;
+  border: 1px solid rgba(203, 213, 225, 0.3);
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background: #a855f7;
+  border-radius: 4px;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  transition: all 0.2s ease;
+  min-height: 20px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9333ea;
+  border-color: rgba(147, 51, 234, 0.5);
+}
+
+.modal-scrollbar::-webkit-scrollbar-corner {
+  background: rgba(241, 245, 249, 0.8);
+}
+
 /* 移动端导航栏适配 - 确保内容不被固定导航栏遮挡 */
 .page-content {
   padding-top: 5rem; /* 80px - 适配移动端导航栏高度 */

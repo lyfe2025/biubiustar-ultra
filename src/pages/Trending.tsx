@@ -38,6 +38,8 @@ export default function Trending() {
   // 根据当前语言获取分类名称
   const getCategoryName = (category: ContentCategory): string => {
     switch (language) {
+      case 'zh':
+        return category.name_zh || category.name
       case 'zh-TW':
         return category.name_zh_tw || category.name_zh || category.name
       case 'en':
@@ -52,7 +54,9 @@ export default function Trending() {
   // 加载分类数据
   const loadCategories = async () => {
     try {
+      console.log(`正在加载分类数据，当前语言: ${language}`)
       const categoriesData = await socialService.getContentCategories(language)
+      console.log('加载到的分类数据:', categoriesData)
       setCategories(categoriesData)
     } catch (error) {
       console.error('加载分类失败:', error)

@@ -21,6 +21,7 @@ interface UploadedFile {
   type: 'image' | 'video'
   path: string
   url: string
+  thumbnail?: string
 }
 
 interface ContentCategory {
@@ -67,7 +68,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
       const categories = await socialService.getContentCategories(language);
       setCategories(categories || []);
     } catch (error) {
-      console.error('Failed to fetch categories:', error);
+      console.error(t('posts.create.categoryError'), error);
     }
   };
 
@@ -90,8 +91,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
     if (!files || files.length === 0) return
     
     // 检查文件数量限制
-    if (uploadedFiles.length + files.length > 5) {
-      toast.error(t('posts.create.uploadLabel') + ' ' + t('common.form.maxFiles'))
+    if (uploadedFiles.length + files.length > 9) {
+      toast.error(t('posts.create.tooManyFiles'))
       return
     }
     
@@ -115,7 +116,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
       }
       
       if (!token) {
-        toast.error('认证已过期，请重新登录')
+        toast.error(t('common.loginRequired'))
         return
       }
       
@@ -128,20 +129,20 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
       })
       
       if (!response.ok) {
-        throw new Error(`${t('posts.create.uploadLabel')} 失败: ${response.status}`)
+        throw new Error(`${t('posts.create.fileUploadFailed')}: ${response.status}`)
       }
       
       const result = await response.json()
       
       if (result.success && result.data.files) {
         setUploadedFiles(prev => [...prev, ...result.data.files])
-        toast.success(`${t('posts.create.uploadLabel')} 成功 ${result.data.files.length} 个文件`)
+        toast.success(`${t('posts.create.fileUploadSuccess')} ${result.data.files.length} ${t('common.file.name')}`)
       } else {
-        throw new Error(result.message || `${t('posts.create.uploadLabel')} 失败`)
+        throw new Error(result.message || t('posts.create.fileUploadFailed'))
       }
     } catch (error) {
-      console.error('文件上传失败:', error)
-      toast.error(error instanceof Error ? error.message : `${t('posts.create.uploadLabel')} 失败，请重试`)
+      console.error(t('posts.create.fileUploadFailed'), error)
+      toast.error(error instanceof Error ? error.message : t('posts.create.fileUploadFailed'))
     } finally {
       setIsUploading(false)
     }
@@ -161,7 +162,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
       }
       
       if (!token) {
-        toast.error('认证已过期，请重新登录')
+        toast.error(t('common.loginRequired'))
         return
       }
       
@@ -176,12 +177,13 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
       
       if (response.ok) {
         setUploadedFiles(prev => prev.filter(f => f.filename !== file.filename))
+        toast.success(t('posts.create.fileDeleteSuccess'))
       } else {
-        throw new Error(`${t('posts.create.uploadLabel')} 删除失败`)
+        throw new Error(t('posts.create.fileDeleteFailed'))
       }
     } catch (error) {
-      console.error('删除文件失败:', error)
-      toast.error(`${t('posts.create.uploadLabel')} 删除失败，请重试`)
+      console.error(t('posts.create.fileDeleteFailed'), error)
+      toast.error(t('posts.create.fileDeleteFailed'))
     }
   }
   
@@ -258,15 +260,23 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
       const images = uploadedFiles.filter(file => file.type === 'image').map(file => file.url)
       const mainImageUrl = images.length > 0 ? images[0] : (imageUrl.trim() || undefined)
       
+      // 准备视频URL（取第一个视频文件）
+      const videos = uploadedFiles.filter(file => file.type === 'video')
+      const videoUrl = videos.length > 0 ? videos[0].url : undefined
+      const videoThumbnail = videos.length > 0 ? videos[0].thumbnail : undefined
+      
       const postData = {
         title: title.trim(),
         content: content.trim(),
         user_id: user.id,
         image_url: mainImageUrl,
         images: images,
+        video: videoUrl,
+        thumbnail: videoThumbnail,
         category: category,
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
-        shares_count: 0
+        shares_count: 0,
+        views_count: 0
       }
 
       await socialService.createPost(postData)
@@ -280,34 +290,13 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
       setShowCategoryDropdown(false)
       setUploadedFiles([])
       
+      // 关闭模态框并通知父组件
       onPostCreated?.()
       onClose()
-      toast.success('帖子发布成功！正在等待审核，审核通过后将在前台显示。')
+      toast.success(t('posts.create.successWithReview'))
     } catch (error) {
-      console.error('发布帖子失败:', error)
-      
-      // 提供更具体的错误提示
-      let errorMessage = t('posts.create.failureMessage')
-      
-      if (error instanceof Error) {
-        if (error.message.includes('401') || error.message.includes('unauthorized')) {
-          errorMessage = t('common.form.loginExpired')
-        } else if (error.message.includes('400')) {
-          errorMessage = t('common.form.checkInput')
-        } else if (error.message.includes('403')) {
-          errorMessage = t('posts.create.noPermission')
-        } else if (error.message.includes('413')) {
-          errorMessage = t('common.form.tooLong')
-        } else if (error.message.includes('429')) {
-          errorMessage = t('common.form.tooFrequent')
-        } else if (error.message.includes('500')) {
-          errorMessage = t('common.form.serverError')
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-          errorMessage = t('common.form.networkError')
-        }
-      }
-      
-      toast.error(errorMessage)
+      console.error(t('posts.create.failed'), error)
+      toast.error(t('posts.create.failed'))
     } finally {
       setIsSubmitting(false)
     }
@@ -328,7 +317,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* 头部 */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 flex-shrink-0">
           <h2 className="text-xl font-semibold text-gray-900">{t('posts.create.modalTitle')}</h2>
           <button
             onClick={handleClose}
@@ -339,8 +328,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
         </div>
 
         {/* 表单内容 */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 relative overflow-x-hidden">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 relative overflow-x-hidden modal-scrollbar">
             {/* 标题输入 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -430,11 +419,11 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
                     accept="image/*,video/*"
                     onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
                     className="hidden"
-                    disabled={isUploading || isSubmitting || uploadedFiles.length >= 5}
+                    disabled={isUploading || isSubmitting || uploadedFiles.length >= 9}
                   />
                 </label>
                 <span className="text-xs text-gray-500">
-                  支持图片和视频，最多5个文件，单个文件最大50MB
+                  {t('posts.create.uploadDescription')}
                 </span>
               </div>
               
@@ -442,7 +431,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
               {uploadedFiles.length > 0 && (
                 <div className="space-y-2">
                   <div className="text-sm font-medium text-gray-700">
-                    已上传文件 ({uploadedFiles.length}/5)
+                    {t('posts.create.uploadedFiles')} ({uploadedFiles.length}/9)
                   </div>
                   <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
                     {uploadedFiles.map((file, index) => (
@@ -456,8 +445,28 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
                               className="w-12 h-12 object-cover rounded"
                             />
                           ) : (
-                            <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
-                              <Play className="w-6 h-6 text-gray-500" />
+                            <div className="w-12 h-12 rounded overflow-hidden relative">
+                              {(file as any).thumbnail ? (
+                                <>
+                                  <img
+                                    src={(file as any).thumbnail}
+                                    alt="视频封面"
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                                    <Play className="w-3 h-3 text-white" />
+                                  </div>
+                                </>
+                              ) : (
+                                <video
+                                  src={file.url}
+                                  className="w-full h-full object-cover"
+                                  controls={false}
+                                  muted
+                                  preload="metadata"
+                                  poster={file.url + '#t=0.1'}
+                                />
+                              )}
                             </div>
                           )}
                         </div>
@@ -483,6 +492,38 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
                         </button>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* 视频预览区域 */}
+              {uploadedFiles.some(file => file.type === 'video') && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('posts.create.videoPreview')}
+                  </label>
+                  <div className="space-y-3">
+                    {uploadedFiles
+                      .filter(file => file.type === 'video')
+                      .map((file, index) => (
+                        <div key={index} className="bg-gray-50 rounded-lg p-4">
+                          <div className="text-sm font-medium text-gray-900 mb-2">
+                            {file.originalName}
+                          </div>
+                          <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                            <video
+                              src={file.url}
+                              className="w-full h-full object-contain"
+                              controls
+                              preload="metadata"
+                              poster={(file as any).thumbnail || file.url + '#t=0.1'}
+                            >
+                              您的浏览器不支持视频播放。
+                            </video>
+                          </div>
+                        </div>
+                      ))
+                    }
                   </div>
                 </div>
               )}
@@ -577,7 +618,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
           </div>
 
           {/* 底部按钮 */}
-          <div className="border-t border-gray-100 p-6">
+          <div className="border-t border-gray-100 p-6 flex-shrink-0 bg-white">
             <div className="flex justify-end space-x-3">
               <button
                 type="button"

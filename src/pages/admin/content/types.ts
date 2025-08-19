@@ -5,10 +5,12 @@ export interface Post {
   content: string
   image_url?: string
   video?: string
+  thumbnail?: string
   status: 'pending' | 'published' | 'rejected' | 'draft'
   likes_count: number
   comments_count: number
   shares_count: number
+  views_count: number
   created_at: string
   updated_at: string
   user_id: string

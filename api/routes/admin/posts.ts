@@ -32,6 +32,7 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
         title,
         content,
         image_url,
+        video,
         tags,
         likes_count,
         comments_count,
@@ -72,7 +73,7 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
         title: post.title,
         content: post.content,
         image_url: post.image_url,
-        video: null, // posts表中没有video字段
+        video: post.video,
         status: post.status || 'pending',
         likes_count: post.likes_count || 0,
         comments_count: post.comments_count || 0,

@@ -11,7 +11,8 @@ import {
   User,
   Heart,
   MessageSquare,
-  Trash2
+  Trash2,
+  Play
 } from 'lucide-react'
 // import { cn } from '../../../lib/utils'
 import { useLanguage } from '../../../contexts/language'
@@ -121,6 +122,30 @@ const ContentList: React.FC<ContentListProps> = ({
                           />
                         </div>
                       )}
+                      {post.video && (
+                        <div className="mt-2">
+                          {post.thumbnail ? (
+                            <div className="relative">
+                              <img 
+                                src={post.thumbnail} 
+                                alt="视频封面" 
+                                className="w-16 h-16 object-cover rounded-md"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-md">
+                                <Play className="w-4 h-4 text-white" />
+                              </div>
+                            </div>
+                          ) : (
+                            <video 
+                              src={post.video} 
+                              className="w-16 h-16 object-cover rounded-md"
+                              muted
+                              preload="metadata"
+                            />
+                          )}
+                          <div className="text-xs text-gray-400 mt-1">视频文件</div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </td>
@@ -155,7 +180,7 @@ const ContentList: React.FC<ContentListProps> = ({
                     </div>
                     <div className="flex items-center space-x-1">
                       <Eye className="h-3 w-3 text-green-500" />
-                      <span>{post.likes_count}</span>
+                      <span>{post.views_count}</span>
                     </div>
                   </div>
                 </td>

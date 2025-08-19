@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Calendar, MapPin, Users, Clock } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
 import { formatDateByLanguage } from '../../utils/dateFormatter'
 import { useLanguage } from '../../contexts/language'
 import { UserActivitiesListProps } from './types'
@@ -9,6 +10,19 @@ import { getCategoryName } from '../../utils/categoryUtils'
 const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isLoading }) => {
   const { t, language } = useLanguage()
   const [categories, setCategories] = useState<ActivityCategory[]>([])
+  const location = useLocation()
+
+  // 获取当前标签页信息
+  const getCurrentTab = () => {
+    const pathname = location.pathname
+    if (pathname.includes('/profile')) {
+      // 从 URL 参数或状态中获取当前标签页
+      const searchParams = new URLSearchParams(location.search)
+      const tab = searchParams.get('tab') || 'overview'
+      return `/profile?tab=${tab}`
+    }
+    return '/profile'
+  }
 
   // 加载分类数据
   useEffect(() => {
@@ -83,12 +97,18 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
       <div className="space-y-6">
         {activities.map((activity) => {
           const statusInfo = getActivityStatus(activity)
+          const currentTab = getCurrentTab()
           
           return (
-            <div key={activity.id} className="border-b border-gray-200 last:border-b-0 pb-6 last:pb-0">
+            <Link 
+              key={activity.id} 
+              to={`/activity/${activity.id}`}
+              state={{ from: currentTab }}
+              className="block border-b border-gray-200 last:border-b-0 pb-6 last:pb-0 hover:bg-gray-50 transition-colors duration-200 rounded-lg p-4 -m-4 mb-2 last:mb-0"
+            >
               {/* 活动标题和状态 */}
               <div className="flex items-start justify-between mb-3">
-                <h4 className="text-lg font-medium text-gray-900 flex-1">
+                <h4 className="text-lg font-medium text-gray-900 flex-1 hover:text-purple-600 transition-colors">
                   {activity.title || t('profile.untitledActivity')}
                 </h4>
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
@@ -145,7 +165,7 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
                   </span>
                 </div>
               )}
-            </div>
+            </Link>
           )
         })}
       </div>

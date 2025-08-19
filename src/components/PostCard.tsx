@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Heart, MessageCircle, Share2, MoreHorizontal, User, Flag, Bookmark, Copy, Trash2 } from 'lucide-react'
+import { Heart, MessageCircle, Share2, MoreHorizontal, User, Flag, Bookmark, Copy, Trash2, Play } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
@@ -62,13 +62,12 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
   // 获取分类数据
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/categories/content')
-      if (response.ok) {
-        const data = await response.json()
-        setCategories(data.categories || [])
-      }
+      console.log(`PostCard: 正在获取分类数据，当前语言: ${language}`)
+      const categoriesData = await socialService.getContentCategories(language)
+      console.log('PostCard: 获取到的分类数据:', categoriesData)
+      setCategories(categoriesData)
     } catch (error) {
-      console.error('获取分类失败:', error)
+      console.error('PostCard: 获取分类失败:', error)
     }
   }
 
@@ -78,13 +77,13 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
       case 'zh':
         return category.name_zh || category.name
       case 'zh-TW':
-        return category.name_zh_tw || category.name
+        return category.name_zh_tw || category.name_zh || category.name
       case 'en':
         return category.name_en || category.name
       case 'vi':
         return category.name_vi || category.name
       default:
-        return category.name
+        return category.name_zh || category.name
     }
   }
 
@@ -106,17 +105,23 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
       if (post.category === 'general') {
         setCategoryDisplayName(t('posts.create.generalCategory'))
       } else {
+        // 查找匹配的分类
         const category = categories.find(cat => cat.id === post.category)
         if (category) {
-          setCategoryDisplayName(getCategoryName(category))
+          // 根据当前语言获取分类名称
+          const categoryName = getCategoryName(category)
+          console.log(`找到分类: ${post.category} -> ${categoryName} (语言: ${language})`)
+          setCategoryDisplayName(categoryName)
         } else {
+          // 如果找不到分类，显示原始值（可能是 UUID 或其他标识符）
+          console.warn(`未找到分类 ID: ${post.category}，可用分类:`, categories.map(c => ({ id: c.id, name: getCategoryName(c) })))
           setCategoryDisplayName(post.category)
         }
       }
     } else if (post.category) {
       setCategoryDisplayName(post.category === 'general' ? t('posts.create.generalCategory') : post.category)
     }
-  }, [categories, post.category, language])
+  }, [categories, post.category, language, t])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -405,6 +410,48 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
             alt={post.title}
             className="w-full h-64 object-cover rounded-lg"
           />
+        </div>
+      )}
+
+      {/* 帖子视频 */}
+      {post.video && (
+        <div className="mb-4">
+          {post.thumbnail ? (
+            <div className="relative inline-block cursor-pointer" onClick={() => {
+              // 创建视频播放器
+              const video = document.createElement('video')
+              video.src = post.video
+              video.controls = true
+              video.autoplay = true
+              video.className = 'w-full h-64 object-cover rounded-lg'
+              
+              // 替换封面图片
+              const container = document.getElementById(`video-container-${post.id}`)
+              if (container) {
+                container.innerHTML = ''
+                container.appendChild(video)
+              }
+            }}>
+              <div id={`video-container-${post.id}`}>
+                <img
+                  src={post.thumbnail}
+                  alt="视频封面"
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
+                  <Play className="w-12 h-12 text-white" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <video
+              src={post.video}
+              className="w-full h-64 object-cover rounded-lg"
+              controls
+              preload="metadata"
+            />
+          )}
+          <div className="text-xs text-gray-400 mt-2">视频内容</div>
         </div>
       )}
 

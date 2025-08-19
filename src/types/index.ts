@@ -23,12 +23,15 @@ export interface Post {
   title: string;
   content: string;
   image_url?: string;
+  video?: string;
+  thumbnail?: string;
   category: string;
   tags?: string[];
   user_id: string;
   likes_count: number;
   comments_count: number;
   shares_count: number;
+  views_count: number;
   status: 'pending' | 'published' | 'rejected' | 'draft';
   created_at: string;
   updated_at: string;

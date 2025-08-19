@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Heart, MessageCircle, Share2, User, Calendar, Tag, Send, Trash2 } from 'lucide-react'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { ArrowLeft, ArrowRight, Heart, MessageCircle, Share2, User, Calendar, Tag, Send, Trash2, Play } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
@@ -28,6 +28,7 @@ interface ContentCategory {
 const PostDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useAuth()
   const { language, t } = useLanguage()
 
@@ -52,6 +53,7 @@ const PostDetail = () => {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalType, setAuthModalType] = useState<'login' | 'register'>('login')
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
 
   // 获取帖子详情
   const fetchPost = async () => {
@@ -90,13 +92,12 @@ const PostDetail = () => {
   // 获取分类数据
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/categories/content')
-      if (response.ok) {
-        const data = await response.json()
-        setCategories(data.categories || [])
-      }
+      console.log(`PostDetail: 正在获取分类数据，当前语言: ${language}`)
+      const categoriesData = await socialService.getContentCategories(language)
+      console.log('PostDetail: 获取到的分类数据:', categoriesData)
+      setCategories(categoriesData)
     } catch (error) {
-      console.error('获取分类失败:', error)
+      console.error('PostDetail: 获取分类失败:', error)
     }
   }
 
@@ -106,13 +107,13 @@ const PostDetail = () => {
       case 'zh':
         return category.name_zh || category.name
       case 'zh-TW':
-        return category.name_zh_tw || category.name
+        return category.name_zh_tw || category.name_zh || category.name
       case 'en':
         return category.name_en || category.name
       case 'vi':
         return category.name_vi || category.name
       default:
-        return category.name
+        return category.name_zh || category.name
     }
   }
 
@@ -244,19 +245,60 @@ const PostDetail = () => {
     if (!post) return
     
     try {
-      await socialService.sharePost(post.id)
-      setSharesCount(prev => prev + 1)
-      
-      // 复制链接到剪贴板
-      const postUrl = `${window.location.origin}/post/${post.id}`
-      await navigator.clipboard.writeText(postUrl)
-      
-      toast.success(t('posts.card.shareSuccess'))
+      if (navigator.share) {
+        await navigator.share({
+          title: post.title,
+          text: post.content,
+          url: window.location.href
+        })
+      } else {
+        // 复制链接到剪贴板
+        await navigator.clipboard.writeText(window.location.href)
+        toast.success(t('posts.detail.linkCopied'))
+      }
     } catch (error) {
       console.error('分享失败:', error)
-      toast.error(t('posts.detail.shareError'))
+      // 如果分享失败，尝试复制链接
+      try {
+        await navigator.clipboard.writeText(window.location.href)
+        toast.success(t('posts.detail.linkCopied'))
+      } catch (clipboardError) {
+        console.error('复制链接失败:', clipboardError)
+        toast.error(t('posts.detail.shareError'))
+      }
     }
   }
+
+  // 处理视频播放
+  const handleVideoPlay = () => {
+    setIsVideoPlaying(true)
+  }
+
+  // 获取返回路径
+  const getBackPath = () => {
+    const referrer = location.state?.from;
+    if (referrer) {
+      return referrer;
+    }
+    
+    // 如果没有 referrer，根据当前路径判断
+    const pathname = location.pathname;
+    if (pathname.includes('/profile')) {
+      return '/profile';
+    } else if (pathname.includes('/admin')) {
+      return '/admin';
+    } else if (pathname.includes('/home') || pathname === '/') {
+      return '/';
+    } else {
+      return '/';
+    }
+  };
+
+  // 处理返回
+  const handleBack = () => {
+    const backPath = getBackPath();
+    navigate(backPath);
+  };
 
   useEffect(() => {
     fetchPost()
@@ -270,17 +312,23 @@ const PostDetail = () => {
       if (post.category === 'general') {
         setCategoryDisplayName(t('posts.create.generalCategory'))
       } else {
+        // 查找匹配的分类
         const category = categories.find(cat => cat.id === post.category)
         if (category) {
-          setCategoryDisplayName(getCategoryName(category))
+          // 根据当前语言获取分类名称
+          const categoryName = getCategoryName(category)
+          console.log(`PostDetail: 找到分类: ${post.category} -> ${categoryName} (语言: ${language})`)
+          setCategoryDisplayName(categoryName)
         } else {
+          // 如果找不到分类，显示原始值（可能是 UUID 或其他标识符）
+          console.warn(`PostDetail: 未找到分类 ID: ${post.category}，可用分类:`, categories.map(c => ({ id: c.id, name: getCategoryName(c) })))
           setCategoryDisplayName(post.category)
         }
       }
     } else if (post?.category) {
       setCategoryDisplayName(post.category === 'general' ? t('posts.create.generalCategory') : post.category)
     }
-  }, [categories, post?.category, language])
+  }, [categories, post?.category, language, t])
 
   if (loading) {
     return (
@@ -340,41 +388,38 @@ const PostDetail = () => {
       <div className="relative container mx-auto px-4 py-8 max-w-4xl">
         {/* 返回按钮 */}
         <button
-          onClick={() => navigate(-1)}
-          className="group flex items-center bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 px-4 py-3 mb-8 hover:bg-white transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+          onClick={handleBack}
+          className="flex items-center bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-purple-100 px-4 py-3 mb-8 hover:bg-white transition-all duration-300"
         >
-          <ArrowLeft className="w-5 h-5 mr-2 text-purple-600 group-hover:text-purple-700 transition-colors" />
-          <span className="text-purple-600 group-hover:text-purple-700 font-medium transition-colors">{t('posts.detail.back')}</span>
+          <ArrowLeft className="w-5 h-5 mr-2 text-purple-600" />
+          <span className="text-purple-600 font-medium">{t('posts.detail.back')}</span>
         </button>
 
         {/* 帖子详情卡片 */}
-        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 shadow-lg transform hover:scale-[1.02] transition-all duration-500">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-purple-100 p-8">
           {/* 帖子头部 */}
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                  {post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url) ? (
-                    <img
-                      src={post.author.avatar_url}
-                      alt={post.author.username}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={getUserDefaultAvatarUrl(post.author?.username || 'User', post.author?.avatar_url)}
-                      alt={post.author?.username || 'User'}
-                      className="w-full h-full rounded-full"
-                    />
-                  )}
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                {post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url) ? (
+                  <img
+                    src={post.author.avatar_url}
+                    alt={post.author.username}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={getUserDefaultAvatarUrl(post.author?.username || 'User', post.author?.avatar_url)}
+                    alt={post.author?.username || 'User'}
+                    className="w-full h-full rounded-full"
+                  />
+                )}
               </div>
               <div>
-                <h4 className="font-bold text-gray-900 text-lg">
+                <h4 className="font-semibold text-gray-900 text-lg">
                   {post.author?.username || t('posts.card.anonymousUser')}
                 </h4>
-                <div className="flex items-center space-x-2 text-sm text-purple-600 font-medium">
+                <div className="flex items-center space-x-2 text-sm text-gray-500">
                   <Calendar className="w-4 h-4" />
                   <span>{formatDate(post.created_at)}</span>
                 </div>
@@ -383,97 +428,132 @@ const PostDetail = () => {
           </div>
 
           {/* 帖子标题 */}
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6 leading-tight">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6 leading-tight">
             {post.title}
           </h1>
 
           {/* 分类标签 */}
           {post.category && (
-            <div className="flex items-center space-x-2 mb-8">
+            <div className="flex items-center space-x-2 mb-6">
               <Tag className="w-4 h-4 text-purple-600" />
-              <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border border-purple-200 shadow-sm">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 border border-purple-200">
                 #{categoryDisplayName || post.category}
               </span>
             </div>
           )}
 
           {/* 帖子内容 */}
-          <div className="prose prose-lg max-w-none mb-8">
-            <div className="bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-2xl p-6 border border-purple-100/50">
+          <div className="mb-8">
+            <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
               <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-lg">
                 {post.content}
               </p>
             </div>
           </div>
 
-          {/* 帖子图片 */}
-          {post.image_url && (
+          {/* 帖子媒体内容 */}
+          {(post.image_url || post.video || post.thumbnail) && (
             <div className="mb-8">
-              <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-purple-100/50">
-                <img
-                  src={post.image_url}
-                  alt={post.title}
-                  className="w-full max-h-96 object-cover transform hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative overflow-hidden rounded-xl border border-gray-200">
+                {post.video ? (
+                  // 视频内容
+                  <div className="relative">
+                    {post.thumbnail && !isVideoPlaying ? (
+                      // 显示视频封面
+                      <div className="relative group cursor-pointer" onClick={handleVideoPlay}>
+                        <img
+                          src={post.thumbnail}
+                          alt={post.title}
+                          className="w-full max-h-96 object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition-colors duration-300">
+                          <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                            <Play className="w-6 h-6 text-purple-600 ml-1" />
+                          </div>
+                        </div>
+                        <div className="absolute bottom-3 left-3 bg-black/70 text-white px-2 py-1 rounded text-sm">
+                          视频
+                        </div>
+                      </div>
+                    ) : (
+                      // 直接显示视频
+                      <video
+                        src={post.video}
+                        controls
+                        autoPlay={isVideoPlaying}
+                        className="w-full max-h-96 object-cover"
+                        poster={post.thumbnail}
+                      >
+                        您的浏览器不支持视频播放。
+                      </video>
+                    )}
+                  </div>
+                ) : post.image_url ? (
+                  // 图片内容
+                  <img
+                    src={post.image_url}
+                    alt={post.title}
+                    className="w-full max-h-96 object-cover"
+                  />
+                ) : null}
               </div>
             </div>
           )}
 
           {/* 互动按钮 */}
-          <div className="flex items-center justify-between pt-8 border-t border-gradient-to-r from-purple-100 to-pink-100">
+          <div className="flex items-center justify-between pt-6 border-t border-gray-200">
             <div className="flex items-center space-x-4">
               <button
                 onClick={handleLike}
                 disabled={isLoading}
                 className={cn(
-                  'group flex items-center space-x-2 px-6 py-3 rounded-2xl transition-all duration-300 transform hover:scale-105 font-semibold',
+                  'flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200',
                   isLiked
-                    ? 'bg-gradient-to-r from-red-50 to-pink-50 text-red-600 border border-red-200 shadow-lg'
-                    : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:text-red-600 border border-gray-200 hover:border-red-200 shadow-md hover:shadow-lg',
+                    ? 'text-red-600 bg-red-50 hover:bg-red-100'
+                    : 'text-gray-600 hover:text-red-600 hover:bg-red-50',
                   isLoading && 'opacity-50 cursor-not-allowed'
                 )}
               >
-                <Heart className={cn('w-5 h-5 transition-all duration-300', isLiked ? 'fill-current scale-110' : 'group-hover:scale-110')} />
-                <span>{likesCount}</span>
+                <Heart className={cn('w-5 h-5', isLiked && 'fill-current')} />
+                <span className="font-medium">{likesCount}</span>
               </button>
 
               <button
                 onClick={handleComment}
-                className="group flex items-center space-x-2 bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600 px-6 py-3 rounded-2xl transition-all duration-300 transform hover:scale-105 border border-gray-200 hover:border-blue-200 shadow-md hover:shadow-lg font-semibold"
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
               >
-                <MessageCircle className="w-5 h-5 transition-all duration-300 group-hover:scale-110" />
-                <span>{commentsCount}</span>
+                <MessageCircle className="w-5 h-5" />
+                <span className="font-medium">{commentsCount}</span>
               </button>
 
               <button
                 onClick={handleShare}
-                className="group flex items-center space-x-2 bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 px-6 py-3 rounded-2xl transition-all duration-300 transform hover:scale-105 border border-gray-200 hover:border-green-200 shadow-md hover:shadow-lg font-semibold"
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all duration-200"
               >
-                <Share2 className="w-5 h-5 transition-all duration-300 group-hover:scale-110" />
-                <span>{t('posts.card.share')}</span>
+                <Share2 className="w-5 h-5" />
+                <span className="font-medium">{t('posts.card.share')}</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* 评论区域 */}
-        <div id="comments-section" className="mt-12">
-          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 md:p-8">
-            <div className="flex items-center space-x-3 mb-8">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+        <div id="comments-section" className="mt-8">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-purple-100 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
                 <MessageCircle className="w-4 h-4 text-white" />
               </div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h3 className="text-xl font-bold text-gray-900">
                 {t('posts.comments.title')} ({comments.length})
               </h3>
             </div>
 
             {/* 评论输入框 */}
             {user ? (
-              <form onSubmit={handleSubmitComment} className="mb-8">
+              <form onSubmit={handleSubmitComment} className="mb-6">
                 <div className="flex space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                     {user.user_metadata?.avatar_url ? (
                       <img
                         src={user.user_metadata.avatar_url}
@@ -481,7 +561,7 @@ const PostDetail = () => {
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <User className="w-6 h-6 text-white" />
+                      <User className="w-5 h-5 text-white" />
                     )}
                   </div>
                   <div className="flex-1">
@@ -490,25 +570,25 @@ const PostDetail = () => {
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder={t('posts.comments.placeholder')}
-                        className="w-full p-6 bg-gradient-to-r from-purple-50/50 to-pink-50/50 border border-purple-200/50 rounded-2xl resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 text-gray-700 placeholder-gray-500"
-                        rows={4}
+                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 text-gray-700 placeholder-gray-500"
+                        rows={3}
                         disabled={isSubmittingComment}
                         maxLength={500}
                       />
-                      <div className="absolute bottom-4 right-4">
+                      <div className="absolute bottom-3 right-3">
                         <div className="text-xs text-gray-400">
                           {newComment.length}/500
                         </div>
                       </div>
                     </div>
-                    <div className="flex justify-end mt-4">
+                    <div className="flex justify-end mt-3">
                       <button
                         type="submit"
                         disabled={!newComment.trim() || isSubmittingComment}
                         className={cn(
-                          'group flex items-center space-x-2 px-8 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl',
+                          'flex items-center space-x-2 px-6 py-2 rounded-lg font-medium transition-all duration-300',
                           newComment.trim() && !isSubmittingComment
-                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                            ? 'bg-purple-600 text-white hover:bg-purple-700'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         )}
                       >
@@ -520,7 +600,7 @@ const PostDetail = () => {
                         ) : (
                           <>
                             <span>{t('posts.comments.submit')}</span>
-                            <Send className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                            <Send className="w-4 h-4" />
                           </>
                         )}
                       </button>
@@ -529,87 +609,83 @@ const PostDetail = () => {
                 </div>
               </form>
             ) : (
-              <div className="text-center py-8 bg-gradient-to-r from-purple-50/80 to-pink-50/80 rounded-2xl border border-purple-200/50 mb-8">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <MessageCircle className="w-8 h-8 text-white" />
+              <div className="text-center py-6 bg-gray-50 rounded-xl border border-gray-200 mb-6">
+                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <MessageCircle className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-gray-600 mb-4 text-lg">{t('posts.card.loginRequired')}</p>
+                <p className="text-gray-600 mb-3">{t('posts.card.loginRequired')}</p>
                 <button
                   onClick={() => openAuthModal('login')}
-                  className="group px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
+                  className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
                 >
-                  <div className="flex items-center space-x-2">
-                    <span>{t('common.actions.login')}</span>
-                    <ArrowLeft className="w-4 h-4 group-hover:translate-x-1 transition-transform rotate-180" />
-                  </div>
+                  {t('common.actions.login')}
                 </button>
               </div>
             )}
 
             {/* 评论列表 */}
-          <div className="space-y-6">
-            {commentsLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-              </div>
-            ) : comments.length === 0 ? (
-              <div className="text-center py-12 bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-2xl border border-purple-100/50">
-                <div className="w-20 h-20 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="w-10 h-10 text-purple-400" />
+            <div className="space-y-4">
+              {commentsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
                 </div>
-                <p className="text-gray-500 text-lg">{t('posts.comments.noComments')}</p>
-              </div>
-            ) : (
-              comments.map((comment, index) => (
-                <div key={comment.id} className="group">
-                  <div className="flex space-x-4">
-                    <div className="relative">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-                        {comment.author?.avatar_url ? (
-                          <img
-                            src={comment.author.avatar_url}
-                            alt={comment.author.username}
-                            className="w-full h-full rounded-full object-cover"
-                          />
-                        ) : (
-                          <User className="w-6 h-6 text-white" />
-                        )}
-                      </div>
-                      {index < comments.length - 1 && (
-                        <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-0.5 h-8 bg-gradient-to-b from-purple-200 to-transparent"></div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-100/50 group-hover:shadow-xl transition-all duration-300">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-3">
-                            <h4 className="font-bold text-gray-900">
-                              {comment.author?.username || t('posts.card.anonymousUser')}
-                            </h4>
-                            <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                            <span className="text-sm text-purple-600 font-medium">
-                              {formatDate(comment.created_at)}
-                            </span>
-                          </div>
-                          {user && comment.author?.id === user.id && (
-                            <button
-                              onClick={() => handleDeleteComment(comment.id)}
-                              className="group/delete p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300 opacity-0 group-hover:opacity-100"
-                              title={t('posts.comments.delete')}
-                            >
-                              <Trash2 className="w-4 h-4 group-hover/delete:scale-110 transition-transform" />
-                            </button>
+              ) : comments.length === 0 ? (
+                <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <MessageCircle className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500">{t('posts.comments.noComments')}</p>
+                </div>
+              ) : (
+                comments.map((comment, index) => (
+                  <div key={comment.id} className="group">
+                    <div className="flex space-x-3">
+                      <div className="relative">
+                        <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          {comment.author?.avatar_url ? (
+                            <img
+                              src={comment.author.avatar_url}
+                              alt={comment.author.username}
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-5 h-5 text-white" />
                           )}
                         </div>
-                        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                          {comment.content}
-                        </p>
+                        {index < comments.length - 1 && (
+                          <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-0.5 h-6 bg-gray-200"></div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <h4 className="font-semibold text-gray-900">
+                                {comment.author?.username || t('posts.card.anonymousUser')}
+                              </h4>
+                              <span className="text-sm text-gray-500">
+                                {formatDate(comment.created_at)}
+                              </span>
+                            </div>
+                            {user && comment.author?.id === user.id && (
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-all duration-300"
+                                title={t('posts.comments.delete')}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                            {comment.content}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
             </div>
           </div>
         </div>

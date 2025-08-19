@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { FileText, Heart, MessageCircle, Trash2, Calendar, Eye } from 'lucide-react'
+import { FileText, Heart, MessageCircle, Trash2, Calendar, Eye, Play } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
 import { formatDateByLanguage } from '../../utils/dateFormatter'
 import { useLanguage } from '../../contexts/language'
 import { UserPostsListProps } from './types'
@@ -13,6 +14,19 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
 }) => {
   const { t } = useLanguage()
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const location = useLocation()
+
+  // 获取当前标签页信息
+  const getCurrentTab = () => {
+    const pathname = location.pathname
+    if (pathname.includes('/profile')) {
+      // 从 URL 参数或状态中获取当前标签页
+      const searchParams = new URLSearchParams(location.search)
+      const tab = searchParams.get('tab') || 'overview'
+      return `/profile?tab=${tab}`
+    }
+    return '/profile'
+  }
 
   if (isLoading) {
     return (
@@ -68,84 +82,120 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
       <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('profile.myPosts')}</h3>
       
       <div className="space-y-6">
-        {posts.map((post) => (
-          <div key={post.id} className="border-b border-gray-200 last:border-b-0 pb-6 last:pb-0">
-            {/* 帖子标题 */}
-            <div className="flex items-start justify-between mb-3">
-              <h4 className="text-lg font-medium text-gray-900 flex-1">
-                {post.title || t('profile.untitledPost')}
-              </h4>
-              <button
-                onClick={() => handleDeleteClick(post.id)}
-                className="text-red-600 hover:text-red-800 p-1 rounded transition-colors"
-                title={t('profile.deletePost')}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* 帖子内容 */}
-            <div className="text-gray-700 mb-4">
-              <p className="whitespace-pre-wrap">
-                {truncateContent(post.content || '')}
-              </p>
-            </div>
-
-            {/* 帖子媒体 */}
-            {post.image_url && (
-              <div className="mb-4">
-                <img
-                  src={post.image_url}
-                  alt="Post image"
-                  className="max-w-full h-auto rounded-lg border border-gray-200"
-                  style={{ maxHeight: '300px' }}
-                />
-              </div>
-            )}
-
-            {/* 帖子统计和操作 */}
-            <div className="flex items-center justify-between text-sm text-gray-500">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => onLikePost(post.id)}
-                  className="flex items-center space-x-1 hover:text-red-600 transition-colors"
+        {posts.map((post) => {
+          const currentTab = getCurrentTab()
+          
+          return (
+            <div key={post.id} className="border-b border-gray-200 last:border-b-0 pb-6 last:pb-0">
+              {/* 帖子标题 */}
+              <div className="flex items-start justify-between mb-3">
+                <Link 
+                  to={`/post/${post.id}`}
+                  state={{ from: currentTab }}
+                  className="text-lg font-medium text-gray-900 flex-1 hover:text-purple-600 transition-colors"
                 >
-                  <Heart className="w-4 h-4" />
-                  <span>{post.likes_count || 0}</span>
+                  {post.title || t('profile.untitledPost')}
+                </Link>
+                <button
+                  onClick={() => handleDeleteClick(post.id)}
+                  className="text-red-600 hover:text-red-800 p-1 rounded transition-colors"
+                  title={t('profile.deletePost')}
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
+              </div>
 
-                <div className="flex items-center space-x-1">
-                  <MessageCircle className="w-4 h-4" />
-                  <span>{post.comments_count || 0}</span>
+              {/* 帖子内容 */}
+              <div className="text-gray-700 mb-4">
+                <p className="whitespace-pre-wrap">
+                  {truncateContent(post.content || '')}
+                </p>
+              </div>
+
+              {/* 帖子媒体 */}
+              {post.image_url && (
+                <div className="mb-4">
+                  <img
+                    src={post.image_url}
+                    alt="Post image"
+                    className="max-w-full h-auto rounded-lg border border-gray-200"
+                    style={{ maxHeight: '300px' }}
+                  />
+                </div>
+              )}
+
+              {/* 帖子视频 */}
+              {post.video && (
+                <div className="mb-4">
+                  {post.thumbnail ? (
+                    <div className="relative inline-block">
+                      <img
+                        src={post.thumbnail}
+                        alt="视频封面"
+                        className="max-w-full h-auto rounded-lg border border-gray-200"
+                        style={{ maxHeight: '300px' }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
+                        <Play className="w-12 h-12 text-white" />
+                      </div>
+                    </div>
+                  ) : (
+                    <video
+                      src={post.video}
+                      className="max-w-full h-auto rounded-lg border border-gray-200"
+                      style={{ maxHeight: '300px' }}
+                      controls
+                      preload="metadata"
+                    />
+                  )}
+                  <div className="text-xs text-gray-400 mt-2">视频内容</div>
+                </div>
+              )}
+
+              {/* 帖子统计和操作 */}
+              <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => onLikePost(post.id)}
+                    className="flex items-center space-x-1 hover:text-red-600 transition-colors"
+                  >
+                    <Heart className="w-4 h-4" />
+                    <span>{post.likes_count || 0}</span>
+                  </button>
+
+                  <div className="flex items-center space-x-1">
+                    <MessageCircle className="w-4 h-4" />
+                    <span>{post.comments_count || 0}</span>
+                  </div>
+
+                  <div className="flex items-center space-x-1">
+                    <Eye className="w-4 h-4" />
+                    <span>{post.views_count || 0}</span>
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-1">
-                  <Eye className="w-4 h-4" />
-                  <span>{post.likes_count || 0}</span>
+                  <Calendar className="w-4 h-4" />
+                  <span>{formatDate(post.created_at)}</span>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-1">
-                <Calendar className="w-4 h-4" />
-                <span>{formatDate(post.created_at)}</span>
-              </div>
+              {/* 帖子状态 */}
+              {post.status && (
+                <div className="mt-3">
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    post.status === 'published' ? 'bg-green-100 text-green-800' :
+                    post.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    post.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {t(`profile.postStatus.${post.status}`)}
+                  </span>
+                </div>
+              )}
             </div>
-
-            {/* 帖子状态 */}
-            {post.status && (
-              <div className="mt-3">
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  post.status === 'published' ? 'bg-green-100 text-green-800' :
-                  post.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  post.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {t(`profile.postStatus.${post.status}`)}
-                </span>
-              </div>
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* 删除确认 */}
@@ -169,8 +219,7 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
                 }}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
               >
-                {t('common.delete')}
-              </button>
+                {t('common.delete')}</button>
             </div>
           </div>
         </div>

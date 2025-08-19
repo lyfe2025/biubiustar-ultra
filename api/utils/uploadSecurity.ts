@@ -207,8 +207,8 @@ export interface UploadConfig {
  */
 export const DEFAULT_UPLOAD_CONFIGS = {
   posts: {
-    maxFileSize: 20 * 1024 * 1024, // 20MB
-    maxFiles: 5,
+    maxFileSize: 50 * 1024 * 1024, // 50MB
+    maxFiles: 9,
     allowedTypes: 'both' as const,
     uploadPath: 'public/uploads/posts'
   },

@@ -28,6 +28,7 @@ export const postTranslations = {
         generalCategory: '通用',
         success: '发布成功！',
         failed: '发布失败，请重试',
+        successWithReview: '帖子发布成功！正在等待审核，审核通过后将在前台显示。',
         noPermission: '没有权限发布帖子',
         tooFrequent: '发布过于频繁，请稍后再试',
         contentTooLong: '内容过长，请缩短后重试',
@@ -38,7 +39,20 @@ export const postTranslations = {
         successMessage: '发布成功！',
         failureMessage: '发布失败，请重试',
         imageType: '图片',
-        videoType: '视频'
+        videoType: '视频',
+        // 文件上传相关
+        uploadDescription: '支持图片和视频，最多9个文件，单个文件最大50MB',
+        uploadedFiles: '已上传文件',
+        videoPreview: '视频预览',
+        deleteFile: '删除文件',
+        fileUploadSuccess: '文件上传成功',
+        fileUploadFailed: '文件上传失败',
+        fileDeleteSuccess: '文件删除成功',
+        fileDeleteFailed: '文件删除失败',
+        fileTypeNotSupported: '不支持的文件类型',
+        fileTooLarge: '文件过大',
+        tooManyFiles: '文件数量过多',
+        dragAndDrop: '拖拽文件到此处或点击选择文件'
       },
 
       actions: {
@@ -205,6 +219,7 @@ export const postTranslations = {
         generalCategory: '通用',
         success: '發布成功！',
         failed: '發布失敗，請重試',
+        successWithReview: '帖子發布成功！正在等待審核，審核通過後將在前台顯示。',
         noPermission: '沒有權限發布帖子',
         tooFrequent: '發布過於頻繁，請稍後再試',
         contentTooLong: '內容過長，請縮短後重試',
@@ -215,7 +230,20 @@ export const postTranslations = {
         successMessage: '發布成功！',
         failureMessage: '發布失敗，請重試',
         imageType: '圖片',
-        videoType: '視頻'
+        videoType: '視頻',
+        // 文件上传相关
+        uploadDescription: '支持圖片和視頻，最多9個文件，單個文件最大50MB',
+        uploadedFiles: '已上傳文件',
+        videoPreview: '視頻預覽',
+        deleteFile: '刪除文件',
+        fileUploadSuccess: '文件上傳成功',
+        fileUploadFailed: '文件上傳失敗',
+        fileDeleteSuccess: '文件刪除成功',
+        fileDeleteFailed: '文件刪除失敗',
+        fileTypeNotSupported: '不支持的文件類型',
+        fileTooLarge: '文件過大',
+        tooManyFiles: '文件數量過多',
+        dragAndDrop: '拖拽文件到此處或點擊選擇文件'
       },
 
       actions: {
@@ -382,6 +410,7 @@ export const postTranslations = {
         generalCategory: 'General',
         success: 'Published successfully!',
         failed: 'Failed to publish, please try again',
+        successWithReview: 'Post published successfully! Waiting for review, it will be displayed on the frontend after approval.',
         noPermission: 'No permission to publish posts',
         tooFrequent: 'Posting too frequently, please try again later',
         contentTooLong: 'Content too long, please shorten and try again',
@@ -392,7 +421,20 @@ export const postTranslations = {
         successMessage: 'Published successfully!',
         failureMessage: 'Failed to publish, please try again',
         imageType: 'Image',
-        videoType: 'Video'
+        videoType: 'Video',
+        // 文件上传相关
+        uploadDescription: 'Supports images and videos, up to 9 files, single file max 50MB',
+        uploadedFiles: 'Uploaded Files',
+        videoPreview: 'Video Preview',
+        deleteFile: 'Delete File',
+        fileUploadSuccess: 'File uploaded successfully',
+        fileUploadFailed: 'File upload failed',
+        fileDeleteSuccess: 'File deleted successfully',
+        fileDeleteFailed: 'File deletion failed',
+        fileTypeNotSupported: 'Unsupported file type',
+        fileTooLarge: 'File too large',
+        tooManyFiles: 'Too many files',
+        dragAndDrop: 'Drag and drop files here or click to select files'
       },
 
       actions: {
@@ -559,7 +601,8 @@ export const postTranslations = {
         generalCategory: 'Chung',
         success: 'Đăng thành công!',
         failed: 'Đăng thất bại, vui lòng thử lại',
-        noPermission: 'Không có quyền đăng bài viết',
+        successWithReview: 'Bài đăng đã được đăng thành công! Đang chờ duyệt, sẽ hiển thị ở giao diện sau khi được phê duyệt.',
+        noPermission: 'Không có quyền đăng bài',
         tooFrequent: 'Đăng quá thường xuyên, vui lòng thử lại sau',
         contentTooLong: 'Nội dung quá dài, vui lòng rút ngắn và thử lại',
         serverError: 'Lỗi máy chủ, vui lòng thử lại sau',
@@ -569,7 +612,20 @@ export const postTranslations = {
         successMessage: 'Đăng thành công!',
         failureMessage: 'Đăng thất bại, vui lòng thử lại',
         imageType: 'Hình ảnh',
-        videoType: 'Video'
+        videoType: 'Video',
+        // 文件上传相关
+        uploadDescription: 'Hỗ trợ hình ảnh và video, tối đa 9 file, file lớn nhất 50MB',
+        uploadedFiles: 'Tệp đã tải lên',
+        videoPreview: 'Xem trước video',
+        deleteFile: 'Xóa tệp',
+        fileUploadSuccess: 'Tệp tải lên thành công',
+        fileUploadFailed: 'Tệp tải lên thất bại',
+        fileDeleteSuccess: 'Tệp đã xóa thành công',
+        fileDeleteFailed: 'Xóa tệp thất bại',
+        fileTypeNotSupported: 'Loại tệp không được hỗ trợ',
+        fileTooLarge: 'Tệp quá lớn',
+        tooManyFiles: 'Quá nhiều tệp',
+        dragAndDrop: 'Kéo và thả các tệp vào đây hoặc nhấp để chọn tệp'
       },
 
       actions: {

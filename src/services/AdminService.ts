@@ -3,6 +3,8 @@ export interface Post {
   title: string
   content: string
   image_url?: string
+  video?: string
+  thumbnail?: string
   author?: {
     id: string
     username: string
@@ -13,6 +15,7 @@ export interface Post {
   likes_count: number
   comments_count: number
   shares_count: number
+  views_count: number
   user_id: string
   category: string
   tags?: string[]
