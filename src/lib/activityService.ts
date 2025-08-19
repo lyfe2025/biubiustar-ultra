@@ -99,7 +99,7 @@ export class ActivityService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ user_id: userId }),
       });
       
       if (response.ok) {
@@ -118,11 +118,11 @@ export class ActivityService {
   static async leaveActivity(activityId: string, userId: string): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await fetch(`/api/activities/${activityId}/leave`, {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ user_id: userId }),
       });
       
       if (response.ok) {

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { supabase, createUserClient } from '../lib/supabase';
+import { supabase, createUserClient, supabaseAdmin } from '../lib/supabase';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
@@ -190,6 +190,54 @@ router.get('/:id/participants', async (req: Request, res: Response): Promise<Res
   } catch (error) {
     console.error('Error in GET /activities/:id/participants:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/activities/:id/participants/:userId - 检查用户是否参与了特定活动
+router.get('/:id/participants/:userId', async (req: Request, res: Response): Promise<Response | void> => {
+  try {
+    const { id, userId } = req.params;
+
+    // 检查活动是否存在
+    const { data: activity, error: activityError } = await supabase
+      .from('activities')
+      .select('id')
+      .eq('id', id)
+      .single();
+
+    if (activityError) {
+      if (activityError.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Activity not found', isParticipating: false });
+      }
+      console.error('Error checking activity:', activityError);
+      return res.status(500).json({ error: 'Failed to check activity', isParticipating: false });
+    }
+
+    // 检查用户是否参与了该活动
+    const { data: participant, error: participantError } = await supabase
+      .from('activity_participants')
+      .select('id, joined_at')
+      .eq('activity_id', id)
+      .eq('user_id', userId)
+      .single();
+
+    if (participantError) {
+      if (participantError.code === 'PGRST116') {
+        // 没有找到参与记录，用户未参与
+        return res.status(200).json({ isParticipating: false });
+      }
+      console.error('Error checking participation:', participantError);
+      return res.status(500).json({ error: 'Failed to check participation status', isParticipating: false });
+    }
+
+    // 找到参与记录，用户已参与
+    res.json({ 
+      isParticipating: true,
+      joinedAt: participant.joined_at
+    });
+  } catch (error) {
+    console.error('Error in GET /activities/:id/participants/:userId:', error);
+    res.status(500).json({ error: 'Internal server error', isParticipating: false });
   }
 });
 
@@ -384,8 +432,8 @@ router.post('/:id/join', async (req: Request, res: Response): Promise<Response |
       return res.status(400).json({ error: 'User already joined this activity' });
     }
 
-    // 添加参与者
-    const { error: joinError } = await supabase
+    // 添加参与者 - 使用 admin 客户端绕过 RLS 策略
+    const { error: joinError } = await supabaseAdmin
       .from('activity_participants')
       .insert([{ activity_id: id, user_id }]);
 
@@ -421,8 +469,8 @@ router.delete('/:id/leave', async (req: Request, res: Response): Promise<Respons
       return res.status(400).json({ error: 'Missing user_id' });
     }
 
-    // 删除参与记录
-    const { error: leaveError } = await supabase
+    // 删除参与记录 - 使用 admin 客户端绕过 RLS 策略
+    const { error: leaveError } = await supabaseAdmin
       .from('activity_participants')
       .delete()
       .eq('activity_id', id)

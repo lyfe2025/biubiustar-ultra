@@ -52,6 +52,8 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
       setIsParticipating(participating);
     } catch (error) {
       console.error('Error checking participation:', error);
+      // 如果检查失败，默认设置为未参与状态
+      setIsParticipating(false);
     }
   };
 
@@ -68,9 +70,10 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
       if (isParticipating) {
         const result = await ActivityService.leaveActivity(activity.id, user.id);
         if (result.success) {
-          setIsParticipating(false);
           setParticipantCount(prev => Math.max(0, prev - 1));
           toast.success('已退出活动');
+          // 重新检查参与状态以确保同步
+          await checkParticipation();
           onParticipationChange?.();
         } else {
           toast.error(`退出活动失败: ${result.error || '未知错误'}`);
@@ -83,9 +86,10 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
         
         const result = await ActivityService.joinActivity(activity.id, user.id);
         if (result.success) {
-          setIsParticipating(true);
           setParticipantCount(prev => prev + 1);
           toast.success(t('activities.messages.joinSuccess'));
+          // 重新检查参与状态以确保同步
+          await checkParticipation();
           onParticipationChange?.();
         } else {
           // 根据错误类型显示不同的错误信息
