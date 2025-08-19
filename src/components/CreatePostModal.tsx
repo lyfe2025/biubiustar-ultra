@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
 import { toast } from 'sonner'
 import { socialService } from '../lib/socialService'
+import { supabase } from '../lib/supabase'
 
 interface CreatePostModalProps {
   isOpen: boolean
@@ -36,7 +37,7 @@ interface ContentCategory {
 }
 
 const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProps) => {
-  const { user } = useAuth()
+  const { user, session } = useAuth()
   const { language, t } = useLanguage()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -103,11 +104,26 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
         formData.append('files', file)
       })
       
+      let token: string | undefined
+      
+      // 优先使用AuthContext中的session
+      if (session?.access_token) {
+        token = session.access_token
+      } else {
+        const { data: sessionData } = await supabase.auth.getSession()
+        token = sessionData.session?.access_token
+      }
+      
+      if (!token) {
+        toast.error('认证已过期，请重新登录')
+        return
+      }
+      
       const response = await fetch('/api/posts/media', {
         method: 'POST',
         body: formData,
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       })
       
@@ -134,11 +150,26 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
   // 删除已上传的文件
   const handleDeleteFile = async (file: UploadedFile) => {
     try {
+      let token: string | undefined
+      
+      // 优先使用AuthContext中的session
+      if (session?.access_token) {
+        token = session.access_token
+      } else {
+        const { data: sessionData } = await supabase.auth.getSession()
+        token = sessionData.session?.access_token
+      }
+      
+      if (!token) {
+        toast.error('认证已过期，请重新登录')
+        return
+      }
+      
       const response = await fetch('/api/posts/media', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ filename: file.filename })
       })
@@ -251,7 +282,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
       
       onPostCreated?.()
       onClose()
-      toast.success(t('posts.create.successMessage'))
+      toast.success('帖子发布成功！正在等待审核，审核通过后将在前台显示。')
     } catch (error) {
       console.error('发布帖子失败:', error)
       

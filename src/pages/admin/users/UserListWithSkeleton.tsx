@@ -5,6 +5,7 @@ import { User as UserType } from './types'
 import UserActions from './UserActions'
 import UserListSkeleton from '../../../components/admin/UserListSkeleton'
 import { useSkeleton } from '../../../hooks/useSkeleton'
+import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../../../utils/avatarGenerator'
 
 interface UserListProps {
   users: UserType[]
@@ -111,12 +112,14 @@ const UserListWithSkeleton: React.FC<UserListProps> = ({
               <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-150">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-3">
-                    {user.avatar ? (
+                    {user.avatar && !isDefaultAvatar(user.avatar) ? (
                       <img className="h-10 w-10 rounded-full object-cover" src={user.avatar} alt="" />
                     ) : (
-                      <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                        <User className="h-6 w-6 text-gray-600" />
-                      </div>
+                      <img 
+                        className="h-10 w-10 rounded-full" 
+                        src={getUserDefaultAvatarUrl(user.username, user.avatar)} 
+                        alt="" 
+                      />
                     )}
                     <div>
                       <div className="text-sm font-medium text-gray-900">{user.username}</div>

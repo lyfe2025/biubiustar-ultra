@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { X, Send, Trash2, User } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
@@ -6,8 +6,9 @@ import { useLanguage } from '../contexts/language'
 import { socialService } from '../lib/socialService'
 import type { Comment } from '../types'
 import { formatDistanceToNow } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
+import { zhCN, enUS, vi } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 
 interface CommentModalProps {
   isOpen: boolean
@@ -18,7 +19,7 @@ interface CommentModalProps {
 
 const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps) => {
   const { user } = useAuth()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -82,12 +83,51 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
 
   const formatDate = (dateString: string) => {
     try {
-      return formatDistanceToNow(new Date(dateString), {
+      // 根据当前语言选择对应的 locale
+      let locale
+      switch (language) {
+        case 'zh':
+          locale = zhCN
+          break
+        case 'zh-TW':
+          locale = zhCN // 繁体中文使用相同的 locale
+          break
+        case 'en':
+          locale = enUS
+          break
+        case 'vi':
+          locale = vi
+          break
+        default:
+          locale = zhCN
+      }
+
+      const result = formatDistanceToNow(new Date(dateString), {
         addSuffix: true,
-        locale: zhCN
+        locale: locale
       })
+
+      // 如果当前语言不是英文，需要手动翻译后缀
+      if (language !== 'en') {
+        return result
+          .replace('less than a minute ago', t('posts.time.justNow'))
+          .replace('minute ago', t('posts.time.minuteAgo'))
+          .replace('minutes ago', t('posts.time.minutesAgo'))
+          .replace('hour ago', t('posts.time.hourAgo'))
+          .replace('hours ago', t('posts.time.hoursAgo'))
+          .replace('day ago', t('posts.time.dayAgo'))
+          .replace('days ago', t('posts.time.daysAgo'))
+          .replace('week ago', t('posts.time.weekAgo'))
+          .replace('weeks ago', t('posts.time.weeksAgo'))
+          .replace('month ago', t('posts.time.monthAgo'))
+          .replace('months ago', t('posts.time.monthsAgo'))
+          .replace('year ago', t('posts.time.yearAgo'))
+          .replace('years ago', t('posts.time.yearsAgo'))
+      }
+
+      return result
     } catch {
-      return '刚刚'
+      return t('posts.time.justNow')
     }
   }
 
@@ -125,14 +165,18 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
               {comments.map((comment) => (
                 <div key={comment.id} className="flex space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    {comment.author?.avatar_url ? (
+                    {comment.author?.avatar_url && !isDefaultAvatar(comment.author.avatar_url) ? (
                       <img
                         src={comment.author.avatar_url}
                         alt={comment.author.username}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <User className="w-4 h-4 text-white" />
+                      <img
+                        src={getUserDefaultAvatarUrl(comment.author?.username || 'User', comment.author?.avatar_url)}
+                        alt={comment.author?.username || 'User'}
+                        className="w-full h-full rounded-full"
+                      />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -171,14 +215,18 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
           {user ? (
             <form onSubmit={handleSubmitComment} className="flex space-x-3">
               <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
-                {user.user_metadata?.avatar_url ? (
+                {user.user_metadata?.avatar_url && !isDefaultAvatar(user.user_metadata.avatar_url) ? (
                   <img
                     src={user.user_metadata.avatar_url}
                     alt={user.user_metadata?.username || user.email}
                     className="w-full h-full rounded-full object-cover"
                   />
                 ) : (
-                  <User className="w-4 h-4 text-white" />
+                  <img
+                    src={getUserDefaultAvatarUrl(user.user_metadata?.username || user.email?.split('@')[0] || 'User', user.user_metadata?.avatar_url)}
+                    alt={user.user_metadata?.username || user.email}
+                    className="w-full h-full rounded-full"
+                  />
                 )}
               </div>
               <div className="flex-1">

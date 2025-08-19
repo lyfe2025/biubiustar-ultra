@@ -23,21 +23,21 @@ import { adminService, type DashboardStats, type RecentActivity } from '../../se
 // 接口定义已移至AdminService中
 
 // 辅助函数：格式化时间为相对时间
-const formatTimeAgo = (dateString: string): string => {
+const formatTimeAgo = (dateString: string, t?: (key: string) => string): string => {
   const now = new Date()
   const date = new Date(dateString)
   const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
   
   if (diffInMinutes < 1) {
-    return '刚刚'
+    return t ? t('admin.dashboard.time.justNow') : '刚刚'
   } else if (diffInMinutes < 60) {
-    return `${diffInMinutes}分钟前`
+    return `${diffInMinutes}${t ? t('admin.dashboard.time.minutesAgo') : '分钟前'}`
   } else if (diffInMinutes < 1440) {
     const hours = Math.floor(diffInMinutes / 60)
-    return `${hours}小时前`
+    return `${hours}${t ? t('admin.dashboard.time.hoursAgo') : '小时前'}`
   } else {
     const days = Math.floor(diffInMinutes / 1440)
-    return `${days}天前`
+    return `${days}${t ? t('admin.dashboard.time.daysAgo') : '天前'}`
   }
 }
 
@@ -89,7 +89,7 @@ const getColorByType = (type: string): string => {
 }
 
 // 辅助函数：格式化活动消息为用户友好的描述
-const formatActivityMessage = (type: string, details: string, userEmail?: string, ipAddress?: string, userAgent?: string): string => {
+const formatActivityMessage = (type: string, details: string, userEmail?: string, ipAddress?: string, userAgent?: string, t?: (key: string) => string): string => {
   try {
     // 尝试解析JSON格式的details
     let parsedDetails: any = {}
@@ -105,8 +105,8 @@ const formatActivityMessage = (type: string, details: string, userEmail?: string
     }
 
     // 提取通用信息
-    const username = parsedDetails.username || userEmail || '未知用户'
-    const ip = parsedDetails.ip || ipAddress || '未知IP'
+    const username = parsedDetails.username || userEmail || (t ? t('admin.dashboard.activityMessages.unknownUser') : '未知用户')
+    const ip = parsedDetails.ip || ipAddress || (t ? t('admin.dashboard.unknownIP') : '未知IP')
     const browser = parsedDetails.userAgent || userAgent
     
     // 简化浏览器信息显示
@@ -116,16 +116,16 @@ const formatActivityMessage = (type: string, details: string, userEmail?: string
       if (userAgent.includes('Firefox')) return 'Firefox'
       if (userAgent.includes('Safari')) return 'Safari'
       if (userAgent.includes('Edge')) return 'Edge'
-      return '未知浏览器'
+      return t ? t('admin.dashboard.activityMessages.unknownBrowser') : '未知浏览器'
     }
     
     const browserInfo = getBrowserInfo(browser)
 
     switch (type) {
       case 'admin_login_success': {
-        const loginDetails = [`管理员 ${username} 登录成功`]
-        if (ip !== '未知IP') loginDetails.push(`来自 ${ip}`)
-        if (browserInfo) loginDetails.push(`使用 ${browserInfo}`)
+        const loginDetails = [t ? t('admin.dashboard.activityMessages.adminLoginSuccess').replace('{username}', username) : `管理员 ${username} 登录成功`]
+        if (ip !== (t ? t('admin.dashboard.unknownIP') : '未知IP')) loginDetails.push(`${t ? t('admin.dashboard.activityMessages.fromIP') : '来自'} ${ip}`)
+        if (browserInfo) loginDetails.push(`${t ? t('admin.dashboard.activityMessages.usingBrowser') : '使用'} ${browserInfo}`)
         return loginDetails.join(' ')
       }
       
@@ -207,16 +207,16 @@ const formatActivityMessage = (type: string, details: string, userEmail?: string
         if (parsedDetails.raw && parsedDetails.raw !== details) {
           return parsedDetails.raw
         }
-        return `${t('admin.dashboard.systemActivity')}: ${type}${ip !== '未知IP' ? ` (${ip})` : ''}`
+        return `${t ? t('admin.dashboard.systemActivity') : '系统活动'}: ${type}${ip !== (t ? t('admin.dashboard.unknownIP') : '未知IP') ? ` (${ip})` : ''}`
     }
   } catch {
     // 如果处理过程中出现任何错误，返回通用描述
-    return `${t('admin.dashboard.systemActivity')}: ${type}`
+    return `${t ? t('admin.dashboard.systemActivity') : '系统活动'}: ${type}`
   }
 }
 
 const AdminDashboard = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalPosts: 0,
@@ -265,9 +265,9 @@ const AdminDashboard = () => {
             username: log.user_email || 'System',
             avatar: undefined
           },
-          content: formatActivityMessage(log.type, log.details || '', log.user_email, log.ip_address, log.user_agent),
-          message: formatActivityMessage(log.type, log.details || '', log.user_email, log.ip_address, log.user_agent),
-          time: formatTimeAgo(log.created_at),
+          content: formatActivityMessage(log.type, log.details || '', log.user_email, log.ip_address, log.user_agent, t),
+          message: formatActivityMessage(log.type, log.details || '', log.user_email, log.ip_address, log.user_agent, t),
+                      time: formatTimeAgo(log.created_at, t),
           icon: getIconByType(log.type),
           color: getColorByType(log.type),
           created_at: log.created_at

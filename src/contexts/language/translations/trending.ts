@@ -6,6 +6,9 @@ export const trendingTranslations = {
       subtitle: '发现当下最热门的内容和话题',
       
       // 搜索和筛选
+      searchTitle: '搜索热门内容',
+      filterByCategory: '按分类筛选',
+      foundPosts: '找到 {count} 个帖子',
       search: {
         placeholder: '搜索热门内容...',
         filters: '筛选',
@@ -82,7 +85,13 @@ export const trendingTranslations = {
         loadMore: '加载更多',
         refreshing: '刷新中...',
         loadFailed: '加载失败，请重试'
-      }
+      },
+      
+      // 状态和操作
+      loading: '加载中...',
+      noPosts: '暂无帖子',
+      noPostsDescription: '没有找到符合条件的帖子，请尝试调整搜索条件或分类筛选',
+      resetFilters: '重置筛选'
     }
   },
   'zh-TW': {
@@ -90,6 +99,10 @@ export const trendingTranslations = {
       title: '熱門',
       subtitle: '發現當下最熱門的內容和話題',
       
+      // 搜索和筛选
+      searchTitle: '搜尋熱門內容',
+      filterByCategory: '按分類篩選',
+      foundPosts: '找到 {count} 個帖子',
       search: {
         placeholder: '搜尋熱門內容...',
         filters: '篩選',
@@ -159,7 +172,13 @@ export const trendingTranslations = {
         loadMore: '加載更多',
         refreshing: '刷新中...',
         loadFailed: '加載失敗，請重試'
-      }
+      },
+      
+      // 状态和操作
+      loading: '加載中...',
+      noPosts: '暫無帖子',
+      noPostsDescription: '沒有找到符合條件的帖子，請嘗試調整搜尋條件或分類篩選',
+      resetFilters: '重置篩選'
     }
   },
   en: {
@@ -167,6 +186,10 @@ export const trendingTranslations = {
       title: 'Trending',
       subtitle: 'Discover the hottest content and topics right now',
       
+      // 搜索和筛选
+      searchTitle: 'Search Trending Content',
+      filterByCategory: 'Filter by Category',
+      foundPosts: 'Found {count} posts',
       search: {
         placeholder: 'Search trending content...',
         filters: 'Filters',
@@ -178,6 +201,12 @@ export const trendingTranslations = {
       categories: {
         all: 'All'
       },
+      adjustSearch: 'Adjust Search Conditions',
+      noContent: 'No trending content',
+      all: 'All',
+      culture: 'Culture',
+      tech: 'Technology',
+      food: 'Food',
 
       sorting: {
         trending: 'Trending',
@@ -230,7 +259,13 @@ export const trendingTranslations = {
         loadMore: 'Load More',
         refreshing: 'Refreshing...',
         loadFailed: 'Load failed, please retry'
-      }
+      },
+      
+      // 状态和操作
+      loading: 'Loading...',
+      noPosts: 'No posts found',
+      noPostsDescription: 'No posts match your criteria. Try adjusting your search terms or category filters.',
+      resetFilters: 'Reset Filters'
     }
   },
   vi: {
@@ -238,6 +273,10 @@ export const trendingTranslations = {
       title: 'Thịnh hành',
       subtitle: 'Khám phá nội dung và chủ đề hot nhất hiện tại',
       
+      // 搜索和筛选
+      searchTitle: 'Tìm kiếm nội dung thịnh hành',
+      filterByCategory: 'Lọc theo danh mục',
+      foundPosts: 'Tìm thấy {count} bài viết',
       search: {
         placeholder: 'Tìm kiếm nội dung thịnh hành...',
         filters: 'Bộ lọc',
@@ -301,7 +340,13 @@ export const trendingTranslations = {
         loadMore: 'Tải thêm',
         refreshing: 'Đang làm mới...',
         loadFailed: 'Tải thất bại, vui lòng thử lại'
-      }
+      },
+      
+      // 状态和操作
+      loading: 'Đang tải...',
+      noPosts: 'Không tìm thấy bài viết',
+      noPostsDescription: 'Không có bài viết nào phù hợp với tiêu chí của bạn. Hãy thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc danh mục.',
+      resetFilters: 'Đặt lại bộ lọc'
     }
   }
 }

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { X, User, Trash2, Key, Save } from 'lucide-react'
+import { X, User, Save, Trash2, Key, Eye, EyeOff } from 'lucide-react'
 import { useLanguage } from '../../../contexts/language'
 import { User as UserType, UserModalProps, AddUserModalProps, PasswordModalProps, NewUserData, PasswordData } from './types'
+import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../../../utils/avatarGenerator'
 
 // 用户详情/编辑模态框
 export const UserModal: React.FC<UserModalProps> = ({
@@ -47,12 +48,14 @@ export const UserModal: React.FC<UserModalProps> = ({
         <div className="p-6 space-y-6">
           {/* 用户头像和基本信息 */}
           <div className="flex items-center space-x-4">
-            {user.avatar ? (
-              <img className="h-16 w-16 rounded-full" src={user.avatar} alt="" />
+            {user.avatar && !isDefaultAvatar(user.avatar) ? (
+              <img className="h-16 w-16 rounded-full object-cover" src={user.avatar} alt="" />
             ) : (
-              <div className="h-16 w-16 rounded-full bg-gray-300 flex items-center justify-center">
-                <User className="h-8 w-8 text-gray-600" />
-              </div>
+              <img 
+                className="h-16 w-16 rounded-full" 
+                src={getUserDefaultAvatarUrl(user.username, user.avatar)} 
+                alt="" 
+              />
             )}
             <div>
               <h4 className="text-lg font-medium text-gray-900">{user.username}</h4>

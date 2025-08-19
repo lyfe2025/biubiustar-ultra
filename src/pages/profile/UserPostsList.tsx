@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FileText, Heart, MessageCircle, Trash2, Calendar, Eye } from 'lucide-react'
-import { format } from 'date-fns'
+import { formatDateByLanguage } from '../../utils/dateFormatter'
 import { useLanguage } from '../../contexts/language'
 import { UserPostsListProps } from './types'
 import { toast } from 'sonner'
@@ -12,6 +12,7 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
   onLikePost 
 }) => {
   const { t } = useLanguage()
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
   if (isLoading) {
     return (
@@ -45,14 +46,13 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
     )
   }
 
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const handleDeleteClick = (postId: string) => {
     setPendingDeleteId(postId)
   }
 
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'PPP')
+      return formatDateByLanguage(dateString, 'PPP', t('common.language'))
     } catch {
       return dateString
     }

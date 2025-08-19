@@ -16,6 +16,7 @@ import {
 // import { cn } from '../../../lib/utils'
 import { useLanguage } from '../../../contexts/language'
 import { ContentListProps, Post } from './types'
+import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../../../utils/avatarGenerator'
 
 const ContentList: React.FC<ContentListProps> = ({
   posts,
@@ -125,12 +126,14 @@ const ContentList: React.FC<ContentListProps> = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-3">
-                    {post.author.avatar_url ? (
-                          <img className="h-8 w-8 rounded-full" src={post.author.avatar_url} alt="" />
+                    {post.author.avatar_url && !isDefaultAvatar(post.author.avatar_url) ? (
+                          <img className="h-8 w-8 rounded-full object-cover" src={post.author.avatar_url} alt="" />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                        <User className="h-4 w-4 text-gray-600" />
-                      </div>
+                      <img 
+                        className="h-8 w-8 rounded-full" 
+                        src={getUserDefaultAvatarUrl(post.author.username, post.author.avatar_url)} 
+                        alt="" 
+                      />
                     )}
                     <div>
                       <div className="text-sm font-medium text-gray-900">{post.author.username}</div>

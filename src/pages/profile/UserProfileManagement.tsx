@@ -1,22 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { User, Camera, MapPin, Globe, FileText, Save, X, Edit3 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useLanguage } from '../../contexts/language'
-import { UserProfile } from './types'
+import { formatJoinDate } from '../../utils/dateFormatter'
+import { UserProfile, UserProfileManagementProps } from './types'
 import { useAuth } from '../../contexts/AuthContext'
-import { generateDefaultAvatarUrl, isDefaultAvatar } from '@/utils/avatarGenerator'
+import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '@/utils/avatarGenerator'
 
-interface UserProfileManagementProps {
-  profile: UserProfile | null
-  isLoading: boolean
-  isEditingProfile: boolean
-  editForm: Partial<UserProfile>
-  onEditFormChange: (field: keyof UserProfile, value: string) => void
-  onSaveProfile: () => void
-  onCancelEdit: () => void
-  onStartEdit: () => void
-  onAvatarUpload: (file: File) => void
-}
+
 
 const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
   profile,
@@ -27,9 +18,10 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
   onSaveProfile,
   onCancelEdit,
   onStartEdit,
-  onAvatarUpload
+  onAvatarUpload,
+  avatarPreview
 }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { user } = useAuth()
   const [dragActive, setDragActive] = useState(false)
 
@@ -144,9 +136,12 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
             <div className="relative">
               <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden">
                 <img
-                  src={displayProfile.avatar_url && !isDefaultAvatar(displayProfile.avatar_url) 
-                    ? displayProfile.avatar_url 
-                    : generateDefaultAvatarUrl(displayProfile.full_name || displayProfile.username || 'User')
+                  src={
+                    avatarPreview ||
+                    (displayProfile.avatar_url && !isDefaultAvatar(displayProfile.avatar_url) 
+                      ? displayProfile.avatar_url 
+                      : getUserDefaultAvatarUrl(displayProfile.full_name || displayProfile.username || 'User', displayProfile.avatar_url)
+                    )
                   }
                   alt={displayProfile.full_name || 'User'}
                   className="w-full h-full object-cover"
@@ -200,7 +195,7 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
                   )}
                   {user?.created_at && (
                     <p className="text-xs text-gray-400 mt-2">
-                      {t('profile.time.joinedOn').replace('{date}', new Date(user.created_at).toLocaleDateString('zh-CN'))}
+                      {t('profile.time.joinedOn').replace('{date}', formatJoinDate(user.created_at, language))}
                     </p>
                   )}
                 </div>

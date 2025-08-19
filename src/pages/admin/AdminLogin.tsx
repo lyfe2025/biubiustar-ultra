@@ -10,7 +10,7 @@ const AdminLogin = () => {
   const { t } = useLanguage()
   
   // 设置登录页面标题
-  usePageTitle(t('admin.login.title'))
+  usePageTitle(t('admin.auth.login.title'))
   
   const [formData, setFormData] = useState({
     username: '',
@@ -103,11 +103,11 @@ const AdminLogin = () => {
             }))
             setError('') // 清除错误信息，使用IP限制提示
           } else {
-            setError(data.error || t('admin.login.loginFailed'))
+            setError(data.error || t('admin.auth.login.loginFailed'))
           }
         } else {
           // 处理其他错误（如401认证失败）
-          setError(data.error || t('admin.login.invalidCredentials'))
+          setError(data.error || t('admin.auth.login.invalidCredentials'))
           
           // 更新安全信息
           if (data.attemptsRemaining !== undefined) {
@@ -124,7 +124,7 @@ const AdminLogin = () => {
       }
     } catch (err: any) {
       console.error('管理员登录错误:', err)
-      setError(t('admin.login.loginFailed'))
+      setError(t('admin.auth.login.loginFailed'))
       
       // 登录失败后重新检查安全状态
       await checkSecurityStatus()
@@ -148,8 +148,8 @@ const AdminLogin = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
               <Shield className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">{t('admin.login.title')}</h1>
-            <p className="text-purple-100">{t('admin.login.subtitle')}</p>
+            <h1 className="text-2xl font-bold text-white mb-2">{t('admin.auth.login.title')}</h1>
+            <p className="text-purple-100">{t('admin.auth.login.subtitle')}</p>
           </div>
 
           {/* 登录表单 */}
@@ -160,9 +160,9 @@ const AdminLogin = () => {
               <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 text-yellow-100 text-sm flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" />
                 <div>
-                  {t('admin.login.attemptsRemaining')
-                    .replace('{remaining}', securityInfo.attemptsRemaining.toString())
-                    .replace('{total}', securityInfo.maxAttempts.toString())}
+                                  {t('admin.auth.login.attemptsRemaining')
+                  .replace('{remaining}', securityInfo.attemptsRemaining.toString())
+                  .replace('{total}', securityInfo.maxAttempts.toString())}
                 </div>
               </div>
             )}
@@ -172,11 +172,11 @@ const AdminLogin = () => {
               <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-red-100 text-sm flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" />
                 <div>
-                  <div className="font-medium">{t('admin.login.accountLocked')}</div>
+                  <div className="font-medium">{t('admin.auth.login.accountLocked')}</div>
                   {securityInfo.lockedUntil && (
                     <div className="text-xs mt-1 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {t('admin.login.lockedUntil').replace('{time}', new Date(securityInfo.lockedUntil).toLocaleString())}
+                      {t('admin.auth.login.lockedUntil').replace('{time}', new Date(securityInfo.lockedUntil).toLocaleString())}
                     </div>
                   )}
                 </div>
@@ -193,7 +193,7 @@ const AdminLogin = () => {
             {/* 邮箱输入 */}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-purple-100 mb-2">
-                {t('admin.login.email')}
+                {t('admin.auth.login.email')}
               </label>
               <input
                 type="email"
@@ -202,7 +202,7 @@ const AdminLogin = () => {
                 value={formData.username}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
-                placeholder={t('admin.login.emailPlaceholder')}
+                placeholder={t('admin.auth.login.emailPlaceholder')}
                 required
               />
             </div>
@@ -210,7 +210,7 @@ const AdminLogin = () => {
             {/* 密码输入 */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-purple-100 mb-2">
-                {t('admin.login.password')}
+                {t('admin.auth.login.password')}
               </label>
               <div className="relative">
                 <input
@@ -220,7 +220,7 @@ const AdminLogin = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 pr-12 bg-white/10 border border-white/20 rounded-lg text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
-                  placeholder={t('admin.login.passwordPlaceholder')}
+                  placeholder={t('admin.auth.login.passwordPlaceholder')}
                   required
                 />
                 <button
@@ -245,10 +245,10 @@ const AdminLogin = () => {
               )}
             >
               {securityInfo.isLocked 
-                ? t('admin.login.accountLocked')
+                ? t('admin.auth.login.accountLocked')
                 : loading 
-                  ? t('admin.login.loggingIn') 
-                  : t('admin.login.login')
+                  ? t('admin.auth.login.loggingIn') 
+                  : t('admin.auth.login.login')
               }
             </button>
           </form>
@@ -262,7 +262,7 @@ const AdminLogin = () => {
             onClick={() => navigate('/')}
             className="text-purple-200 hover:text-white transition-colors text-sm"
           >
-            ← {t('admin.login.backToHome')}
+            ← {t('admin.auth.login.backToHome')}
           </button>
         </div>
       </div>

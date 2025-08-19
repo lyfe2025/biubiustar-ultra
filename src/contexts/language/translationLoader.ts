@@ -85,8 +85,6 @@ export const allTranslations = mergeTranslations(
   commonTranslations
 )
 
-
-
 // 获取翻译文本
 export const getTranslation = (key: string, language: Language): string => {
   // 确保翻译数据存在

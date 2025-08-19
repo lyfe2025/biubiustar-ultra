@@ -32,11 +32,8 @@ router.get('/', async (req: Request, res: Response) => {
 
     // 处理排序逻辑
     if (sort === 'trending') {
-      // 热门排序：先按点赞数排序，再按评论数，最后按浏览数
-      query = query.order('likes_count', { ascending: false, nullsFirst: false })
-                   .order('comments_count', { ascending: false, nullsFirst: false })
-                   .order('views_count', { ascending: false, nullsFirst: false })
-                   .order('created_at', { ascending: false });
+      // 热门页面改为按最新发布时间排序
+      query = query.order('created_at', { ascending: false });
     } else {
       // 默认按创建时间排序
       query = query.order('created_at', { ascending: false });
@@ -94,6 +91,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         likes(count)
       `)
       .eq('id', id)
+      .eq('status', 'published')
       .single();
 
     if (error) {
@@ -137,7 +135,7 @@ router.post('/', async (req: Request, res: Response) => {
       tags: tags || [],
       image_url: finalImageUrl || null,
       user_id,
-      status: 'published',
+      status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };

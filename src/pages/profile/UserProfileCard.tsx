@@ -1,8 +1,8 @@
 import React from 'react'
 import { Edit, MapPin, Globe, Calendar } from 'lucide-react'
-import { format } from 'date-fns'
+import { formatJoinDate } from '../../utils/dateFormatter'
 import { useLanguage } from '../../contexts/language'
-import { generateDefaultAvatarUrl, isDefaultAvatar } from '../../utils/avatarGenerator'
+import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../../utils/avatarGenerator'
 import { UserProfileCardProps } from './types'
 import type { UserProfile } from './types'
 import { useAuth } from '../../contexts/AuthContext'
@@ -32,7 +32,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   isLoading,
   onStartEdit
 }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { user } = useAuth()
    
   // 如果没有profile，使用默认数据
@@ -56,27 +56,33 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   // 注意：现在总是显示个人资料，不再显示创建提示
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      {/* 上下结构布局 */}
-      <div className="flex flex-col items-center">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {/* 头部渐变背景区域 */}
+      <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-32 relative">
+        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+      </div>
+      
+      {/* 内容区域 */}
+      <div className="p-6 -mt-16 relative">
         {/* 头像区域 - 居中显示 */}
-        <div className="mb-6">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
-              <img
-                src={displayProfile?.avatar_url && !isDefaultAvatar(displayProfile.avatar_url) 
-                  ? displayProfile.avatar_url 
-                  : generateDefaultAvatarUrl(displayProfile?.username || t('profile.basic.username'))
-                }
-                alt={displayProfile?.full_name || displayProfile?.username || t('profile.basic.username')}
-                className="w-full h-full object-cover"
-              />
+        <div className="flex flex-col items-center">
+          <div className="mb-6">
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                <img
+                  src={displayProfile?.avatar_url && !isDefaultAvatar(displayProfile.avatar_url) 
+                    ? displayProfile.avatar_url 
+                    : getUserDefaultAvatarUrl(displayProfile?.username || t('profile.basic.username'), displayProfile?.avatar_url)
+                  }
+                  alt={displayProfile?.full_name || displayProfile?.username || t('profile.basic.username')}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 用户信息区域 - 居中对齐 */}
-        <div className="w-full text-center">
+          {/* 用户信息区域 - 居中对齐 */}
+          <div className="w-full text-center">
           {/* 基本信息 */}
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -123,22 +129,23 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
                 <Calendar className="w-4 h-4" />
                 <span>
-                  {t('profile.time.joinedOn').replace('{date}', format(new Date(displayProfile.created_at), 'PPP'))}
+                  {t('profile.time.joinedOn').replace('{date}', formatJoinDate(displayProfile.created_at, language))}
                 </span>
               </div>
             )}
           </div>
         </div>
 
-        {/* 编辑按钮 - 居中放在卡片底部 */}
-        <div className="mt-6 pt-4 border-t border-gray-100 flex justify-center">
-          <button
-            onClick={onStartEdit}
-            className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-700 bg-white hover:bg-gray-50 px-3 py-2 rounded-md transition-colors duration-200 text-sm font-medium"
-          >
-            <Edit className="w-4 h-4" />
-            <span>{t('profile.edit')}</span>
-          </button>
+          {/* 编辑按钮 - 居中放在卡片底部 */}
+          <div className="mt-6 pt-4 border-t border-gray-100 flex justify-center">
+            <button
+              onClick={onStartEdit}
+              className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-700 bg-white hover:bg-gray-50 px-3 py-2 rounded-md transition-colors duration-200 text-sm font-medium"
+            >
+              <Edit className="w-4 h-4" />
+              <span>{t('profile.edit')}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

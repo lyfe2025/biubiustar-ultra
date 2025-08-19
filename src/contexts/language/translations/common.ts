@@ -88,6 +88,7 @@ export const commonTranslations = {
       },
 
       // 语言
+      language: 'zh',
       languages: {
         zh: '简体中文',
         zhTw: '繁體中文',
@@ -255,6 +256,7 @@ export const commonTranslations = {
       },
 
       // 语言
+      language: 'zh-TW',
       languages: {
         zh: '簡體中文',
         zhTw: '繁體中文',
@@ -418,6 +420,7 @@ export const commonTranslations = {
       },
 
       // 语言
+      language: 'en',
       languages: {
         zh: 'Simplified Chinese',
         zhTw: 'Traditional Chinese',
@@ -581,6 +584,7 @@ export const commonTranslations = {
       },
 
       // 语言
+      language: 'vi',
       languages: {
         zh: 'Tiếng Trung giản thể',
         zhTw: 'Tiếng Trung phồn thể',

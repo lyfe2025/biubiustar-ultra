@@ -9,12 +9,15 @@ import type { Post } from '../types'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN, enUS, vi } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 
 interface PostCardProps {
   post: Post
   onLike?: (postId: string) => void
   onComment?: (postId: string) => void
   onShare?: (postId: string) => void
+  showFullContent?: boolean // 是否显示完整内容，默认false（截断显示）
+  maxContentLength?: number // 最大内容长度，默认150字符
 }
 
 interface ContentCategory {
@@ -30,7 +33,7 @@ interface ContentCategory {
   is_active: boolean
 }
 
-const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
+const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, maxContentLength = 150 }: PostCardProps) => {
   const { user } = useAuth()
   const { language, t } = useLanguage()
   const navigate = useNavigate()
@@ -148,7 +151,11 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
     setIsLoading(true)
 
     try {
-      await socialService.likePost(post.id, user.id)
+      if (isLiked) {
+        await socialService.unlikePost(post.id, user.id)
+      } else {
+        await socialService.likePost(post.id, user.id)
+      }
       const newIsLiked = !isLiked
       setIsLiked(newIsLiked)
       setLikesCount(prev => newIsLiked ? prev + 1 : prev - 1)
@@ -286,14 +293,18 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-            {post.author?.avatar_url ? (
+            {post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url) ? (
               <img
                 src={post.author.avatar_url}
                 alt={post.author.username}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
-              <User className="w-5 h-5 text-white" />
+              <img
+                src={getUserDefaultAvatarUrl(post.author?.username || 'User', post.author?.avatar_url)}
+                alt={post.author?.username || 'User'}
+                className="w-full h-full rounded-full"
+              />
             )}
           </div>
           <div>
@@ -366,9 +377,24 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
         >
           {post.title}
         </h3>
-        <p className="text-gray-700 leading-relaxed">
-          {post.content}
-        </p>
+        <div className="text-gray-700 leading-relaxed">
+          {showFullContent || post.content.length <= maxContentLength ? (
+            <p>{post.content}</p>
+          ) : (
+            <div>
+              <p>{post.content.slice(0, maxContentLength)}...</p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  navigate(`/post/${post.id}`)
+                }}
+                className="text-purple-600 hover:text-purple-700 text-sm font-medium mt-2 transition-colors duration-200"
+              >
+                {t('posts.card.readMore')}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 帖子图片 */}
@@ -388,6 +414,20 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
           <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
             #{categoryDisplayName || post.category}
           </span>
+        </div>
+      )}
+
+      {/* 标签 */}
+      {post.tags && post.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {post.tags.map((tag, index) => (
+            <span 
+              key={index}
+              className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full"
+            >
+              #{tag}
+            </span>
+          ))}
         </div>
       )}
 

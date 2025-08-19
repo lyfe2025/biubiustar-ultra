@@ -1,18 +1,19 @@
-import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, User, LogOut } from 'lucide-react'
-import { useAuth } from '../contexts/AuthContext'
+import React, { useState, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Menu, X, LogOut, Globe } from 'lucide-react'
 import { useLanguage } from '../contexts/language'
+import { useAuth } from '../contexts/AuthContext'
+import { isDefaultAvatar, generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 import LanguageSelector from './LanguageSelector'
-import AuthModal from './AuthModal'
 import { cn } from '../utils/cn'
 import { useSiteInfo } from '../hooks/useSettings'
-import { isDefaultAvatar, generateDefaultAvatarUrl } from '../utils/avatarGenerator'
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  onRequireAuth: (type?: 'login' | 'register') => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [authModalType, setAuthModalType] = useState<'login' | 'register'>('login')
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const { user, userProfile, logout } = useAuth()
   const { t } = useLanguage()
@@ -20,8 +21,7 @@ const Navbar: React.FC = () => {
   const { siteName, siteLogo } = useSiteInfo()
 
   const openAuthModal = (type: 'login' | 'register') => {
-    setAuthModalType(type)
-    setIsAuthModalOpen(true)
+    onRequireAuth(type)
   }
 
   const handleLogoutClick = () => {
@@ -105,7 +105,7 @@ const Navbar: React.FC = () => {
                     <img
                       src={userProfile?.avatar_url && !isDefaultAvatar(userProfile.avatar_url) 
                         ? userProfile.avatar_url 
-                        : generateDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User')
+                        : getUserDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User', userProfile?.avatar_url)
                       }
                       alt={userProfile?.username || 'User'}
                       className="h-6 w-6 rounded-full object-cover border border-white/30"
@@ -180,7 +180,7 @@ const Navbar: React.FC = () => {
                         <img
                           src={userProfile?.avatar_url && !isDefaultAvatar(userProfile.avatar_url) 
                             ? userProfile.avatar_url 
-                            : generateDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User')
+                            : getUserDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User', userProfile?.avatar_url)
                           }
                           alt={userProfile?.username || 'User'}
                           className="h-6 w-6 rounded-full object-cover border border-gray-200"
@@ -226,13 +226,6 @@ const Navbar: React.FC = () => {
           )}
         </div>
       </nav>
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        type={authModalType}
-      />
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (

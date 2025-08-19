@@ -38,6 +38,8 @@ export const adminContentTranslations = {
           reject: '拒绝',
           delete: '删除'
         },
+        confirmDelete: '确认删除内容',
+        confirmDeleteMessage: '确定要删除内容 "{title}" 吗？此操作无法撤销。',
         tabs: {
           content: '内容',
           categories: '分类'
@@ -157,6 +159,8 @@ export const adminContentTranslations = {
           reject: '拒絕',
           delete: '刪除'
         },
+        confirmDelete: '確認刪除內容',
+        confirmDeleteMessage: '確定要刪除內容 "{title}" 嗎？此操作無法撤銷。',
         tabs: {
           content: '內容',
           categories: '分類'
@@ -276,6 +280,8 @@ export const adminContentTranslations = {
           reject: 'Reject',
           delete: 'Delete'
         },
+        confirmDelete: 'Confirm Delete Content',
+        confirmDeleteMessage: 'Are you sure you want to delete content "{title}"? This action cannot be undone.',
         tabs: {
           content: 'Content',
           categories: 'Categories'
@@ -395,6 +401,8 @@ export const adminContentTranslations = {
           reject: 'Từ chối',
           delete: 'Xóa'
         },
+        confirmDelete: 'Xác nhận xóa nội dung',
+        confirmDeleteMessage: 'Bạn có chắc chắn muốn xóa nội dung "{title}" không? Hành động này không thể hoàn tác.',
         tabs: {
           content: 'Nội dung',
           categories: 'Danh mục'

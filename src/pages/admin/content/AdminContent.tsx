@@ -1,6 +1,7 @@
 import React from 'react'
 import { FileText, Folder, ChevronLeft, ChevronRight } from 'lucide-react'
 import AdminLayout from '../../../components/AdminLayout'
+import DeleteConfirmModal from '../../../components/DeleteConfirmModal'
 import { useLanguage } from '../../../contexts/language'
 import ContentFilters from './ContentFilters'
 import ContentList from './ContentList'
@@ -39,6 +40,7 @@ const AdminContent = () => {
     showCreateCategoryModal,
     showEditCategoryModal,
     showDeleteCategoryConfirm,
+    showDeletePostConfirm,
     
     // 操作方法
     fetchPosts,
@@ -62,7 +64,10 @@ const AdminContent = () => {
     openCreateCategoryModal,
     openEditCategoryModal,
     openDeleteCategoryConfirm,
-    closeAllModals
+    closeAllModals,
+    openDeletePostConfirm,
+    postToDelete,
+    confirmDeletePost
   } = useContentManagement()
 
   const handleViewPost = (post: any) => {
@@ -75,9 +80,8 @@ const AdminContent = () => {
   }
 
   const handleDeletePost = async (post: any) => {
-    // 调用外层已有的删除确认弹窗能力（内容预览里已有模态）
-    await deletePost(post.id)
-    closePreview()
+    // 显示删除确认框而不是直接删除
+    openDeletePostConfirm(post)
   }
 
   const handlePreviewUpdateStatus = async (status: any) => {
@@ -344,6 +348,17 @@ const AdminContent = () => {
             </div>
           </div>
         )}
+
+        {/* 内容删除确认对话框 */}
+        <DeleteConfirmModal
+          isOpen={showDeletePostConfirm}
+          onClose={closeAllModals}
+          onConfirm={confirmDeletePost}
+          title={t('admin.content.confirmDelete')}
+          message={t('admin.content.confirmDeleteMessage').replace('{title}', postToDelete?.title || '')}
+          itemName={postToDelete?.title}
+          itemIcon={<FileText className="w-5 h-5 text-red-600" />}
+        />
       </div>
     </AdminLayout>
   )

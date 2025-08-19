@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Calendar, MapPin, Users, Clock } from 'lucide-react'
-import { format } from 'date-fns'
+import { formatDateByLanguage } from '../../utils/dateFormatter'
 import { useLanguage } from '../../contexts/language'
 import { UserActivitiesListProps } from './types'
 import { ActivityCategory, ActivityService } from '../../lib/activityService'
@@ -56,7 +56,7 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
 
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'PPP')
+      return formatDateByLanguage(dateString, 'PPP', language)
     } catch {
       return dateString
     }

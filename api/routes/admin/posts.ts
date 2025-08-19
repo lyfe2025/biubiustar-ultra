@@ -55,7 +55,7 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     const userIds = posts?.map(post => post.user_id) || []
     const { data: userProfiles } = await supabase
       .from('user_profiles')
-      .select('id, username, avatar_url')
+      .select('id, username, full_name, avatar_url')
       .in('id', userIds)
     
     // 创建用户信息映射
@@ -71,18 +71,22 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
         id: post.id,
         title: post.title,
         content: post.content,
-        image: post.image_url,
+        image_url: post.image_url,
         video: null, // posts表中没有video字段
         status: post.status || 'pending',
         likes_count: post.likes_count || 0,
         comments_count: post.comments_count || 0,
-        views_count: 0, // posts表中没有views_count字段
+        shares_count: post.shares_count || 0,
         created_at: post.created_at,
         updated_at: post.updated_at,
+        user_id: post.user_id,
+        category: post.category,
+        tags: post.tags || [],
         author: {
           id: user?.id || post.user_id,
           username: user?.username || '未知用户',
-          avatar: user?.avatar_url
+          full_name: user?.full_name || user?.username || '未知用户',
+          avatar_url: user?.avatar_url
         }
       }
     }) || []

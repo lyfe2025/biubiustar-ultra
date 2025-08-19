@@ -31,7 +31,37 @@ export const adminDashboardTranslations = {
         systemSettings: '系统设置',
         systemSettingsDesc: '配置系统参数',
         viewAllActivities: '查看所有活动',
-        systemActivity: '系统活动'
+        systemActivity: '系统活动',
+        unknownIP: '未知IP',
+        time: {
+          justNow: '刚刚',
+          minutesAgo: '分钟前',
+          hoursAgo: '小时前',
+          daysAgo: '天前'
+        },
+        activityMessages: {
+          unknownUser: '未知用户',
+          unknownBrowser: '未知浏览器',
+          fromIP: '来自',
+          usingBrowser: '使用',
+          adminLoginSuccess: '管理员 {username} 登录成功',
+          unauthorizedAccess: '非管理员用户 {username} 尝试访问管理后台',
+          loginSystemError: '登录系统发生错误',
+          sourceIP: '来源IP',
+          ipBlocked: 'IP地址 {ip} 被临时封禁',
+          reason: '原因',
+          failedAttempts: '失败尝试',
+          times: '次',
+          blockedUntil: '解锁时间',
+          ipPermanentlyBlocked: 'IP地址 {ip} 被永久封禁',
+          operator: '操作者',
+          ipAutoUnblocked: 'IP地址 {ip} 自动解锁',
+          blacklistCleanup: '系统清理了 {count} 个过期IP黑名单记录',
+          loginAttemptsCleanup: '系统清理了 {count} 个过期登录尝试记录',
+          securityCleanupSummary: '安全数据清理完成，清理IP黑名单 {blacklist} 条，登录尝试记录 {attempts} 条，共 {total} 条记录',
+          securityCleanupFailed: '安全数据清理失败',
+          newUserRegister: '新用户 {username} 注册'
+        }
       }
     }
   },
@@ -66,7 +96,37 @@ export const adminDashboardTranslations = {
         systemSettings: '系統設置',
         systemSettingsDesc: '配置系統參數',
         viewAllActivities: '查看所有活動',
-        systemActivity: '系統活動'
+        systemActivity: '系統活動',
+        unknownIP: '未知IP',
+        time: {
+          justNow: '剛剛',
+          minutesAgo: '分鐘前',
+          hoursAgo: '小時前',
+          daysAgo: '天前'
+        },
+        activityMessages: {
+          unknownUser: '未知用戶',
+          unknownBrowser: '未知瀏覽器',
+          fromIP: '來自',
+          usingBrowser: '使用',
+          adminLoginSuccess: '管理員 {username} 登錄成功',
+          unauthorizedAccess: '非管理員用戶 {username} 嘗試訪問管理後台',
+          loginSystemError: '登錄系統發生錯誤',
+          sourceIP: '來源IP',
+          ipBlocked: 'IP地址 {ip} 被臨時封禁',
+          reason: '原因',
+          failedAttempts: '失敗嘗試',
+          times: '次',
+          blockedUntil: '解鎖時間',
+          ipPermanentlyBlocked: 'IP地址 {ip} 被永久封禁',
+          operator: '操作者',
+          ipAutoUnblocked: 'IP地址 {ip} 自動解鎖',
+          blacklistCleanup: '系統清理了 {count} 個過期IP黑名單記錄',
+          loginAttemptsCleanup: '系統清理了 {count} 個過期登錄嘗試記錄',
+          securityCleanupSummary: '安全數據清理完成，清理IP黑名單 {blacklist} 條，登錄嘗試記錄 {attempts} 條，共 {total} 條記錄',
+          securityCleanupFailed: '安全數據清理失敗',
+          newUserRegister: '新用戶 {username} 註冊'
+        }
       }
     }
   },
@@ -101,7 +161,37 @@ export const adminDashboardTranslations = {
         systemSettings: 'System Settings',
         systemSettingsDesc: 'Configure system parameters',
         viewAllActivities: 'View All Activities',
-        systemActivity: 'System Activity'
+        systemActivity: 'System Activity',
+        unknownIP: 'Unknown IP',
+        time: {
+          justNow: 'Just now',
+          minutesAgo: 'minutes ago',
+          hoursAgo: 'hours ago',
+          daysAgo: 'days ago'
+        },
+        activityMessages: {
+          unknownUser: 'Unknown User',
+          unknownBrowser: 'Unknown Browser',
+          fromIP: 'from',
+          usingBrowser: 'using',
+          adminLoginSuccess: 'Admin {username} logged in successfully',
+          unauthorizedAccess: 'Non-admin user {username} attempted to access admin panel',
+          loginSystemError: 'Login system error occurred',
+          sourceIP: 'Source IP',
+          ipBlocked: 'IP address {ip} temporarily blocked',
+          reason: 'Reason',
+          failedAttempts: 'Failed attempts',
+          times: 'times',
+          blockedUntil: 'Unblocked until',
+          ipPermanentlyBlocked: 'IP address {ip} permanently blocked',
+          operator: 'Operator',
+          ipAutoUnblocked: 'IP address {ip} automatically unblocked',
+          blacklistCleanup: 'System cleaned {count} expired IP blacklist records',
+          loginAttemptsCleanup: 'System cleaned {count} expired login attempt records',
+          securityCleanupSummary: 'Security data cleanup completed, cleaned {blacklist} IP blacklist records, {attempts} login attempt records, total {total} records',
+          securityCleanupFailed: 'Security data cleanup failed',
+          newUserRegister: 'New user {username} registered'
+        }
       }
     }
   },
@@ -136,7 +226,37 @@ export const adminDashboardTranslations = {
         systemSettings: 'Cài đặt hệ thống',
         systemSettingsDesc: 'Cấu hình tham số hệ thống',
         viewAllActivities: 'Xem tất cả hoạt động',
-        systemActivity: 'Hoạt động hệ thống'
+        systemActivity: 'Hoạt động hệ thống',
+        unknownIP: 'IP không xác định',
+        time: {
+          justNow: 'Vừa xong',
+          minutesAgo: 'phút trước',
+          hoursAgo: 'giờ trước',
+          daysAgo: 'ngày trước'
+        },
+        activityMessages: {
+          unknownUser: 'Người dùng không xác định',
+          unknownBrowser: 'Trình duyệt không xác định',
+          fromIP: 'từ',
+          usingBrowser: 'sử dụng',
+          adminLoginSuccess: 'Quản trị viên {username} đăng nhập thành công',
+          unauthorizedAccess: 'Người dùng không phải quản trị {username} cố gắng truy cập bảng quản trị',
+          loginSystemError: 'Xảy ra lỗi hệ thống đăng nhập',
+          sourceIP: 'IP nguồn',
+          ipBlocked: 'Địa chỉ IP {ip} bị chặn tạm thời',
+          reason: 'Lý do',
+          failedAttempts: 'Lần thử thất bại',
+          times: 'lần',
+          blockedUntil: 'Mở khóa đến',
+          ipPermanentlyBlocked: 'Địa chỉ IP {ip} bị chặn vĩnh viễn',
+          operator: 'Người thao tác',
+          ipAutoUnblocked: 'Địa chỉ IP {ip} tự động mở khóa',
+          blacklistCleanup: 'Hệ thống đã dọn dẹp {count} bản ghi danh sách đen IP hết hạn',
+          loginAttemptsCleanup: 'Hệ thống đã dọn dẹp {count} bản ghi lần thử đăng nhập hết hạn',
+          securityCleanupSummary: 'Dọn dẹp dữ liệu bảo mật hoàn tất, đã dọn {blacklist} bản ghi danh sách đen IP, {attempts} bản ghi lần thử đăng nhập, tổng cộng {total} bản ghi',
+          securityCleanupFailed: 'Dọn dẹp dữ liệu bảo mật thất bại',
+          newUserRegister: 'Người dùng mới {username} đã đăng ký'
+        }
       }
     }
   }

@@ -34,6 +34,10 @@ export const useContentManagement = () => {
   const [showDeleteCategoryConfirm, setShowDeleteCategoryConfirm] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<ContentCategory | null>(null)
   
+  // 内容删除确认状态
+  const [showDeletePostConfirm, setShowDeletePostConfirm] = useState(false)
+  const [postToDelete, setPostToDelete] = useState<Post | null>(null)
+  
   const navigate = useNavigate()
 
   // 获取帖子数据
@@ -133,6 +137,28 @@ export const useContentManagement = () => {
     }
   }
 
+  // 显示删除帖子确认框
+  const openDeletePostConfirm = (post: Post) => {
+    setPostToDelete(post)
+    setShowDeletePostConfirm(true)
+  }
+
+  // 确认删除帖子
+  const confirmDeletePost = async () => {
+    if (!postToDelete) return
+    
+    try {
+      await adminService.deletePost(postToDelete.id)
+      await fetchPosts()
+      setShowDeletePostConfirm(false)
+      setPostToDelete(null)
+      toast.success('帖子删除成功')
+    } catch (error) {
+      console.error('删除帖子失败:', error)
+      toast.error('删除帖子失败')
+    }
+  }
+
   // 创建内容分类
   const createContentCategory = async (categoryData: any) => {
     try {
@@ -217,6 +243,8 @@ export const useContentManagement = () => {
     setShowEditCategoryModal(false)
     setShowDeleteCategoryConfirm(false)
     setSelectedCategory(null)
+    setShowDeletePostConfirm(false)
+    setPostToDelete(null)
   }
 
   return {
@@ -249,12 +277,16 @@ export const useContentManagement = () => {
     showCreateCategoryModal,
     showEditCategoryModal,
     showDeleteCategoryConfirm,
+    showDeletePostConfirm,
+    postToDelete,
     
     // 操作方法
     fetchPosts,
     fetchContentCategories,
     updatePostStatus,
     deletePost,
+    openDeletePostConfirm,
+    confirmDeletePost,
     createContentCategory,
     updateContentCategory,
     deleteContentCategory,

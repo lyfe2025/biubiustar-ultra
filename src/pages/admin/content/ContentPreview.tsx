@@ -2,6 +2,7 @@ import React from 'react'
 import { X, Check, Trash2, Calendar, User, Heart, MessageSquare, Eye, Image, Video } from 'lucide-react'
 import { useLanguage } from '../../../contexts/language'
 import { ContentPreviewProps, Post } from './types'
+import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../../../utils/avatarGenerator'
 
 const ContentPreview: React.FC<ContentPreviewProps> = ({
   post,
@@ -60,12 +61,14 @@ const ContentPreview: React.FC<ContentPreviewProps> = ({
 
           {/* 作者信息 */}
           <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-            {post.author.avatar_url ? (
-              <img className="h-12 w-12 rounded-full" src={post.author.avatar_url} alt="" />
+            {post.author.avatar_url && !isDefaultAvatar(post.author.avatar_url) ? (
+              <img className="h-12 w-12 rounded-full object-cover" src={post.author.avatar_url} alt="" />
             ) : (
-              <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
-                <User className="h-6 w-6 text-gray-600" />
-              </div>
+              <img 
+                className="h-12 w-12 rounded-full" 
+                src={getUserDefaultAvatarUrl(post.author.username, post.author.avatar_url)} 
+                alt="" 
+              />
             )}
             <div>
               <div className="text-sm font-medium text-gray-900">{post.author.username}</div>

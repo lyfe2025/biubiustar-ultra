@@ -13,6 +13,7 @@ export interface Post {
   updated_at: string
   user_id: string
   category: string
+  tags?: string[]
   author?: {
     id: string
     username: string

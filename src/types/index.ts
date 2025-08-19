@@ -24,6 +24,7 @@ export interface Post {
   content: string;
   image_url?: string;
   category: string;
+  tags?: string[];
   user_id: string;
   likes_count: number;
   comments_count: number;

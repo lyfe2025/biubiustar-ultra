@@ -99,7 +99,15 @@ export default function Trending() {
     }
     
     try {
-      await socialService.likePost(postId, user.id)
+      // 检查当前点赞状态
+      const isLiked = await socialService.isPostLiked(postId, user.id)
+      
+      if (isLiked) {
+        await socialService.unlikePost(postId, user.id)
+      } else {
+        await socialService.likePost(postId, user.id)
+      }
+      
       // 重新加载帖子数据以更新点赞状态
       await loadTrendingPosts()
     } catch (error) {
@@ -132,82 +140,146 @@ export default function Trending() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 pt-20">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-purple-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 relative overflow-hidden">
+      {/* 背景装饰 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-pink-400/15 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
+
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 text-white pt-36 pb-12 md:pt-32 md:pb-24 overflow-hidden">
+        {/* 动态背景效果 */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/90 to-purple-800/90"></div>
+          <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="animate-fade-in-up">
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-8 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
               {t('trending.title')}
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-lg md:text-xl lg:text-2xl text-purple-100 max-w-4xl mx-auto leading-relaxed">
               {t('trending.subtitle')}
             </p>
           </div>
+        </div>
+      </div>
 
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-purple-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+          {/* 搜索栏 */}
+          <div className="mb-6 md:mb-8">
+            <div className="text-center mb-4 md:mb-6">
+              <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                {t('trending.searchTitle')}
+              </h3>
+              <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
+            </div>
+            <div className="relative max-w-2xl mx-auto">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400 w-6 h-6" />
               <input
                 type="text"
                 placeholder={t('trending.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full pl-12 pr-6 py-4 border-2 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-lg placeholder-purple-300"
               />
             </div>
           </div>
 
-
-
-          {/* Filters */}
-          <div className="flex flex-wrap justify-center gap-4">
-            {categoryOptions.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={cn(
-                  'flex items-center px-6 py-3 rounded-xl transition-all duration-200',
-                  selectedCategory === category.id
-                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
-                    : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-purple-50 hover:text-purple-600 border border-purple-200'
-                )}
-              >
-                {category.label}
-              </button>
-            ))}
+          {/* 分类筛选 */}
+          <div>
+            <div className="text-center mb-4 md:mb-6">
+              <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                {t('trending.filterByCategory')}
+              </h3>
+              <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
+            </div>
+            <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
+              {categoryOptions.map((category, index) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={cn(
+                    'group relative px-3 md:px-6 py-2 md:py-3 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 text-sm md:text-base',
+                    selectedCategory === category.id
+                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-500 shadow-xl shadow-purple-500/25'
+                      : 'bg-white/80 text-gray-700 border-gray-200 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 hover:text-purple-700 hover:border-purple-300 hover:shadow-lg'
+                  )}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <span className="relative z-10 font-medium">
+                    {category.label}
+                  </span>
+                  {selectedCategory !== category.id && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-600/0 group-hover:from-purple-500/10 group-hover:to-purple-600/10 rounded-2xl transition-all duration-300"></div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Posts Grid */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 md:pb-16">
         {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <div className="flex flex-col justify-center items-center py-16 md:py-24">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 md:h-16 w-12 md:w-16 border-4 border-purple-200"></div>
+              <div className="animate-spin rounded-full h-12 md:h-16 w-12 md:w-16 border-4 border-purple-600 border-t-transparent absolute top-0 left-0"></div>
+            </div>
+            <p className="mt-4 md:mt-6 text-base md:text-lg text-gray-600 font-medium">{t('trending.loading')}</p>
+          </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="text-center py-16 md:py-24">
+            <div className="relative inline-block">
+              <div className="text-6xl md:text-8xl mb-4 md:mb-6 animate-bounce">📝</div>
+              <div className="absolute -top-2 -right-2 w-4 md:w-6 h-4 md:h-6 bg-purple-500 rounded-full animate-ping"></div>
+            </div>
+            <h3 className="text-xl md:text-2xl font-bold text-gray-700 mb-4">{t('trending.noPosts')}</h3>
+            <p className="text-base md:text-lg text-gray-500 mb-6 md:mb-8 max-w-md mx-auto">{t('trending.noPostsDescription')}</p>
+            <button 
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('all');
+              }}
+              className="px-6 md:px-8 py-2 md:py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl font-medium hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-sm md:text-base"
+            >
+              {t('trending.resetFilters')}
+            </button>
           </div>
         ) : (
-          <div className="space-y-8">
-            {filteredPosts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                onComment={() => handleComment(post.id)}
-                onLike={() => handleLike(post.id)}
-                onShare={() => handleShare(post.id)}
-              />
-            ))}
-          </div>
-        )}
-
-        {!isLoading && filteredPosts.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <Search className="w-16 h-16 mx-auto" />
+          <div className="space-y-6 md:space-y-8">
+            <div className="text-center">
+              <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                {t('trending.foundPosts').replace('{count}', filteredPosts.length.toString())}
+              </h2>
+              <div className="w-32 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
             </div>
-            <h3 className="text-xl font-medium text-gray-600 mb-2">{t('trending.noContent')}</h3>
-            <p className="text-gray-500">{t('trending.adjustSearch')}</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
+              {filteredPosts.map((post, index) => (
+                <div 
+                  key={post.id} 
+                  className="transform hover:scale-105 transition-all duration-300"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <PostCard
+                    post={post}
+                    onLike={() => handleLike(post.id)}
+                    onComment={() => handleComment(post.id)}
+                    onShare={() => handleShare(post.id)}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

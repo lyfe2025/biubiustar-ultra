@@ -6,6 +6,7 @@ import UserFilters from './UserFilters'
 import UserList from './UserList'
 import { UserModal, AddUserModal, PasswordModal } from './UserModal'
 import { useUserManagement } from './hooks/useUserManagement'
+import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../../../utils/avatarGenerator'
 
 const AdminUsers = () => {
   const { t } = useLanguage()
@@ -234,12 +235,14 @@ const AdminUsers = () => {
                 </p>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
-                    {selectedUser.avatar ? (
-                      <img className="h-8 w-8 rounded-full" src={selectedUser.avatar} alt="" />
+                    {selectedUser.avatar && !isDefaultAvatar(selectedUser.avatar) ? (
+                      <img className="h-8 w-8 rounded-full object-cover" src={selectedUser.avatar} alt="" />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                        <User className="h-4 w-4 text-gray-600" />
-                      </div>
+                      <img 
+                        className="h-8 w-8 rounded-full" 
+                        src={getUserDefaultAvatarUrl(selectedUser.username, selectedUser.avatar)} 
+                        alt="" 
+                      />
                     )}
                     <div>
                       <p className="text-sm font-medium text-gray-900">{selectedUser.username}</p>

@@ -47,6 +47,12 @@ export type ProfileTab = 'overview' | 'profile' | 'content' | 'social' | 'settin
 export interface UserProfileCardProps {
   profile: UserProfile | null
   isLoading: boolean
+  onStartEdit: () => void
+}
+
+export interface UserProfileManagementProps {
+  profile: UserProfile | null
+  isLoading: boolean
   isEditingProfile: boolean
   editForm: EditProfileForm
   onEditFormChange: (field: keyof EditProfileForm, value: string) => void
@@ -54,6 +60,7 @@ export interface UserProfileCardProps {
   onCancelEdit: () => void
   onStartEdit: () => void
   onAvatarUpload: (file: File) => void
+  avatarPreview: string | null
 }
 
 export interface UserStatsPanelProps {

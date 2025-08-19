@@ -198,7 +198,28 @@ export class AuthService {
     try {
       console.log('AuthService: 获取用户资料，用户ID:', userId);
       
-      const response = await fetch(`/api/users/${userId}`);
+      const sessionData = localStorage.getItem('supabase.auth.token');
+    let token = '';
+    
+    if (sessionData) {
+      try {
+        const session = JSON.parse(sessionData);
+        token = session.access_token || '';
+      } catch (parseError) {
+        console.warn('解析session数据失败:', parseError);
+      }
+    }
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`/api/users/${userId}`, {
+        headers
+      });
       if (!response.ok) {
         if (response.status === 404) {
           console.warn('AuthService: 未找到用户资料，用户ID:', userId);
@@ -219,11 +240,28 @@ export class AuthService {
   // 更新用户资料
   static async updateUserProfile(userId: string, updates: Partial<User>) {
     try {
+      const sessionData = localStorage.getItem('supabase.auth.token');
+    let token = '';
+    
+    if (sessionData) {
+      try {
+        const session = JSON.parse(sessionData);
+        token = session.access_token || '';
+      } catch (parseError) {
+        console.warn('解析session数据失败:', parseError);
+      }
+    }
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(`/api/users/${userId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(updates),
       });
       

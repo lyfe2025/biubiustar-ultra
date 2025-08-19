@@ -15,6 +15,7 @@ export interface Post {
   shares_count: number
   user_id: string
   category: string
+  tags?: string[]
   created_at: string
   updated_at: string
 }

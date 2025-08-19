@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
@@ -22,8 +22,10 @@ import TestCategories from './pages/TestCategories'
 import DebugLanguage from './pages/DebugLanguage'
 import DebugCategories from './pages/DebugCategories'
 import AdminAuthGuard from './components/AdminAuthGuard'
+import ProtectedRoute from './components/ProtectedRoute'
 import Footer from './components/Footer'
 import ErrorBoundary from './components/ErrorBoundary'
+import AuthModal from './components/AuthModal'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
@@ -33,12 +35,23 @@ import './utils/debugAuth' // 加载调试工具
 function AppContent() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [authModalType, setAuthModalType] = useState<'login' | 'register'>('login')
   useFavicon() // 使网站图标响应系统设置
+
+  const openAuthModal = (type: 'login' | 'register' = 'login') => {
+    setAuthModalType(type)
+    setIsAuthModalOpen(true)
+  }
+
+  const handleAuthModalClose = () => {
+    setIsAuthModalOpen(false)
+  }
 
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        {!isAdminRoute && <Navbar />}
+        {!isAdminRoute && <Navbar onRequireAuth={openAuthModal} />}
         <ErrorBoundary>
           <Routes>
                   <Route path="/" element={<Home />} />
@@ -50,7 +63,11 @@ function AppContent() {
                   <Route path="/debug-language" element={<DebugLanguage />} />
                   <Route path="/debug-categories" element={<DebugCategories />} />
                   <Route path="/about" element={<About />} />
-                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile" element={
+                    <ProtectedRoute onRequireAuth={openAuthModal}>
+                      <Profile />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/admin" element={<AdminLogin />} />
                   <Route path="/admin/dashboard" element={<AdminAuthGuard><AdminDashboard /></AdminAuthGuard>} />
                   <Route path="/admin/content" element={<AdminAuthGuard><AdminContent /></AdminAuthGuard>} />
@@ -65,6 +82,13 @@ function AppContent() {
         </ErrorBoundary>
         {!isAdminRoute && <Footer />}
         <Toaster position="top-right" richColors />
+        
+        {/* 全局登录弹窗 */}
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={handleAuthModalClose}
+          type={authModalType}
+        />
       </div>
     </ErrorBoundary>
   )

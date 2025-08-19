@@ -1,15 +1,16 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useAuth } from '../../../contexts/AuthContext'
-import { socialService } from '../../../lib/socialService'
-import { ActivityService } from '../../../lib/activityService'
+import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { supabase } from '../../../lib/supabase'
+import { socialService } from '../../../lib/socialService'
+import { User } from '../../../lib/supabase'
+import { useAuth } from '../../../contexts/AuthContext'
+import { ActivityService } from '../../../lib/activityService'
 import type { Post } from '../../admin/content/types'
 import type { Activity } from '../../../types'
-import { toast } from 'sonner'
 import type { UserProfile, UserStats, NotificationSettings, EditProfileForm, ProfileTab } from '../types'
 
 export const useUserProfile = () => {
-  const { user, session, signOut } = useAuth()
+  const { user, session, signOut, refreshProfile } = useAuth()
   const [activeTab, setActiveTab] = useState<ProfileTab>('overview')
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [userStats, setUserStats] = useState<UserStats>({
@@ -36,6 +37,9 @@ export const useUserProfile = () => {
     location: '',
     website: ''
   })
+  // 头像预览状态
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
 
   // 加载用户数据
   const loadUserData = useCallback(async () => {
@@ -98,9 +102,25 @@ export const useUserProfile = () => {
     if (!user) return
     
     try {
+      // 如果有头像预览，先上传头像
+      if (avatarFile) {
+        const uploadSuccess = await uploadAvatarToServer(avatarFile)
+        if (!uploadSuccess) {
+          toast.error('头像上传失败，请重试')
+          return
+        }
+        // 清除预览状态
+        setAvatarPreview(null)
+        setAvatarFile(null)
+      }
+      
       const updatedProfile = await socialService.updateUserProfile(user.id, editForm)
       setUserProfile(updatedProfile)
       setIsEditingProfile(false)
+      
+      // 同步更新AuthContext中的全局状态
+      await refreshProfile()
+      
       toast.success('资料保存成功')
       
       // 保存成功后重新加载数据以确保同步
@@ -137,26 +157,29 @@ export const useUserProfile = () => {
     }
   }
 
-  // 上传头像
-  const uploadAvatar = async (file: File) => {
-    console.log('=== 头像上传开始 ===')
-    console.log('用户状态:', {
-      user: user ? { id: user.id, email: user.email } : null,
-      userExists: !!user
-    })
-    console.log('AuthContext session状态:', {
-      session: session ? { 
-        access_token: session.access_token ? `存在(长度: ${session.access_token.length})` : '不存在',
-        expires_at: session.expires_at,
-        user_id: session.user?.id
-      } : null,
-      sessionExists: !!session
-    })
+  // 预览头像（不立即上传）
+  const previewAvatar = (file: File) => {
+    if (!user) {
+      toast.error('请先登录后再上传头像')
+      return
+    }
+    
+    // 创建预览URL
+    const previewUrl = URL.createObjectURL(file)
+    setAvatarPreview(previewUrl)
+    setAvatarFile(file)
+    
+    toast.success('头像预览已更新，点击保存以确认更改')
+  }
+  
+  // 实际上传头像到服务器
+  const uploadAvatarToServer = async (file: File) => {
+    console.log('=== 头像上传到服务器开始 ===')
     
     if (!user) {
       console.error('用户未登录')
       toast.error('请先登录后再上传头像')
-      return
+      return false
     }
     
     try {
@@ -168,33 +191,17 @@ export const useUserProfile = () => {
       // 优先使用AuthContext中的session
       if (session?.access_token) {
         token = session.access_token
-        console.log('使用AuthContext的token:', `存在(长度: ${token.length})`)
       } else {
-        console.log('AuthContext session为空，尝试从supabase获取')
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-        console.log('从supabase获取session结果:', { 
-          sessionData: sessionData ? {
-            session: sessionData.session ? {
-              access_token: sessionData.session.access_token ? `存在(长度: ${sessionData.session.access_token.length})` : '不存在',
-              expires_at: sessionData.session.expires_at,
-              user_id: sessionData.session.user?.id
-            } : null
-          } : null,
-          sessionError 
-        })
-        
+        const { data: sessionData } = await supabase.auth.getSession()
         token = sessionData.session?.access_token
       }
-      
-      console.log('最终使用的token:', token ? `存在(长度: ${token.length})` : '不存在')
       
       if (!token) {
         console.error('无法获取认证令牌')
         toast.error('认证已过期，请重新登录')
-        return
+        return false
       }
       
-      console.log('发送头像上传请求...')
       const response = await fetch('/api/users/avatar', {
         method: 'POST',
         headers: {
@@ -203,27 +210,27 @@ export const useUserProfile = () => {
         body: formData
       })
       
-      console.log('头像上传响应状态:', response.status)
-      
       if (!response.ok) {
         const errorData = await response.json()
-        console.error('头像上传失败响应:', errorData)
         throw new Error(errorData.error || '头像上传失败')
       }
       
       const result = await response.json()
-      console.log('头像上传成功响应:', result)
       
       // 更新本地用户资料状态
       if (result.profile) {
         setUserProfile(result.profile)
       }
       
-      toast.success(result.message || '头像上传成功')
-      console.log('=== 头像上传完成 ===')
+      // 同步更新AuthContext中的全局状态
+      await refreshProfile()
+      
+      console.log('=== 头像上传到服务器完成 ===')
+      return true
     } catch (error) {
       console.error('头像上传失败:', error)
       toast.error(error instanceof Error ? error.message : '头像上传失败')
+      return false
     }
   }
 
@@ -264,13 +271,16 @@ export const useUserProfile = () => {
     isEditingProfile,
     setIsEditingProfile,
     editForm,
+    avatarPreview,
+    avatarFile,
     
     // 操作方法
     loadUserData,
     saveProfile,
     deletePost,
     likePost,
-    uploadAvatar,
+    previewAvatar,
+    uploadAvatarToServer,
     handleEditFormChange,
     setNotificationSettings,
     signOut,
@@ -315,6 +325,9 @@ export const useUserProfile = () => {
       } : defaultProfile;
       
       setEditForm(formData);
+      // 清除头像预览状态
+      setAvatarPreview(null);
+      setAvatarFile(null);
     }
   }
 }

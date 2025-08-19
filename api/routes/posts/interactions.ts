@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { supabaseAdmin } from '../../lib/supabase.js';
+import { supabaseAdmin, verifyAuthToken } from '../../lib/supabase.js';
 import { sendResponse, sendValidationError, sendNotFoundError } from '../../utils/response.js';
 
 const router = Router();
@@ -8,12 +8,17 @@ const router = Router();
 router.post('/:id/like', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { user_id } = req.body;
-
-    if (!user_id) {
-      sendValidationError(res, '用户ID不能为空');
+    
+    // 验证用户认证
+    const authHeader = req.headers.authorization;
+    const user = await verifyAuthToken(authHeader);
+    
+    if (!user) {
+      sendResponse(res, false, null, '请先登录', 401);
       return;
     }
+    
+    const user_id = user.id;
 
     // Check if post exists
     const { error: postError } = await supabaseAdmin
@@ -78,12 +83,17 @@ router.post('/:id/like', async (req: Request, res: Response) => {
 router.delete('/:id/like', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { user_id } = req.body;
-
-    if (!user_id) {
-      sendValidationError(res, '用户ID不能为空');
+    
+    // 验证用户认证
+    const authHeader = req.headers.authorization;
+    const user = await verifyAuthToken(authHeader);
+    
+    if (!user) {
+      sendResponse(res, false, null, '请先登录', 401);
       return;
     }
+    
+    const user_id = user.id;
 
     const { error } = await supabaseAdmin
       .from('likes')

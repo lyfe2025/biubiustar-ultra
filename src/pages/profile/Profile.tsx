@@ -26,6 +26,8 @@ const Profile: React.FC = () => {
     userActivities,
     isLoading,
     notificationSettings,
+    avatarPreview,
+    avatarFile,
     
     // UI状态
     activeTab,
@@ -40,7 +42,8 @@ const Profile: React.FC = () => {
     saveProfile,
     deletePost,
     likePost,
-    uploadAvatar,
+    previewAvatar,
+    uploadAvatarToServer,
     handleEditFormChange,
     setNotificationSettings,
     signOut,
@@ -95,16 +98,10 @@ const Profile: React.FC = () => {
               <UserProfileCard
                 profile={userProfile}
                 isLoading={isLoading}
-                isEditingProfile={isEditingProfile}
-                editForm={editForm}
-                onEditFormChange={handleEditFormChange}
-                onSaveProfile={saveProfile}
-                onCancelEdit={cancelEdit}
                 onStartEdit={() => {
                   startEdit()
                   setActiveTab('profile')
                 }}
-                onAvatarUpload={uploadAvatar}
               />
 
               {/* 统计面板 */}
@@ -170,7 +167,8 @@ const Profile: React.FC = () => {
                   onSaveProfile={saveProfile}
                   onCancelEdit={cancelEdit}
                   onStartEdit={startEdit}
-                  onAvatarUpload={uploadAvatar}
+                  onAvatarUpload={previewAvatar}
+                  avatarPreview={avatarPreview}
                 />
               )}
 

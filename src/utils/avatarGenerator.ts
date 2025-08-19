@@ -80,8 +80,8 @@ export function generateDefaultAvatar(username: string, size: number = 64): stri
   // 计算字体大小（约为头像尺寸的40%）
   const fontSize = Math.round(size * 0.4);
   
-  // 生成唯一的渐变ID，避免多个头像之间的冲突
-  const gradientId = `gradient-${Math.abs(gradientIndex)}-${size}`;
+  // 生成唯一的渐变ID，包含用户名和尺寸，避免多个头像之间的冲突
+  const gradientId = `gradient-${username.replace(/[^a-zA-Z0-9]/g, '')}-${gradientIndex}-${size}`;
   
   const svg = `
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
@@ -120,15 +120,63 @@ export function generateDefaultAvatarDataUrl(username: string, size: number = 64
  * @returns 默认头像的URL路径
  */
 export function generateDefaultAvatarUrl(username: string): string {
-  return `/api/avatar/default?username=${encodeURIComponent(username)}`;
+  // 使用Data URL格式，避免浏览器缓存问题，确保每个用户的头像都是唯一的
+  return generateDefaultAvatarDataUrl(username);
 }
 
 /**
- * 检查是否为默认头像URL
+ * 从旧格式的默认头像URL中提取用户名
+ * @param avatarUrl 头像URL
+ * @returns 用户名或null
+ */
+export function extractUsernameFromDefaultAvatarUrl(avatarUrl: string): string | null {
+  if (!avatarUrl) return null;
+  
+  // 匹配旧格式：/api/avatar/default?username=用户名
+  const match = avatarUrl.match(/\/api\/avatar\/default\?username=([^&]+)/);
+  if (match) {
+    return decodeURIComponent(match[1]);
+  }
+  
+  return null;
+}
+
+/**
+ * 检查是否为默认头像URL（兼容新旧格式）
  * @param avatarUrl 头像URL
  * @returns 是否为默认头像
  */
 export function isDefaultAvatar(avatarUrl: string | null | undefined): boolean {
   if (!avatarUrl) return true;
-  return avatarUrl.includes('/api/avatar/default');
+  
+  // 检查是否为Data URL格式的默认头像
+  if (avatarUrl.startsWith('data:image/svg+xml')) {
+    return true;
+  }
+  
+  // 检查是否为旧格式的API URL
+  if (avatarUrl.includes('/api/avatar/default')) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * 获取用户的默认头像URL（兼容新旧格式）
+ * @param username 用户名
+ * @param avatarUrl 数据库中存储的头像URL
+ * @returns 默认头像URL
+ */
+export function getUserDefaultAvatarUrl(username: string, avatarUrl?: string | null): string {
+  // 如果数据库中有旧格式的默认头像URL，从中提取用户名
+  if (avatarUrl && avatarUrl.includes('/api/avatar/default')) {
+    const extractedUsername = extractUsernameFromDefaultAvatarUrl(avatarUrl);
+    if (extractedUsername) {
+      username = extractedUsername;
+    }
+  }
+  
+  // 生成新的Data URL格式头像
+  return generateDefaultAvatarDataUrl(username);
 }
