@@ -86,12 +86,12 @@ export const allTranslations = mergeTranslations(
 )
 
 // 获取翻译文本
-export const getTranslation = (key: string, language: Language): string => {
+export const getTranslation = (key: string, language: Language, params?: Record<string, string | number>): string => {
   // 确保翻译数据存在
   if (!allTranslations || !allTranslations[language]) {
     // 尝试回退到英文
     if (language !== 'en' && allTranslations?.en) {
-      return getTranslation(key, 'en')
+      return getTranslation(key, 'en', params)
     }
     return key
   }
@@ -105,11 +105,21 @@ export const getTranslation = (key: string, language: Language): string => {
     } else {
       // 如果找不到翻译，尝试英文回退
       if (language !== 'en' && allTranslations?.en) {
-        return getTranslation(key, 'en')
+        return getTranslation(key, 'en', params)
       }
       return key
     }
   }
 
-  return typeof translation === 'string' ? translation : key
+  let result = typeof translation === 'string' ? translation : key
+  
+  // 如果有参数，进行替换
+  if (params && typeof result === 'string') {
+    Object.keys(params).forEach(paramKey => {
+      const regex = new RegExp(`{${paramKey}}`, 'g')
+      result = result.replace(regex, String(params[paramKey]))
+    })
+  }
+
+  return result
 }

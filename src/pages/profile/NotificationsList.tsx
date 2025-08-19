@@ -11,7 +11,7 @@ const NotificationsList: React.FC = () => {
       id: '1',
       type: 'like',
       message: t('profile.notifications.newLike'),
-      time: '2 minutes ago',
+      time: t('common.time.minutes', { count: 2 }),
       read: false,
       avatar: null,
       data: { postId: 'post-1' }
@@ -20,7 +20,7 @@ const NotificationsList: React.FC = () => {
       id: '2',
       type: 'comment',
       message: t('profile.notifications.newComment'),
-      time: '1 hour ago',
+      time: t('common.time.hour', { count: 1 }),
       read: false,
       avatar: null,
       data: { postId: 'post-2', commentId: 'comment-1' }
@@ -29,7 +29,7 @@ const NotificationsList: React.FC = () => {
       id: '3',
       type: 'follow',
       message: t('profile.notifications.newFollower'),
-      time: '3 hours ago',
+      time: t('common.time.hours', { count: 3 }),
       read: true,
       avatar: null,
       data: { userId: 'user-3' }
@@ -38,7 +38,7 @@ const NotificationsList: React.FC = () => {
       id: '4',
       type: 'activity',
       message: t('profile.notifications.activityReminder'),
-      time: '1 day ago',
+      time: t('common.time.day', { count: 1 }),
       read: true,
       avatar: null,
       data: { activityId: 'activity-1' }

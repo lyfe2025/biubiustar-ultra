@@ -42,8 +42,8 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   }, [language])
 
   // 翻译函数
-  const t = useCallback((key: string) => {
-    return getTranslation(key, language)
+  const t = useCallback((key: string, params?: Record<string, string | number>) => {
+    return getTranslation(key, language, params)
   }, [language])
 
   const value: LanguageContextType = {

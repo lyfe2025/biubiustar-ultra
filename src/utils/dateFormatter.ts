@@ -13,6 +13,9 @@ const localeMap = {
   'vi': enUS // 越南语暂时使用英文，因为 date-fns 没有越南语支持
 }
 
+// 翻译函数类型
+type TranslationFunction = (key: string, params?: Record<string, string | number>) => string
+
 /**
  * 根据语言格式化日期
  * @param date 日期对象或日期字符串
@@ -54,17 +57,30 @@ export const formatJoinDate = (
  * 格式化相对时间（例如：2 天前）
  * @param date 日期对象或日期字符串
  * @param language 语言代码
+ * @param t 翻译函数
  * @returns 相对时间字符串
  */
 export const formatRelativeTime = (
   date: Date | string | number, 
-  language: string = 'en'
+  language: string = 'en',
+  t?: TranslationFunction
 ): string => {
   const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date
   const now = new Date()
   const diffInMs = now.getTime() - dateObj.getTime()
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
   
+  // 如果有翻译函数，使用翻译函数
+  if (t) {
+    if (diffInDays === 0) return t('common.time.today')
+    if (diffInDays === 1) return t('common.time.yesterday')
+    if (diffInDays < 7) return t('common.time.days', { count: diffInDays })
+    if (diffInDays < 30) return t('common.time.weeks', { count: Math.floor(diffInDays / 7) })
+    if (diffInDays < 365) return t('common.time.months', { count: Math.floor(diffInDays / 30) })
+    return t('common.time.years', { count: Math.floor(diffInDays / 365) })
+  }
+  
+  // 如果没有翻译函数，使用硬编码的文本（向后兼容）
   if (language === 'zh' || language === 'zh-TW') {
     if (diffInDays === 0) return '今天'
     if (diffInDays === 1) return '昨天'

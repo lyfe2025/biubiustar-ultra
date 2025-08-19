@@ -82,7 +82,7 @@ router.get('/:id/activities', async (req: Request, res: Response): Promise<Respo
       limit = 10, 
       offset = 0, 
       category,
-      status = 'active' 
+      status = 'published' 
     } = req.query;
 
     // 通过activity_participants表查询用户参加的活动
@@ -100,10 +100,11 @@ router.get('/:id/activities', async (req: Request, res: Response): Promise<Respo
           max_participants,
           current_participants,
           status,
-          tags,
           created_at,
           updated_at,
-          user_id
+          user_id,
+          image_url,
+          category_id
         )
       `)
       .eq('user_id', id)
@@ -161,7 +162,7 @@ router.get('/:id/created-activities', async (req: Request, res: Response): Promi
       limit = 10, 
       offset = 0, 
       category, 
-      status = 'active' 
+      status = 'published' 
     } = req.query;
 
     let query = supabase

@@ -61,10 +61,54 @@ router.get('/', async (req: Request, res: Response) => {
       return;
     }
 
+    // 🚀 优化：从user_profiles表获取帖子作者信息，避免Auth API调用
+    const userIds = [...new Set((posts || []).map(post => post.user_id))];
+    const userMap = new Map<string, { id: string; username: string; full_name?: string; avatar_url?: string }>();
+    
+    if (userIds.length > 0) {
+      try {
+        // 从user_profiles表批量获取用户信息，避免Auth API调用
+        const { data: userProfiles } = await supabaseAdmin
+          .from('user_profiles')
+          .select('id, username, full_name, avatar_url')
+          .in('id', userIds);
+        
+        if (userProfiles) {
+          userProfiles.forEach(user => {
+            userMap.set(user.id, {
+              id: user.id,
+              username: user.username,
+              full_name: user.full_name,
+              avatar_url: user.avatar_url
+            });
+          });
+        }
+        
+        console.log(`从user_profiles批量获取 ${userIds.length} 个帖子作者信息，成功获取 ${userMap.size} 个用户信息`)
+      } catch (error) {
+        console.error('获取帖子作者信息失败:', error)
+        // 继续执行，只是作者信息可能为空
+      }
+    }
+
+    // 格式化帖子数据，添加作者信息
+    const formattedPosts = (posts || []).map(post => {
+      const author = userMap.get(post.user_id);
+      return {
+        ...post,
+        author: author ? {
+          id: author.id,
+          username: author.username,
+          full_name: author.full_name,
+          avatar_url: author.avatar_url
+        } : null
+      };
+    });
+
     const totalPages = Math.ceil((count || 0) / limitNum);
 
     sendResponse(res, true, {
-      posts: posts || [],
+      posts: formattedPosts,
       pagination: {
         current_page: pageNum,
         total_pages: totalPages,
@@ -104,7 +148,37 @@ router.get('/:id', async (req: Request, res: Response) => {
       return;
     }
 
-    sendResponse(res, true, { post });
+    // 🚀 优化：从user_profiles表获取帖子作者信息，避免Auth API调用
+    let author = null;
+    try {
+      const { data: userProfile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('id, username, full_name, avatar_url')
+        .eq('id', post.user_id)
+        .single();
+      
+      if (userProfile) {
+        author = {
+          id: userProfile.id,
+          username: userProfile.username,
+          full_name: userProfile.full_name,
+          avatar_url: userProfile.avatar_url
+        };
+      }
+      
+      console.log(`从user_profiles获取帖子作者信息，成功获取作者: ${author?.username || '未知'}`)
+    } catch (error) {
+      console.error('获取帖子作者信息失败:', error)
+      // 继续执行，只是作者信息可能为空
+    }
+
+    // 格式化帖子数据，添加作者信息
+    const formattedPost = {
+      ...post,
+      author: author
+    };
+
+    sendResponse(res, true, { post: formattedPost });
 
   } catch (error) {
     console.error('Error in get post:', error);
