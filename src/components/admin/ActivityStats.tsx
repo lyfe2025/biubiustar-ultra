@@ -40,8 +40,8 @@ const ActivityStats: React.FC<ActivityStatsProps> = ({ refreshTrigger }) => {
       setStats({
         totalActivities: data.totalActivities || 0,
         activeActivities: data.activeActivities || 0,
-        completedActivities: 0, // DashboardStats中没有此字段，使用默认值
-        totalParticipants: 0, // DashboardStats中没有此字段，使用默认值
+        completedActivities: data.completedActivities || 0, // 使用API返回的真实数据
+        totalParticipants: data.totalParticipants || 0, // 使用API返回的真实数据
         upcomingActivities: data.upcomingActivities || 0,
         popularActivities: 0 // 改为数字类型
       });

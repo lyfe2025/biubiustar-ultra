@@ -236,7 +236,7 @@ router.get('/stats', requireAdmin, async (req: Request, res: Response): Promise<
     // 获取活动统计
     const { data: activitiesData, error: activitiesError } = await supabaseAdmin
       .from('activities')
-      .select('id, created_at, status, end_date')
+      .select('id, created_at, status, start_date, end_date')
     
     if (activitiesError) {
       console.error('获取活动数据失败:', activitiesError)
@@ -244,10 +244,30 @@ router.get('/stats', requireAdmin, async (req: Request, res: Response): Promise<
     }
 
     // 计算进行中的活动数
-    const now = new Date()
+    const now = new Date();
     const activeActivities = activitiesData?.filter(activity => 
-      activity.status === 'active' && new Date(activity.end_date) > now
-    ).length || 0
+      activity.status === 'published' && 
+      new Date(activity.start_date) <= now && 
+      new Date(activity.end_date) > now
+    ).length || 0;
+
+    // 计算已完成活动数
+    const completedActivities = activitiesData?.filter(activity => 
+      activity.status === 'completed' || 
+      (activity.status === 'published' && new Date(activity.end_date) <= now)
+    ).length || 0;
+
+    // 获取活动参与人数统计
+    const { data: participantsData, error: participantsError } = await supabaseAdmin
+      .from('activity_participants')
+      .select('id')
+    
+    if (participantsError) {
+      console.error('获取活动参与数据失败:', participantsError)
+      return res.status(500).json({ error: '获取活动参与数据失败' })
+    }
+
+    const totalParticipants = participantsData?.length || 0
 
     // 获取点赞统计
     const { data: likesData, error: likesError } = await supabaseAdmin
@@ -277,6 +297,8 @@ router.get('/stats', requireAdmin, async (req: Request, res: Response): Promise<
       pendingPosts,
       totalActivities: activitiesData?.length || 0,
       activeActivities,
+      completedActivities,
+      totalParticipants,
       totalViews,
       totalLikes: likesData?.length || 0,
       totalComments: commentsData?.length || 0

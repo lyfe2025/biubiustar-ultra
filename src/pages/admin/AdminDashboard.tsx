@@ -228,6 +228,8 @@ const AdminDashboard = () => {
     totalComments: 0,
     newUsersToday: 0,
     activeActivities: 0,
+    completedActivities: 0,
+    totalParticipants: 0,
     upcomingActivities: 0
   })
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
@@ -295,6 +297,8 @@ const AdminDashboard = () => {
           totalComments: 0,
           newUsersToday: 0,
           activeActivities: 0,
+          completedActivities: 0,
+          totalParticipants: 0,
           upcomingActivities: 0
         })
         setRecentActivities([])

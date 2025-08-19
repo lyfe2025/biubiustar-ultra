@@ -109,6 +109,8 @@ export interface DashboardStats {
   totalComments: number
   newUsersToday: number
   activeActivities: number
+  completedActivities: number
+  totalParticipants: number
   upcomingActivities: number
 }
 

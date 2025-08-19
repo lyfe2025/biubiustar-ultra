@@ -51,7 +51,7 @@ const EditActivityModal: React.FC<EditActivityModalProps> = ({
     status: 'draft'
   })
 
-  // 当活动数据变化时更新表单
+  // 当弹窗打开且有活动数据时初始化表单（只在弹窗首次打开时执行）
   useEffect(() => {
     if (activity && isOpen) {
       setEditActivityData({
@@ -66,7 +66,7 @@ const EditActivityModal: React.FC<EditActivityModalProps> = ({
         status: activity.status
       })
     }
-  }, [activity, isOpen])
+  }, [activity?.id, isOpen]) // 只依赖activity的id和isOpen状态，避免activity对象变化导致重新初始化
 
   // 重置表单数据
   const resetForm = () => {

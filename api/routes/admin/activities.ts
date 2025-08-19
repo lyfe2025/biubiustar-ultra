@@ -366,8 +366,30 @@ router.put('/:id', async (req: Request, res: Response): Promise<Response | void>
     // 验证时间
     const startDate = new Date(start_date)
     const endDate = new Date(end_date)
-    if (startDate >= endDate) {
-      return res.status(400).json({ error: '结束时间必须晚于开始时间' })
+    
+    // 验证时间格式
+    if (isNaN(startDate.getTime())) {
+      return res.status(400).json({ 
+        error: '开始时间格式错误',
+        field: 'start_date',
+        value: start_date
+      })
+    }
+
+    if (isNaN(endDate.getTime())) {
+      return res.status(400).json({ 
+        error: '结束时间格式错误',
+        field: 'end_date',
+        value: end_date
+      })
+    }
+    
+    if (endDate <= startDate) {
+      return res.status(400).json({ 
+        error: '结束时间必须晚于开始时间',
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString()
+      })
     }
 
     // 验证最大参与人数
@@ -382,8 +404,8 @@ router.put('/:id', async (req: Request, res: Response): Promise<Response | void>
         title: title.trim(),
         description: description.trim(),
         location: location.trim(),
-        start_date,
-        end_date,
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
         category: category || 'general',
         max_participants: max_participants || null,
         image_url: image || null,
