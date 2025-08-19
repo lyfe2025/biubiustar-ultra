@@ -9,7 +9,9 @@ export default defineConfig({
     react({
       babel: {
         plugins: [
-          'react-dev-locator',
+          ['babel-plugin-react-dev-locator', { 
+            sourceRoot: __dirname 
+          }],
         ],
       },
     }),
