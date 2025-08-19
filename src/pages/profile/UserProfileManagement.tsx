@@ -190,14 +190,14 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
               ) : (
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {displayProfile.full_name || '未设置姓名'}
+                    {displayProfile?.full_name || displayProfile?.username || user?.email?.split('@')[0] || '未设置姓名'}
                   </h2>
                   <p className="text-gray-600 mt-1">
                     {displayProfile.bio || '这个人很懒，什么都没有留下'}
                   </p>
                   {user?.email && (
                     <p className="text-sm text-gray-500 mt-1">
-                      @{user.email.split('@')[0]}
+                      @{displayProfile?.username || user?.email?.split('@')[0] || 'unknown'}
                     </p>
                   )}
                   {user?.created_at && (

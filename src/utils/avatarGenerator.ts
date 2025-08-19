@@ -3,23 +3,23 @@
  * 用于生成基于用户名首字母的默认SVG头像
  */
 
-// 预定义的背景色调色板 - 符合项目紫色主题风格
-const BACKGROUND_COLORS = [
-  '#8B5CF6', // purple-500 - 主紫色
-  '#7C3AED', // purple-600 - 深紫色
-  '#6D28D9', // purple-700 - 更深紫色
-  '#A855F7', // purple-500 变体
-  '#9333EA', // purple-600 变体
-  '#EC4899', // pink-500 - 粉紫色
-  '#DB2777', // pink-600 - 深粉色
-  '#BE185D', // pink-700 - 更深粉色
-  '#6366F1', // indigo-500 - 蓝紫色
-  '#4F46E5', // indigo-600 - 深蓝紫色
-  '#4338CA', // indigo-700 - 更深蓝紫色
-  '#8B5CF6', // purple-500 重复（确保足够选择）
-  '#A78BFA', // purple-400 - 浅紫色
-  '#C084FC', // purple-300 - 更浅紫色
-  '#DDD6FE'  // purple-200 - 最浅紫色
+// 预定义的渐变色调色板 - 符合项目紫色主题风格，参考PostCard.tsx的渐变样式
+const GRADIENT_COLORS = [
+  { from: '#8B5CF6', to: '#EC4899' }, // purple-500 to pink-500 - 主渐变
+  { from: '#7C3AED', to: '#DB2777' }, // purple-600 to pink-600 - 深色渐变
+  { from: '#6D28D9', to: '#BE185D' }, // purple-700 to pink-700 - 更深渐变
+  { from: '#A855F7', to: '#F472B6' }, // purple-500变体 to pink-400
+  { from: '#9333EA', to: '#E879F9' }, // purple-600变体 to fuchsia-400
+  { from: '#8B5CF6', to: '#6366F1' }, // purple-500 to indigo-500 - 蓝紫渐变
+  { from: '#7C3AED', to: '#4F46E5' }, // purple-600 to indigo-600
+  { from: '#6D28D9', to: '#4338CA' }, // purple-700 to indigo-700
+  { from: '#A78BFA', to: '#C084FC' }, // purple-400 to purple-300 - 浅色渐变
+  { from: '#8B5CF6', to: '#A78BFA' }, // purple-500 to purple-400
+  { from: '#EC4899', to: '#F472B6' }, // pink-500 to pink-400
+  { from: '#6366F1', to: '#8B5CF6' }, // indigo-500 to purple-500
+  { from: '#C084FC', to: '#DDD6FE' }, // purple-300 to purple-200 - 最浅渐变
+  { from: '#9333EA', to: '#8B5CF6' }, // purple-600变体 to purple-500
+  { from: '#EC4899', to: '#8B5CF6' }  // pink-500 to purple-500 - 反向渐变
 ];
 
 /**
@@ -52,37 +52,46 @@ export function getInitials(name: string): string {
 }
 
 /**
- * 根据字符串生成一致的颜色索引
+ * 根据字符串生成一致的渐变色索引
  * @param str 输入字符串
- * @returns 颜色索引
+ * @returns 渐变色索引
  */
-function getColorIndex(str: string): number {
+function getGradientIndex(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
     hash = hash & hash; // 转换为32位整数
   }
-  return Math.abs(hash) % BACKGROUND_COLORS.length;
+  return Math.abs(hash) % GRADIENT_COLORS.length;
 }
 
 /**
- * 生成SVG格式的默认头像
+ * 生成SVG格式的默认头像（渐变背景）
  * @param username 用户名
  * @param size 头像尺寸（默认64px）
  * @returns SVG字符串
  */
 export function generateDefaultAvatar(username: string, size: number = 64): string {
   const initials = getInitials(username);
-  const colorIndex = getColorIndex(username);
-  const backgroundColor = BACKGROUND_COLORS[colorIndex];
+  const gradientIndex = getGradientIndex(username);
+  const gradient = GRADIENT_COLORS[gradientIndex];
   
   // 计算字体大小（约为头像尺寸的40%）
   const fontSize = Math.round(size * 0.4);
   
+  // 生成唯一的渐变ID，避免多个头像之间的冲突
+  const gradientId = `gradient-${Math.abs(gradientIndex)}-${size}`;
+  
   const svg = `
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="${backgroundColor}"/>
+      <defs>
+        <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:${gradient.from};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${gradient.to};stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="url(#${gradientId})"/>
       <text x="${size/2}" y="${size/2}" font-family="Arial, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="central">
         ${initials}
       </text>

@@ -102,6 +102,10 @@ export const authTranslations = {
 
       // 状态信息
       loggingIn: '正在登录...',
+      registering: '正在注册...',
+      sending: '正在发送...',
+      processing: '处理中...',
+      confirm: '确认',
 
       // 成功消息
       success: {
@@ -218,6 +222,10 @@ export const authTranslations = {
 
       // 狀態信息
       loggingIn: '正在登入...',
+      registering: '正在註冊...',
+      sending: '正在發送...',
+      processing: '處理中...',
+      confirm: '確認',
 
       // 成功消息
       success: {
@@ -333,6 +341,10 @@ export const authTranslations = {
 
       // Status information
       loggingIn: 'Logging in...',
+      registering: 'Registering...',
+      sending: 'Sending...',
+      processing: 'Processing...',
+      confirm: 'Confirm',
 
       // Success messages
       success: {
@@ -448,6 +460,10 @@ export const authTranslations = {
 
       // Thông tin trạng thái
       loggingIn: 'Đang đăng nhập...',
+      registering: 'Đang đăng ký...',
+      sending: 'Đang gửi...',
+      processing: 'Đang xử lý...',
+      confirm: 'Xác nhận',
 
       // Thông báo thành công
       success: {
