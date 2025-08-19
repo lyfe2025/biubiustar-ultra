@@ -74,6 +74,15 @@ export const profileTranslations = {
         createFirst: '发布第一个帖子'
       },
 
+      // 帖子状态
+      postStatus: {
+        published: '已发布',
+        pending: '待审核',
+        rejected: '已拒绝',
+        draft: '草稿',
+        private: '私密'
+      },
+
       // 活动管理
       activities: {
         title: '我的活动',
@@ -83,6 +92,43 @@ export const profileTranslations = {
         upcoming: '即将参与',
         noActivities: '还没有参与任何活动',
         joinFirst: '参与第一个活动'
+      },
+
+      // 活动状态
+      activityStatus: {
+        upcoming: '即将开始',
+        ongoing: '进行中',
+        ended: '已结束'
+      },
+
+      // 个人资料完整度
+      profileCompleteness: {
+        title: '个人资料完整度',
+        basicInfo: '基本信息',
+        avatar: '头像',
+        location: '位置信息',
+        website: '个人网站',
+        completed: '已完成',
+        incomplete: '待完善',
+        optional: '可选',
+        notSet: '未设置'
+      },
+
+      // 占位符文本
+      placeholders: {
+        enterName: '请输入您的姓名',
+        introduceYourself: '介绍一下您自己...',
+        yourLocation: '您的所在地',
+        yourWebsite: 'https://your-website.com',
+        noBio: '这个人很懒，什么都没有留下',
+        noLocation: '未设置位置',
+        noWebsite: '未设置网站',
+        unknown: 'unknown'
+      },
+
+      // 时间相关
+      time: {
+        joinedOn: '加入于 {date}'
       },
 
       confirmSignOut: '确定要退出登录吗？',
@@ -173,7 +219,9 @@ export const profileTranslations = {
         unblock: '取消屏蔽',
         report: '举报',
         message: '私信',
-        share: '分享资料'
+        share: '分享资料',
+        save: '保存',
+        cancel: '取消'
       },
 
       // 消息提示
@@ -252,6 +300,15 @@ export const profileTranslations = {
         createFirst: '發布第一個帖子'
       },
 
+      // 帖子状态
+      postStatus: {
+        published: '已發布',
+        pending: '待審核',
+        rejected: '已拒絕',
+        draft: '草稿',
+        private: '私密'
+      },
+
       myPosts: '我的帖子',
       untitledPost: '未命名帖子',
       confirmDeletePost: '確定要刪除這篇帖子嗎？',
@@ -269,6 +326,43 @@ export const profileTranslations = {
         upcoming: '即將參與',
         noActivities: '還沒有參與任何活動',
         joinFirst: '參與第一個活動'
+      },
+
+      // 活动状态
+      activityStatus: {
+        upcoming: '即將開始',
+        ongoing: '進行中',
+        ended: '已結束'
+      },
+
+      // 个人资料完整度
+      profileCompleteness: {
+        title: '個人資料完整度',
+        basicInfo: '基本信息',
+        avatar: '頭像',
+        location: '位置信息',
+        website: '個人網站',
+        completed: '已完成',
+        incomplete: '待完善',
+        optional: '可選',
+        notSet: '未設置'
+      },
+
+      // 占位符文本
+      placeholders: {
+        enterName: '請輸入您的姓名',
+        introduceYourself: '介紹一下您自己...',
+        yourLocation: '您的所在地',
+        yourWebsite: 'https://your-website.com',
+        noBio: '這個人很懶，什麼都沒有留下',
+        noLocation: '未設置位置',
+        noWebsite: '未設置網站',
+        unknown: 'unknown'
+      },
+
+      // 时间相关
+      time: {
+        joinedOn: '加入於 {date}'
       },
 
       // 設置
@@ -353,7 +447,9 @@ export const profileTranslations = {
         unblock: '取消屏蔽',
         report: '舉報',
         message: '私信',
-        share: '分享資料'
+        share: '分享資料',
+        save: '保存',
+        cancel: '取消'
       },
 
       messages: {
@@ -431,6 +527,15 @@ export const profileTranslations = {
         createFirst: 'Create your first post'
       },
 
+      // 帖子状态
+      postStatus: {
+        published: 'Published',
+        pending: 'Pending',
+        rejected: 'Rejected',
+        draft: 'Draft',
+        private: 'Private'
+      },
+
       myPosts: 'My Posts',
       untitledPost: 'Untitled Post',
       confirmDeletePost: 'Are you sure you want to delete this post?',
@@ -448,6 +553,43 @@ export const profileTranslations = {
         upcoming: 'Upcoming',
         noActivities: 'No activities yet',
         joinFirst: 'Join your first activity'
+      },
+
+      // 活动状态
+      activityStatus: {
+        upcoming: 'Upcoming',
+        ongoing: 'Ongoing',
+        ended: 'Ended'
+      },
+
+      // 个人资料完整度
+      profileCompleteness: {
+        title: 'Profile Completeness',
+        basicInfo: 'Basic Information',
+        avatar: 'Avatar',
+        location: 'Location',
+        website: 'Website',
+        completed: 'Completed',
+        incomplete: 'Incomplete',
+        optional: 'Optional',
+        notSet: 'Not Set'
+      },
+
+      // 占位符文本
+      placeholders: {
+        enterName: 'Enter your name',
+        introduceYourself: 'Introduce yourself...',
+        yourLocation: 'Your location',
+        yourWebsite: 'https://your-website.com',
+        noBio: 'This person is lazy and left nothing',
+        noLocation: 'Location not set',
+        noWebsite: 'Website not set',
+        unknown: 'unknown'
+      },
+
+      // 时间相关
+      time: {
+        joinedOn: 'Joined on {date}'
       },
 
       notifications: {
@@ -498,7 +640,9 @@ export const profileTranslations = {
         unblock: 'Unblock',
         report: 'Report',
         message: 'Message',
-        share: 'Share Profile'
+        share: 'Share Profile',
+        save: 'Save',
+        cancel: 'Cancel'
       },
 
       // 设置
@@ -610,6 +754,15 @@ export const profileTranslations = {
         createFirst: 'Tạo bài viết đầu tiên'
       },
 
+      // 帖子状态
+      postStatus: {
+        published: 'Đã xuất bản',
+        pending: 'Đang chờ duyệt',
+        rejected: 'Đã từ chối',
+        draft: 'Bản nháp',
+        private: 'Riêng tư'
+      },
+
       myPosts: 'Bài viết của tôi',
       untitledPost: 'Bài viết chưa có tiêu đề',
       confirmDeletePost: 'Bạn có chắc chắn muốn xóa bài viết này?',
@@ -627,6 +780,43 @@ export const profileTranslations = {
         upcoming: 'Sắp tới',
         noActivities: 'Chưa có hoạt động nào',
         joinFirst: 'Tham gia hoạt động đầu tiên'
+      },
+
+      // 活动状态
+      activityStatus: {
+        upcoming: 'Sắp tới',
+        ongoing: 'Đang diễn ra',
+        ended: 'Đã kết thúc'
+      },
+
+      // 个人资料完整度
+      profileCompleteness: {
+        title: 'Mức độ hoàn thiện hồ sơ',
+        basicInfo: 'Thông tin cơ bản',
+        avatar: 'Ảnh đại diện',
+        location: 'Vị trí',
+        website: 'Website',
+        completed: 'Hoàn thành',
+        incomplete: 'Chưa hoàn thành',
+        optional: 'Tùy chọn',
+        notSet: 'Chưa thiết lập'
+      },
+
+      // 占位符文本
+      placeholders: {
+        enterName: 'Nhập tên của bạn',
+        introduceYourself: 'Giới thiệu về bản thân...',
+        yourLocation: 'Vị trí của bạn',
+        yourWebsite: 'https://your-website.com',
+        noBio: 'Người này lười và không để lại gì',
+        noLocation: 'Chưa thiết lập vị trí',
+        noWebsite: 'Chưa thiết lập website',
+        unknown: 'unknown'
+      },
+
+      // 时间相关
+      time: {
+        joinedOn: 'Tham gia vào {date}'
       },
 
       notifications: {
@@ -677,7 +867,9 @@ export const profileTranslations = {
         unblock: 'Bỏ chặn',
         report: 'Báo cáo',
         message: 'Nhắn tin',
-        share: 'Chia sẻ hồ sơ'
+        share: 'Chia sẻ hồ sơ',
+        save: 'Lưu',
+        cancel: 'Hủy'
       },
 
       // 设置

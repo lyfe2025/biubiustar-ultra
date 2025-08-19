@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Trending from './pages/Trending'
 import Activities from './pages/Activities'
 import ActivityDetail from './pages/ActivityDetail'
+import PostDetail from './pages/PostDetail'
 import About from './pages/About'
 import Profile from './pages/Profile'
 import AdminLogin from './pages/admin/AdminLogin'
@@ -44,6 +45,7 @@ function AppContent() {
                   <Route path="/trending" element={<Trending />} />
                   <Route path="/activities" element={<Activities />} />
                   <Route path="/activities/:id" element={<ActivityDetail />} />
+                  <Route path="/post/:id" element={<PostDetail />} />
                   <Route path="/test-categories" element={<TestCategories />} />
                   <Route path="/debug-language" element={<DebugLanguage />} />
                   <Route path="/debug-categories" element={<DebugCategories />} />

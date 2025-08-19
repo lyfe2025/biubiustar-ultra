@@ -35,7 +35,7 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
 
   // 生成默认个人资料数据
   const generateDefaultProfileData = (): UserProfile => {
-    const defaultName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '用户'
+    const defaultName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('profile.basic.username')
     return {
       id: user?.id || '',
       username: user?.user_metadata?.username || user?.email?.split('@')[0] || '',
@@ -119,8 +119,6 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
     )
   }
 
-
-
   // 有个人资料时的管理界面
   return (
     <div className="space-y-6">
@@ -183,26 +181,26 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
                       value={editForm.full_name || ''}
                       onChange={(e) => onEditFormChange('full_name', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="请输入您的姓名"
+                      placeholder={t('profile.placeholders.enterName')}
                     />
                   </div>
                 </div>
               ) : (
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {displayProfile?.full_name || displayProfile?.username || user?.email?.split('@')[0] || '未设置姓名'}
+                    {displayProfile?.full_name || displayProfile?.username || user?.email?.split('@')[0] || t('profile.basic.username')}
                   </h2>
                   <p className="text-gray-600 mt-1">
-                    {displayProfile.bio || '这个人很懒，什么都没有留下'}
+                    {displayProfile.bio || t('profile.placeholders.noBio')}
                   </p>
                   {user?.email && (
                     <p className="text-sm text-gray-500 mt-1">
-                      @{displayProfile?.username || user?.email?.split('@')[0] || 'unknown'}
+                      @{displayProfile?.username || user?.email?.split('@')[0] || t('profile.placeholders.unknown')}
                     </p>
                   )}
                   {user?.created_at && (
                     <p className="text-xs text-gray-400 mt-2">
-                      加入于 {new Date(user.created_at).toLocaleDateString('zh-CN')}
+                      {t('profile.time.joinedOn').replace('{date}', new Date(user.created_at).toLocaleDateString('zh-CN'))}
                     </p>
                   )}
                 </div>
@@ -224,11 +222,11 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
                   onChange={(e) => onEditFormChange('bio', e.target.value)}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                  placeholder="介绍一下您自己..."
+                  placeholder={t('profile.placeholders.introduceYourself')}
                 />
               ) : (
                 <p className="text-gray-900 bg-gray-50 p-3 rounded-lg min-h-[100px]">
-                  {displayProfile.bio || '暂无个人简介'}
+                  {displayProfile.bio || t('profile.basic.bio')}
                 </p>
               )}
             </div>
@@ -246,11 +244,11 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
                     value={editForm.location || ''}
                     onChange={(e) => onEditFormChange('location', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="您的所在地"
+                    placeholder={t('profile.placeholders.yourLocation')}
                   />
                 ) : (
                   <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
-                    {displayProfile.location || '未设置位置'}
+                    {displayProfile.location || t('profile.placeholders.noLocation')}
                   </p>
                 )}
               </div>
@@ -266,7 +264,7 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
                     value={editForm.website || ''}
                     onChange={(e) => onEditFormChange('website', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="https://your-website.com"
+                    placeholder={t('profile.placeholders.yourWebsite')}
                   />
                 ) : (
                   <div className="bg-gray-50 p-3 rounded-lg">
@@ -280,7 +278,7 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
                         {displayProfile.website}
                       </a>
                     ) : (
-                      <span className="text-gray-900">未设置网站</span>
+                      <span className="text-gray-900">{t('profile.placeholders.noWebsite')}</span>
                     )}
                   </div>
                 )}
@@ -296,14 +294,14 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
                 className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-2"
               >
                 <X className="w-4 h-4" />
-                <span>取消</span>
+                <span>{t('profile.actions.cancel')}</span>
               </button>
               <button
                 onClick={onSaveProfile}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
-                <span>保存</span>
+                <span>{t('profile.actions.save')}</span>
               </button>
             </div>
           )}
@@ -312,42 +310,42 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
 
       {/* 个人资料统计 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">个人资料完整度</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profile.profileCompleteness.title')}</h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">基本信息</span>
+            <span className="text-sm text-gray-600">{t('profile.profileCompleteness.basicInfo')}</span>
             <span className={cn(
               "text-sm font-medium",
               displayProfile.full_name && displayProfile.bio ? "text-green-600" : "text-orange-600"
             )}>
-              {displayProfile.full_name && displayProfile.bio ? "已完成" : "待完善"}
+              {displayProfile.full_name && displayProfile.bio ? t('profile.profileCompleteness.completed') : t('profile.profileCompleteness.incomplete')}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">头像</span>
+            <span className="text-sm text-gray-600">{t('profile.profileCompleteness.avatar')}</span>
             <span className={cn(
               "text-sm font-medium",
               displayProfile.avatar_url ? "text-green-600" : "text-orange-600"
             )}>
-              {displayProfile.avatar_url ? "已设置" : "未设置"}
+              {displayProfile.avatar_url ? t('profile.profileCompleteness.completed') : t('profile.profileCompleteness.notSet')}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">位置信息</span>
+            <span className="text-sm text-gray-600">{t('profile.profileCompleteness.location')}</span>
             <span className={cn(
               "text-sm font-medium",
               displayProfile.location ? "text-green-600" : "text-gray-400"
             )}>
-              {displayProfile.location ? "已设置" : "可选"}
+              {displayProfile.location ? t('profile.profileCompleteness.completed') : t('profile.profileCompleteness.optional')}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">个人网站</span>
+            <span className="text-sm text-gray-600">{t('profile.profileCompleteness.website')}</span>
             <span className={cn(
               "text-sm font-medium",
               displayProfile.website ? "text-green-600" : "text-gray-400"
             )}>
-              {displayProfile.website ? "已设置" : "可选"}
+              {displayProfile.website ? t('profile.profileCompleteness.completed') : t('profile.profileCompleteness.optional')}
             </span>
           </div>
         </div>

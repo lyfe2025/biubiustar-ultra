@@ -30,7 +30,8 @@ export const adminDashboardTranslations = {
         securityManagementDesc: '管理登录安全和IP限制',
         systemSettings: '系统设置',
         systemSettingsDesc: '配置系统参数',
-        viewAllActivities: '查看所有活动'
+        viewAllActivities: '查看所有活动',
+        systemActivity: '系统活动'
       }
     }
   },
@@ -64,7 +65,8 @@ export const adminDashboardTranslations = {
         securityManagementDesc: '管理登錄安全和IP限制',
         systemSettings: '系統設置',
         systemSettingsDesc: '配置系統參數',
-        viewAllActivities: '查看所有活動'
+        viewAllActivities: '查看所有活動',
+        systemActivity: '系統活動'
       }
     }
   },
@@ -98,7 +100,8 @@ export const adminDashboardTranslations = {
         securityManagementDesc: 'Manage login security and IP restrictions',
         systemSettings: 'System Settings',
         systemSettingsDesc: 'Configure system parameters',
-        viewAllActivities: 'View All Activities'
+        viewAllActivities: 'View All Activities',
+        systemActivity: 'System Activity'
       }
     }
   },
@@ -132,7 +135,8 @@ export const adminDashboardTranslations = {
         securityManagementDesc: 'Quản lý bảo mật đăng nhập và hạn chế IP',
         systemSettings: 'Cài đặt hệ thống',
         systemSettingsDesc: 'Cấu hình tham số hệ thống',
-        viewAllActivities: 'Xem tất cả hoạt động'
+        viewAllActivities: 'Xem tất cả hoạt động',
+        systemActivity: 'Hoạt động hệ thống'
       }
     }
   }

@@ -75,6 +75,26 @@ export const postTranslations = {
         loginRequired: '请先登录'
       },
 
+      // 帖子详情页面
+      detail: {
+        loading: '加载中...',
+        postNotFound: '帖子不存在',
+        loadError: '获取帖子详情失败',
+        back: '返回',
+        postIdMissing: '帖子ID不存在',
+        categoryError: '获取分类失败',
+        likeError: '点赞失败',
+        commentError: '获取评论失败',
+        commentSubmitError: '发表评论失败，请重试',
+        commentDeleteError: '删除评论失败，请重试',
+        shareError: '分享失败，请重试',
+        loginRequired: '请先登录',
+        commentSuccess: '评论发表成功',
+        commentDeleteSuccess: '评论删除成功',
+        deleteConfirm: '确定要删除这条评论吗？',
+        operationError: '操作失败，请重试'
+      },
+
       // 时间显示
       time: {
         justNow: '刚刚',
@@ -229,6 +249,26 @@ export const postTranslations = {
         deleteFailed: '刪除失敗，請重試',
         onlyDeleteOwn: '只能刪除自己的帖子',
         loginRequired: '請先登錄'
+      },
+
+      // 帖子詳情頁面
+      detail: {
+        loading: '加載中...',
+        postNotFound: '帖子不存在',
+        loadError: '獲取帖子詳情失敗',
+        back: '返回',
+        postIdMissing: '帖子ID不存在',
+        categoryError: '獲取分類失敗',
+        likeError: '點讚失敗',
+        commentError: '獲取評論失敗',
+        commentSubmitError: '發表評論失敗，請重試',
+        commentDeleteError: '刪除評論失敗，請重試',
+        shareError: '分享失敗，請重試',
+        loginRequired: '請先登錄',
+        commentSuccess: '評論發表成功',
+        commentDeleteSuccess: '評論刪除成功',
+        deleteConfirm: '確定要刪除這條評論嗎？',
+        operationError: '操作失敗，請重試'
       },
 
       // 時間顯示
@@ -387,6 +427,26 @@ export const postTranslations = {
         loginRequired: 'Please login first'
       },
 
+      // Post detail page
+      detail: {
+        loading: 'Loading...',
+        postNotFound: 'Post not found',
+        loadError: 'Failed to load post details',
+        back: 'Back',
+        postIdMissing: 'Post ID is missing',
+        categoryError: 'Failed to load categories',
+        likeError: 'Like failed',
+        commentError: 'Failed to load comments',
+        commentSubmitError: 'Failed to submit comment, please try again',
+        commentDeleteError: 'Failed to delete comment, please try again',
+        shareError: 'Share failed, please try again',
+        loginRequired: 'Please login first',
+        commentSuccess: 'Comment posted successfully',
+        commentDeleteSuccess: 'Comment deleted successfully',
+        deleteConfirm: 'Are you sure you want to delete this comment?',
+        operationError: 'Operation failed, please try again'
+      },
+
       // Time display
       time: {
         justNow: 'Just now',
@@ -541,6 +601,26 @@ export const postTranslations = {
         deleteFailed: 'Xóa thất bại, vui lòng thử lại',
         onlyDeleteOwn: 'Bạn chỉ có thể xóa bài viết của mình',
         loginRequired: 'Vui lòng đăng nhập trước'
+      },
+
+      // Trang chi tiết bài viết
+      detail: {
+        loading: 'Đang tải...',
+        postNotFound: 'Không tìm thấy bài viết',
+        loadError: 'Không thể tải chi tiết bài viết',
+        back: 'Quay lại',
+        postIdMissing: 'Thiếu ID bài viết',
+        categoryError: 'Không thể tải danh mục',
+        likeError: 'Thích thất bại',
+        commentError: 'Không thể tải bình luận',
+        commentSubmitError: 'Không thể gửi bình luận, vui lòng thử lại',
+        commentDeleteError: 'Không thể xóa bình luận, vui lòng thử lại',
+        shareError: 'Chia sẻ thất bại, vui lòng thử lại',
+        loginRequired: 'Vui lòng đăng nhập trước',
+        commentSuccess: 'Bình luận đã được đăng thành công',
+        commentDeleteSuccess: 'Bình luận đã được xóa thành công',
+        deleteConfirm: 'Bạn có chắc chắn muốn xóa bình luận này?',
+        operationError: 'Thao tác thất bại, vui lòng thử lại'
       },
 
       // Hiển thị thời gian

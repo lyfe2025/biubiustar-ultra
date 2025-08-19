@@ -122,7 +122,8 @@ export const authTranslations = {
         registerFailed: '注册失败，请重试',
         logoutSuccess: '退出成功',
         emailExists: '该邮箱已被注册',
-        usernameExists: '该用户名已被使用'
+        usernameExists: '该用户名已被使用',
+        redirectingToLogin: '即将跳转到登录页面...'
       }
     }
   },
@@ -241,7 +242,8 @@ export const authTranslations = {
         registerFailed: '註冊失敗，請重試',
         logoutSuccess: '退出成功',
         emailExists: '該郵箱已被註冊',
-        usernameExists: '該用戶名已被使用'
+        usernameExists: '該用戶名已被使用',
+        redirectingToLogin: '即將跳轉到登入頁面...'
       }
     }
   },
@@ -360,7 +362,8 @@ export const authTranslations = {
         registerFailed: 'Registration failed, please try again',
         logoutSuccess: 'Logout successful',
         emailExists: 'This email is already registered',
-        usernameExists: 'This username is already taken'
+        usernameExists: 'This username is already taken',
+        redirectingToLogin: 'Redirecting to login page...'
       }
     }
   },
@@ -479,7 +482,8 @@ export const authTranslations = {
         registerFailed: 'Đăng ký thất bại, vui lòng thử lại',
         logoutSuccess: 'Đăng xuất thành công',
         emailExists: 'Email này đã được đăng ký',
-        usernameExists: 'Tên người dùng này đã được sử dụng'
+        usernameExists: 'Tên người dùng này đã được sử dụng',
+        redirectingToLogin: 'Đang chuyển hướng đến trang đăng nhập...'
       }
     }
   }

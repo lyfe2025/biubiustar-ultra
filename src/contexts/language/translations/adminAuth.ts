@@ -11,7 +11,8 @@ export const adminAuthTranslations = {
       
       // 认证相关
       auth: {
-        sessionExpired: '会话已过期，请重新登录'
+        sessionExpired: '会话已过期，请重新登录',
+        verifyingPermissions: '验证管理员权限'
       },
       
       // 管理员登录
@@ -44,7 +45,8 @@ export const adminAuthTranslations = {
       
       // 認證相關
       auth: {
-        sessionExpired: '會話已過期，請重新登錄'
+        sessionExpired: '會話已過期，請重新登錄',
+        verifyingPermissions: '驗證管理員權限'
       },
       
       login: {
@@ -76,7 +78,8 @@ export const adminAuthTranslations = {
       
       // Authentication
       auth: {
-        sessionExpired: 'Session expired, please login again'
+        sessionExpired: 'Session expired, please login again',
+        verifyingPermissions: 'Verifying Admin Permissions'
       },
       
       login: {
@@ -108,7 +111,8 @@ export const adminAuthTranslations = {
       
       // Xác thực
       auth: {
-        sessionExpired: 'Phiên đã hết hạn, vui lòng đăng nhập lại'
+        sessionExpired: 'Phiên đã hết hạn, vui lòng đăng nhập lại',
+        verifyingPermissions: 'Xác minh quyền quản trị'
       },
       
       login: {

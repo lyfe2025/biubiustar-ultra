@@ -29,6 +29,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [redirectCountdown, setRedirectCountdown] = useState(0);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -74,6 +75,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     });
     setError('');
     setSuccess('');
+    setRedirectCountdown(0);
     setFieldValidation({
       email: { isValid: false, message: '', isChecking: false },
       account: { isValid: false, message: '', isChecking: false },
@@ -299,9 +301,20 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       } else if (mode === 'register') {
         await signUp(formData.email, formData.password, formData.username);
         setSuccess(t('auth.success.registerSuccess'));
-        setTimeout(() => {
-          handleClose();
-        }, 2000);
+        // 注册成功后开始倒计时，然后跳转到登录弹窗
+        setRedirectCountdown(3);
+        const countdownInterval = setInterval(() => {
+          setRedirectCountdown(prev => {
+            if (prev <= 1) {
+              clearInterval(countdownInterval);
+              setSuccess('');
+              setRedirectCountdown(0);
+              handleModeChange('login');
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
       } else if (mode === 'forgot-password') {
           await resetPassword(formData.email);
         setSuccess(t('auth.success.resetPasswordSent'));
@@ -669,8 +682,29 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
           {/* 成功信息 */}
           {success && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <span className="text-green-700 text-sm">{success}</span>
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <Check className="w-6 h-6 text-green-500" />
+              </div>
+              <div className="flex-1">
+                <div className="text-green-800 font-medium text-sm">{success}</div>
+                {mode === 'register' && redirectCountdown > 0 && (
+                  <div className="text-green-600 text-xs mt-1">
+                    {t('auth.messages.redirectingToLogin')} ({redirectCountdown}s)
+                    <div className="mt-1 w-full bg-green-200 rounded-full h-1">
+                      <div 
+                        className="bg-green-500 h-1 rounded-full transition-all duration-1000 ease-linear"
+                        style={{ width: `${(redirectCountdown / 3) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+                {mode === 'register' && redirectCountdown === 0 && (
+                  <div className="text-green-600 text-xs mt-1">
+                    {t('auth.messages.redirectingToLogin')}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

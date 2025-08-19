@@ -2,49 +2,50 @@ import React from 'react'
 import { Bell, Check, X, Clock, User, Heart, MessageCircle, Calendar } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
 
-// 模拟的通知数据
-const mockNotifications = [
-  {
-    id: '1',
-    type: 'like',
-    message: 'John doe liked your post',
-    time: '2 minutes ago',
-    read: false,
-    avatar: null,
-    data: { postId: 'post-1' }
-  },
-  {
-    id: '2',
-    type: 'comment',
-    message: 'Alice commented on your post',
-    time: '1 hour ago',
-    read: false,
-    avatar: null,
-    data: { postId: 'post-2', commentId: 'comment-1' }
-  },
-  {
-    id: '3',
-    type: 'follow',
-    message: 'Bob started following you',
-    time: '3 hours ago',
-    read: true,
-    avatar: null,
-    data: { userId: 'user-3' }
-  },
-  {
-    id: '4',
-    type: 'activity',
-    message: 'New activity "Tech Meetup" starts tomorrow',
-    time: '1 day ago',
-    read: true,
-    avatar: null,
-    data: { activityId: 'activity-1' }
-  }
-]
-
 const NotificationsList: React.FC = () => {
   const { t } = useLanguage()
-  const [notifications, setNotifications] = React.useState(mockNotifications)
+  
+  // 生成模拟的通知数据，使用翻译函数
+  const generateMockNotifications = () => [
+    {
+      id: '1',
+      type: 'like',
+      message: t('profile.notifications.newLike'),
+      time: '2 minutes ago',
+      read: false,
+      avatar: null,
+      data: { postId: 'post-1' }
+    },
+    {
+      id: '2',
+      type: 'comment',
+      message: t('profile.notifications.newComment'),
+      time: '1 hour ago',
+      read: false,
+      avatar: null,
+      data: { postId: 'post-2', commentId: 'comment-1' }
+    },
+    {
+      id: '3',
+      type: 'follow',
+      message: t('profile.notifications.newFollower'),
+      time: '3 hours ago',
+      read: true,
+      avatar: null,
+      data: { userId: 'user-3' }
+    },
+    {
+      id: '4',
+      type: 'activity',
+      message: t('profile.notifications.activityReminder'),
+      time: '1 day ago',
+      read: true,
+      avatar: null,
+      data: { activityId: 'activity-1' }
+    }
+  ]
+
+  const [notifications, setNotifications] = React.useState(generateMockNotifications())
 
   const getNotificationIcon = (type: string) => {
     switch (type) {

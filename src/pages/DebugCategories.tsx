@@ -49,7 +49,7 @@ const DebugCategories: React.FC = () => {
   const testCategoryFromRaw = rawApiResponse?.data?.categories?.find((cat: any) => cat.id === '1ca52152-11f7-451c-9fa0-ca71a6771e51')
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="pt-20 p-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">🐛 分类调试页面</h1>
       
       {/* 当前状态 */}

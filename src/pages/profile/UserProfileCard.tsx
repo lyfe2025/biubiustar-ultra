@@ -55,12 +55,8 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
   // 注意：现在总是显示个人资料，不再显示创建提示
 
-
-
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-
-
       {/* 上下结构布局 */}
       <div className="flex flex-col items-center">
         {/* 头像区域 - 居中显示 */}
@@ -70,9 +66,9 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
               <img
                 src={displayProfile?.avatar_url && !isDefaultAvatar(displayProfile.avatar_url) 
                   ? displayProfile.avatar_url 
-                  : generateDefaultAvatarUrl(displayProfile?.username || 'User')
+                  : generateDefaultAvatarUrl(displayProfile?.username || t('profile.basic.username'))
                 }
-                alt={displayProfile?.full_name || displayProfile?.username || 'User'}
+                alt={displayProfile?.full_name || displayProfile?.username || t('profile.basic.username')}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -84,10 +80,10 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
           {/* 基本信息 */}
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              {displayProfile?.full_name || displayProfile?.username || 'Unknown User'}
+              {displayProfile?.full_name || displayProfile?.username || t('profile.basic.username')}
             </h2>
             <p className="text-purple-600 font-medium">
-              @{displayProfile?.username || 'unknown'}
+              @{displayProfile?.username || t('profile.placeholders.unknown')}
             </p>
           </div>
 
@@ -127,7 +123,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
                 <Calendar className="w-4 h-4" />
                 <span>
-                  {t('profile.stats.joinedOn').replace('{date}', format(new Date(displayProfile.created_at), 'PPP'))}
+                  {t('profile.time.joinedOn').replace('{date}', format(new Date(displayProfile.created_at), 'PPP'))}
                 </span>
               </div>
             )}

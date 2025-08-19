@@ -113,6 +113,11 @@ class SocialService {
       }
       
       const data = await response.json();
+      // 适应API返回格式：{success: true, data: {post: actualPostData}}
+      if (data.success && data.data && data.data.post) {
+        return data.data.post;
+      }
+      // 兼容旧格式
       return data;
     } catch (error) {
       console.error('Error fetching post:', error);
@@ -196,6 +201,40 @@ class SocialService {
     }
   }
 
+  // 取消点赞帖子
+  async unlikePost(postId: string, userId: string): Promise<void> {
+    try {
+      // 从localStorage获取认证token
+      const sessionData = localStorage.getItem('supabase.auth.token');
+      if (!sessionData) {
+        throw new Error('用户未登录，请先登录');
+      }
+      
+      const session = JSON.parse(sessionData);
+      const accessToken = session.access_token;
+      
+      if (!accessToken) {
+        throw new Error('认证token无效，请重新登录');
+      }
+      
+      const response = await fetch(`/api/posts/${postId}/like`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ user_id: userId })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error unliking post:', error);
+      throw error;
+    }
+  }
+
   // 获取帖子点赞数
   async getPostLikesCount(postId: string): Promise<number> {
     try {
@@ -257,13 +296,13 @@ class SocialService {
   // 获取帖子评论
   async getPostComments(postId: string): Promise<Comment[]> {
     try {
-      const response = await fetch(`/api/posts/${postId}/comments`);
+      const response = await fetch(`/api/comments/${postId}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
-      return data || [];
+      return data.data || [];
     } catch (error) {
       console.error('Error fetching comments:', error);
       throw error;

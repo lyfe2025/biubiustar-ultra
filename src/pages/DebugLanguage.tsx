@@ -36,7 +36,7 @@ const DebugLanguage: React.FC = () => {
   const testCategory = categories.find(cat => cat.id === '1ca52152-11f7-451c-9fa0-ca71a6771e51')
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="pt-20 p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">🐛 语言调试页面</h1>
       
       {/* 当前状态 */}

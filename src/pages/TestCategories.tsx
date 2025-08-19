@@ -37,15 +37,15 @@ const TestCategories = () => {
   }, [categories]);
 
   if (loading) {
-    return <div className="p-8">加载中...</div>;
+    return <div className="pt-20 p-8">加载中...</div>;
   }
 
   if (error) {
-    return <div className="p-8 text-red-500">错误: {error}</div>;
+    return <div className="pt-20 p-8 text-red-500">错误: {error}</div>;
   }
 
   return (
-    <div className="p-8">
+    <div className="pt-20 p-8">
       <h1 className="text-2xl font-bold mb-4">分类测试页面</h1>
       <p className="mb-4">获取到 {categories.length} 个分类:</p>
       <div className="grid gap-2">

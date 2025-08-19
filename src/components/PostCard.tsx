@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Heart, MessageCircle, Share2, MoreHorizontal, User, Flag, Bookmark, Copy, Trash2 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
@@ -32,6 +33,7 @@ interface ContentCategory {
 const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
   const { user } = useAuth()
   const { language, t } = useLanguage()
+  const navigate = useNavigate()
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(post.likes_count || 0)
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0)
@@ -99,7 +101,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
   useEffect(() => {
     if (categories.length > 0 && post.category) {
       if (post.category === 'general') {
-        setCategoryDisplayName('通用')
+        setCategoryDisplayName(t('posts.create.generalCategory'))
       } else {
         const category = categories.find(cat => cat.id === post.category)
         if (category) {
@@ -109,7 +111,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
         }
       }
     } else if (post.category) {
-      setCategoryDisplayName(post.category === 'general' ? '通用' : post.category)
+      setCategoryDisplayName(post.category === 'general' ? t('posts.create.generalCategory') : post.category)
     }
   }, [categories, post.category, language])
 
@@ -153,7 +155,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
       onLike?.(post.id)
     } catch (error) {
       console.error('点赞失败:', error)
-      toast.error('操作失败，请重试')
+      toast.error(t('common.messages.error'))
     } finally {
       setIsLoading(false)
     }
@@ -355,7 +357,13 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
 
       {/* 帖子内容 */}
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 
+          className="text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-purple-600 transition-colors duration-200"
+          onClick={(e) => {
+            e.stopPropagation()
+            navigate(`/post/${post.id}`)
+          }}
+        >
           {post.title}
         </h3>
         <p className="text-gray-700 leading-relaxed">

@@ -132,7 +132,7 @@ const Activities = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 text-white py-12 md:py-24 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 text-white pt-20 pb-12 md:pt-24 md:pb-24 overflow-hidden">
         {/* 动态背景效果 */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-600/90 to-purple-800/90"></div>

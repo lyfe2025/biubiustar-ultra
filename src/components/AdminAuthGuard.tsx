@@ -1,7 +1,7 @@
 import React, { useEffect, useState, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, AlertTriangle, LogIn } from 'lucide-react'
-// import { useLanguage } from '../contexts/language'
+import { useLanguage } from '../contexts/language'
 import { adminService } from '../services/AdminService'
 import AuthGuardState from '../utils/authGuard'
 
@@ -18,7 +18,7 @@ interface AuthModalProps {
 }
 
 // 认证失败提示弹窗组件
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, title, message }) => {
+const AuthModal: React.FC<AuthModalProps & { t: (key: string) => string }> = ({ isOpen, onClose, onLogin, title, message, t }) => {
   if (!isOpen) return null
 
   return (
@@ -46,14 +46,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, title, 
               onClick={onClose}
               className="flex-1 px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
-              取消
+              {t('common.actions.cancel')}
             </button>
             <button
               onClick={onLogin}
               className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
             >
               <LogIn className="w-4 h-4" />
-              <span>重新登录</span>
+              <span>{t('admin.auth.login.title')}</span>
             </button>
           </div>
         </div>
@@ -63,14 +63,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, title, 
 }
 
 // 加载状态组件
-const AuthLoadingScreen: React.FC = () => {
+const AuthLoadingScreen: React.FC<{ t: (key: string) => string }> = ({ t }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
       <div className="text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl mb-4">
           <Shield className="w-8 h-8 text-white animate-pulse" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-700 mb-2">验证管理员权限</h2>
+        <h2 className="text-xl font-semibold text-gray-700 mb-2">{t('admin.auth.verifyingPermissions')}</h2>
         <div className="flex items-center justify-center space-x-1">
           <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"></div>
           <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -91,7 +91,7 @@ const AuthLoadingScreen: React.FC = () => {
  * 5. 防止循环认证检查
  */
 const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
-  // const { t } = useLanguage()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const [isChecking, setIsChecking] = useState(true)
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -195,7 +195,7 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
 
   // 如果正在检查认证状态，显示加载界面
   if (isChecking) {
-    return <AuthLoadingScreen />
+    return <AuthLoadingScreen t={t} />
   }
 
   // 如果正在导航或认证失败，显示提示弹窗
@@ -212,6 +212,7 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
           onLogin={handleLogin}
           title="认证失败"
           message={authError}
+          t={t}
         />
       </>
     )

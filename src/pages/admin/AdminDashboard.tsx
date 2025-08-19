@@ -207,11 +207,11 @@ const formatActivityMessage = (type: string, details: string, userEmail?: string
         if (parsedDetails.raw && parsedDetails.raw !== details) {
           return parsedDetails.raw
         }
-        return `系统活动: ${type}${ip !== '未知IP' ? ` (${ip})` : ''}`
+        return `${t('admin.dashboard.systemActivity')}: ${type}${ip !== '未知IP' ? ` (${ip})` : ''}`
     }
   } catch {
     // 如果处理过程中出现任何错误，返回通用描述
-    return `系统活动: ${type}`
+    return `${t('admin.dashboard.systemActivity')}: ${type}`
   }
 }
 

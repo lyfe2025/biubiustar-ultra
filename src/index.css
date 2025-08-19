@@ -104,3 +104,14 @@
 .animate-fade-in-up {
   animation: fade-in-up 0.8s ease-out;
 }
+
+/* 移动端导航栏适配 - 确保内容不被固定导航栏遮挡 */
+.page-content {
+  padding-top: 5rem; /* 80px - 适配移动端导航栏高度 */
+}
+
+@media (min-width: 768px) {
+  .page-content {
+    padding-top: 4rem; /* 64px - 桌面端导航栏高度 */
+  }
+}
