@@ -19,6 +19,88 @@ router.use('/', socialRoutes);
 
 // 管理员功能路由
 
+// PUT /api/users/:id - 更新用户资料
+router.put('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // 验证必要字段
+    const allowedFields = ['full_name', 'bio', 'location', 'website', 'avatar_url'];
+    const filteredData: any = {};
+    
+    // 只允许更新指定字段
+    Object.keys(updateData).forEach(key => {
+      if (allowedFields.includes(key) && updateData[key] !== undefined) {
+        filteredData[key] = updateData[key];
+      }
+    });
+
+    // 如果没有有效的更新数据
+    if (Object.keys(filteredData).length === 0) {
+      res.status(400).json({ error: 'No valid fields to update' });
+      return;
+    }
+
+    // 添加更新时间
+    filteredData.updated_at = new Date().toISOString();
+
+    // 更新用户资料
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update(filteredData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Update user profile error:', error);
+      res.status(500).json({ error: 'Failed to update user profile' });
+      return;
+    }
+
+    if (!data) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    res.json({ data });
+  } catch (error) {
+    console.error('Error in PUT /users/:id:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/users/:id - 获取单个用户信息
+router.get('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+  try {
+    const { id } = req.params;
+
+    // 获取用户基本信息
+    const { data: user, error: userError } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (userError) {
+      console.error('Error fetching user:', userError);
+      res.status(500).json({ error: 'Failed to fetch user' });
+      return;
+    }
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error in GET /users/:id:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // PUT /api/users/:id/status - 更新用户状态（管理员功能）
 router.put('/:id/status', async (req: Request, res: Response): Promise<Response | void> => {
   try {

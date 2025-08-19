@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FileText, Heart, MessageCircle, Trash2, Calendar, Eye } from 'lucide-react'
 import { format } from 'date-fns'
 import { useLanguage } from '../../contexts/language'
 import { UserPostsListProps } from './types'
+import { toast } from 'sonner'
 
 const UserPostsList: React.FC<UserPostsListProps> = ({ 
   posts, 
@@ -44,10 +45,9 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
     )
   }
 
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const handleDeleteClick = (postId: string) => {
-    if (window.confirm(t('profile.confirmDeletePost'))) {
-      onDeletePost(postId)
-    }
+    setPendingDeleteId(postId)
   }
 
   const formatDate = (dateString: string) => {
@@ -147,6 +147,34 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
           </div>
         ))}
       </div>
+
+      {/* 删除确认 */}
+      {pendingDeleteId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('common.delete')}</h3>
+            <p className="text-gray-600 mb-6">{t('profile.confirmDeletePost')}</p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setPendingDeleteId(null)}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={() => {
+                  onDeletePost(pendingDeleteId)
+                  setPendingDeleteId(null)
+                  toast.success(t('posts.card.deleteSuccess'))
+                }}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                {t('common.delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { User, FileText, Users, Settings, Bell, Plus } from 'lucide-react'
+import { User, FileText, Users, Settings, Bell, Plus, UserCircle } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useLanguage } from '../../contexts/language'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -10,6 +10,7 @@ import UserPostsList from './UserPostsList'
 import UserActivitiesList from './UserActivitiesList.tsx'
 import ProfileSettings from './ProfileSettings.tsx'
 import NotificationsList from './NotificationsList.tsx'
+import UserProfileManagement from './UserProfileManagement'
 import { useUserProfile } from './hooks/useUserProfile'
 
 const Profile: React.FC = () => {
@@ -61,6 +62,7 @@ const Profile: React.FC = () => {
 
   const tabs = [
     { id: 'overview', name: t('profile.tabs.overview'), icon: User },
+    { id: 'profile', name: t('profile.tabs.profile'), icon: UserCircle },
     { id: 'content', name: t('profile.tabs.content'), icon: FileText },
     { id: 'social', name: t('profile.tabs.social'), icon: Users },
     { id: 'settings', name: t('profile.tabs.settings'), icon: Settings },
@@ -98,7 +100,10 @@ const Profile: React.FC = () => {
                 onEditFormChange={handleEditFormChange}
                 onSaveProfile={saveProfile}
                 onCancelEdit={cancelEdit}
-                onStartEdit={startEdit}
+                onStartEdit={() => {
+                  startEdit()
+                  setActiveTab('profile')
+                }}
                 onAvatarUpload={uploadAvatar}
               />
 
@@ -153,6 +158,20 @@ const Profile: React.FC = () => {
                     isLoading={isLoading}
                   />
                 </div>
+              )}
+
+              {activeTab === 'profile' && (
+                <UserProfileManagement
+                  profile={userProfile}
+                  isLoading={isLoading}
+                  isEditingProfile={isEditingProfile}
+                  editForm={editForm}
+                  onEditFormChange={handleEditFormChange}
+                  onSaveProfile={saveProfile}
+                  onCancelEdit={cancelEdit}
+                  onStartEdit={startEdit}
+                  onAvatarUpload={uploadAvatar}
+                />
               )}
 
               {activeTab === 'content' && (

@@ -124,6 +124,7 @@ export const adminActivitiesTranslations = {
           delete: '删除',
           view: '查看',
           creating: '创建中...',
+          updating: '更新中...',
           update: '更新',
           close: '关闭'
         },
@@ -260,6 +261,7 @@ export const adminActivitiesTranslations = {
           delete: '刪除',
           view: '查看',
           creating: '創建中...',
+          updating: '更新中...',
           update: '更新',
           close: '關閉'
         },
@@ -395,6 +397,7 @@ export const adminActivitiesTranslations = {
           delete: 'Delete',
           view: 'View',
           creating: 'Creating...',
+          updating: 'Updating...',
           update: 'Update',
           close: 'Close'
         },
@@ -530,6 +533,7 @@ export const adminActivitiesTranslations = {
           delete: 'Xóa',
           view: 'Xem',
           creating: 'Đang tạo...',
+          updating: 'Đang cập nhật...',
           update: 'Cập nhật',
           close: 'Đóng'
         },

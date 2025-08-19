@@ -93,10 +93,19 @@ export const useContentManagement = () => {
   const filteredPosts = posts
 
   // 过滤分类
-  const filteredCategories = contentCategories.filter(category =>
-    category.name.toLowerCase().includes(categorySearchTerm.toLowerCase()) ||
-    (category.description && category.description.toLowerCase().includes(categorySearchTerm.toLowerCase()))
-  )
+  const filteredCategories = contentCategories.filter(category => {
+    const searchLower = categorySearchTerm.toLowerCase()
+    return (
+      (category.name_zh && category.name_zh.toLowerCase().includes(searchLower)) ||
+      (category.name_zh_tw && category.name_zh_tw.toLowerCase().includes(searchLower)) ||
+      (category.name_en && category.name_en.toLowerCase().includes(searchLower)) ||
+      (category.name_vi && category.name_vi.toLowerCase().includes(searchLower)) ||
+      (category.description_zh && category.description_zh.toLowerCase().includes(searchLower)) ||
+      (category.description_zh_tw && category.description_zh_tw.toLowerCase().includes(searchLower)) ||
+      (category.description_en && category.description_en.toLowerCase().includes(searchLower)) ||
+      (category.description_vi && category.description_vi.toLowerCase().includes(searchLower))
+    )
+  })
 
   // 更新帖子状态
   const updatePostStatus = async (postId: string, status: Post['status']) => {

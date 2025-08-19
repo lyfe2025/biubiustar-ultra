@@ -731,6 +731,28 @@ class SocialService {
     }
   }
 
+  // 获取内容分类
+  async getContentCategories(language?: string): Promise<any[]> {
+    try {
+      const langParam = language ? language.toLowerCase() : 'zh';
+      const url = `/api/categories/content?lang=${langParam}`;
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data.success && data.data && data.data.categories) {
+        return data.data.categories;
+      }
+      return data.categories || [];
+    } catch (error) {
+      console.error('Error fetching content categories:', error);
+      return [];
+    }
+  }
+
   // 添加缺失的方法
   async toggleLike(postId: string, userId: string): Promise<void> {
     // 首先检查是否已经点赞

@@ -55,16 +55,49 @@ const AdminCategories: React.FC = () => {
   const loadCategories = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/categories')
+      const response = await fetch('/api/admin/categories/content')
       if (response.ok) {
         const data = await response.json()
         setCategories(data)
       } else {
-        toast.error('加载分类失败')
+        // 解析错误响应
+        try {
+          const errorData = await response.json()
+          let errorMessage = '加载分类失败'
+          
+          if (errorData.error) {
+            errorMessage = errorData.error
+            // 如果有详细信息，添加到错误消息中
+            if (errorData.details) {
+              errorMessage += `：${errorData.details}`
+            }
+          } else {
+            // 根据HTTP状态码提供更具体的错误信息
+            switch (response.status) {
+              case 401:
+                errorMessage = '未授权访问，请重新登录'
+                break
+              case 403:
+                errorMessage = '权限不足，无法访问分类数据'
+                break
+              case 500:
+                errorMessage = '服务器内部错误，请稍后重试'
+                break
+              default:
+                errorMessage = `加载分类失败（错误代码：${response.status}）`
+            }
+          }
+          
+          toast.error(errorMessage)
+        } catch (parseError) {
+          // 如果无法解析错误响应，显示通用错误信息
+          console.error('解析错误响应失败:', parseError)
+          toast.error(`加载分类失败（HTTP ${response.status}）`)
+        }
       }
     } catch (error) {
       console.error('Error loading categories:', error)
-      toast.error('加载分类失败')
+      toast.error('网络错误，请检查网络连接后重试')
     } finally {
       setLoading(false)
     }
@@ -84,7 +117,7 @@ const AdminCategories: React.FC = () => {
     }
 
     try {
-      const response = await fetch('/api/admin/categories', {
+      const response = await fetch('/api/admin/categories/content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,11 +143,48 @@ const AdminCategories: React.FC = () => {
         })
         loadCategories()
       } else {
-        toast.error('创建分类失败')
+        // 解析错误响应
+        try {
+          const errorData = await response.json()
+          let errorMessage = '创建分类失败'
+          
+          if (errorData.error) {
+            errorMessage = errorData.error
+            // 如果有详细信息，添加到错误消息中
+            if (errorData.details) {
+              errorMessage += `：${errorData.details}`
+            }
+            // 如果有缺失字段信息，显示具体缺失的字段
+            if (errorData.missingFields && errorData.missingFields.length > 0) {
+              errorMessage += `，缺失字段：${errorData.missingFields.join('、')}`
+            }
+          } else {
+            // 根据HTTP状态码提供更具体的错误信息
+            switch (response.status) {
+              case 400:
+                errorMessage = '请求参数错误，请检查输入内容'
+                break
+              case 409:
+                errorMessage = '分类名称已存在，请使用不同的名称'
+                break
+              case 500:
+                errorMessage = '服务器内部错误，请稍后重试'
+                break
+              default:
+                errorMessage = `创建分类失败（错误代码：${response.status}）`
+            }
+          }
+          
+          toast.error(errorMessage)
+        } catch (parseError) {
+          // 如果无法解析错误响应，显示通用错误信息
+          console.error('解析错误响应失败:', parseError)
+          toast.error(`创建分类失败（HTTP ${response.status}）`)
+        }
       }
     } catch (error) {
       console.error('Error creating category:', error)
-      toast.error('创建分类失败')
+      toast.error('网络错误，请检查网络连接后重试')
     }
   }
 
@@ -127,7 +197,7 @@ const AdminCategories: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/admin/categories/${selectedCategory.id}`, {
+      const response = await fetch(`/api/admin/categories/content/${selectedCategory.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -154,11 +224,48 @@ const AdminCategories: React.FC = () => {
         })
         loadCategories()
       } else {
-        toast.error('更新分类失败')
+        // 解析错误响应
+        try {
+          const errorData = await response.json()
+          let errorMessage = '更新分类失败'
+          
+          if (errorData.error) {
+            errorMessage = errorData.error
+            // 如果有详细信息，添加到错误消息中
+            if (errorData.details) {
+              errorMessage += `：${errorData.details}`
+            }
+            // 如果有缺失字段信息，显示具体缺失的字段
+            if (errorData.missingFields && errorData.missingFields.length > 0) {
+              errorMessage += `，缺失字段：${errorData.missingFields.join('、')}`
+            }
+          } else {
+            // 根据HTTP状态码提供更具体的错误信息
+            switch (response.status) {
+              case 400:
+                errorMessage = '请求参数错误，请检查输入内容'
+                break
+              case 404:
+                errorMessage = '分类不存在或已被删除'
+                break
+              case 500:
+                errorMessage = '服务器内部错误，请稍后重试'
+                break
+              default:
+                errorMessage = `更新分类失败（错误代码：${response.status}）`
+            }
+          }
+          
+          toast.error(errorMessage)
+        } catch (parseError) {
+          // 如果无法解析错误响应，显示通用错误信息
+          console.error('解析错误响应失败:', parseError)
+          toast.error(`更新分类失败（HTTP ${response.status}）`)
+        }
       }
     } catch (error) {
       console.error('Error updating category:', error)
-      toast.error('更新分类失败')
+      toast.error('网络错误，请检查网络连接后重试')
     }
   }
 
@@ -167,7 +274,7 @@ const AdminCategories: React.FC = () => {
     if (!selectedCategory) return
 
     try {
-      const response = await fetch(`/api/admin/categories/${selectedCategory.id}`, {
+      const response = await fetch(`/api/admin/categories/content/${selectedCategory.id}`, {
         method: 'DELETE'
       })
 
@@ -177,11 +284,44 @@ const AdminCategories: React.FC = () => {
         setSelectedCategory(null)
         loadCategories()
       } else {
-        toast.error('删除分类失败')
+        // 解析错误响应
+        try {
+          const errorData = await response.json()
+          let errorMessage = '删除分类失败'
+          
+          if (errorData.error) {
+            errorMessage = errorData.error
+            // 如果有详细信息，添加到错误消息中
+            if (errorData.details) {
+              errorMessage += `：${errorData.details}`
+            }
+          } else {
+            // 根据HTTP状态码提供更具体的错误信息
+            switch (response.status) {
+              case 400:
+                errorMessage = '无法删除分类，可能正在被使用中'
+                break
+              case 404:
+                errorMessage = '分类不存在或已被删除'
+                break
+              case 500:
+                errorMessage = '服务器内部错误，请稍后重试'
+                break
+              default:
+                errorMessage = `删除分类失败（错误代码：${response.status}）`
+            }
+          }
+          
+          toast.error(errorMessage)
+        } catch (parseError) {
+          // 如果无法解析错误响应，显示通用错误信息
+          console.error('解析错误响应失败:', parseError)
+          toast.error(`删除分类失败（HTTP ${response.status}）`)
+        }
       }
     } catch (error) {
       console.error('Error deleting category:', error)
-      toast.error('删除分类失败')
+      toast.error('网络错误，请检查网络连接后重试')
     }
   }
 

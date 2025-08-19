@@ -4,7 +4,10 @@
  */
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import { supabase } from '../../lib/supabase';
+import { UploadSecurity, DEFAULT_UPLOAD_CONFIGS } from '../../utils/uploadSecurity';
 
 const router = Router();
 
@@ -12,13 +15,18 @@ const router = Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB限制
+    fileSize: DEFAULT_UPLOAD_CONFIGS.avatar.maxFileSize,
+    files: DEFAULT_UPLOAD_CONFIGS.avatar.maxFiles
   },
   fileFilter: (req, file, cb) => {
-    // 只允许图片文件
-    if (file.mimetype.startsWith('image/')) {
+    // 使用安全工具类进行文件验证
+    const isExtensionSafe = UploadSecurity.isExtensionSafe(file.originalname);
+    const isMimeTypeAllowed = UploadSecurity.isMimeTypeAllowed(file.mimetype);
+    
+    if (isExtensionSafe && isMimeTypeAllowed) {
       cb(null, true);
     } else {
+      console.error(`危险文件被拒绝: ${file.originalname}, MIME: ${file.mimetype}`);
       cb(null, false);
     }
   }
@@ -103,49 +111,67 @@ router.post('/avatar', upload.single('avatar'), async (req: Request, res: Respon
       return;
     }
 
+    console.log('头像上传请求 - Authorization header:', authHeader ? 'present' : 'missing');
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: '未提供有效的认证令牌' });
+      console.error('认证失败: 缺少或格式错误的Authorization header');
+      res.status(401).json({ error: '未找到认证令牌' });
       return;
     }
 
     const token = authHeader.substring(7);
+    console.log('提取的token长度:', token.length);
     
     // 验证用户身份
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) {
+      console.error('用户认证失败:', authError);
       res.status(401).json({ error: '认证失败' });
       return;
     }
+    
+    console.log('用户认证成功:', user.id);
 
-    // 生成文件名
-    const fileExt = file.originalname.split('.').pop();
-    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
-
-    // 上传到Supabase Storage
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file.buffer, {
-        contentType: file.mimetype,
-        upsert: true
+    // 使用安全工具类验证文件
+    const validationResult = UploadSecurity.validateFile({
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      buffer: file.buffer
+    }, DEFAULT_UPLOAD_CONFIGS.avatar.maxFileSize);
+    
+    if (!validationResult.isValid) {
+      console.error(`文件安全验证失败: ${file.originalname}`, validationResult.error);
+      res.status(400).json({ 
+        error: '文件安全验证失败', 
+        details: validationResult.error 
       });
-
-    if (uploadError) {
-      console.error('头像上传错误:', uploadError);
-      res.status(500).json({ error: '头像上传失败' });
       return;
     }
 
-    // 获取公共URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
+    // 确保头像上传目录安全
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
+    UploadSecurity.ensureSecureUploadDir(uploadDir);
+
+    // 生成安全的文件名
+    const safeFileName = UploadSecurity.generateSafeFilename(file.originalname, user.id);
+    const filePath = path.join(uploadDir, safeFileName);
+
+    console.log(`头像上传开始: 用户${user.id}, 文件${safeFileName}`);
+    console.log('安全验证通过: 文件格式和内容验证成功');
+
+    // 保存文件到本地
+    fs.writeFileSync(filePath, file.buffer);
+
+    // 生成本地访问URL
+    const relativePath = `/uploads/avatars/${safeFileName}`;
+    const avatarUrl = `${req.protocol}://${req.get('host')}${relativePath}`;
 
     // 更新用户资料中的头像URL
     const { data: updatedProfile, error: updateError } = await supabase
       .from('user_profiles')
       .update({ 
-        avatar_url: publicUrl,
+        avatar_url: avatarUrl,
         updated_at: new Date().toISOString()
       })
       .eq('id', user.id)
@@ -158,10 +184,20 @@ router.post('/avatar', upload.single('avatar'), async (req: Request, res: Respon
       return;
     }
 
+    console.log(`头像上传成功: ${safeFileName}, 大小: ${file.size} bytes, URL: ${avatarUrl}`);
+
     res.json({
       message: '头像上传成功',
-      avatar_url: publicUrl,
-      profile: updatedProfile
+      avatar_url: avatarUrl,
+      profile: updatedProfile,
+      data: {
+        filename: safeFileName,
+        originalName: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype,
+        path: relativePath,
+        url: avatarUrl
+      }
     });
 
   } catch (error) {

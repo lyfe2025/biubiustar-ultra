@@ -5,12 +5,40 @@ export const postTranslations = {
       title: '帖子',
       create: {
         title: '创建帖子',
+        modalTitle: '发布新帖子',
         placeholder: '分享你的想法...',
         submit: '发布',
+        submitting: '发布中...',
         cancel: '取消',
         addImage: '添加图片',
         addVideo: '添加视频',
-        selectCategory: '选择分类'
+        selectCategory: '选择分类',
+        titleLabel: '标题',
+        titlePlaceholder: '输入帖子标题...',
+        contentLabel: '内容',
+        contentPlaceholder: '分享你的想法...',
+        imageLinkLabel: '图片链接（可选）',
+        imageLinkPlaceholder: 'https://example.com/image.jpg',
+        uploadLabel: '上传图片/视频（可选）',
+        selectFile: '选择文件',
+        uploading: '上传中...',
+        tagsLabel: '标签（可选）',
+        tagsPlaceholder: '用逗号分隔多个标签，如：科技,生活,分享',
+        categoryLabel: '分类',
+        generalCategory: '通用',
+        success: '发布成功！',
+        failed: '发布失败，请重试',
+        noPermission: '没有权限发布帖子',
+        tooFrequent: '发布过于频繁，请稍后再试',
+        contentTooLong: '内容过长，请缩短后重试',
+        serverError: '服务器错误，请稍后重试',
+        networkError: '网络连接失败，请检查网络后重试',
+        loginExpired: '登录已过期，请重新登录后再试',
+        invalidInput: '请检查输入内容是否正确',
+        successMessage: '发布成功！',
+        failureMessage: '发布失败，请重试',
+        imageType: '图片',
+        videoType: '视频'
       },
 
       actions: {
@@ -22,7 +50,46 @@ export const postTranslations = {
         delete: '删除',
         report: '举报',
         save: '保存',
-        unsave: '取消保存'
+        unsave: '取消保存',
+        copyLink: '复制链接',
+        bookmark: '收藏'
+      },
+
+      // 帖子卡片固定文本
+      card: {
+        anonymousUser: '匿名用户',
+        justNow: '刚刚',
+        copyLink: '复制链接',
+        bookmark: '收藏',
+        report: '举报',
+        delete: '删除',
+        share: '分享',
+        shareSuccess: '分享成功！',
+        copySuccess: '帖子链接已复制到剪贴板',
+        bookmarkComingSoon: '收藏功能开发中',
+        reportComingSoon: '举报功能开发中',
+        deleteConfirm: '确定要删除这个帖子吗？',
+        deleteSuccess: '帖子已删除',
+        deleteFailed: '删除失败，请重试',
+        onlyDeleteOwn: '只能删除自己的帖子',
+        loginRequired: '请先登录'
+      },
+
+      // 时间显示
+      time: {
+        justNow: '刚刚',
+        minuteAgo: '分钟前',
+        minutesAgo: '分钟前',
+        hourAgo: '小时前',
+        hoursAgo: '小时前',
+        dayAgo: '天前',
+        daysAgo: '天前',
+        weekAgo: '周前',
+        weeksAgo: '周前',
+        monthAgo: '个月前',
+        monthsAgo: '个月前',
+        yearAgo: '年前',
+                yearsAgo: '年前'
       },
 
       stats: {
@@ -94,12 +161,40 @@ export const postTranslations = {
       title: '帖子',
       create: {
         title: '創建帖子',
+        modalTitle: '發布新帖子',
         placeholder: '分享你的想法...',
         submit: '發布',
+        submitting: '發布中...',
         cancel: '取消',
         addImage: '添加圖片',
         addVideo: '添加視頻',
-        selectCategory: '選擇分類'
+        selectCategory: '選擇分類',
+        titleLabel: '標題',
+        titlePlaceholder: '輸入帖子標題...',
+        contentLabel: '內容',
+        contentPlaceholder: '分享你的想法...',
+        imageLinkLabel: '圖片鏈接（可選）',
+        imageLinkPlaceholder: 'https://example.com/image.jpg',
+        uploadLabel: '上傳圖片/視頻（可選）',
+        selectFile: '選擇文件',
+        uploading: '上傳中...',
+        tagsLabel: '標籤（可選）',
+        tagsPlaceholder: '用逗號分隔多個標籤，如：科技,生活,分享',
+        categoryLabel: '分類',
+        generalCategory: '通用',
+        success: '發布成功！',
+        failed: '發布失敗，請重試',
+        noPermission: '沒有權限發布帖子',
+        tooFrequent: '發布過於頻繁，請稍後再試',
+        contentTooLong: '內容過長，請縮短後重試',
+        serverError: '服務器錯誤，請稍後重試',
+        networkError: '網絡連接失敗，請檢查網絡後重試',
+        loginExpired: '登錄已過期，請重新登錄後再試',
+        invalidInput: '請檢查輸入內容是否正確',
+        successMessage: '發布成功！',
+        failureMessage: '發布失敗，請重試',
+        imageType: '圖片',
+        videoType: '視頻'
       },
 
       actions: {
@@ -111,7 +206,46 @@ export const postTranslations = {
         delete: '刪除',
         report: '舉報',
         save: '保存',
-        unsave: '取消保存'
+        unsave: '取消保存',
+        copyLink: '複製鏈接',
+        bookmark: '收藏'
+      },
+
+      // 帖子卡片固定文本
+      card: {
+        anonymousUser: '匿名用戶',
+        justNow: '剛剛',
+        copyLink: '複製鏈接',
+        bookmark: '收藏',
+        report: '舉報',
+        delete: '刪除',
+        share: '分享',
+        shareSuccess: '分享成功！',
+        copySuccess: '帖子鏈接已複製到剪貼板',
+        bookmarkComingSoon: '收藏功能開發中',
+        reportComingSoon: '舉報功能開發中',
+        deleteConfirm: '確定要刪除這個帖子嗎？',
+        deleteSuccess: '帖子已刪除',
+        deleteFailed: '刪除失敗，請重試',
+        onlyDeleteOwn: '只能刪除自己的帖子',
+        loginRequired: '請先登錄'
+      },
+
+      // 時間顯示
+      time: {
+        justNow: '剛剛',
+        minuteAgo: '分鐘前',
+        minutesAgo: '分鐘前',
+        hourAgo: '小時前',
+        hoursAgo: '小時前',
+        dayAgo: '天前',
+        daysAgo: '天前',
+        weekAgo: '週前',
+        weeksAgo: '週前',
+        monthAgo: '個月前',
+        monthsAgo: '個月前',
+        yearAgo: '年前',
+        yearsAgo: '年前'
       },
 
       stats: {
@@ -183,12 +317,40 @@ export const postTranslations = {
       title: 'Posts',
       create: {
         title: 'Create Post',
+        modalTitle: 'Publish New Post',
         placeholder: 'Share your thoughts...',
         submit: 'Publish',
+        submitting: 'Publishing...',
         cancel: 'Cancel',
         addImage: 'Add Image',
         addVideo: 'Add Video',
-        selectCategory: 'Select Category'
+        selectCategory: 'Select Category',
+        titleLabel: 'Title',
+        titlePlaceholder: 'Enter post title...',
+        contentLabel: 'Content',
+        contentPlaceholder: 'Share your thoughts...',
+        imageLinkLabel: 'Image Link (Optional)',
+        imageLinkPlaceholder: 'https://example.com/image.jpg',
+        uploadLabel: 'Upload Image/Video (Optional)',
+        selectFile: 'Select File',
+        uploading: 'Uploading...',
+        tagsLabel: 'Tags (Optional)',
+        tagsPlaceholder: 'Separate multiple tags with commas, e.g., Technology, Lifestyle, Share',
+        categoryLabel: 'Category',
+        generalCategory: 'General',
+        success: 'Published successfully!',
+        failed: 'Failed to publish, please try again',
+        noPermission: 'No permission to publish posts',
+        tooFrequent: 'Posting too frequently, please try again later',
+        contentTooLong: 'Content too long, please shorten and try again',
+        serverError: 'Server error, please try again later',
+        networkError: 'Network connection failed, please check your network and try again',
+        loginExpired: 'Login expired, please log in again and try again',
+        invalidInput: 'Please check if your input is correct',
+        successMessage: 'Published successfully!',
+        failureMessage: 'Failed to publish, please try again',
+        imageType: 'Image',
+        videoType: 'Video'
       },
 
       actions: {
@@ -200,7 +362,46 @@ export const postTranslations = {
         delete: 'Delete',
         report: 'Report',
         save: 'Save',
-        unsave: 'Unsave'
+        unsave: 'Unsave',
+        copyLink: 'Copy Link',
+        bookmark: 'Bookmark'
+      },
+
+      // Post card fixed text
+      card: {
+        anonymousUser: 'Anonymous User',
+        justNow: 'Just now',
+        copyLink: 'Copy Link',
+        bookmark: 'Bookmark',
+        report: 'Report',
+        delete: 'Delete',
+        share: 'Share',
+        shareSuccess: 'Shared successfully!',
+        copySuccess: 'Post link copied to clipboard',
+        bookmarkComingSoon: 'Bookmark feature coming soon',
+        reportComingSoon: 'Report feature coming soon',
+        deleteConfirm: 'Are you sure you want to delete this post?',
+        deleteSuccess: 'Post deleted',
+        deleteFailed: 'Delete failed, please try again',
+        onlyDeleteOwn: 'You can only delete your own posts',
+        loginRequired: 'Please login first'
+      },
+
+      // Time display
+      time: {
+        justNow: 'Just now',
+        minuteAgo: 'minute ago',
+        minutesAgo: 'minutes ago',
+        hourAgo: 'hour ago',
+        hoursAgo: 'hours ago',
+        dayAgo: 'day ago',
+        daysAgo: 'days ago',
+        weekAgo: 'week ago',
+        weeksAgo: 'weeks ago',
+        monthAgo: 'month ago',
+        monthsAgo: 'months ago',
+        yearAgo: 'year ago',
+        yearsAgo: 'years ago'
       },
 
       stats: {
@@ -272,12 +473,40 @@ export const postTranslations = {
       title: 'Bài viết',
       create: {
         title: 'Tạo bài viết',
+        modalTitle: 'Đăng bài viết mới',
         placeholder: 'Chia sẻ suy nghĩ của bạn...',
         submit: 'Đăng',
+        submitting: 'Đang đăng...',
         cancel: 'Hủy',
         addImage: 'Thêm hình ảnh',
         addVideo: 'Thêm video',
-        selectCategory: 'Chọn danh mục'
+        selectCategory: 'Chọn danh mục',
+        titleLabel: 'Tiêu đề',
+        titlePlaceholder: 'Nhập tiêu đề bài viết...',
+        contentLabel: 'Nội dung',
+        contentPlaceholder: 'Chia sẻ suy nghĩ của bạn...',
+        imageLinkLabel: 'Liên kết hình ảnh (tùy chọn)',
+        imageLinkPlaceholder: 'https://example.com/image.jpg',
+        uploadLabel: 'Tải lên hình ảnh/video (tùy chọn)',
+        selectFile: 'Chọn file',
+        uploading: 'Đang tải lên...',
+        tagsLabel: 'Thẻ (tùy chọn)',
+        tagsPlaceholder: 'Tách nhiều thẻ bằng dấu phẩy, ví dụ: Công nghệ, Lối sống, Chia sẻ',
+        categoryLabel: 'Danh mục',
+        generalCategory: 'Chung',
+        success: 'Đăng thành công!',
+        failed: 'Đăng thất bại, vui lòng thử lại',
+        noPermission: 'Không có quyền đăng bài viết',
+        tooFrequent: 'Đăng quá thường xuyên, vui lòng thử lại sau',
+        contentTooLong: 'Nội dung quá dài, vui lòng rút ngắn và thử lại',
+        serverError: 'Lỗi máy chủ, vui lòng thử lại sau',
+        networkError: 'Kết nối mạng thất bại, vui lòng kiểm tra kết nối mạng và thử lại',
+        loginExpired: 'Đăng nhập đã hết hạn, vui lòng đăng nhập lại và thử lại',
+        invalidInput: 'Vui lòng kiểm tra xem nội dung đầu vào có đúng không',
+        successMessage: 'Đăng thành công!',
+        failureMessage: 'Đăng thất bại, vui lòng thử lại',
+        imageType: 'Hình ảnh',
+        videoType: 'Video'
       },
 
       actions: {
@@ -289,7 +518,46 @@ export const postTranslations = {
         delete: 'Xóa',
         report: 'Báo cáo',
         save: 'Lưu',
-        unsave: 'Bỏ lưu'
+        unsave: 'Bỏ lưu',
+        copyLink: 'Sao chép liên kết',
+        bookmark: 'Đánh dấu'
+      },
+
+      // Văn bản cố định của thẻ bài viết
+      card: {
+        anonymousUser: 'Người dùng ẩn danh',
+        justNow: 'Vừa xong',
+        copyLink: 'Sao chép liên kết',
+        bookmark: 'Đánh dấu',
+        report: 'Báo cáo',
+        delete: 'Xóa',
+        share: 'Chia sẻ',
+        shareSuccess: 'Chia sẻ thành công!',
+        copySuccess: 'Liên kết bài viết đã được sao chép vào bộ nhớ tạm',
+        bookmarkComingSoon: 'Tính năng đánh dấu đang phát triển',
+        reportComingSoon: 'Tính năng báo cáo đang phát triển',
+        deleteConfirm: 'Bạn có chắc chắn muốn xóa bài viết này?',
+        deleteSuccess: 'Bài viết đã được xóa',
+        deleteFailed: 'Xóa thất bại, vui lòng thử lại',
+        onlyDeleteOwn: 'Bạn chỉ có thể xóa bài viết của mình',
+        loginRequired: 'Vui lòng đăng nhập trước'
+      },
+
+      // Hiển thị thời gian
+      time: {
+        justNow: 'Vừa xong',
+        minuteAgo: 'phút trước',
+        minutesAgo: 'phút trước',
+        hourAgo: 'giờ trước',
+        hoursAgo: 'giờ trước',
+        dayAgo: 'ngày trước',
+        daysAgo: 'ngày trước',
+        weekAgo: 'tuần trước',
+        weeksAgo: 'tuần trước',
+        monthAgo: 'tháng trước',
+        monthsAgo: 'tháng trước',
+        yearAgo: 'năm trước',
+        yearsAgo: 'năm trước'
       },
 
       stats: {

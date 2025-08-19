@@ -75,13 +75,34 @@ router.post('/register', async (req: Request, res: Response) => {
       return;
     }
 
-    // Return success response (exclude sensitive data)
+    // User profile will be automatically created by database trigger (handle_new_user)
+    // Wait a moment for the trigger to complete
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Fetch the created user profile to return in response
+    const finalUsername = username || email.split('@')[0];
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+    
+    if (profileError || !userProfile) {
+      console.error('Error fetching user profile after creation:', profileError);
+      // If profile wasn't created by trigger, clean up the auth user
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      sendResponse(res, false, null, '注册失败: 用户资料创建失败', 500);
+      return;
+    }
+
+    // Return success response with the profile data created by trigger
     sendResponse(res, true, {
       user: {
         id: authData.user.id,
         email: authData.user.email,
-        username: authData.user.user_metadata?.username,
-        full_name: authData.user.user_metadata?.full_name,
+        username: userProfile.username,
+        full_name: userProfile.full_name,
+        avatar_url: userProfile.avatar_url,
         created_at: authData.user.created_at
       }
     }, '注册成功', 201);

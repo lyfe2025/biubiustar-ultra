@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Globe, Upload, Image } from 'lucide-react'
 import { useLanguage } from '../../../contexts/language'
+import { toast } from 'sonner'
 import { SettingsSectionProps, BasicSettingsData } from './types'
 
 const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, SettingsSectionProps>(({ settings, loading, onUpdate, onSaveComplete }, ref) => {
@@ -95,13 +96,13 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
 
       // 文件大小检查（限制为5MB）
       if (file.size > 5 * 1024 * 1024) {
-        alert('文件大小不能超过5MB')
+        toast.error('文件大小不能超过5MB')
         return
       }
 
       // 文件类型检查
       if (!file.type.startsWith('image/')) {
-        alert('只能上传图片文件')
+        toast.error('只能上传图片文件')
         return
       }
 
@@ -111,7 +112,7 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
                     JSON.parse(localStorage.getItem('supabase.auth.token')!).access_token)
 
       if (!token) {
-        alert('未找到认证信息，请重新登录')
+        toast.error('未找到认证信息，请重新登录')
         return
       }
 
@@ -194,7 +195,7 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
           console.log('图片设置已自动保存到数据库')
         } catch (saveError) {
           console.error('自动保存图片设置失败:', saveError)
-          alert(`图片上传成功，但自动保存失败: ${saveError instanceof Error ? saveError.message : '未知错误'}`)
+          toast.error(`图片上传成功，但自动保存失败: ${saveError instanceof Error ? saveError.message : '未知错误'}`)
         }
         
         // 添加时间戳参数避免浏览器缓存
@@ -225,7 +226,7 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
 
     } catch (error) {
       console.error('文件上传失败:', error)
-      alert(`文件上传失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      toast.error(`文件上传失败: ${error instanceof Error ? error.message : '未知错误'}`)
     } finally {
       // 清除上传状态
       setUploading(prev => ({ ...prev, [field]: false }))
@@ -252,89 +253,89 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
         </h3>
       </div>
 
-      {/* 站点名称 */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t('admin.settings.basic.siteName')}
-        </label>
-        <input
-          type="text"
-          value={formData.site_name}
-          onChange={(e) => handleChange('site_name', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          placeholder={t('admin.settings.basic.siteNamePlaceholder')}
-        />
-        <p className="mt-1 text-sm text-gray-500">
-          {t('admin.settings.basic.siteNameDescription')}
-        </p>
-      </div>
-
-      {/* 站点描述 - 多语言 */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t('admin.settings.basic.siteDescription')}
-        </label>
-        
-        {/* 简体中文 */}
-        <div className="mb-4">
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            简体中文
+        {/* 站点名称 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t('admin.settings.basic.siteName')}
           </label>
-          <textarea
-            value={formData.site_description_zh}
-            onChange={(e) => handleChange('site_description_zh', e.target.value)}
-            rows={3}
+          <input
+            type="text"
+            value={formData.site_name}
+            onChange={(e) => handleChange('site_name', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            placeholder="请输入简体中文站点描述"
+            placeholder={t('admin.settings.basic.siteNamePlaceholder')}
           />
+          <p className="mt-1 text-sm text-gray-500">
+            {t('admin.settings.basic.siteNameDescription')}
+          </p>
         </div>
 
-        {/* 繁体中文 */}
-        <div className="mb-4">
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            繁體中文
+        {/* 站点描述 - 多语言 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t('admin.settings.basic.siteDescription')}
           </label>
-          <textarea
-            value={formData.site_description_zh_tw}
-            onChange={(e) => handleChange('site_description_zh_tw', e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            placeholder="請輸入繁體中文站點描述"
-          />
-        </div>
+          
+          {/* 简体中文 */}
+          <div className="mb-4">
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              {t('common.languages.zh')}
+            </label>
+            <textarea
+              value={formData.site_description_zh}
+              onChange={(e) => handleChange('site_description_zh', e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder={t('admin.settings.basic.siteDescriptionZhPlaceholder')}
+            />
+          </div>
 
-        {/* 英文 */}
-        <div className="mb-4">
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            English
-          </label>
-          <textarea
-            value={formData.site_description_en}
-            onChange={(e) => handleChange('site_description_en', e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            placeholder="Enter site description in English"
-          />
-        </div>
+          {/* 繁体中文 */}
+          <div className="mb-4">
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              {t('common.languages.zhTw')}
+            </label>
+            <textarea
+              value={formData.site_description_zh_tw}
+              onChange={(e) => handleChange('site_description_zh_tw', e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder={t('admin.settings.basic.siteDescriptionZhTwPlaceholder')}
+            />
+          </div>
 
-        {/* 越南语 */}
-        <div className="mb-4">
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Tiếng Việt
-          </label>
-          <textarea
-            value={formData.site_description_vi}
-            onChange={(e) => handleChange('site_description_vi', e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            placeholder="Nhập mô tả trang web bằng tiếng Việt"
-          />
-        </div>
+          {/* 英文 */}
+          <div className="mb-4">
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              {t('common.languages.en')}
+            </label>
+            <textarea
+              value={formData.site_description_en}
+              onChange={(e) => handleChange('site_description_en', e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder={t('admin.settings.basic.siteDescriptionEnPlaceholder')}
+            />
+          </div>
 
-        <p className="mt-1 text-sm text-gray-500">
-          {t('admin.settings.basic.siteDescriptionDescription')}
-        </p>
-      </div>
+          {/* 越南语 */}
+          <div className="mb-4">
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              {t('common.languages.vi')}
+            </label>
+            <textarea
+              value={formData.site_description_vi}
+              onChange={(e) => handleChange('site_description_vi', e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder={t('admin.settings.basic.siteDescriptionViPlaceholder')}
+            />
+          </div>
+
+          <p className="mt-1 text-sm text-gray-500">
+            {t('admin.settings.basic.siteDescriptionDescription')}
+          </p>
+        </div>
 
       {/* 站点Logo */}
       <div>

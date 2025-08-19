@@ -14,6 +14,9 @@ export const trendingTranslations = {
         timeRange: '时间范围'
       },
       searchPlaceholder: '搜索热门内容...',
+      categories: {
+        all: '全部'
+      },
       adjustSearch: '调整搜索条件',
       noContent: '暂无热门内容',
       all: '全部',
@@ -95,6 +98,9 @@ export const trendingTranslations = {
         timeRange: '時間範圍'
       },
       searchPlaceholder: '搜尋熱門內容...',
+      categories: {
+        all: '全部'
+      },
       adjustSearch: '調整搜尋條件',
       noContent: '暫無熱門內容',
       all: '全部',
@@ -168,6 +174,10 @@ export const trendingTranslations = {
         category: 'Category',
         timeRange: 'Time Range'
       },
+      searchPlaceholder: 'Search trending content...',
+      categories: {
+        all: 'All'
+      },
 
       sorting: {
         trending: 'Trending',
@@ -234,6 +244,10 @@ export const trendingTranslations = {
         sort: 'Sắp xếp',
         category: 'Danh mục',
         timeRange: 'Khoảng thời gian'
+      },
+      searchPlaceholder: 'Tìm kiếm nội dung thịnh hành...',
+      categories: {
+        all: 'Tất cả'
       },
 
       sorting: {

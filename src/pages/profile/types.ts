@@ -42,7 +42,7 @@ export interface EditProfileForm {
   website: string
 }
 
-export type ProfileTab = 'overview' | 'content' | 'social' | 'settings' | 'notifications'
+export type ProfileTab = 'overview' | 'profile' | 'content' | 'social' | 'settings' | 'notifications'
 
 export interface UserProfileCardProps {
   profile: UserProfile | null

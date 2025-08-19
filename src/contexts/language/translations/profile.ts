@@ -32,6 +32,7 @@ export const profileTranslations = {
       // 标签页
       tabs: {
         overview: '概览',
+        profile: '个人资料',
         content: '内容',
         social: '社交',
         settings: '设置',
@@ -212,6 +213,7 @@ export const profileTranslations = {
       // 標籤頁
       tabs: {
         overview: '概覽',
+        profile: '個人資料',
         content: '內容',
         social: '社交',
         settings: '設置',
@@ -390,6 +392,7 @@ export const profileTranslations = {
       // Tabs
       tabs: {
         overview: 'Overview',
+        profile: 'Profile',
         content: 'Content',
         social: 'Social',
         settings: 'Settings',
@@ -568,6 +571,7 @@ export const profileTranslations = {
       // Các tab
       tabs: {
         overview: 'Tổng quan',
+        profile: 'Hồ sơ',
         content: 'Nội dung',
         social: 'Xã hội',
         settings: 'Cài đặt',

@@ -7,13 +7,14 @@ import LanguageSelector from './LanguageSelector'
 import AuthModal from './AuthModal'
 import { cn } from '../utils/cn'
 import { useSiteInfo } from '../hooks/useSettings'
+import { isDefaultAvatar, generateDefaultAvatarUrl } from '../utils/avatarGenerator'
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalType, setAuthModalType] = useState<'login' | 'register'>('login')
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
-  const { user, logout } = useAuth()
+  const { user, userProfile, logout } = useAuth()
   const { t } = useLanguage()
   const location = useLocation()
   const { siteName, siteLogo } = useSiteInfo()
@@ -101,7 +102,14 @@ const Navbar: React.FC = () => {
                     to="/profile"
                     className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
                   >
-                    <User className="w-4 h-4" />
+                    <img
+                      src={userProfile?.avatar_url && !isDefaultAvatar(userProfile.avatar_url) 
+                        ? userProfile.avatar_url 
+                        : generateDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User')
+                      }
+                      alt={userProfile?.username || 'User'}
+                      className="h-6 w-6 rounded-full object-cover border border-white/30"
+                    />
                     <span className="text-sm font-medium">{t('nav.profile')}</span>
                   </Link>
                   <button
@@ -169,7 +177,14 @@ const Navbar: React.FC = () => {
                         className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors duration-200"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        <User className="w-5 h-5" />
+                        <img
+                          src={userProfile?.avatar_url && !isDefaultAvatar(userProfile.avatar_url) 
+                            ? userProfile.avatar_url 
+                            : generateDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User')
+                          }
+                          alt={userProfile?.username || 'User'}
+                          className="h-6 w-6 rounded-full object-cover border border-gray-200"
+                        />
                         <span>{t('nav.profile')}</span>
                       </Link>
                       <button

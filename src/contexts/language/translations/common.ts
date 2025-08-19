@@ -8,6 +8,9 @@ export const commonTranslations = {
       save: '保存',
       edit: '编辑',
       create: '创建',
+      update: '更新',
+      creating: '创建中...',
+      updating: '更新中...',
       
       // 通用操作
       actions: {
@@ -31,7 +34,8 @@ export const commonTranslations = {
         copy: '复制',
         share: '分享',
         download: '下载',
-        upload: '上传'
+        upload: '上传',
+        login: '去登录'
       },
 
       // 状态
@@ -83,6 +87,14 @@ export const commonTranslations = {
         results: '结果'
       },
 
+      // 语言
+      languages: {
+        zh: '简体中文',
+        zhTw: '繁體中文',
+        en: 'English',
+        vi: 'Tiếng Việt'
+      },
+
       // 表单
       form: {
         required: '必填',
@@ -94,7 +106,14 @@ export const commonTranslations = {
         tooShort: '太短',
         tooLong: '太长',
         confirm: '确认',
-        passwordMismatch: '密码不匹配'
+        passwordMismatch: '密码不匹配',
+        maxFiles: '最多只能上传5个文件',
+        loginRequired: '请先登录',
+        loginExpired: '登录已过期，请重新登录后再试',
+        checkInput: '请检查输入内容是否正确',
+        tooFrequent: '操作过于频繁，请稍后再试',
+        serverError: '服务器错误，请稍后重试',
+        networkError: '网络连接失败，请检查网络后重试'
       },
 
       // 文件
@@ -126,6 +145,15 @@ export const commonTranslations = {
         serverError: '服务器错误'
       },
 
+      // 确认对话框
+      confirm: {
+        abandonEdit: '放弃编辑',
+        closeConfirm: '确定要关闭吗？',
+        closeConfirmMessage: '未保存的内容将丢失。',
+        confirmClose: '确定关闭',
+        cancel: '取消'
+      },
+
       // 页脚
       footer: {
         defaultDescription: '一个现代化的社交平台，连接世界各地的用户',
@@ -151,6 +179,9 @@ export const commonTranslations = {
       save: '保存',
       edit: '編輯',
       create: '創建',
+      update: '更新',
+      creating: '創建中...',
+      updating: '更新中...',
       
       actions: {
         save: '保存',
@@ -173,7 +204,8 @@ export const commonTranslations = {
         copy: '複製',
         share: '分享',
         download: '下載',
-        upload: '上傳'
+        upload: '上傳',
+        login: '去登錄'
       },
 
       status: {
@@ -222,6 +254,14 @@ export const commonTranslations = {
         results: '結果'
       },
 
+      // 语言
+      languages: {
+        zh: '簡體中文',
+        zhTw: '繁體中文',
+        en: 'English',
+        vi: 'Tiếng Việt'
+      },
+
       form: {
         required: '必填',
         optional: '可選',
@@ -232,7 +272,14 @@ export const commonTranslations = {
         tooShort: '太短',
         tooLong: '太長',
         confirm: '確認',
-        passwordMismatch: '密碼不匹配'
+        passwordMismatch: '密碼不匹配',
+        maxFiles: '最多只能上傳5個文件',
+        loginRequired: '請先登錄',
+        loginExpired: '登錄已過期，請重新登錄後再試',
+        checkInput: '請檢查輸入內容是否正確',
+        tooFrequent: '操作過於頻繁，請稍後再試',
+        serverError: '服務器錯誤，請稍後重試',
+        networkError: '網絡連接失敗，請檢查網絡後重試'
       },
 
       file: {
@@ -262,6 +309,15 @@ export const commonTranslations = {
         serverError: '服務器錯誤'
       },
 
+      // 确认对话框
+      confirm: {
+        abandonEdit: '放棄編輯',
+        closeConfirm: '確定要關閉嗎？',
+        closeConfirmMessage: '未保存的內容將丟失。',
+        confirmClose: '確定關閉',
+        cancel: '取消'
+      },
+
       // 頁腳
       footer: {
         defaultDescription: '一個現代化的社交平台，連接世界各地的用戶',
@@ -287,6 +343,9 @@ export const commonTranslations = {
       save: 'Save',
       edit: 'Edit',
       create: 'Create',
+      update: 'Update',
+      creating: 'Creating...',
+      updating: 'Updating...',
       
       actions: {
         save: 'Save',
@@ -308,7 +367,8 @@ export const commonTranslations = {
         copy: 'Copy',
         share: 'Share',
         download: 'Download',
-        upload: 'Upload'
+        upload: 'Upload',
+        login: 'Go to Login'
       },
 
       status: {
@@ -357,6 +417,14 @@ export const commonTranslations = {
         results: 'results'
       },
 
+      // 语言
+      languages: {
+        zh: 'Simplified Chinese',
+        zhTw: 'Traditional Chinese',
+        en: 'English',
+        vi: 'Vietnamese'
+      },
+
       form: {
         required: 'Required',
         optional: 'Optional',
@@ -367,7 +435,14 @@ export const commonTranslations = {
         tooShort: 'Too short',
         tooLong: 'Too long',
         confirm: 'Confirm',
-        passwordMismatch: 'Passwords do not match'
+        passwordMismatch: 'Passwords do not match',
+        maxFiles: 'Maximum 5 files can be uploaded',
+        loginRequired: 'Please login first',
+        loginExpired: 'Login expired, please log in again and try again',
+        checkInput: 'Please check if your input is correct',
+        tooFrequent: 'Operation too frequent, please try again later',
+        serverError: 'Server error, please try again later',
+        networkError: 'Network connection failed, please check your network and try again'
       },
 
       file: {
@@ -397,6 +472,15 @@ export const commonTranslations = {
         serverError: 'Server error'
       },
 
+      // 确认对话框
+      confirm: {
+        abandonEdit: 'Abandon Edit',
+        closeConfirm: 'Are you sure you want to close?',
+        closeConfirmMessage: 'Unsaved content will be lost.',
+        confirmClose: 'Confirm Close',
+        cancel: 'Cancel'
+      },
+
       // Footer
       footer: {
         defaultDescription: 'A modern social platform connecting users worldwide',
@@ -422,6 +506,9 @@ export const commonTranslations = {
       save: 'Lưu',
       edit: 'Chỉnh sửa',
       create: 'Tạo',
+      update: 'Cập nhật',
+      creating: 'Đang tạo...',
+      updating: 'Đang cập nhật...',
       
       actions: {
         save: 'Lưu',
@@ -443,7 +530,8 @@ export const commonTranslations = {
         copy: 'Sao chép',
         share: 'Chia sẻ',
         download: 'Tải xuống',
-        upload: 'Tải lên'
+        upload: 'Tải lên',
+        login: 'Đi đến đăng nhập'
       },
 
       status: {
@@ -492,6 +580,14 @@ export const commonTranslations = {
         results: 'kết quả'
       },
 
+      // 语言
+      languages: {
+        zh: 'Tiếng Trung giản thể',
+        zhTw: 'Tiếng Trung phồn thể',
+        en: 'Tiếng Anh',
+        vi: 'Tiếng Việt'
+      },
+
       form: {
         required: 'Bắt buộc',
         optional: 'Tùy chọn',
@@ -502,7 +598,14 @@ export const commonTranslations = {
         tooShort: 'Quá ngắn',
         tooLong: 'Quá dài',
         confirm: 'Xác nhận',
-        passwordMismatch: 'Mật khẩu không khớp'
+        passwordMismatch: 'Mật khẩu không khớp',
+        maxFiles: 'Tối đa 5 tệp có thể được tải lên',
+        loginRequired: 'Vui lòng đăng nhập trước',
+        loginExpired: 'Đăng nhập đã hết hạn, vui lòng đăng nhập lại và thử lại',
+        checkInput: 'Vui lòng kiểm tra xem nội dung đầu vào có đúng không',
+        tooFrequent: 'Thao tác quá thường xuyên, vui lòng thử lại sau',
+        serverError: 'Lỗi máy chủ, vui lòng thử lại sau',
+        networkError: 'Kết nối mạng thất bại, vui lòng kiểm tra kết nối mạng và thử lại'
       },
 
       file: {
@@ -530,6 +633,15 @@ export const commonTranslations = {
         saveFailed: 'Lưu thất bại',
         networkError: 'Lỗi mạng',
         serverError: 'Lỗi máy chủ'
+      },
+
+      // 确认对话框
+      confirm: {
+        abandonEdit: 'Bỏ chỉnh sửa',
+        closeConfirm: 'Bạn có chắc chắn muốn đóng?',
+        closeConfirmMessage: 'Nội dung chưa lưu sẽ bị mất.',
+        confirmClose: 'Xác nhận đóng',
+        cancel: 'Hủy'
       },
 
       // Footer

@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import type { UserProfile, UserStats, NotificationSettings, EditProfileForm, ProfileTab } from '../types'
 
 export const useUserProfile = () => {
-  const { user, signOut } = useAuth()
+  const { user, session, signOut } = useAuth()
   const [activeTab, setActiveTab] = useState<ProfileTab>('overview')
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [userStats, setUserStats] = useState<UserStats>({
@@ -48,21 +48,26 @@ export const useUserProfile = () => {
       const profile = await socialService.getUserProfile(user.id)
       setUserProfile(profile)
       
-      if (profile) {
-        setEditForm({
-          full_name: profile.full_name || '',
-          bio: profile.bio || '',
-          location: profile.location || '',
-          website: profile.website || ''
-        })
-      } else {
+      // 生成默认数据（当profile为null时使用）
+      const defaultProfile = {
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+        bio: '',
+        location: '',
+        website: ''
+      };
+      
+      // 初始化编辑表单 - 优先使用profile，否则使用默认数据
+      const formData = profile ? {
+        full_name: profile.full_name || '',
+        bio: profile.bio || '',
+        location: profile.location || '',
+        website: profile.website || ''
+      } : defaultProfile;
+      
+      setEditForm(formData);
+      
+      if (!profile) {
         console.warn('用户资料为空，可能需要创建用户资料')
-        setEditForm({
-          full_name: '',
-          bio: '',
-          location: '',
-          website: ''
-        })
       }
       
       // 获取用户统计数据
@@ -90,13 +95,16 @@ export const useUserProfile = () => {
 
   // 保存用户资料
   const saveProfile = async () => {
-    if (!user || !userProfile) return
+    if (!user) return
     
     try {
       const updatedProfile = await socialService.updateUserProfile(user.id, editForm)
       setUserProfile(updatedProfile)
       setIsEditingProfile(false)
       toast.success('资料保存成功')
+      
+      // 保存成功后重新加载数据以确保同步
+      await loadUserData()
     } catch (error) {
       console.error('保存用户资料失败:', error)
       toast.error('保存用户资料失败')
@@ -131,29 +139,91 @@ export const useUserProfile = () => {
 
   // 上传头像
   const uploadAvatar = async (file: File) => {
-    if (!user) return
+    console.log('=== 头像上传开始 ===')
+    console.log('用户状态:', {
+      user: user ? { id: user.id, email: user.email } : null,
+      userExists: !!user
+    })
+    console.log('AuthContext session状态:', {
+      session: session ? { 
+        access_token: session.access_token ? `存在(长度: ${session.access_token.length})` : '不存在',
+        expires_at: session.expires_at,
+        user_id: session.user?.id
+      } : null,
+      sessionExists: !!session
+    })
+    
+    if (!user) {
+      console.error('用户未登录')
+      toast.error('请先登录后再上传头像')
+      return
+    }
     
     try {
-      const fileName = `avatar-${user.id}-${Date.now()}`
-      const { error } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file)
-
-      if (error) throw error
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName)
-
-      // 更新用户资料中的头像URL
-      await socialService.updateUserProfile(user.id, { avatar_url: publicUrl })
+      const formData = new FormData()
+      formData.append('avatar', file)
       
-      // 重新加载用户数据
-      loadUserData()
-      toast.success('头像上传成功')
+      let token: string | undefined
+      
+      // 优先使用AuthContext中的session
+      if (session?.access_token) {
+        token = session.access_token
+        console.log('使用AuthContext的token:', `存在(长度: ${token.length})`)
+      } else {
+        console.log('AuthContext session为空，尝试从supabase获取')
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+        console.log('从supabase获取session结果:', { 
+          sessionData: sessionData ? {
+            session: sessionData.session ? {
+              access_token: sessionData.session.access_token ? `存在(长度: ${sessionData.session.access_token.length})` : '不存在',
+              expires_at: sessionData.session.expires_at,
+              user_id: sessionData.session.user?.id
+            } : null
+          } : null,
+          sessionError 
+        })
+        
+        token = sessionData.session?.access_token
+      }
+      
+      console.log('最终使用的token:', token ? `存在(长度: ${token.length})` : '不存在')
+      
+      if (!token) {
+        console.error('无法获取认证令牌')
+        toast.error('认证已过期，请重新登录')
+        return
+      }
+      
+      console.log('发送头像上传请求...')
+      const response = await fetch('/api/users/avatar', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      })
+      
+      console.log('头像上传响应状态:', response.status)
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('头像上传失败响应:', errorData)
+        throw new Error(errorData.error || '头像上传失败')
+      }
+      
+      const result = await response.json()
+      console.log('头像上传成功响应:', result)
+      
+      // 更新本地用户资料状态
+      if (result.profile) {
+        setUserProfile(result.profile)
+      }
+      
+      toast.success(result.message || '头像上传成功')
+      console.log('=== 头像上传完成 ===')
     } catch (error) {
       console.error('头像上传失败:', error)
-      toast.error('头像上传失败')
+      toast.error(error instanceof Error ? error.message : '头像上传失败')
     }
   }
 
@@ -206,17 +276,45 @@ export const useUserProfile = () => {
     signOut,
     
     // UI操作
-    startEdit: () => setIsEditingProfile(true),
+    startEdit: () => {
+      // 生成默认数据
+      const defaultProfile = {
+        full_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || '',
+        bio: '',
+        location: '',
+        website: ''
+      };
+      
+      // 优先使用现有资料，否则使用默认数据
+      const formData = userProfile ? {
+        full_name: userProfile.full_name || '',
+        bio: userProfile.bio || '',
+        location: userProfile.location || '',
+        website: userProfile.website || ''
+      } : defaultProfile;
+      
+      setEditForm(formData);
+      setIsEditingProfile(true);
+    },
     cancelEdit: () => {
       setIsEditingProfile(false)
-      if (userProfile) {
-        setEditForm({
-          full_name: userProfile.full_name || '',
-          bio: userProfile.bio || '',
-          location: userProfile.location || '',
-          website: userProfile.website || ''
-        })
-      }
+      // 生成默认数据
+      const defaultProfile = {
+        full_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || '',
+        bio: '',
+        location: '',
+        website: ''
+      };
+      
+      // 恢复到原始数据或默认数据
+      const formData = userProfile ? {
+        full_name: userProfile.full_name || '',
+        bio: userProfile.bio || '',
+        location: userProfile.location || '',
+        website: userProfile.website || ''
+      } : defaultProfile;
+      
+      setEditForm(formData);
     }
   }
 }

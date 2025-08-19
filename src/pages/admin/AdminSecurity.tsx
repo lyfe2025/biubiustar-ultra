@@ -159,8 +159,7 @@ const AdminSecurity: React.FC = () => {
 
   // 解锁IP
   const handleUnlockIP = async (ip: string) => {
-    if (!confirm(`确定要解锁IP ${ip} 吗？`)) return
-    
+    // 这里可改为在按钮旁显示二次确认UI；先直接执行并用toast反馈
     try {
       await adminService.unlockIP(ip)
       toast.success('IP已成功解锁')

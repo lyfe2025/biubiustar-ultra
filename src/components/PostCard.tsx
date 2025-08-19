@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from 'react'
 import { Heart, MessageCircle, Share2, MoreHorizontal, User, Flag, Bookmark, Copy, Trash2 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/language'
 import { socialService } from '../lib/socialService'
 import type { Post } from '../types'
 import { formatDistanceToNow } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
+import { zhCN, enUS, vi } from 'date-fns/locale'
+import { toast } from 'sonner'
 
 interface PostCardProps {
   post: Post
@@ -14,8 +16,22 @@ interface PostCardProps {
   onShare?: (postId: string) => void
 }
 
+interface ContentCategory {
+  id: string
+  name: string
+  name_zh: string
+  name_zh_tw: string
+  name_en: string
+  name_vi: string
+  description?: string
+  color?: string
+  icon?: string
+  is_active: boolean
+}
+
 const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
   const { user } = useAuth()
+  const { language, t } = useLanguage()
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(post.likes_count || 0)
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0)
@@ -24,6 +40,9 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
   const [sharesCount, setSharesCount] = useState(post.shares_count || 0)
   const [showShareOptions, setShowShareOptions] = useState(false)
   const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [categories, setCategories] = useState<ContentCategory[]>([])
+  const [categoryDisplayName, setCategoryDisplayName] = useState<string>('')
 
   // 获取真实的评论数量
   const fetchCommentsCount = async () => {
@@ -34,6 +53,36 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
       console.error('获取评论数量失败:', error)
     }
   }
+
+  // 获取分类数据
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/categories/content')
+      if (response.ok) {
+        const data = await response.json()
+        setCategories(data.categories || [])
+      }
+    } catch (error) {
+      console.error('获取分类失败:', error)
+    }
+  }
+
+  // 根据当前语言获取分类名称
+  const getCategoryName = (category: ContentCategory): string => {
+    switch (language) {
+      case 'zh':
+        return category.name_zh || category.name
+      case 'zh-TW':
+        return category.name_zh_tw || category.name
+      case 'en':
+        return category.name_en || category.name
+      case 'vi':
+        return category.name_vi || category.name
+      default:
+        return category.name
+    }
+  }
+
   const moreMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -42,7 +91,27 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
     }
     // 获取真实的评论数量
     fetchCommentsCount()
+    // 获取分类数据
+    fetchCategories()
   }, [user, post.id])
+
+  // 当分类数据或语言变化时，更新分类显示名称
+  useEffect(() => {
+    if (categories.length > 0 && post.category) {
+      if (post.category === 'general') {
+        setCategoryDisplayName('通用')
+      } else {
+        const category = categories.find(cat => cat.id === post.category)
+        if (category) {
+          setCategoryDisplayName(getCategoryName(category))
+        } else {
+          setCategoryDisplayName(post.category)
+        }
+      }
+    } else if (post.category) {
+      setCategoryDisplayName(post.category === 'general' ? '通用' : post.category)
+    }
+  }, [categories, post.category, language])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -69,7 +138,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
 
   const handleLike = async () => {
     if (!user) {
-      alert('请先登录')
+      toast.error(t('posts.card.loginRequired'))
       return
     }
 
@@ -84,7 +153,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
       onLike?.(post.id)
     } catch (error) {
       console.error('点赞失败:', error)
-      alert('操作失败，请重试')
+      toast.error('操作失败，请重试')
     } finally {
       setIsLoading(false)
     }
@@ -106,7 +175,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
       setShowShareOptions(!showShareOptions);
       
       // 显示成功提示
-      alert('分享成功！');
+      toast.success(t('posts.card.shareSuccess'));
       
       // 调用父组件回调
       if (onShare) {
@@ -114,7 +183,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
       }
     } catch (error) {
       console.error('分享失败:', error);
-      alert('分享失败，请重试');
+      toast.error('分享失败，请重试');
     }
   }
 
@@ -125,49 +194,87 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
   const handleCopyLink = () => {
     const postUrl = `${window.location.origin}/post/${post.id}`
     navigator.clipboard.writeText(postUrl)
-    alert('帖子链接已复制到剪贴板')
+    toast.success(t('posts.card.copySuccess'))
     setShowMoreMenu(false)
   }
 
   const handleBookmark = () => {
     // TODO: 实现收藏功能
-    alert('收藏功能开发中')
+    toast.info(t('posts.card.bookmarkComingSoon'))
     setShowMoreMenu(false)
   }
 
   const handleReport = () => {
     // TODO: 实现举报功能
-    alert('举报功能开发中')
+    toast.info(t('posts.card.reportComingSoon'))
     setShowMoreMenu(false)
   }
 
   const handleDelete = async () => {
     if (!user || user.id !== post.author?.id) {
-      alert('只能删除自己的帖子')
+      toast.error(t('posts.card.onlyDeleteOwn'))
       return
     }
 
-    if (confirm('确定要删除这个帖子吗？')) {
-      try {
-        await socialService.deletePost(post.id)
-        alert('帖子已删除')
-        // TODO: 刷新帖子列表
-      } catch (error) {
-        console.error('删除帖子失败:', error)
-        alert('删除失败，请重试')
-      }
+    try {
+      await socialService.deletePost(post.id)
+      toast.success(t('posts.card.deleteSuccess'))
+      // TODO: 刷新帖子列表
+    } catch (error) {
+      console.error('删除帖子失败:', error)
+      toast.error(t('posts.card.deleteFailed'))
     }
     setShowMoreMenu(false)
+    setShowDeleteConfirm(false)
   }
 
   const formatDate = (dateString: string) => {
     try {
-      return formatDistanceToNow(new Date(dateString), {
+      // 根据当前语言选择对应的 locale
+      let locale
+      switch (language) {
+        case 'zh':
+          locale = zhCN
+          break
+        case 'zh-TW':
+          locale = zhCN // 繁体中文使用相同的 locale
+          break
+        case 'en':
+          locale = enUS
+          break
+        case 'vi':
+          locale = vi
+          break
+        default:
+          locale = zhCN
+      }
+
+      const result = formatDistanceToNow(new Date(dateString), {
         addSuffix: true,
-        locale: zhCN
+        locale: locale
       })
+
+      // 如果当前语言不是英文，需要手动翻译后缀
+      if (language !== 'en') {
+        return result
+          .replace('less than a minute ago', t('posts.time.justNow'))
+          .replace('minute ago', t('posts.time.minuteAgo'))
+          .replace('minutes ago', t('posts.time.minutesAgo'))
+          .replace('hour ago', t('posts.time.hourAgo'))
+          .replace('hours ago', t('posts.time.hoursAgo'))
+          .replace('day ago', t('posts.time.dayAgo'))
+          .replace('days ago', t('posts.time.daysAgo'))
+          .replace('week ago', t('posts.time.weekAgo'))
+          .replace('weeks ago', t('posts.time.weeksAgo'))
+          .replace('month ago', t('posts.time.monthAgo'))
+          .replace('months ago', t('posts.time.monthsAgo'))
+          .replace('year ago', t('posts.time.yearAgo'))
+          .replace('years ago', t('posts.time.yearsAgo'))
+      }
+
+      return result
     } catch {
-      return '刚刚'
+      return t('posts.time.justNow')
     }
   }
 
@@ -189,7 +296,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
           </div>
           <div>
             <h4 className="font-medium text-gray-900">
-              {post.author?.username || '匿名用户'}
+              {post.author?.username || t('posts.card.anonymousUser')}
             </h4>
             <p className="text-sm text-gray-500">
               {formatDate(post.created_at)}
@@ -211,7 +318,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
                 className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
               >
                 <Copy className="w-4 h-4" />
-                <span>复制链接</span>
+                <span>{t('posts.card.copyLink')}</span>
               </button>
               
               <button
@@ -219,16 +326,16 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
                 className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
               >
                 <Bookmark className="w-4 h-4" />
-                <span>收藏</span>
+                <span>{t('posts.card.bookmark')}</span>
               </button>
               
               {user && user.id === post.author?.id && (
                 <button
-                  onClick={handleDelete}
+                  onClick={() => setShowDeleteConfirm(true)}
                   className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
                 >
                   <Trash2 className="w-4 h-4" />
-                  <span>删除</span>
+                  <span>{t('posts.card.delete')}</span>
                 </button>
               )}
               
@@ -238,7 +345,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
                   className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
                 >
                   <Flag className="w-4 h-4" />
-                  <span>举报</span>
+                  <span>{t('posts.card.report')}</span>
                 </button>
               )}
             </div>
@@ -271,7 +378,7 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
       {post.category && (
         <div className="flex flex-wrap gap-1 mt-2">
           <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-            #{post.category}
+            #{categoryDisplayName || post.category}
           </span>
         </div>
       )}
@@ -307,10 +414,42 @@ const PostCard = ({ post, onLike, onComment, onShare }: PostCardProps) => {
             className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all duration-200"
           >
             <Share2 className="w-4 h-4" />
-            <span className="text-sm font-medium">分享</span>
+            <span className="text-sm font-medium">{t('posts.card.share')}</span>
           </button>
         </div>
       </div>
+
+      {/* 删除确认对话框 */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div 
+            className="absolute inset-0"
+            onClick={() => setShowDeleteConfirm(false)}
+          />
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 relative z-10">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {t('posts.card.delete')}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {t('posts.card.deleteConfirm')}
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                {t('posts.card.delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

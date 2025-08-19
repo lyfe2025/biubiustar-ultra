@@ -7,6 +7,8 @@ import ContentList from './ContentList'
 import ContentPreview from './ContentPreview'
 import CategoryManagement from './CategoryManagement'
 import { useContentManagement } from './hooks/useContentManagement'
+import CreateContentCategoryForm from './CreateContentCategoryForm'
+import EditContentCategoryForm from './EditContentCategoryForm'
 
 const AdminContent = () => {
   const { t } = useLanguage()
@@ -73,10 +75,9 @@ const AdminContent = () => {
   }
 
   const handleDeletePost = async (post: any) => {
-    if (window.confirm(`确定要删除帖子 "${post.title}" 吗？此操作无法撤销。`)) {
-      await deletePost(post.id)
-      closePreview()
-    }
+    // 调用外层已有的删除确认弹窗能力（内容预览里已有模态）
+    await deletePost(post.id)
+    closePreview()
   }
 
   const handlePreviewUpdateStatus = async (status: any) => {
@@ -88,10 +89,8 @@ const AdminContent = () => {
 
   const handlePreviewDelete = async () => {
     if (selectedPost) {
-      if (window.confirm(`确定要删除帖子 "${selectedPost.title}" 吗？此操作无法撤销。`)) {
-        await deletePost(selectedPost.id)
-        closePreview()
-      }
+      await deletePost(selectedPost.id)
+      closePreview()
     }
   }
 
@@ -261,11 +260,11 @@ const AdminContent = () => {
             categories={contentCategories}
             loading={loading}
             searchTerm={categorySearchTerm}
-            setSearchTerm={setCategorySearchTerm}
+            onSearchChange={setCategorySearchTerm}
             onCreate={openCreateCategoryModal}
             onEdit={openEditCategoryModal}
             onDelete={openDeleteCategoryConfirm}
-            onToggle={toggleCategoryStatus}
+            onToggleStatus={toggleCategoryStatus}
           />
         )}
 
@@ -278,8 +277,44 @@ const AdminContent = () => {
           onDelete={handlePreviewDelete}
         />
 
-        {/* 分类管理模态框 - 这里应该添加创建/编辑分类的模态框 */}
-        {/* 由于原文件太大，这些模态框组件可以后续添加 */}
+        {/* 创建内容分类模态框 */}
+        {showCreateCategoryModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeAllModals} />
+            <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                  {t('admin.content.categories.create')}
+                </h2>
+                
+                <CreateContentCategoryForm
+                  onSubmit={createContentCategory}
+                  onCancel={closeAllModals}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 编辑内容分类模态框 */}
+        {showEditCategoryModal && selectedCategory && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeAllModals} />
+            <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                  {t('admin.content.categories.edit')}
+                </h2>
+                
+                <EditContentCategoryForm
+                  category={selectedCategory}
+                  onSubmit={(data) => updateContentCategory(selectedCategory.id, data)}
+                  onCancel={closeAllModals}
+                />
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* 删除确认对话框 */}
         {showDeleteCategoryConfirm && selectedCategory && (

@@ -9,42 +9,74 @@ import PostCard from '../components/PostCard'
 import CommentModal from '../components/CommentModal'
 import { usePageTitle } from '../hooks/usePageTitle'
 
+// 内容分类接口
+interface ContentCategory {
+  id: string
+  name: string
+  name_zh: string
+  name_zh_tw: string
+  name_en: string
+  name_vi: string
+  description?: string
+  color?: string
+  icon?: string
+}
+
 export default function Trending() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { user } = useAuth()
   usePageTitle(t('trending.title'))
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [posts, setPosts] = useState<Post[]>([])
+  const [categories, setCategories] = useState<ContentCategory[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [selectedPostTitle, setSelectedPostTitle] = useState('')
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
 
+  // 根据当前语言获取分类名称
+  const getCategoryName = (category: ContentCategory): string => {
+    switch (language) {
+      case 'zh-TW':
+        return category.name_zh_tw || category.name_zh || category.name
+      case 'en':
+        return category.name_en || category.name
+      case 'vi':
+        return category.name_vi || category.name
+      default:
+        return category.name_zh || category.name
+    }
+  }
+
+  // 加载分类数据
+  const loadCategories = async () => {
+    try {
+      const categoriesData = await socialService.getContentCategories(language)
+      setCategories(categoriesData)
+    } catch (error) {
+      console.error('加载分类失败:', error)
+      setCategories([])
+    }
+  }
+
   useEffect(() => {
-    console.log('=== Trending页面已加载，开始调用API ===');
     loadTrendingPosts();
-    
-    // 3秒后强制再次调用
-    const timer = setTimeout(() => {
-      console.log('=== 3秒后强制调用API ===');
-      loadTrendingPosts();
-    }, 3000);
-    
-    return () => clearTimeout(timer);
+    loadCategories();
   }, []);
+
+  // 语言变化时重新加载分类
+  useEffect(() => {
+    loadCategories();
+  }, [language]);
 
   const loadTrendingPosts = async () => {
     setIsLoading(true)
     try {
-      console.log('开始加载热门帖子...')
-      const trendingData = await socialService.getTrendingPosts(20)
-      console.log('热门帖子数据:', trendingData)
-      console.log('数据类型:', typeof trendingData, '是否为数组:', Array.isArray(trendingData))
-      console.log('数据长度:', trendingData?.length)
-      setPosts(trendingData)
+      const data = await socialService.getTrendingPosts()
+      setPosts(data)
     } catch (error) {
-      console.error('加载热门帖子失败:', error)
+      console.error('Error loading trending posts:', error)
       setPosts([])
     } finally {
       setIsLoading(false)
@@ -83,11 +115,13 @@ export default function Trending() {
     }
   }
 
-  const categories = [
-    { id: 'all', label: t('trending.all') },
-    { id: 'culture', label: t('trending.culture') },
-    { id: 'tech', label: t('trending.tech') },
-    { id: 'food', label: t('trending.food') }
+  // 构建分类选项（包含"全部"选项）
+  const categoryOptions = [
+    { id: 'all', label: t('trending.categories.all') },
+    ...categories.map(category => ({
+      id: category.id,
+      label: getCategoryName(category)
+    }))
   ]
 
   const filteredPosts = posts.filter(post => {
@@ -125,22 +159,11 @@ export default function Trending() {
             </div>
           </div>
 
-          {/* Debug Button */}
-          <div className="flex justify-center mb-4">
-            <button
-              onClick={() => {
-                console.log('强制刷新热门帖子...')
-                loadTrendingPosts()
-              }}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-            >
-              强制刷新数据
-            </button>
-          </div>
+
 
           {/* Filters */}
           <div className="flex flex-wrap justify-center gap-4">
-            {categories.map((category) => (
+            {categoryOptions.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}

@@ -31,6 +31,15 @@ export interface ContentCategory {
   is_active: boolean
   created_at: string
   updated_at: string
+  // 多语言字段
+  name_zh?: string
+  name_zh_tw?: string
+  name_en?: string
+  name_vi?: string
+  description_zh?: string
+  description_zh_tw?: string
+  description_en?: string
+  description_vi?: string
 }
 
 export interface ContentFiltersProps {
@@ -61,11 +70,11 @@ export interface CategoryManagementProps {
   categories: ContentCategory[]
   loading: boolean
   searchTerm: string
-  setSearchTerm: (term: string) => void
+  onSearchChange: (term: string) => void
   onCreate: () => void
   onEdit: (category: ContentCategory) => void
   onDelete: (category: ContentCategory) => void
-  onToggle: (category: ContentCategory) => void
+  onToggleStatus: (category: ContentCategory) => void
 }
 
 export interface NewCategoryData {
@@ -73,4 +82,14 @@ export interface NewCategoryData {
   description: string
   color: string
   icon: string
+  sort_order: number
+  // 多语言字段
+  name_zh?: string
+  name_zh_tw?: string
+  name_en?: string
+  name_vi?: string
+  description_zh?: string
+  description_zh_tw?: string
+  description_en?: string
+  description_vi?: string
 }

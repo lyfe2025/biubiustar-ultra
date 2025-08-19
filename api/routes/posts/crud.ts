@@ -117,11 +117,17 @@ router.get('/:id', async (req: Request, res: Response) => {
 // Create new post
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { title, content, category, tags, images, user_id } = req.body;
+    const { title, content, category, tags, images, image_url, user_id } = req.body;
 
     if (!title?.trim() || !content?.trim() || !user_id) {
       sendValidationError(res, '标题、内容和用户ID不能为空');
       return;
+    }
+
+    // Handle images array - use first image as image_url or use provided image_url
+    let finalImageUrl = image_url;
+    if (images && Array.isArray(images) && images.length > 0) {
+      finalImageUrl = images[0];
     }
 
     const postData = {
@@ -129,7 +135,7 @@ router.post('/', async (req: Request, res: Response) => {
       content: content.trim(),
       category: category || 'general',
       tags: tags || [],
-      images: images || [],
+      image_url: finalImageUrl || null,
       user_id,
       status: 'published',
       created_at: new Date().toISOString(),
@@ -160,7 +166,7 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, content, category, tags, images, user_id } = req.body;
+    const { title, content, category, tags, images, image_url, user_id } = req.body;
 
     if (!user_id) {
       sendValidationError(res, '用户ID不能为空');
@@ -197,7 +203,15 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (content !== undefined) updateData.content = content.trim();
     if (category !== undefined) updateData.category = category;
     if (tags !== undefined) updateData.tags = tags;
-    if (images !== undefined) updateData.images = images;
+    
+    // Handle images array - use first image as image_url or use provided image_url
+    if (images !== undefined || image_url !== undefined) {
+      let finalImageUrl = image_url;
+      if (images && Array.isArray(images) && images.length > 0) {
+        finalImageUrl = images[0];
+      }
+      updateData.image_url = finalImageUrl || null;
+    }
 
     const { data: post, error } = await supabaseAdmin
       .from('posts')

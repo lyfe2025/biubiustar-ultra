@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import { X, Send, Trash2, User } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/language'
 import { socialService } from '../lib/socialService'
 import type { Comment } from '../types'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
+import { toast } from 'sonner'
 
 interface CommentModalProps {
   isOpen: boolean
@@ -16,6 +18,7 @@ interface CommentModalProps {
 
 const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps) => {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -42,7 +45,7 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) {
-      alert('请先登录')
+      toast.error('请先登录')
       return
     }
     if (!newComment.trim()) return
@@ -58,7 +61,7 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
       setNewComment('')
     } catch (error) {
       console.error('发表评论失败:', error)
-      alert('发表评论失败，请重试')
+      toast.error('发表评论失败，请重试')
     } finally {
       setIsSubmitting(false)
     }
@@ -66,14 +69,14 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
 
   const handleDeleteComment = async (commentId: string) => {
     if (!user) return
-    if (!confirm('确定要删除这条评论吗？')) return
+    if (!window.confirm('确定要删除这条评论吗？')) return
 
     try {
       await socialService.deleteComment(commentId, user.id)
       setComments(prev => prev.filter(comment => comment.id !== commentId))
     } catch (error) {
       console.error('删除评论失败:', error)
-      alert('删除评论失败，请重试')
+      toast.error('删除评论失败，请重试')
     }
   }
 
@@ -96,7 +99,7 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
         {/* 头部 */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">评论</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('posts.comments.title')}</h2>
             <p className="text-sm text-gray-500 mt-1 truncate">{postTitle}</p>
           </div>
           <button
@@ -115,7 +118,7 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
             </div>
           ) : comments.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500">暂无评论，快来发表第一条评论吧！</p>
+              <p className="text-gray-500">{t('posts.comments.noComments')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -136,7 +139,7 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
                     <div className="bg-gray-50 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-sm text-gray-900">
-                          {comment.author?.username || '匿名用户'}
+                          {comment.author?.username || t('posts.card.anonymousUser')}
                         </span>
                         <div className="flex items-center space-x-2">
                           <span className="text-xs text-gray-500">
@@ -182,7 +185,7 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="写下你的评论..."
+                  placeholder={t('posts.comments.placeholder')}
                   className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   rows={3}
                   disabled={isSubmitting}
@@ -199,19 +202,19 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
                     )}
                   >
                     <Send className="w-4 h-4" />
-                    <span>{isSubmitting ? '发送中...' : '发送'}</span>
+                    <span>{isSubmitting ? t('common.actions.loading') : t('posts.comments.submit')}</span>
                   </button>
                 </div>
               </div>
             </form>
           ) : (
             <div className="text-center py-4">
-              <p className="text-gray-500 mb-3">请登录后发表评论</p>
+              <p className="text-gray-500 mb-3">{t('posts.card.loginRequired')}</p>
               <button
                 onClick={onClose}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
-                去登录
+                {t('common.actions.login')}
               </button>
             </div>
           )}

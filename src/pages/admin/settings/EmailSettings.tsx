@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Mail, Eye, EyeOff, CheckCircle } from 'lucide-react'
 import { useLanguage } from '../../../contexts/language'
 import { SettingsSectionProps, EmailSettingsData } from './types'
+import { toast } from 'sonner'
 
 const EmailSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUpdate }) => {
   const { t } = useLanguage()
@@ -47,9 +48,9 @@ const EmailSettings: React.FC<SettingsSectionProps> = ({ settings, loading, onUp
     try {
       // 这里应该调用测试邮件的API
       await new Promise(resolve => setTimeout(resolve, 2000)) // 模拟API调用
-      alert('测试邮件发送成功！')
+      toast.success('测试邮件发送成功！')
     } catch (error) {
-      alert('测试邮件发送失败，请检查配置')
+      toast.error('测试邮件发送失败，请检查配置')
     } finally {
       setTesting(false)
     }
