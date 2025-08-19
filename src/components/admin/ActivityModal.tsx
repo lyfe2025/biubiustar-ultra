@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { XCircle, MapPin, Calendar, Users, Tag, User } from 'lucide-react'
+import { XCircle, User, MapPin, Calendar, Tag, Users, UserCheck } from 'lucide-react'
 import { AdminActivity } from '../../services/AdminService'
 import { useLanguage } from '../../contexts/language'
-import { ActivityCategory, ActivityService } from '../../lib/activityService'
+import { ActivityService, ActivityCategory, ActivityParticipant } from '../../lib/activityService'
 import { getCategoryName } from '../../utils/categoryUtils'
 
 interface ActivityModalProps {
@@ -17,19 +17,52 @@ interface ActivityModalProps {
 const ActivityModal: React.FC<ActivityModalProps> = ({ activity, isOpen, onClose, onEdit, onDelete, onToggleFeatured }) => {
   const { t, language } = useLanguage()
   const [categories, setCategories] = useState<ActivityCategory[]>([])
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false)
+  const [participants, setParticipants] = useState<ActivityParticipant[]>([])
+  const [isLoadingParticipants, setIsLoadingParticipants] = useState(false)
+  const [participantsError, setParticipantsError] = useState<string | null>(null)
+  const [showParticipants, setShowParticipants] = useState(false)
 
   // 加载分类数据
   useEffect(() => {
     const loadCategories = async () => {
+      setIsLoadingCategories(true);
       try {
-        const categoryData = await ActivityService.getActivityCategories(language);
-        setCategories(categoryData);
+        const categoriesData = await ActivityService.getActivityCategories();
+        setCategories(categoriesData);
       } catch (error) {
         console.error('Failed to load categories:', error);
+      } finally {
+        setIsLoadingCategories(false);
       }
     };
+
     loadCategories();
-  }, [language]);
+  }, []);
+
+  // 加载参与人员数据
+  const loadParticipants = async () => {
+    if (!activity?.id) return;
+    
+    setIsLoadingParticipants(true);
+    setParticipantsError(null);
+    try {
+      const participantsData = await ActivityService.getActivityParticipants(activity.id);
+      setParticipants(participantsData);
+    } catch (error) {
+      console.error('Failed to load participants:', error);
+      setParticipantsError('加载参与人员失败');
+    } finally {
+      setIsLoadingParticipants(false);
+    }
+  };
+
+  // 当显示参与人员时加载数据
+  useEffect(() => {
+    if (showParticipants && activity?.id) {
+      loadParticipants();
+    }
+  }, [showParticipants, activity?.id]);
 
   if (!isOpen || !activity) return null
 
@@ -143,11 +176,22 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, isOpen, onClose
               <div className="flex-shrink-0">
                 <Users className="w-5 h-5 text-gray-400" />
               </div>
-              <div>
+              <div className="flex-1">
                 <div className="text-sm font-medium text-gray-900">{t('admin.activities.table.participants')}</div>
-                <div className="text-sm text-gray-500">
-                  {activity.current_participants}
-                  {activity.max_participants && ` / ${activity.max_participants}`}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <span className="text-sm text-gray-500">
+                      {activity.current_participants}
+                      {activity.max_participants && ` / ${activity.max_participants}`}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setShowParticipants(!showParticipants)}
+                    className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                    {showParticipants ? '隐藏参与人员' : '查看参与人员'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -172,6 +216,68 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, isOpen, onClose
               </div>
             </div>
           </div>
+
+          {/* 参与人员列表 */}
+          {showParticipants && (
+            <div className="mb-6">
+              <h5 className="text-sm font-medium text-gray-900 mb-3">参与人员</h5>
+              {isLoadingParticipants ? (
+                <div className="text-center py-4">
+                  <div className="text-sm text-gray-500">加载中...</div>
+                </div>
+              ) : participantsError ? (
+                <div className="text-center py-4">
+                  <div className="text-sm text-red-500">{participantsError}</div>
+                  <button
+                    onClick={loadParticipants}
+                    className="mt-2 text-blue-600 hover:text-blue-800 text-sm"
+                  >
+                    重试
+                  </button>
+                </div>
+              ) : participants.length > 0 ? (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {participants.map((participant, index) => (
+                       <div key={participant.id || index} className="flex items-center space-x-3 p-2 bg-white rounded border">
+                         <div className="flex-shrink-0">
+                           {participant.user?.avatar_url ? (
+                             <img
+                               src={participant.user.avatar_url}
+                               alt={participant.user.username || participant.user.full_name}
+                               className="w-8 h-8 rounded-full object-cover"
+                             />
+                           ) : (
+                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                               <User className="w-4 h-4 text-blue-600" />
+                             </div>
+                           )}
+                         </div>
+                         <div className="flex-1 min-w-0">
+                           <div className="text-sm font-medium text-gray-900 truncate">
+                             {participant.user?.full_name || participant.user?.username || '未知用户'}
+                           </div>
+                           <div className="text-xs text-gray-500">
+                             参与时间：{new Date(participant.joined_at).toLocaleDateString('zh-CN', {
+                               year: 'numeric',
+                               month: 'short',
+                               day: 'numeric',
+                               hour: '2-digit',
+                               minute: '2-digit'
+                             })}
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4 bg-gray-50 rounded-lg">
+                  <div className="text-sm text-gray-500">暂无参与人员</div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 活动描述 */}
           <div className="mb-6">

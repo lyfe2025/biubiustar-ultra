@@ -157,7 +157,7 @@ export class ActivityService {
   }
 
   // 获取活动参与者
-  static async getActivityParticipants(activityId: string): Promise<unknown[]> {
+  static async getActivityParticipants(activityId: string): Promise<ActivityParticipant[]> {
     try {
       const response = await fetch(`/api/activities/${activityId}/participants`);
       if (!response.ok) {

@@ -146,45 +146,64 @@ router.get('/:id/participants', async (req: Request, res: Response): Promise<Res
     const { id } = req.params;
     const { limit = 50, offset = 0 } = req.query;
 
-    const { data, error } = await supabase
+    // 首先获取活动参与者记录
+    const { data: participants, error: participantsError } = await supabase
       .from('activity_participants')
-      .select(`
-        id,
-        activity_id,
-        user_id,
-        joined_at,
-        user_profiles!inner(
-          id,
-          username,
-          full_name,
-          avatar_url
-        )
-      `)
+      .select('id, activity_id, user_id, joined_at')
       .eq('activity_id', id)
       .order('joined_at', { ascending: false })
       .range(Number(offset), Number(offset) + Number(limit) - 1);
 
-    if (error) {
-      console.error('Error fetching activity participants:', error);
+    if (participantsError) {
+      console.error('Error fetching activity participants:', participantsError);
       return res.status(500).json({ error: 'Failed to fetch activity participants' });
     }
 
+    if (!participants || participants.length === 0) {
+      return res.json([]);
+    }
+
+    // 获取所有参与者的用户ID
+    const userIds = participants.map(p => p.user_id);
+
+    // 查询用户资料信息
+    const { data: userProfiles, error: profilesError } = await supabase
+      .from('user_profiles')
+      .select('id, username, full_name, avatar_url')
+      .in('id', userIds);
+
+    if (profilesError) {
+      console.error('Error fetching user profiles:', profilesError);
+      return res.status(500).json({ error: 'Failed to fetch user profiles' });
+    }
+
+    // 创建用户资料映射
+    const profilesMap = new Map();
+    userProfiles?.forEach(profile => {
+      profilesMap.set(profile.id, profile);
+    });
+
     // 格式化返回数据
-    const formattedParticipants = (data as any[])?.map((participant: any) => {
-      const userProfile = participant.user_profiles as any;
+    const formattedParticipants = participants.map(participant => {
+      const userProfile = profilesMap.get(participant.user_id);
       return {
         id: participant.id,
         activity_id: participant.activity_id,
         user_id: participant.user_id,
         joined_at: participant.joined_at,
-        user: {
+        user: userProfile ? {
           id: userProfile.id,
           username: userProfile.username,
           full_name: userProfile.full_name,
           avatar_url: userProfile.avatar_url
+        } : {
+          id: participant.user_id,
+          username: '未知用户',
+          full_name: '未知用户',
+          avatar_url: null
         }
       };
-    }) || [];
+    });
 
     res.json(formattedParticipants);
   } catch (error) {

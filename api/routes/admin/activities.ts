@@ -64,9 +64,29 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
       userMap.set(user.id, user)
     })
 
+    // 批量获取所有活动的参与人数
+    const activityIds = activities?.map(activity => activity.id) || []
+    const participantsCountMap = new Map()
+    
+    if (activityIds.length > 0) {
+      // 查询所有活动的参与人数
+      const { data: participantsData } = await supabaseAdmin
+        .from('activity_participants')
+        .select('activity_id')
+        .in('activity_id', activityIds)
+      
+      // 统计每个活动的参与人数
+      participantsData?.forEach(participant => {
+        const activityId = participant.activity_id
+        participantsCountMap.set(activityId, (participantsCountMap.get(activityId) || 0) + 1)
+      })
+    }
+
     // 转换数据格式以匹配AdminService接口
     const formattedActivities = activities?.map(activity => {
       const user = userMap.get(activity.user_id)
+      const actualParticipants = participantsCountMap.get(activity.id) || 0
+      
       return {
         id: activity.id,
         title: activity.title,
@@ -77,7 +97,7 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
         end_date: activity.end_date,
         status: activity.status,
         category: activity.category || 'general',
-        current_participants: activity.current_participants || 0,
+        current_participants: actualParticipants, // 使用实际查询的参与人数
         max_participants: activity.max_participants || 0,
         is_featured: false,
         tags: [],
