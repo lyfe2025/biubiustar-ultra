@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase.js'
 import { requireAdmin } from '../auth.js'
+import asyncHandler from '../../../middleware/asyncHandler.js'
 
 const router = Router()
 
@@ -8,7 +9,7 @@ const router = Router()
 router.use(requireAdmin)
 
 // 获取系统设置
-router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { category } = req.query
     let query = supabaseAdmin
@@ -98,10 +99,10 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     console.error('获取系统设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 保存系统设置
-router.put('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const settings = req.body
     
@@ -221,6 +222,6 @@ router.put('/', async (req: Request, res: Response): Promise<Response | void> =>
     console.error('保存系统设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 export default router

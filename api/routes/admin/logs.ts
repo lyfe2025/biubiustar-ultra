@@ -1,13 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { requireAdmin } from './auth';
 import { supabaseAdmin } from '../../lib/supabase';
+import asyncHandler from '../../middleware/asyncHandler.js';
 
 const router = Router();
 
 
 
 // 获取活动日志列表
-router.get('/', requireAdmin, async (req: Request, res: Response) => {
+router.get('/', requireAdmin, asyncHandler(async (req: Request, res: Response) => {
   try {
     const {
       page = 1,
@@ -73,6 +74,6 @@ router.get('/', requireAdmin, async (req: Request, res: Response) => {
     console.error('获取活动日志异常:', error);
     res.status(500).json({ error: 'INTERNAL_SERVER_ERROR' });
   }
-});
+}));
 
 export default router;

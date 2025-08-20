@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { supabaseAdmin } from '../../lib/supabase';
 import { sendSuccess, sendError } from '../../utils/response';
+import asyncHandler from '../../middleware/asyncHandler.js';
 
 const router = Router();
 
@@ -10,7 +11,7 @@ const router = Router();
  * @access Public
  * @query lang - 语言代码 (zh, zh-tw, en, vi)，默认为 zh
  */
-router.get('/', async (req, res) => {
+router.get('/', asyncHandler(async (req, res) => {
   try {
     const lang = req.query.lang as string || 'zh';
     
@@ -59,6 +60,6 @@ router.get('/', async (req, res) => {
     console.error('Error in GET /api/categories/content:', error);
     return sendError(res, '服务器内部错误', 500);
   }
-});
+}));
 
 export default router;

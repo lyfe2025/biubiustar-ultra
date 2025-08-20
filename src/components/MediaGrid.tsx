@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { Play, X, ZoomIn } from 'lucide-react'
 import { MediaFile } from '../types'
+import LazyImage from './LazyImage'
 import { cn } from '../lib/utils'
 
 interface MediaGridProps {
@@ -20,7 +21,7 @@ interface MediaPreviewModalProps {
   showNavigation?: boolean
 }
 
-const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
+const MediaPreviewModal: React.FC<MediaPreviewModalProps> = React.memo(({
   mediaFile,
   isOpen,
   onClose,
@@ -62,11 +63,14 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
         {/* 媒体内容 */}
         <div className="w-full h-full flex items-center justify-center">
           {mediaFile.file_type === 'image' ? (
-            <img
-              src={mediaFile.file_url}
-              alt="预览"
-              className="max-w-full max-h-full object-contain"
-            />
+            <LazyImage
+                  src={mediaFile.file_url}
+                  alt="预览"
+                  className="max-w-full max-h-full"
+                  objectFit="contain"
+                  loading="lazy"
+                  fallback="/images/placeholder-activity.svg"
+                />
           ) : (
             <video
               src={mediaFile.file_url}
@@ -80,9 +84,9 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
       </div>
     </div>
   )
-}
+})
 
-const MediaGrid: React.FC<MediaGridProps> = ({
+const MediaGrid: React.FC<MediaGridProps> = React.memo(({
   mediaFiles,
   className,
   itemClassName,
@@ -96,43 +100,43 @@ const MediaGrid: React.FC<MediaGridProps> = ({
   }
 
   // 限制显示的媒体文件数量
-  const displayFiles = mediaFiles.slice(0, maxItems)
-  const hasMore = mediaFiles.length > maxItems
+  const displayFiles = useMemo(() => mediaFiles.slice(0, maxItems), [mediaFiles, maxItems])
+  const hasMore = useMemo(() => mediaFiles.length > maxItems, [mediaFiles.length, maxItems])
 
   // 根据文件数量确定响应式网格布局
-  const getGridClass = (count: number) => {
+  const getGridClass = useCallback((count: number) => {
     if (count === 1) return 'grid-cols-1'
     if (count === 2) return 'grid-cols-1 sm:grid-cols-2'
     if (count <= 4) return 'grid-cols-2 sm:grid-cols-2'
     if (count <= 6) return 'grid-cols-2 sm:grid-cols-3'
     return 'grid-cols-2 sm:grid-cols-3'
-  }
+  }, [])
 
   // 根据文件数量确定响应式高度
-  const getHeightClass = (count: number) => {
+  const getHeightClass = useCallback((count: number) => {
     if (count === 1) return 'aspect-video max-h-80'
     if (count === 2) return 'aspect-square'
     if (count <= 4) return 'aspect-square'
     return 'aspect-square'
-  }
+  }, [])
 
-  const handleMediaClick = (index: number) => {
+  const handleMediaClick = useCallback((index: number) => {
     if (showPreview) {
       setPreviewIndex(index)
     }
-  }
+  }, [showPreview])
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (previewIndex !== null && previewIndex > 0) {
       setPreviewIndex(previewIndex - 1)
     }
-  }
+  }, [previewIndex])
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (previewIndex !== null && previewIndex < displayFiles.length - 1) {
       setPreviewIndex(previewIndex + 1)
     }
-  }
+  }, [previewIndex, displayFiles.length])
 
   return (
     <>      <div className={cn(
@@ -153,11 +157,13 @@ const MediaGrid: React.FC<MediaGridProps> = ({
           >
             {mediaFile.file_type === 'image' ? (
               <>
-                <img
+                <LazyImage
                   src={mediaFile.file_url}
                   alt={`媒体文件 ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  objectFit="cover"
                   loading="lazy"
+                  fallback="/images/placeholder-activity.svg"
                 />
                 {showPreview && (
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -169,11 +175,13 @@ const MediaGrid: React.FC<MediaGridProps> = ({
               <>
                 <div className="w-full h-full relative">
                   {mediaFile.thumbnail_url ? (
-                    <img
+                    <LazyImage
                       src={mediaFile.thumbnail_url}
                       alt={`视频缩略图 ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full"
+                      objectFit="cover"
                       loading="lazy"
+                      fallback="/images/placeholder-activity.svg"
                     />
                   ) : (
                     <video
@@ -219,7 +227,7 @@ const MediaGrid: React.FC<MediaGridProps> = ({
       )}
     </>
   )
-}
+})
 
 export default MediaGrid
 export { MediaPreviewModal }

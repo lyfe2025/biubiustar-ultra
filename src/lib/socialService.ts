@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { apiCache } from '../services/apiCache'
 import type { Post as PostType, Comment as CommentType, User } from '../types'
 
 // 使用导入的类型别名
@@ -180,6 +181,10 @@ class SocialService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      // 清除相关缓存
+      apiCache.invalidatePattern(`post_liked_status:*:${postId}:*`);
+      apiCache.invalidatePattern(`post_likes_count:*:${postId}:*`);
     } catch (error) {
       console.error('Error liking post:', error);
       throw error;
@@ -188,21 +193,28 @@ class SocialService {
 
   // 检查用户是否已点赞帖子
   async isPostLiked(postId: string, userId: string): Promise<boolean> {
-    try {
-      const response = await fetch(`/api/posts/${postId}/likes/${userId}`);
-      if (response.status === 404) {
-        return false;
-      }
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.isLiked || false;
-    } catch (error) {
-      console.error('Error checking if post is liked:', error);
-      return false;
-    }
+    return apiCache.cached(
+      'post_liked_status',
+      async () => {
+        try {
+          const response = await fetch(`/api/posts/${postId}/likes/${userId}`);
+          if (response.status === 404) {
+            return false;
+          }
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          return data.isLiked || false;
+        } catch (error) {
+          console.error('Error checking if post is liked:', error);
+          return false;
+        }
+      },
+      { postId, userId },
+      1 * 60 * 1000 // 1分钟缓存
+    );
   }
 
   // 取消点赞帖子
@@ -232,6 +244,10 @@ class SocialService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      // 清除相关缓存
+      apiCache.invalidatePattern(`post_liked_status:*:${postId}:*`);
+      apiCache.invalidatePattern(`post_likes_count:*:${postId}:*`);
     } catch (error) {
       console.error('Error unliking post:', error);
       throw error;
@@ -240,34 +256,48 @@ class SocialService {
 
   // 获取帖子点赞数
   async getPostLikesCount(postId: string): Promise<number> {
-    try {
-      const response = await fetch(`/api/posts/${postId}/likes/count`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.count || 0;
-    } catch (error) {
-      console.error('Error fetching post likes count:', error);
-      return 0;
-    }
+    return apiCache.cached(
+      'post_likes_count',
+      async () => {
+        try {
+          const response = await fetch(`/api/posts/${postId}/likes/count`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          return data.count || 0;
+        } catch (error) {
+          console.error('Error fetching post likes count:', error);
+          return 0;
+        }
+      },
+      { postId },
+      2 * 60 * 1000 // 2分钟缓存
+    );
   }
 
   // 获取帖子评论数量
   async getPostCommentsCount(postId: string): Promise<number> {
-    try {
-      const response = await fetch(`/api/comments/${postId}/count`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.data?.count || 0;
-    } catch (error) {
-      console.error('Error fetching post comments count:', error);
-      return 0;
-    }
+    return apiCache.cached(
+      'post_comments_count',
+      async () => {
+        try {
+          const response = await fetch(`/api/comments/${postId}/count`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          return data.data?.count || 0;
+        } catch (error) {
+          console.error('Error fetching post comments count:', error);
+          return 0;
+        }
+      },
+      { postId },
+      2 * 60 * 1000 // 2分钟缓存
+    );
   }
 
   // 分享帖子 - 纯前端操作，不需要登录
@@ -346,6 +376,10 @@ class SocialService {
       }
       
       const data = await response.json();
+      
+      // 清除相关缓存
+      apiCache.invalidatePattern(`post_comments_count:*:${comment.post_id}:*`);
+      
       // 后端API返回格式: {success: true, data: formattedComment}
       // 需要返回data.data以获取实际的评论对象
       return data.data || data;
@@ -417,6 +451,13 @@ class SocialService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      // 清除相关缓存
+      apiCache.invalidatePattern(`user_followed_status:*:${followerId}:*`);
+      apiCache.invalidatePattern(`user_following_count:*:${followerId}:*`);
+      apiCache.invalidatePattern(`user_followers_count:*:${followingId}:*`);
+      apiCache.invalidatePattern(`user_stats:*:${followerId}:*`);
+      apiCache.invalidatePattern(`user_stats:*:${followingId}:*`);
     } catch (error) {
       console.error('Error following user:', error);
       throw error;
@@ -449,6 +490,13 @@ class SocialService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      // 清除相关缓存
+      apiCache.invalidatePattern(`user_followed_status:*:${followerId}:*`);
+      apiCache.invalidatePattern(`user_following_count:*:${followerId}:*`);
+      apiCache.invalidatePattern(`user_followers_count:*:${followingId}:*`);
+      apiCache.invalidatePattern(`user_stats:*:${followerId}:*`);
+      apiCache.invalidatePattern(`user_stats:*:${followingId}:*`);
     } catch (error) {
       console.error('Error unfollowing user:', error);
       throw error;
@@ -457,21 +505,28 @@ class SocialService {
 
   // 检查是否已关注用户
   async isUserFollowed(followerId: string, followingId: string): Promise<boolean> {
-    try {
-      const response = await fetch(`/api/follows/${followerId}/${followingId}/status`);
-      if (response.status === 404) {
-        return false;
-      }
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.isFollowing || false;
-    } catch (error) {
-      console.error('Error checking follow status:', error);
-      return false;
-    }
+    return apiCache.cached(
+      'user_followed_status',
+      async () => {
+        try {
+          const response = await fetch(`/api/follows/${followerId}/${followingId}/status`);
+          if (response.status === 404) {
+            return false;
+          }
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          return data.isFollowing || false;
+        } catch (error) {
+          console.error('Error checking follow status:', error);
+          return false;
+        }
+      },
+      { followerId, followingId },
+      2 * 60 * 1000 // 2分钟缓存
+    );
   }
 
   // 检查是否关注用户
@@ -495,34 +550,48 @@ class SocialService {
 
   // 获取用户关注数
   async getUserFollowingCount(userId: string): Promise<number> {
-    try {
-      const response = await fetch(`/api/users/${userId}/following/count`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.count || 0;
-    } catch (error) {
-      console.error('Error fetching following count:', error);
-      return 0;
-    }
+    return apiCache.cached(
+      'user_following_count',
+      async () => {
+        try {
+          const response = await fetch(`/api/users/${userId}/following/count`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          return data.count || 0;
+        } catch (error) {
+          console.error('Error fetching following count:', error);
+          return 0;
+        }
+      },
+      { userId },
+      5 * 60 * 1000 // 5分钟缓存
+    );
   }
 
   // 获取用户粉丝数
   async getUserFollowersCount(userId: string): Promise<number> {
-    try {
-      const response = await fetch(`/api/users/${userId}/followers/count`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.count || 0;
-    } catch (error) {
-      console.error('Error fetching followers count:', error);
-      return 0;
-    }
+    return apiCache.cached(
+      'user_followers_count',
+      async () => {
+        try {
+          const response = await fetch(`/api/users/${userId}/followers/count`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          return data.count || 0;
+        } catch (error) {
+          console.error('Error fetching followers count:', error);
+          return 0;
+        }
+      },
+      { userId },
+      5 * 60 * 1000 // 5分钟缓存
+    );
   }
 
   // 获取用户关注的人列表
@@ -668,22 +737,29 @@ class SocialService {
     followersCount: number;
     followingCount: number;
   }> {
-    try {
-      const response = await fetch(`/api/users/${userId}/stats`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return {
-        postsCount: data.postsCount || 0,
-        followersCount: data.followersCount || 0,
-        followingCount: data.followingCount || 0
-      };
-    } catch (error) {
-      console.error('Error fetching user stats:', error);
-      throw error;
-    }
+    return apiCache.cached(
+      'user_stats',
+      async () => {
+        try {
+          const response = await fetch(`/api/users/${userId}/stats`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          return {
+            postsCount: data.postsCount || 0,
+            followersCount: data.followersCount || 0,
+            followingCount: data.followingCount || 0
+          };
+        } catch (error) {
+          console.error('Error fetching user stats:', error);
+          throw error;
+        }
+      },
+      { userId },
+      5 * 60 * 1000 // 5分钟缓存
+    );
   }
 
   // 获取热门帖子
@@ -758,21 +834,28 @@ class SocialService {
 
   // 获取用户资料
   async getUserProfile(userId: string): Promise<User | null> {
-    try {
-      const response = await fetch(`/api/users/${userId}`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          return null;
+    return apiCache.cached(
+      'user_profile',
+      async () => {
+        try {
+          const response = await fetch(`/api/users/${userId}`);
+          if (!response.ok) {
+            if (response.status === 404) {
+              return null;
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          throw error;
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      throw error;
-    }
+      },
+      { userId },
+      10 * 60 * 1000 // 10分钟缓存
+    );
   }
 
   // 获取内容分类

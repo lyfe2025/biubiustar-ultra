@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { XCircle, Upload, Calendar, MapPin, Users, Tag, FileText, Image } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
 import { toast } from 'sonner'
+import LazyImage from '../LazyImage'
 
 import { adminService } from '../../services/AdminService'
 
@@ -488,22 +489,13 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
               {/* 图片预览 */}
               {newActivityData.image && (
                 <div className="mb-4 relative inline-block">
-                  <img 
+                  <LazyImage
                     src={newActivityData.image.startsWith('/') ? `${window.location.origin}${newActivityData.image}` : newActivityData.image}
-                    alt="活动图片预览" 
-                    className="w-32 h-32 object-cover border border-gray-300 rounded-lg"
-                    onError={(e) => {
-                      console.warn('图片加载失败:', newActivityData.image)
-                      const target = e.target as HTMLImageElement
-                      target.src = '/images/placeholder-activity.svg'
-                      target.onerror = () => {
-                        target.style.display = 'none'
-                        console.error('备用图片也加载失败')
-                      }
-                    }}
-                    onLoad={() => {
-                      console.log('图片加载成功:', newActivityData.image)
-                    }}
+                    alt="活动图片预览"
+                    className="w-32 h-32 border border-gray-300 rounded-lg"
+                    objectFit="cover"
+                    fallback="/images/placeholder-activity.svg"
+                    loading="lazy"
                   />
                   <button
                     type="button"

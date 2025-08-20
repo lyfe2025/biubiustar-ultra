@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express'
 import { getClientIP, getLoginAttempts } from '../../middleware/security'
 import { supabaseAdmin } from '../../lib/supabase'
+import asyncHandler from '../../middleware/asyncHandler.js'
 
 const router = Router()
 
 // 获取当前IP的安全状态
-router.get('/security-status', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/security-status', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const clientIP = getClientIP(req)
     
@@ -40,6 +41,6 @@ router.get('/security-status', async (req: Request, res: Response): Promise<Resp
       error: '获取安全状态失败'
     })
   }
-})
+}))
 
 export default router

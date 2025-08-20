@@ -4,11 +4,12 @@
  */
 import { Router, Request, Response } from 'express';
 import { supabase } from '../../lib/supabase';
+import asyncHandler from '../../middleware/asyncHandler.js';
 
 const router = Router();
 
 // GET /api/users/:id/posts - 获取用户帖子列表
-router.get('/:id/posts', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/posts', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { 
@@ -93,10 +94,10 @@ router.get('/:id/posts', async (req: Request, res: Response): Promise<Response |
     console.error('Error in GET /users/:id/posts:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // GET /api/users/:id/activities - 获取用户参加的活动列表
-router.get('/:id/activities', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/activities', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { 
@@ -172,10 +173,10 @@ router.get('/:id/activities', async (req: Request, res: Response): Promise<Respo
     console.error('Error in GET /users/:id/activities:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // GET /api/users/:id/created-activities - 获取用户创建的活动
-router.get('/:id/created-activities', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/created-activities', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { 
@@ -210,6 +211,6 @@ router.get('/:id/created-activities', async (req: Request, res: Response): Promi
     console.error('Error in GET /users/:id/created-activities:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 export default router;

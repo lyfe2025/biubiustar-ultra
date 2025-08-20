@@ -6,7 +6,8 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { supabase } from '../../lib/supabase';
+import { supabaseAdmin } from '../../lib/supabase.js';
+import { asyncHandler } from '../../middleware/asyncHandler';
 import { UploadSecurity, DEFAULT_UPLOAD_CONFIGS } from '../../utils/uploadSecurity';
 
 const router = Router();
@@ -33,76 +34,65 @@ const upload = multer({
 });
 
 // GET /api/users/:id/profile - 获取用户资料
-router.get('/:id/profile', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
-    const { id } = req.params;
+router.get('/:id/profile', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+  const { id } = req.params;
 
-    // 获取用户基本信息
-    const { data: user, error: userError } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle();
+  // 获取用户基本信息
+  const { data: user, error: userError } = await supabaseAdmin
+    .from('user_profiles')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
 
-    if (userError) {
-      console.error('Error fetching user profile:', userError);
-      res.status(500).json({ error: 'Failed to fetch user profile' });
-      return;
-    }
+  if (userError) {
+    console.error('Error fetching user profile:', userError);
+    res.status(500).json({ error: 'Failed to fetch user profile' });
+    return;
+  }
 
-    if (!user) {
+  if (!user) {
+    res.status(404).json({ error: 'User not found' });
+    return;
+  }
+
+  res.json(user);
+}));
+
+// PUT /api/users/:id/profile - 更新用户资料
+router.put('/:id/profile', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  // 移除不允许更新的字段
+  const { id: _id, created_at: _createdAt, updated_at: _updatedAt, ...allowedData } = updateData;
+  // 避免未使用变量警告
+  void _id; void _createdAt; void _updatedAt;
+
+  const { data, error } = await supabaseAdmin
+    .from('user_profiles')
+    .update({
+      ...allowedData,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
       res.status(404).json({ error: 'User not found' });
       return;
     }
-
-    res.json(user);
-  } catch (error) {
-    console.error('Error in GET /users/:id/profile:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ error: 'Failed to update user profile' });
+    return;
   }
-});
 
-// PUT /api/users/:id/profile - 更新用户资料
-router.put('/:id/profile', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
-
-    // 移除不允许更新的字段
-    const { id: _id, created_at: _createdAt, updated_at: _updatedAt, ...allowedData } = updateData;
-    // 避免未使用变量警告
-    void _id; void _createdAt; void _updatedAt;
-
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .update({
-        ...allowedData,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        res.status(404).json({ error: 'User not found' });
-        return;
-      }
-      console.error('Error updating user profile:', error);
-      res.status(500).json({ error: 'Failed to update user profile' });
-      return;
-    }
-
-    res.json(data);
-  } catch (error) {
-    console.error('Error in PUT /users/:id/profile:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+  res.json(data);
+}));
 
 // POST /api/users/avatar - 上传用户头像
-router.post('/avatar', upload.single('avatar'), async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.post('/avatar', upload.single('avatar'), asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const file = req.file;
     const authHeader = req.headers.authorization;
 
@@ -123,7 +113,7 @@ router.post('/avatar', upload.single('avatar'), async (req: Request, res: Respon
     console.log('提取的token长度:', token.length);
     
     // 验证用户身份
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     if (authError || !user) {
       console.error('用户认证失败:', authError);
       res.status(401).json({ error: '认证失败' });
@@ -168,7 +158,7 @@ router.post('/avatar', upload.single('avatar'), async (req: Request, res: Respon
     const avatarUrl = `${req.protocol}://${req.get('host')}${relativePath}`;
 
     // 更新用户资料中的头像URL
-    const { data: updatedProfile, error: updateError } = await supabase
+    const { data: updatedProfile, error: updateError } = await supabaseAdmin
       .from('user_profiles')
       .update({ 
         avatar_url: avatarUrl,
@@ -200,10 +190,6 @@ router.post('/avatar', upload.single('avatar'), async (req: Request, res: Respon
       }
     });
 
-  } catch (error) {
-    console.error('头像上传处理错误:', error);
-    res.status(500).json({ error: '服务器内部错误' });
-  }
-});
+}));
 
 export default router;

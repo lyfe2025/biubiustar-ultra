@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase.js'
 import { requireAdmin } from '../auth.js'
+import asyncHandler from '../../../middleware/asyncHandler.js'
 
 const router = Router()
 
@@ -10,7 +11,7 @@ router.use(requireAdmin)
 // ==================== 活动分类管理 API ====================
 
 // 获取所有分类
-router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { data: categories, error } = await supabaseAdmin
       .from('activity_categories')
@@ -27,10 +28,10 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     console.error('获取分类列表失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 创建新分类
-router.post('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { 
       name, description, color, icon,
@@ -96,10 +97,10 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
     console.error('创建分类失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 更新分类
-router.put('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { 
@@ -188,10 +189,10 @@ router.put('/:id', async (req: Request, res: Response): Promise<Response | void>
     console.error('更新分类失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 删除分类
-router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
 
@@ -227,10 +228,10 @@ router.delete('/:id', async (req: Request, res: Response): Promise<Response | vo
     console.error('删除分类失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 切换分类状态
-router.put('/:id/toggle', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:id/toggle', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
 
@@ -266,6 +267,6 @@ router.put('/:id/toggle', async (req: Request, res: Response): Promise<Response 
     console.error('切换分类状态失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 export default router

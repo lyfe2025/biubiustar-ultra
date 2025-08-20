@@ -6,6 +6,7 @@ import { sendResponse, sendValidationError } from '../../utils/response.js'
 import { authenticateToken } from '../../middleware/auth.js'
 import { UploadSecurity, DEFAULT_UPLOAD_CONFIGS } from '../../utils/uploadSecurity.js'
 import { VideoThumbnailGenerator } from '../../utils/videoThumbnail.js'
+import asyncHandler from '../../middleware/asyncHandler.js'
 
 const router = Router()
 
@@ -40,8 +41,7 @@ const upload = multer({
 })
 
 // 上传帖子媒体文件（图片和视频）
-router.post('/media', authenticateToken, upload.array('files', 9), async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.post('/media', authenticateToken, upload.array('files', 9), asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const files = req.files as Express.Multer.File[]
     
     if (!files || files.length === 0) {
@@ -140,16 +140,10 @@ router.post('/media', authenticateToken, upload.array('files', 9), async (req: R
       files: uploadedFiles,
       count: uploadedFiles.length
     }, '媒体文件上传成功', 201)
-    
-  } catch (error) {
-    console.error('[UPLOAD_SECURITY] 帖子媒体上传失败:', error)
-    sendResponse(res, false, null, '媒体文件上传失败', 500)
-  }
-})
+}))
 
 // 删除帖子媒体文件
-router.delete('/media', authenticateToken, async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.delete('/media', authenticateToken, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { filename } = req.body
     
     if (!filename) {
@@ -188,15 +182,10 @@ router.delete('/media', authenticateToken, async (req: Request, res: Response): 
     } else {
       sendResponse(res, false, null, '文件不存在', 404)
     }
-  } catch (error) {
-    console.error('[UPLOAD_SECURITY] 删除帖子媒体文件失败:', error)
-    sendResponse(res, false, null, '文件删除失败', 500)
-  }
-})
+}))
 
 // 获取帖子媒体文件列表
-router.get('/media', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.get('/media', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'posts')
     
     if (!fs.existsSync(uploadsDir)) {
@@ -237,10 +226,6 @@ router.get('/media', async (req: Request, res: Response): Promise<Response | voi
       .sort((a, b) => b.modified.getTime() - a.modified.getTime()) // 按修改时间排序
     
     sendResponse(res, true, { files })
-  } catch (error) {
-    console.error('获取帖子媒体文件列表失败:', error)
-    sendResponse(res, false, null, '获取文件列表失败', 500)
-  }
-})
+}))
 
 export default router

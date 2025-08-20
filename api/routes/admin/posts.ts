@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { supabaseAdmin, supabase } from '../../lib/supabase'
 import { requireAdmin } from './auth'
+import asyncHandler from '../../middleware/asyncHandler.js'
 
 const router = Router()
 
@@ -8,7 +9,7 @@ const router = Router()
 router.use(requireAdmin)
 
 // 获取所有帖子（内容管理）
-router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // 获取分页参数
     const page = parseInt(req.query.page as string) || 1
@@ -112,10 +113,10 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     console.error('获取帖子列表失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 更新帖子状态
-router.put('/:id/status', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:id/status', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { status } = req.body
@@ -139,10 +140,10 @@ router.put('/:id/status', async (req: Request, res: Response): Promise<Response 
     console.error('更新帖子状态失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 删除帖子
-router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
 
@@ -166,6 +167,6 @@ router.delete('/:id', async (req: Request, res: Response): Promise<Response | vo
     console.error('删除帖子失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 export default router

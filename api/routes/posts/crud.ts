@@ -2,11 +2,12 @@ import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../../lib/supabase.js';
 import { sendResponse, sendValidationError, sendNotFoundError, sendUnauthorizedError } from '../../utils/response.js';
 import { validatePostStatus } from '../../utils/validation.js';
+import { asyncHandler } from '../../middleware/asyncHandler.js';
 
 const router = Router();
 
 // Get all posts with pagination and filtering
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { 
       page = '1', 
@@ -128,10 +129,10 @@ router.get('/', async (req: Request, res: Response) => {
     console.error('Error in get posts:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Get single post by ID
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -198,10 +199,10 @@ router.get('/:id', async (req: Request, res: Response) => {
     console.error('Error in get post:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Create new post
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { title, content, category, tags, images, image_url, video, thumbnail, user_id, media_files } = req.body;
 
@@ -286,10 +287,10 @@ router.post('/', async (req: Request, res: Response) => {
     console.error('Error in create post:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Update post
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { title, content, category, tags, images, image_url, video, thumbnail, user_id } = req.body;
@@ -352,10 +353,10 @@ router.put('/:id', async (req: Request, res: Response) => {
     console.error('Error in update post:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Delete post
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
@@ -399,10 +400,10 @@ router.delete('/:id', async (req: Request, res: Response) => {
     console.error('Error in delete post:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Update post status (admin only)
-router.put('/:id/status', async (req: Request, res: Response) => {
+router.put('/:id/status', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status, user_id } = req.body;
@@ -457,6 +458,6 @@ router.put('/:id/status', async (req: Request, res: Response) => {
     console.error('Error in update post status:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 export default router;

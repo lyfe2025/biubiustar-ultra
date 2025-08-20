@@ -1,10 +1,11 @@
 import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase.js'
+import asyncHandler from '../../../middleware/asyncHandler.js'
 
 const router = Router()
 
-// 获取公开的系统设置（供前台使用）
-router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
+// 获取公开设置
+router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // 只获取公开的设置
     const { data: settings, error } = await supabaseAdmin
@@ -82,13 +83,13 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     
     res.json({ success: true, data: result });
   } catch (error) {
-    console.error('获取公开系统设置失败:', error)
+    console.error('获取分类设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
-// 获取特定分类的公开设置
-router.get('/:category', async (req: Request, res: Response): Promise<Response | void> => {
+// 获取指定分类的公开设置
+router.get('/:category', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { category } = req.params
     
@@ -171,6 +172,6 @@ router.get('/:category', async (req: Request, res: Response): Promise<Response |
     console.error('获取公开系统设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 export default router

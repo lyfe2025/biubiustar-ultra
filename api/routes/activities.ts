@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { supabase, createUserClient, supabaseAdmin } from '../lib/supabase';
 import { authenticateToken } from '../middleware/auth';
+import asyncHandler from '../middleware/asyncHandler.js';
 
 const router = Router();
 
-// GET /api/activities - 获取活动列表
-router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
+// GET /api/activities - 获取所有活动
+router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { 
       limit = 10, 
@@ -60,10 +61,10 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     console.error('Error in GET /activities:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // GET /api/activities/upcoming - 获取即将到来的活动
-router.get('/upcoming', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/upcoming', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { limit = 10 } = req.query;
     const now = new Date().toISOString();
@@ -99,10 +100,10 @@ router.get('/upcoming', async (req: Request, res: Response): Promise<Response | 
     console.error('Error in GET /activities/upcoming:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
-// GET /api/activities/:id - 获取单个活动
-router.get('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+// GET /api/activities/:id - 获取单个活动详情
+router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 
@@ -138,10 +139,10 @@ router.get('/:id', async (req: Request, res: Response): Promise<Response | void>
     console.error('Error in GET /activities/:id:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // GET /api/activities/:id/participants - 获取活动参与者
-router.get('/:id/participants', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/participants', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { limit = 50, offset = 0 } = req.query;
@@ -210,10 +211,10 @@ router.get('/:id/participants', async (req: Request, res: Response): Promise<Res
     console.error('Error in GET /activities/:id/participants:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // GET /api/activities/:id/participants/:userId - 检查用户是否参与了特定活动
-router.get('/:id/participants/:userId', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/participants/:userId', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id, userId } = req.params;
 
@@ -258,10 +259,10 @@ router.get('/:id/participants/:userId', async (req: Request, res: Response): Pro
     console.error('Error in GET /activities/:id/participants/:userId:', error);
     res.status(500).json({ error: 'Internal server error', isParticipating: false });
   }
-});
+}));
 
 // POST /api/activities - 创建活动
-router.post('/', authenticateToken, async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/', authenticateToken, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const {
       title,
@@ -356,10 +357,10 @@ router.post('/', authenticateToken, async (req: Request, res: Response): Promise
     console.error('Error in POST /activities:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // PUT /api/activities/:id - 更新活动
-router.put('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -389,10 +390,10 @@ router.put('/:id', async (req: Request, res: Response): Promise<Response | void>
     console.error('Error in PUT /activities/:id:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // DELETE /api/activities/:id - 删除活动
-router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 
@@ -411,10 +412,10 @@ router.delete('/:id', async (req: Request, res: Response): Promise<Response | vo
     console.error('Error in DELETE /activities/:id:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // POST /api/activities/:id/join - 加入活动
-router.post('/:id/join', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/:id/join', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
@@ -476,10 +477,10 @@ router.post('/:id/join', async (req: Request, res: Response): Promise<Response |
     console.error('Error in POST /activities/:id/join:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // DELETE /api/activities/:id/leave - 离开活动
-router.delete('/:id/leave', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/:id/leave', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
@@ -519,6 +520,6 @@ router.delete('/:id/leave', async (req: Request, res: Response): Promise<Respons
     console.error('Error in DELETE /activities/:id/leave:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 export default router;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Calendar, MapPin, Users, Clock, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/language/LanguageContext';
 import { getCategoryName } from '../utils/categoryUtils';
 import { toast } from 'sonner';
+import LazyImage from './LazyImage';
 import { categoriesCache, type ActivityCategory } from '../services/categoriesCache';
 import { batchStatusService } from '../services/batchStatusService';
 
@@ -21,7 +22,7 @@ interface ActivityCardProps {
   initialParticipantCount?: number;
 }
 
-export const ActivityCard: React.FC<ActivityCardProps> = ({ 
+export const ActivityCard: React.FC<ActivityCardProps> = React.memo(({ 
   activity, 
   onParticipationChange, 
   simplified = false,
@@ -46,7 +47,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
     loadCategories();
   }, [language]);
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const categoriesData = await categoriesCache.getActivityCategories(language);
       setCategories(categoriesData || []);
@@ -54,9 +55,9 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
       console.error('Failed to load categories:', error);
       setCategories([]);
     }
-  };
+  }, [language]);
 
-  const checkParticipation = async () => {
+  const checkParticipation = useCallback(async () => {
     if (!user) return;
     
     // 如果已有初始数据，则不需要重新检查
@@ -70,9 +71,9 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
       // 如果检查失败，默认设置为未参与状态
       setIsParticipating(false);
     }
-  };
+  }, [user, activity.id, initialIsParticipating]);
 
-  const handleParticipation = async () => {
+  const handleParticipation = useCallback(async () => {
     if (!user) {
       toast.error(t('activities.messages.loginRequired'));
       return;
@@ -127,9 +128,9 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, t, isLoading, isParticipating, activity.id, activity.max_participants, participantCount, checkParticipation, onParticipationChange]);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -145,10 +146,10 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
     }
     
     return `${month}${monthText}${day}${dayText} ${hours}:${minutes}`;
-  };
+  }, [t]);
 
   // 获取活动状态
-  const getActivityStatus = () => {
+  const activityStatus = useMemo(() => {
     const now = new Date();
     const startDate = new Date(activity.start_date);
     const endDate = new Date(activity.end_date);
@@ -160,11 +161,10 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
     } else {
       return { status: t('activities.status.completed'), color: 'bg-gray-500/30 text-gray-300' };
     }
-  };
+  }, [activity.start_date, activity.end_date, t]);
 
-  const activityStatus = getActivityStatus();
-  const isActivityFull = participantCount >= activity.max_participants;
-  const isActivityPast = activityStatus.status === t('activities.status.completed');
+  const isActivityFull = useMemo(() => participantCount >= activity.max_participants, [participantCount, activity.max_participants]);
+  const isActivityPast = useMemo(() => activityStatus.status === t('activities.status.completed'), [activityStatus.status, t]);
 
   // 简化模式渲染
   if (simplified) {
@@ -172,10 +172,12 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
       <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-purple-200 group">
         {/* 活动图片 */}
         <div className="aspect-video overflow-hidden relative">
-          <img
+          <LazyImage
             src={activity.image_url || '/images/placeholder-activity.svg'}
             alt={activity.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+            objectFit="cover"
+            loading="lazy"
           />
           {/* 状态标签 */}
           <div className="absolute top-3 left-3">
@@ -229,10 +231,12 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
     <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-50 hover:border-purple-100 group transform hover:-translate-y-2">
       {/* 活动图片 */}
       <Link to={`/activities/${activity.id}`} className="block relative overflow-hidden">
-        <img
+        <LazyImage
           src={activity.image_url || '/images/placeholder-activity.svg'}
           alt={activity.title}
-          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-64 group-hover:scale-110 transition-transform duration-500"
+          objectFit="cover"
+          loading="lazy"
         />
         {/* 渐变遮罩 */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -252,7 +256,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
         {/* 分类标签 */}
         <div className="absolute top-4 right-4">
           <span className="px-4 py-2 bg-purple-600/90 text-white rounded-full text-sm font-bold backdrop-blur-md border-2 border-white/20 shadow-lg shadow-purple-600/30">
-            {(() => {
+            {useMemo(() => {
               // 如果categories还没有加载完成，显示loading或者原始分类名
               if (!categories || categories.length === 0) {
                 return activity.category || '未知分类';
@@ -282,7 +286,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
               }
 
               return activity.category || '未知分类';
-            })()}
+            }, [categories, activity.category_id, activity.category, language])}
           </span>
         </div>
         
@@ -399,4 +403,6 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
       </div>
     </div>
   );
-};
+});
+
+export default ActivityCard;

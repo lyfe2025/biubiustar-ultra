@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin, verifyAuthToken } from '../../lib/supabase.js';
 import { sendResponse, sendValidationError, sendNotFoundError } from '../../utils/response.js';
+import asyncHandler from '../../middleware/asyncHandler.js';
 
 const router = Router();
 
 // Like a post
-router.post('/:id/like', async (req: Request, res: Response) => {
+router.post('/:id/like', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     
@@ -77,10 +78,10 @@ router.post('/:id/like', async (req: Request, res: Response) => {
     console.error('Error in like post:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Unlike a post
-router.delete('/:id/like', async (req: Request, res: Response) => {
+router.delete('/:id/like', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     
@@ -113,10 +114,10 @@ router.delete('/:id/like', async (req: Request, res: Response) => {
     console.error('Error in unlike post:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Get post likes count
-router.get('/:id/likes/count', async (req: Request, res: Response) => {
+router.get('/:id/likes/count', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -137,10 +138,10 @@ router.get('/:id/likes/count', async (req: Request, res: Response) => {
     console.error('Error in get likes count:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Check if user liked a post
-router.get('/:id/likes/:userId', async (req: Request, res: Response) => {
+router.get('/:id/likes/:userId', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id, userId } = req.params;
 
@@ -163,10 +164,10 @@ router.get('/:id/likes/:userId', async (req: Request, res: Response) => {
     console.error('Error in check like status:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Share a post
-router.post('/:id/share', async (req: Request, res: Response) => {
+router.post('/:id/share', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { user_id, platform } = req.body;
@@ -215,6 +216,6 @@ router.post('/:id/share', async (req: Request, res: Response) => {
     console.error('Error in share post:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 export default router;

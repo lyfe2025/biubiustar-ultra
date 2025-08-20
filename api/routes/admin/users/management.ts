@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase'
 import { clearAuthUsersCache } from './cache'
 import { requireAdmin } from '../auth'
+import asyncHandler from '../../../middleware/asyncHandler.js'
 
 const router = Router()
 
@@ -9,7 +10,7 @@ const router = Router()
 router.use(requireAdmin)
 
 // 更新用户状态
-router.patch('/:id/status', async (req: Request, res: Response): Promise<Response | void> => {
+router.patch('/:id/status', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { status } = req.body
@@ -43,10 +44,10 @@ router.patch('/:id/status', async (req: Request, res: Response): Promise<Respons
     console.error('更新用户状态失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 更新用户角色
-router.patch('/:id/role', async (req: Request, res: Response): Promise<Response | void> => {
+router.patch('/:id/role', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { role } = req.body
@@ -80,10 +81,10 @@ router.patch('/:id/role', async (req: Request, res: Response): Promise<Response 
     console.error('更新用户角色失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 更新用户密码
-router.patch('/:id/password', async (req: Request, res: Response): Promise<Response | void> => {
+router.patch('/:id/password', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { password } = req.body
@@ -115,10 +116,10 @@ router.patch('/:id/password', async (req: Request, res: Response): Promise<Respo
     console.error('更新用户密码失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 批量更新用户状态
-router.patch('/batch/status', async (req: Request, res: Response): Promise<Response | void> => {
+router.patch('/batch/status', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { userIds, status } = req.body
 
@@ -153,10 +154,10 @@ router.patch('/batch/status', async (req: Request, res: Response): Promise<Respo
     console.error('批量更新用户状态失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 重置用户密码（生成临时密码）
-router.post('/:id/reset-password', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/:id/reset-password', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
 
@@ -190,10 +191,10 @@ router.post('/:id/reset-password', async (req: Request, res: Response): Promise<
     console.error('重置用户密码失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 锁定/解锁用户账户
-router.patch('/:id/lock', async (req: Request, res: Response): Promise<Response | void> => {
+router.patch('/:id/lock', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { locked } = req.body
@@ -231,6 +232,6 @@ router.patch('/:id/lock', async (req: Request, res: Response): Promise<Response 
     console.error('更新用户锁定状态失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 export default router

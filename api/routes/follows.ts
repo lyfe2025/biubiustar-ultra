@@ -4,11 +4,12 @@
  */
 import { Router, Request, Response } from 'express';
 import { supabase } from '../lib/supabase';
+import asyncHandler from '../middleware/asyncHandler.js';
 
 const router = Router();
 
 // POST /api/follows - 关注用户
-router.post('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { follower_id, following_id } = req.body;
 
@@ -57,10 +58,10 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
     console.error('Error in POST /follows:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // DELETE /api/follows/:id - 取消关注
-router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 
@@ -80,10 +81,10 @@ router.delete('/:id', async (req: Request, res: Response): Promise<Response | vo
     console.error('Error in DELETE /follows/:id:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // DELETE /api/follows/unfollow - 通过用户ID取消关注
-router.delete('/unfollow', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/unfollow', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { follower_id, following_id } = req.body;
 
@@ -109,12 +110,12 @@ router.delete('/unfollow', async (req: Request, res: Response): Promise<Response
     console.error('Error in DELETE /follows/unfollow:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 
 
 // GET /api/follows/check - 检查关注状态
-router.get('/check', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/check', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { follower_id, following_id } = req.query;
 
@@ -141,6 +142,6 @@ router.get('/check', async (req: Request, res: Response): Promise<Response | voi
     console.error('Error in GET /follows/check:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 export default router;

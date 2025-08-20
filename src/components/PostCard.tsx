@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heart, MessageCircle, Share2, MoreHorizontal, User, Flag, Bookmark, Copy, Trash2, Play } from 'lucide-react'
 import { cn } from '../lib/utils'
@@ -12,6 +12,7 @@ import { zhCN, enUS, vi } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 import MediaGrid from './MediaGrid'
+import LazyImage from './LazyImage'
 import { categoriesCache, type ContentCategory } from '../services/categoriesCache'
 
 interface PostCardProps {
@@ -29,13 +30,13 @@ interface PostCardProps {
 
 // ContentCategory 接口已移至 categoriesCache 服务中
 
-const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, maxContentLength = 150, initialCommentsCount, initialLikesCount, initialIsLiked }: PostCardProps) => {
+const PostCard = memo(({ post, onLike, onComment, onShare, showFullContent = false, maxContentLength = 150, initialCommentsCount, initialLikesCount, initialIsLiked }: PostCardProps) => {
   const { user } = useAuth()
   const { language, t } = useLanguage()
   const navigate = useNavigate()
 
   // 获取媒体文件数据，支持新的media_files和向后兼容旧的image_url/video字段
-  const getMediaFiles = (): MediaFile[] => {
+  const getMediaFiles = useMemo((): MediaFile[] => {
     const mediaFiles: MediaFile[] = []
     
     // 优先使用新的media_files数据
@@ -69,7 +70,7 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     }
     
     return mediaFiles
-  }
+  }, [post.media_files, post.image_url, post.video, post.thumbnail, post.id, post.created_at])
   const [isLiked, setIsLiked] = useState<boolean>(initialIsLiked ?? false)
   const [likesCount, setLikesCount] = useState<number>(initialLikesCount ?? (post.likes_count || 0))
   const [commentsCount, setCommentsCount] = useState<number>(initialCommentsCount ?? (post.comments_count || 0))
@@ -83,7 +84,7 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
   const [categoryDisplayName, setCategoryDisplayName] = useState<string>('')
 
   // 获取真实的评论数量（仅在没有初始数据时调用）
-  const fetchCommentsCount = async () => {
+  const fetchCommentsCount = useCallback(async () => {
     if (initialCommentsCount !== undefined) return
     
     try {
@@ -92,10 +93,10 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     } catch (error) {
       console.error('获取评论数量失败:', error)
     }
-  }
+  }, [post.id, initialCommentsCount])
 
   // 获取分类数据（使用缓存服务）
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       console.log(`PostCard: 正在获取分类数据，当前语言: ${language}`)
       const categoriesData = await categoriesCache.getContentCategories(language)
@@ -104,12 +105,12 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     } catch (error) {
       console.error('PostCard: 获取分类失败:', error)
     }
-  }
+  }, [language])
 
   // 根据当前语言获取分类名称（使用缓存服务的工具函数）
-  const getCategoryName = (category: ContentCategory): string => {
+  const getCategoryName = useCallback((category: ContentCategory): string => {
     return categoriesCache.getCategoryName(category, language)
-  }
+  }, [language])
 
   const moreMenuRef = useRef<HTMLDivElement>(null)
 
@@ -162,7 +163,7 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     }
   }, [])
 
-  const checkIfLiked = async () => {
+  const checkIfLiked = useCallback(async () => {
     if (!user) return
     try {
       const liked = await socialService.isPostLiked(post.id, user.id)
@@ -170,9 +171,9 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     } catch (error) {
       console.error('检查点赞状态失败:', error)
     }
-  }
+  }, [user, post.id])
 
-  const handleLike = async () => {
+  const handleLike = useCallback(async () => {
     if (!user) {
       toast.error(t('posts.card.loginRequired'))
       return
@@ -197,13 +198,13 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user, post.id, isLiked, isLoading, t, onLike])
 
-  const handleComment = () => {
+  const handleComment = useCallback(() => {
     onComment?.(post.id)
-  }
+  }, [onComment, post.id])
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     try {
       // 调用分享功能（纯前端操作）
       await socialService.sharePost(post.id);
@@ -225,32 +226,32 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
       console.error('分享失败:', error);
       toast.error('分享失败，请重试');
     }
-  }
+  }, [post.id, showShareOptions, t, onShare])
 
-  const handleMoreClick = () => {
+  const handleMoreClick = useCallback(() => {
     setShowMoreMenu(!showMoreMenu)
-  }
+  }, [showMoreMenu])
 
-  const handleCopyLink = () => {
+  const handleCopyLink = useCallback(() => {
     const postUrl = `${window.location.origin}/post/${post.id}`
     navigator.clipboard.writeText(postUrl)
     toast.success(t('posts.card.copySuccess'))
     setShowMoreMenu(false)
-  }
+  }, [post.id, t])
 
-  const handleBookmark = () => {
+  const handleBookmark = useCallback(() => {
     // TODO: 实现收藏功能
     toast.info(t('posts.card.bookmarkComingSoon'))
     setShowMoreMenu(false)
-  }
+  }, [t])
 
-  const handleReport = () => {
+  const handleReport = useCallback(() => {
     // TODO: 实现举报功能
     toast.info(t('posts.card.reportComingSoon'))
     setShowMoreMenu(false)
-  }
+  }, [t])
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!user || user.id !== post.author?.id) {
       toast.error(t('posts.card.onlyDeleteOwn'))
       return
@@ -266,9 +267,9 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     }
     setShowMoreMenu(false)
     setShowDeleteConfirm(false)
-  }
+  }, [user, post.author?.id, post.id, t])
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     try {
       // 根据当前语言选择对应的 locale
       let locale
@@ -316,27 +317,25 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     } catch {
       return t('posts.time.justNow')
     }
-  }
+  }, [language, t])
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 p-6 hover:shadow-lg transition-all duration-300">
       {/* 帖子头部 */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-            {post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url) ? (
-              <img
-                src={post.author.avatar_url}
-                alt={post.author.username}
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <img
-                src={getUserDefaultAvatarUrl(post.author?.username || 'User', post.author?.avatar_url)}
-                alt={post.author?.username || 'User'}
-                className="w-full h-full rounded-full"
-              />
-            )}
+          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+            <LazyImage
+              src={post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url) 
+                ? post.author.avatar_url 
+                : getUserDefaultAvatarUrl(post.author?.username || 'User', post.author?.avatar_url)
+              }
+              alt={post.author?.username || 'User'}
+              className="w-full h-full rounded-full"
+              objectFit="cover"
+              loading="lazy"
+              fallback={getUserDefaultAvatarUrl(post.author?.username || 'User', post.author?.avatar_url)}
+            />
           </div>
           <div>
             <h4 className="font-medium text-gray-900">
@@ -429,10 +428,10 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
       </div>
 
       {/* 媒体文件展示 */}
-      {getMediaFiles().length > 0 && (
+      {getMediaFiles.length > 0 && (
         <div className="mb-4">
           <MediaGrid 
-            mediaFiles={getMediaFiles()}
+            mediaFiles={getMediaFiles}
             className="rounded-lg"
             showPreview={true}
             maxItems={9}
@@ -532,6 +531,6 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
       )}
     </div>
   )
-}
+})
 
 export default PostCard

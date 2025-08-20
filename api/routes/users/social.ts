@@ -4,12 +4,12 @@
  */
 import { Router, Request, Response } from 'express';
 import { supabase } from '../../lib/supabase';
+import asyncHandler from '../../middleware/asyncHandler.js';
 
 const router = Router();
 
 // GET /api/users/:id/followers - 获取粉丝列表
-router.get('/:id/followers', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.get('/:id/followers', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { id } = req.params;
     const { limit = 10, offset = 0 } = req.query;
 
@@ -37,15 +37,10 @@ router.get('/:id/followers', async (req: Request, res: Response): Promise<Respon
     }
 
     res.json(data || []);
-  } catch (error) {
-    console.error('Error in GET /users/:id/followers:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+}));
 
 // GET /api/users/:id/following - 获取关注列表
-router.get('/:id/following', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.get('/:id/following', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { id } = req.params;
     const { limit = 10, offset = 0 } = req.query;
 
@@ -73,15 +68,10 @@ router.get('/:id/following', async (req: Request, res: Response): Promise<Respon
     }
 
     res.json(data || []);
-  } catch (error) {
-    console.error('Error in GET /users/:id/following:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+}));
 
 // GET /api/users/:id/followers/count - 获取粉丝数
-router.get('/:id/followers/count', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.get('/:id/followers/count', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { id } = req.params;
 
     const { count, error } = await supabase
@@ -96,15 +86,10 @@ router.get('/:id/followers/count', async (req: Request, res: Response): Promise<
     }
 
     res.json({ count: count || 0 });
-  } catch (error) {
-    console.error('Error in GET /users/:id/followers/count:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+}));
 
 // GET /api/users/:id/following/count - 获取关注数
-router.get('/:id/following/count', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.get('/:id/following/count', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { id } = req.params;
 
     const { count, error } = await supabase
@@ -119,10 +104,6 @@ router.get('/:id/following/count', async (req: Request, res: Response): Promise<
     }
 
     res.json({ count: count || 0 });
-  } catch (error) {
-    console.error('Error in GET /users/:id/following/count:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+}));
 
 export default router;

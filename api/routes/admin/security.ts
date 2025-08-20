@@ -3,6 +3,7 @@ import { supabaseAdmin } from '../../lib/supabase'
 import { requireAdmin } from './auth';
 import { logSecurityEvent, logActivityEvent, getClientIP } from '../../middleware/security'
 import { User } from '@supabase/supabase-js'
+import asyncHandler from '../../middleware/asyncHandler.js'
 
 // 扩展Request接口以包含user属性
 interface AuthenticatedRequest extends Request {
@@ -12,8 +13,7 @@ interface AuthenticatedRequest extends Request {
 const router = Router()
 
 // 获取登录尝试记录（分页）
-router.get('/login-attempts', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
-  try {
+router.get('/login-attempts', requireAdmin, asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
     const offset = (page - 1) * limit
@@ -44,15 +44,10 @@ router.get('/login-attempts', requireAdmin, async (req: AuthenticatedRequest, re
         totalPages: Math.ceil((count || 0) / limit)
       }
     })
-  } catch (error) {
-    console.error('获取登录尝试记录失败:', error)
-    res.status(500).json({ error: '服务器内部错误' })
-  }
-})
+}))
 
 // 获取IP黑名单（分页）
-router.get('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
-  try {
+router.get('/ip-blacklist', requireAdmin, asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
     const offset = (page - 1) * limit
@@ -83,15 +78,10 @@ router.get('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res:
         totalPages: Math.ceil((count || 0) / limit)
       }
     })
-  } catch (error) {
-    console.error('获取IP黑名单失败:', error)
-    res.status(500).json({ error: '服务器内部错误' })
-  }
-})
+}))
 
 // 获取安全日志（分页）
-router.get('/security-logs', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
-  try {
+router.get('/security-logs', requireAdmin, asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
     const offset = (page - 1) * limit
@@ -145,15 +135,10 @@ router.get('/security-logs', requireAdmin, async (req: AuthenticatedRequest, res
         totalPages: Math.ceil((count || 0) / limit)
       }
     })
-  } catch (error) {
-    console.error('获取安全日志失败:', error)
-    res.status(500).json({ error: '服务器内部错误' })
-  }
-})
+}))
 
 // 手动解锁IP
-router.delete('/ip-blacklist/:ip', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
-  try {
+router.delete('/ip-blacklist/:ip', requireAdmin, asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
     const { ip } = req.params
     const adminIP = getClientIP(req)
     
@@ -192,15 +177,10 @@ router.delete('/ip-blacklist/:ip', requireAdmin, async (req: AuthenticatedReques
     )
     
     res.json({ success: true, message: 'IP已成功解锁' })
-  } catch (error) {
-    console.error('解锁IP失败:', error)
-    res.status(500).json({ error: '服务器内部错误' })
-  }
-})
+}))
 
 // 手动添加IP到黑名单
-router.post('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
-  try {
+router.post('/ip-blacklist', requireAdmin, asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
     const { ip_address, reason } = req.body
     const adminIP = getClientIP(req)
     
@@ -254,15 +234,10 @@ router.post('/ip-blacklist', requireAdmin, async (req: AuthenticatedRequest, res
     )
     
     res.json({ success: true, message: 'IP已添加到黑名单' })
-  } catch (error) {
-    console.error('添加IP到黑名单失败:', error)
-    res.status(500).json({ error: '服务器内部错误' })
-  }
-})
+}))
 
 // 获取安全统计数据
-router.get('/stats', requireAdmin, async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
-  try {
+router.get('/stats', requireAdmin, asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<Response | void> => {
     const now = new Date()
     const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -300,10 +275,6 @@ router.get('/stats', requireAdmin, async (req: AuthenticatedRequest, res: Respon
       blockedIPs: blockedIPs.count || 0,
       securityEvents7d: securityEvents7d.count || 0
     })
-  } catch (error) {
-    console.error('获取安全统计数据失败:', error)
-    res.status(500).json({ error: '服务器内部错误' })
-  }
-})
+}))
 
 export default router

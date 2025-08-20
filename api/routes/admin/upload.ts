@@ -5,6 +5,7 @@ import { requireAdmin } from './auth.js'
 import path from 'path'
 import fs from 'fs'
 import { UploadSecurity, DEFAULT_UPLOAD_CONFIGS } from '../../utils/uploadSecurity'
+import asyncHandler from '../../middleware/asyncHandler.js'
 
 
 const router = Router()
@@ -202,7 +203,7 @@ router.post('/site-asset', (req: Request, res: Response): void => {
     }
   })
 
-  tempUpload.single('image')(req, res, async (err) => {
+  tempUpload.single('image')(req, res, async (err: any) => {
     if (err) {
       console.error('站点资源上传失败:', err)
       return res.status(500).json({
@@ -301,7 +302,7 @@ router.post('/site-asset', (req: Request, res: Response): void => {
 })
 
 // 删除图片
-router.delete('/image', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/image', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { filename } = req.body
     
@@ -344,10 +345,10 @@ router.delete('/image', async (req: Request, res: Response): Promise<Response | 
       details: error instanceof Error ? error.message : '未知错误'
     })
   }
-})
+}))
 
 // 获取文件列表
-router.get('/files', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/files', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
     
@@ -383,10 +384,10 @@ router.get('/files', async (req: Request, res: Response): Promise<Response | voi
       details: error instanceof Error ? error.message : '未知错误'
     })
   }
-})
+}))
 
 // 清理未使用的文件
-router.post('/cleanup', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/cleanup', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
     
@@ -421,6 +422,6 @@ router.post('/cleanup', async (req: Request, res: Response): Promise<Response | 
       details: error instanceof Error ? error.message : '未知错误'
     })
   }
-})
+}))
 
 export default router

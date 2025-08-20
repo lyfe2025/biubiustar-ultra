@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { supabase } from '../lib/supabase';
+import asyncHandler from '../middleware/asyncHandler.js';
 // import { authenticateUser } from '../middleware/auth';
 
 const router = Router();
@@ -8,7 +9,7 @@ const router = Router();
  * 批量获取首页数据 - 优化版本
  * 同时获取posts和activities，减少API调用次数
  */
-router.get('/home-data', async (req, res) => {
+router.get('/home-data', asyncHandler(async (req, res) => {
   try {
     const postsLimit = parseInt(req.query.postsLimit as string) || 3;
     const activitiesLimit = parseInt(req.query.activitiesLimit as string) || 2;
@@ -104,13 +105,13 @@ router.get('/home-data', async (req, res) => {
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
-});
+}));
 
 /**
  * 批量获取帖子详情页数据
  * 同时获取帖子详情、评论、点赞状态等
  */
-router.get('/post-detail/:id', async (req, res) => {
+router.get('/post-detail/:id', asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.query.userId as string;
@@ -234,13 +235,13 @@ router.get('/post-detail/:id', async (req, res) => {
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
-});
+}));
 
 /**
  * 批量获取活动页面数据
  * 同时获取活动列表和分类
  */
-router.get('/activities-data', async (req, res) => {
+router.get('/activities-data', asyncHandler(async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -314,6 +315,6 @@ router.get('/activities-data', async (req, res) => {
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
-});
+}));
 
 export default router;

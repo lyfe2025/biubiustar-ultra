@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { XCircle, Upload, Calendar, MapPin, Users, Tag, FileText, Image } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
 import { toast } from 'sonner'
+import LazyImage from '../LazyImage'
 
 import { adminService, AdminActivity } from '../../services/AdminService'
 
@@ -500,19 +501,13 @@ const EditActivityModal: React.FC<EditActivityModalProps> = ({
               {/* 图片预览 */}
               {editActivityData.image && editActivityData.image.trim() ? (
                 <div className="mb-4 relative inline-block">
-                  <img
+                  <LazyImage
                     src={editActivityData.image.startsWith('/') ? `${window.location.origin}${editActivityData.image}` : editActivityData.image}
                     alt="活动图片预览"
-                    className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                    onError={(e) => {
-                      console.warn('图片加载失败:', editActivityData.image)
-                      const target = e.target as HTMLImageElement
-                      target.src = '/images/placeholder-activity.svg'
-                      target.onerror = () => {
-                        target.style.display = 'none'
-                        console.error('备用图片也加载失败')
-                      }
-                    }}
+                    className="w-32 h-32 rounded-lg border border-gray-300"
+                    objectFit="cover"
+                    fallback="/images/placeholder-activity.svg"
+                    loading="lazy"
                   />
                   <button
                     type="button"

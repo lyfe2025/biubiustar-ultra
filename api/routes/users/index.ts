@@ -8,6 +8,7 @@ import profileRoutes from './profile';
 import statsRoutes from './stats';
 import postsRoutes from './posts';
 import socialRoutes from './social';
+import asyncHandler from '../../middleware/asyncHandler.js';
 
 const router = Router();
 
@@ -20,7 +21,7 @@ router.use('/', socialRoutes);
 // 管理员功能路由
 
 // PUT /api/users/:id - 更新用户资料
-router.put('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -69,10 +70,10 @@ router.put('/:id', async (req: Request, res: Response): Promise<Response | void>
     console.error('Error in PUT /users/:id:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // GET /api/users/:id - 获取单个用户信息
-router.get('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 
@@ -99,10 +100,10 @@ router.get('/:id', async (req: Request, res: Response): Promise<Response | void>
     console.error('Error in GET /users/:id:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // PUT /api/users/:id/status - 更新用户状态（管理员功能）
-router.put('/:id/status', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:id/status', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -136,10 +137,10 @@ router.put('/:id/status', async (req: Request, res: Response): Promise<Response 
     console.error('Update user status error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // PUT /api/users/:id/role - 更新用户角色（管理员功能）
-router.put('/:id/role', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:id/role', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { role } = req.body;
@@ -173,10 +174,10 @@ router.put('/:id/role', async (req: Request, res: Response): Promise<Response | 
     console.error('Update user role error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // DELETE /api/users/:id - 删除用户（管理员功能）
-router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 
@@ -197,10 +198,10 @@ router.delete('/:id', async (req: Request, res: Response): Promise<Response | vo
     console.error('Delete user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 // GET /api/users - 获取用户列表（管理员功能）
-router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { page = 1, limit = 20, status, role, search } = req.query;
     
@@ -244,6 +245,6 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     console.error('Get users error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+}));
 
 export default router;

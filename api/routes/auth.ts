@@ -6,11 +6,12 @@ import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { validateEmail, validatePassword } from '../utils/validation.js';
 import { sendResponse } from '../utils/response.js';
+import asyncHandler from '../middleware/asyncHandler.js';
 
 const router = Router();
 
 // User Registration
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/register', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { email, password, username, full_name } = req.body;
 
@@ -111,10 +112,10 @@ router.post('/register', async (req: Request, res: Response) => {
     console.error('Registration error:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // User Login
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { account, password } = req.body; // Changed from 'email' to 'account' to support both email and username
 
@@ -215,10 +216,10 @@ router.post('/login', async (req: Request, res: Response) => {
     console.error('Login error:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // User Logout
-router.post('/logout', async (req: Request, res: Response) => {
+router.post('/logout', asyncHandler(async (req: Request, res: Response) => {
   try {
     const authHeader = req.headers.authorization;
     
@@ -245,10 +246,10 @@ router.post('/logout', async (req: Request, res: Response) => {
     // Return success even on error for security reasons
     sendResponse(res, true, null, '登出成功');
   }
-});
+}));
 
 // Password Reset Request
-router.post('/reset-password', async (req: Request, res: Response) => {
+router.post('/reset-password', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
@@ -280,10 +281,10 @@ router.post('/reset-password', async (req: Request, res: Response) => {
     console.error('Password reset error:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Update Password
-router.post('/update-password', async (req: Request, res: Response) => {
+router.post('/update-password', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { access_token, new_password } = req.body;
 
@@ -316,10 +317,10 @@ router.post('/update-password', async (req: Request, res: Response) => {
     console.error('Password update error:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 // Get Current User
-router.get('/me', async (req: Request, res: Response) => {
+router.get('/me', asyncHandler(async (req: Request, res: Response) => {
   try {
     const authHeader = req.headers.authorization;
     
@@ -353,6 +354,6 @@ router.get('/me', async (req: Request, res: Response) => {
     console.error('Get user error:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 export default router;

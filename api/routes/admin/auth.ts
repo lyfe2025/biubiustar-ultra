@@ -7,45 +7,41 @@ import {
   getClientIP,
   logActivityEvent 
 } from '../../middleware/security'
+import asyncHandler from '../../middleware/asyncHandler.js'
 
 const router = Router()
 
 // 管理员权限验证中间件
-export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: '未提供认证令牌' })
-    }
-
-    const token = authHeader.substring(7)
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
-    
-    if (error || !user) {
-      return res.status(401).json({ error: '无效的认证令牌' })
-    }
-
-    // 检查用户是否为管理员
-    const { data: userProfile, error: profileError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    
-    if (profileError || !userProfile || userProfile.role !== 'admin') {
-      return res.status(403).json({ error: '需要管理员权限' })
-    }
-
-    req.user = user
-    next()
-  } catch (error) {
-    console.error('权限验证失败:', error)
-    res.status(500).json({ error: '服务器内部错误' })
+export const requireAdmin = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: '未提供认证令牌' })
   }
-}
+
+  const token = authHeader.substring(7)
+  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  
+  if (error || !user) {
+    return res.status(401).json({ error: '无效的认证令牌' })
+  }
+
+  // 检查用户是否为管理员
+  const { data: userProfile, error: profileError } = await supabaseAdmin
+    .from('user_profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  
+  if (profileError || !userProfile || userProfile.role !== 'admin') {
+    return res.status(403).json({ error: '需要管理员权限' })
+  }
+
+  req.user = user
+  next()
+})
 
 // 管理员登录API（应用安全检查中间件）
-router.post('/login', ipSecurityCheck, async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/login', ipSecurityCheck, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { email, password } = req.body
     const ipAddress = req.clientIP || getClientIP(req)
@@ -195,10 +191,10 @@ router.post('/login', ipSecurityCheck, async (req: Request, res: Response): Prom
     
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 获取管理员统计信息
-router.get('/stats', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/stats', requireAdmin, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // 获取用户统计
     const { data: usersData, error: usersError } = await supabaseAdmin
@@ -309,10 +305,10 @@ router.get('/stats', requireAdmin, async (req: Request, res: Response): Promise<
     console.error('获取统计数据失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 获取最近活动
-router.get('/recent-activities', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/recent-activities', requireAdmin, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const activities = []
 
@@ -365,7 +361,7 @@ router.get('/recent-activities', requireAdmin, async (req: Request, res: Respons
     console.error('获取最近活动失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 格式化时间为相对时间
 function formatTimeAgo(dateString: string): string {

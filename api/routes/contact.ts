@@ -5,6 +5,7 @@
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { requireAdmin } from './admin/auth';
+import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
 
@@ -130,8 +131,7 @@ const checkDuplicateSubmission = async (ip: string): Promise<boolean> => {
  * Submit Contact Form
  * POST /api/contact/submit
  */
-router.post('/submit', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.post('/submit', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { name, email, subject, message, phone } = req.body;
 
     // Input validation
@@ -182,18 +182,14 @@ router.post('/submit', async (req: Request, res: Response): Promise<Response | v
       submitted_at: data.submitted_at
     }, '消息提交成功，我们将尽快回复您', 201);
 
-  } catch (error) {
-    console.error('Contact form submission error:', error);
-    sendResponse(res, false, null, '服务器内部错误', 500);
-  }
-});
+  return;
+}));
 
 /**
  * Get Contact Submissions (Admin only)
  * GET /api/contact/submissions
  */
-router.get('/submissions', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.get('/submissions', requireAdmin, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     
     const { page = 1, limit = 10, status } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -227,18 +223,14 @@ router.get('/submissions', requireAdmin, async (req: Request, res: Response): Pr
       }
     });
 
-  } catch (error) {
-    console.error('Get submissions error:', error);
-    sendResponse(res, false, null, '服务器内部错误', 500);
-  }
-});
+  return;
+}));
 
 /**
  * Update Contact Submission Status (Admin only)
  * PUT /api/contact/submissions/:id/status
  */
-router.put('/submissions/:id/status', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.put('/submissions/:id/status', requireAdmin, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     
     const { id } = req.params;
     const { status } = req.body;
@@ -267,19 +259,13 @@ router.put('/submissions/:id/status', requireAdmin, async (req: Request, res: Re
     }
 
     sendResponse(res, true, data, '状态更新成功');
-
-  } catch (error) {
-    console.error('Update status error:', error);
-    sendResponse(res, false, null, '服务器内部错误', 500);
-  }
-});
+}));
 
 /**
  * Delete Contact Submission (Admin only)
  * DELETE /api/contact/submissions/:id
  */
-router.delete('/submissions/:id', requireAdmin, async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.delete('/submissions/:id', requireAdmin, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { id } = req.params;
 
     // First check if the submission exists
@@ -307,11 +293,6 @@ router.delete('/submissions/:id', requireAdmin, async (req: Request, res: Respon
     }
 
     sendResponse(res, true, null, '联系提交记录删除成功');
-
-  } catch (error) {
-    console.error('Delete submission error:', error);
-    sendResponse(res, false, null, '服务器内部错误', 500);
-  }
-});
+}));
 
 export default router;

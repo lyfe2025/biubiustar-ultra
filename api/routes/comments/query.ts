@@ -4,6 +4,7 @@
  */
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../../lib/supabase.js';
+import asyncHandler from '../../middleware/asyncHandler.js';
 
 const router = Router();
 
@@ -21,8 +22,7 @@ const sendResponse = (res: Response, success: boolean, data?: unknown, message?:
  * Get comments count for a post
  * GET /api/comments/:postId/count
  */
-router.get('/:postId/count', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.get('/:postId/count', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { postId } = req.params;
     
     if (!postId) {
@@ -42,20 +42,14 @@ router.get('/:postId/count', async (req: Request, res: Response): Promise<Respon
     }
 
     sendResponse(res, true, { count: count || 0 }, '获取评论数量成功');
-
-  } catch (error) {
-    console.error('获取评论数量错误:', error);
-    sendResponse(res, false, null, '服务器内部错误', 500);
-  }
-});
+}));
 
 /**
  * Get comments for a post
  * GET /api/comments/:postId
  * Also accessible via /api/posts/:postId/comments (handled by posts router)
  */
-router.get('/:postId', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.get('/:postId', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { postId } = req.params;
     
     if (!postId) {
@@ -121,11 +115,6 @@ router.get('/:postId', async (req: Request, res: Response): Promise<Response | v
     }) || [];
 
     sendResponse(res, true, formattedComments, '获取评论成功');
-
-  } catch (error) {
-    console.error('获取评论错误:', error);
-    sendResponse(res, false, null, '服务器内部错误', 500);
-  }
-});
+}));
 
 export default router;

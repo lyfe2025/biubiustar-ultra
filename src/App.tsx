@@ -1,26 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import Navbar from './components/Navbar'
-import Home from './pages/Home'
-import Trending from './pages/Trending'
-import Activities from './pages/Activities'
-import ActivityDetail from './pages/ActivityDetail'
-import PostDetail from './pages/PostDetail'
-import About from './pages/About'
-import Profile from './pages/Profile'
-import AdminLogin from './pages/admin/AdminLogin'
-import AdminDashboard from './pages/admin/AdminDashboard'
-import AdminContent from './pages/admin/AdminContent'
-import AdminUsers from './pages/admin/AdminUsers'
-import AdminActivities from './pages/admin/AdminActivities'
-import AdminCategories from './pages/admin/AdminCategories'
-import AdminContacts from './pages/admin/AdminContacts'
-import AdminSettings from './pages/admin/AdminSettings'
-import AdminSecurity from './pages/admin/AdminSecurity'
-import AdminLogs from './pages/admin/AdminLogs'
-import TestCategories from './pages/TestCategories'
-import DebugLanguage from './pages/DebugLanguage'
-import DebugCategories from './pages/DebugCategories'
 import AdminAuthGuard from './components/AdminAuthGuard'
 import ProtectedRoute from './components/ProtectedRoute'
 import Footer from './components/Footer'
@@ -31,6 +11,40 @@ import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
 import { useFavicon } from './hooks/useFavicon'
 import './utils/debugAuth' // 加载调试工具
+
+// 懒加载页面组件
+const Home = lazy(() => import('./pages/Home'))
+const Trending = lazy(() => import('./pages/Trending'))
+const Activities = lazy(() => import('./pages/Activities'))
+const ActivityDetail = lazy(() => import('./pages/ActivityDetail'))
+const PostDetail = lazy(() => import('./pages/PostDetail'))
+const About = lazy(() => import('./pages/About'))
+const Profile = lazy(() => import('./pages/Profile'))
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const AdminContent = lazy(() => import('./pages/admin/AdminContent'))
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
+const AdminActivities = lazy(() => import('./pages/admin/AdminActivities'))
+const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'))
+const AdminContacts = lazy(() => import('./pages/admin/AdminContacts'))
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
+const AdminSecurity = lazy(() => import('./pages/admin/AdminSecurity'))
+const AdminLogs = lazy(() => import('./pages/admin/AdminLogs'))
+const TestCategories = lazy(() => import('./pages/TestCategories'))
+const DebugLanguage = lazy(() => import('./pages/DebugLanguage'))
+const DebugCategories = lazy(() => import('./pages/DebugCategories'))
+
+// 加载状态组件
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+        <p className="text-white text-lg font-medium">加载中...</p>
+      </div>
+    </div>
+  )
+}
 
 // 重定向组件：将 /posts/:id 重定向到 /post/:id
 function PostRedirect() {
@@ -76,7 +90,8 @@ function AppContent() {
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
         {!isAdminRoute && <Navbar onRequireAuth={openAuthModal} />}
         <ErrorBoundary>
-          <Routes>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/trending" element={<Trending />} />
                   <Route path="/activities" element={<Activities />} />
@@ -102,7 +117,8 @@ function AppContent() {
                   <Route path="/admin/settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
                   <Route path="/admin/security" element={<AdminAuthGuard><AdminSecurity /></AdminAuthGuard>} />
                   <Route path="/admin/logs" element={<AdminAuthGuard><AdminLogs /></AdminAuthGuard>} />
-          </Routes>
+            </Routes>
+          </Suspense>
         </ErrorBoundary>
         {!isAdminRoute && <Footer />}
         <Toaster position="top-right" richColors />

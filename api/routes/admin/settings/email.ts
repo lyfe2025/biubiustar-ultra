@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import nodemailer from 'nodemailer'
 import { supabaseAdmin } from '../../../lib/supabase'
 import { requireAdmin } from '../../../middleware/auth'
+import asyncHandler from '../../../middleware/asyncHandler.js'
 
 const router = Router()
 
@@ -9,7 +10,7 @@ const router = Router()
 router.use(requireAdmin)
 
 // 测试邮件发送
-router.post('/test', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/test', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { to, subject, content } = req.body
     
@@ -86,10 +87,10 @@ router.post('/test', async (req: Request, res: Response): Promise<Response | voi
       details: error?.message || 'Unknown error'
     });
   }
-})
+}))
 
 // 获取邮件配置状态
-router.get('/config-status', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/config-status', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // 获取邮件配置
     const { data: emailSettings, error: settingsError } = await supabaseAdmin
@@ -131,6 +132,6 @@ router.get('/config-status', async (req: Request, res: Response): Promise<Respon
     console.error('Error getting email config:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-})
+}))
 
 export default router

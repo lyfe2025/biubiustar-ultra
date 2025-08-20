@@ -1,10 +1,11 @@
 import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase.js'
+import asyncHandler from '../../../middleware/asyncHandler.js'
 
 const router = Router()
 
 // 测试端点 - 不需要认证，用于调试 - 必须在认证中间件之前定义
-router.get('/test', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/test', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     console.log('开始测试获取系统设置...')
     
@@ -106,6 +107,6 @@ router.get('/test', async (req: Request, res: Response): Promise<Response | void
     console.error('测试获取系统设置失败:', error)
     res.status(500).json({ error: '服务器内部错误', details: error })
   }
-})
+}))
 
 export default router

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../lib/supabase.js'
 import { requireAdmin } from './auth.js'
+import asyncHandler from '../../middleware/asyncHandler.js'
 
 const router = Router()
 
@@ -8,7 +9,7 @@ const router = Router()
 router.use(requireAdmin)
 
 // 获取所有活动（管理员）
-router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // 获取分页参数
     const page = parseInt(req.query.page as string) || 1
@@ -126,10 +127,10 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     console.error('获取活动列表失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 更新活动状态
-router.put('/:id/status', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:id/status', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { status } = req.body
@@ -153,10 +154,10 @@ router.put('/:id/status', async (req: Request, res: Response): Promise<Response 
     console.error('更新活动状态失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 创建活动
-router.post('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { 
       title, 
@@ -339,10 +340,10 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
     console.error('创建活动失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 更新活动
-router.put('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { 
@@ -446,10 +447,10 @@ router.put('/:id', async (req: Request, res: Response): Promise<Response | void>
     console.error('更新活动失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 删除活动
-router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
 
@@ -472,6 +473,6 @@ router.delete('/:id', async (req: Request, res: Response): Promise<Response | vo
     console.error('删除活动失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 export default router

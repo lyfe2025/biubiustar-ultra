@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase'
 import { clearAuthUsersCache } from './cache'
 import { authenticateToken, requireAdmin } from '../../../middleware/auth'
+import asyncHandler from '../../../middleware/asyncHandler'
 
 const router = Router()
 
@@ -118,7 +119,7 @@ async function createUserAtomically(userData: {
 }
 
 // 创建用户
-router.post('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { username, email, password, full_name, role } = req.body
 
@@ -172,10 +173,10 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
     
     res.status(500).json({ error: errorMessage || '创建用户失败' })
   }
-})
+}))
 
 // 删除用户
-router.delete('/:id', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
 
@@ -242,10 +243,10 @@ router.delete('/:id', async (req: Request, res: Response): Promise<Response | vo
     console.error('删除用户失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 // 批量删除用户
-router.delete('/batch', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/batch', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { userIds } = req.body
 
@@ -316,6 +317,6 @@ router.delete('/batch', async (req: Request, res: Response): Promise<Response | 
     console.error('批量删除用户失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 export default router

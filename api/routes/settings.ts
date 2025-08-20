@@ -4,12 +4,12 @@
  */
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase';
+import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
 
 // GET /api/settings/public - 获取公开的系统设置（供前台使用）
-router.get('/public', async (req: Request, res: Response): Promise<Response | void> => {
-  try {
+router.get('/public', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { data: settings, error } = await supabaseAdmin
       .from('system_settings')
       .select('setting_key, setting_value, setting_type, category')
@@ -65,10 +65,6 @@ router.get('/public', async (req: Request, res: Response): Promise<Response | vo
     }, {}) || {}
     
     res.json(settingsByCategory)
-  } catch (error) {
-    console.error('获取公开系统设置失败:', error)
-    res.status(500).json({ error: '服务器内部错误' })
-  }
-})
+}))
 
 export default router

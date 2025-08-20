@@ -4,6 +4,7 @@
  */
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin, createUserClient, verifyAuthToken } from '../../lib/supabase.js';
+import asyncHandler from '../../middleware/asyncHandler.js';
 
 const router = Router();
 
@@ -40,7 +41,7 @@ const validateCommentData = (data: Record<string, unknown>): { valid: boolean; m
  * Add a comment to a post
  * POST /api/comments
  */
-router.post('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const authHeader = req.headers.authorization;
     const user = await verifyAuthToken(authHeader);
@@ -117,13 +118,13 @@ router.post('/', async (req: Request, res: Response): Promise<Response | void> =
     console.error('添加评论错误:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 /**
  * Delete a comment
  * DELETE /api/comments/:commentId
  */
-router.delete('/:commentId', async (req: Request, res: Response): Promise<Response | void> => {
+router.delete('/:commentId', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const authHeader = req.headers.authorization;
     const user = await verifyAuthToken(authHeader);
@@ -179,13 +180,13 @@ router.delete('/:commentId', async (req: Request, res: Response): Promise<Respon
     console.error('删除评论错误:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 /**
  * Update a comment
  * PUT /api/comments/:commentId
  */
-router.put('/:commentId', async (req: Request, res: Response): Promise<Response | void> => {
+router.put('/:commentId', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const authHeader = req.headers.authorization;
     const user = await verifyAuthToken(authHeader);
@@ -277,6 +278,6 @@ router.put('/:commentId', async (req: Request, res: Response): Promise<Response 
     console.error('更新评论错误:', error);
     sendResponse(res, false, null, '服务器内部错误', 500);
   }
-});
+}));
 
 export default router;

@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase'
 import { getCachedAuthUsers } from './cache'
 import { requireAdmin } from '../auth'
+import asyncHandler from '../../../middleware/asyncHandler.js'
 
 const router = Router()
 
@@ -9,7 +10,7 @@ const router = Router()
 router.use(requireAdmin)
 
 // 获取所有用户（用户管理）
-router.get('/', async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     // 获取分页参数
     const page = parseInt(req.query.page as string) || 1
@@ -146,6 +147,6 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
     console.error('获取用户列表失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
   }
-})
+}))
 
 export default router
