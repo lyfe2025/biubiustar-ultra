@@ -20,7 +20,28 @@ router.get('/:id/posts', async (req: Request, res: Response): Promise<Response |
 
     let query = supabase
       .from('posts')
-      .select('*')
+      .select(`
+        id,
+        title,
+        content,
+        tags,
+        user_id,
+        likes_count,
+        comments_count,
+        shares_count,
+        is_published,
+        status,
+        created_at,
+        updated_at,
+        category,
+        media_files(
+          id,
+          file_url,
+          file_type,
+          thumbnail_url,
+          display_order
+        )
+      `)
       .eq('user_id', id)
       .order('created_at', { ascending: false })
       .range(Number(offset), Number(offset) + Number(limit) - 1);
@@ -45,7 +66,7 @@ router.get('/:id/posts', async (req: Request, res: Response): Promise<Response |
     // 获取总数
     let totalQuery = supabase
       .from('posts')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('user_id', id);
 
     if (status) {
@@ -103,7 +124,6 @@ router.get('/:id/activities', async (req: Request, res: Response): Promise<Respo
           created_at,
           updated_at,
           user_id,
-          image_url,
           category_id
         )
       `)

@@ -221,9 +221,6 @@ router.post('/', async (req: Request, res: Response) => {
       content: content.trim(),
       category: category || 'general',
       tags: tags || [],
-      image_url: finalImageUrl || null,
-      video: video || null,
-      thumbnail: thumbnail || null,
       user_id,
       status: 'pending',
       created_at: new Date().toISOString(),
@@ -333,24 +330,8 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (category !== undefined) updateData.category = category;
     if (tags !== undefined) updateData.tags = tags;
     
-    // Handle images array - use first image as image_url or use provided image_url
-    if (images !== undefined || image_url !== undefined) {
-      let finalImageUrl = image_url;
-      if (images && Array.isArray(images) && images.length > 0) {
-        finalImageUrl = images[0];
-      }
-      updateData.image_url = finalImageUrl || null;
-    }
-    
-    // Handle video field
-    if (video !== undefined) {
-      updateData.video = video || null;
-    }
-    
-    // Handle thumbnail field
-    if (thumbnail !== undefined) {
-      updateData.thumbnail = thumbnail || null;
-    }
+    // Note: image_url, video, and thumbnail fields are no longer used
+    // Media files are now handled through the media_files table
 
     const { data: post, error } = await supabaseAdmin
       .from('posts')

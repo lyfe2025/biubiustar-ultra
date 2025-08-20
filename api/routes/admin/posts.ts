@@ -31,8 +31,6 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
         id,
         title,
         content,
-        image_url,
-        video,
         tags,
         likes_count,
         comments_count,
@@ -42,7 +40,14 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
         created_at,
         updated_at,
         category,
-        user_id
+        user_id,
+        media_files(
+          id,
+          file_url,
+          file_type,
+          thumbnail_url,
+          display_order
+        )
       `)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
@@ -72,8 +77,8 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
         id: post.id,
         title: post.title,
         content: post.content,
-        image_url: post.image_url,
-        video: post.video,
+
+        media_files: post.media_files || [],
         status: post.status || 'pending',
         likes_count: post.likes_count || 0,
         comments_count: post.comments_count || 0,
