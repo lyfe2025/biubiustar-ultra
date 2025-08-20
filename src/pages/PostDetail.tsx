@@ -134,7 +134,9 @@ const PostDetail = () => {
 
     try {
       setLoading(true)
+      console.log('🔍 PostDetail: 降级方案 - 调用 socialService.getPost，帖子ID:', id)
       const postData = await socialService.getPost(id)
+      console.log('✅ PostDetail: 降级方案 - 获取帖子数据成功，阅读量:', postData.views_count)
       setPost(postData)
       setLikesCount(postData.likes_count || 0)
       setCommentsCount(postData.comments_count || 0)

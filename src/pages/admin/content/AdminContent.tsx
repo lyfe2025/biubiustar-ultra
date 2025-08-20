@@ -93,7 +93,8 @@ const AdminContent = () => {
 
   const handlePreviewDelete = async () => {
     if (selectedPost) {
-      await deletePost(selectedPost.id)
+      // 显示删除确认框而不是直接删除
+      openDeletePostConfirm(selectedPost)
       closePreview()
     }
   }

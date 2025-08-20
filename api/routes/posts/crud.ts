@@ -242,9 +242,28 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
       // 继续执行，只是作者信息可能为空
     }
 
-    // 格式化帖子数据，添加作者信息
+    // 异步更新阅读量（不影响响应）
+    console.log(`🔍 API: 准备更新帖子 ${id} 的阅读量，当前值: ${post.views_count}`)
+    supabaseAdmin
+      .from('posts')
+      .update({ 
+        views_count: post.views_count + 1,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .then(({ error, data }) => {
+        if (error) {
+          console.error('❌ API: 更新阅读量失败:', error)
+        } else {
+          console.log(`✅ API: 帖子 ${id} 阅读量已更新，从 ${post.views_count} 增加到 ${post.views_count + 1}`)
+          console.log('📊 API: 更新结果:', data)
+        }
+      })
+
+    // 格式化帖子数据，添加作者信息和更新后的阅读量
     const formattedPost = {
       ...post,
+      views_count: (post.views_count || 0) + 1, // 返回更新后的阅读量
       author: author
     };
 

@@ -297,8 +297,20 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, isOpen, onClose
             </div>
           </div>
 
-          {/* 关闭按钮 */}
-          <div className="flex justify-end mt-6">
+          {/* 操作按钮 */}
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              onClick={() => onEdit(activity)}
+              className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {t('admin.activities.actions.edit')}
+            </button>
+            <button
+              onClick={() => onDelete(activity)}
+              className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              {t('admin.activities.actions.delete')}
+            </button>
             <button
               onClick={onClose}
               className="bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"

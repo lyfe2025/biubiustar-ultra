@@ -343,11 +343,13 @@ class BatchDataService {
         const userId = req.params?.userId;
         
         // 并行获取帖子相关的所有数据
+        console.log('🔍 BatchDataService: 批量获取帖子详情 - 调用 socialService.getPost，帖子ID:', postId)
         const [post, isLiked, commentsCount] = await Promise.all([
           socialService.getPost(postId),
           userId ? socialService.isPostLiked(postId, userId) : Promise.resolve(false),
           socialService.getPostCommentsCount(postId)
         ]);
+        console.log('✅ BatchDataService: 批量获取帖子详情 - 获取帖子数据成功，阅读量:', post?.views_count)
         
         const data = {
           post,

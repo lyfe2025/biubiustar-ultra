@@ -140,6 +140,16 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
     }
   }
   
+  // 文件删除确认状态
+  const [fileToDelete, setFileToDelete] = useState<UploadedFile | null>(null)
+  const [showDeleteFileConfirm, setShowDeleteFileConfirm] = useState(false)
+
+  // 显示文件删除确认框
+  const showDeleteFileConfirmModal = (file: UploadedFile) => {
+    setFileToDelete(file)
+    setShowDeleteFileConfirm(true)
+  }
+
   // 删除已上传的文件
   const handleDeleteFile = async (file: UploadedFile) => {
     try {
@@ -176,6 +186,9 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
     } catch (error) {
       console.error(t('posts.create.fileDeleteFailed'), error)
       toast.error(t('posts.create.fileDeleteFailed'))
+    } finally {
+      setShowDeleteFileConfirm(false)
+      setFileToDelete(null)
     }
   }
   
@@ -488,7 +501,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
                         {/* 删除按钮 */}
                         <button
                           type="button"
-                          onClick={() => handleDeleteFile(file)}
+                          onClick={() => showDeleteFileConfirmModal(file)}
                           className="flex-shrink-0 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                           disabled={isSubmitting}
                         >
@@ -680,6 +693,40 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
               >
                 {t('common.confirm.confirmClose')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 文件删除确认对话框 */}
+      {showDeleteFileConfirm && fileToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div 
+            className="absolute inset-0"
+            onClick={() => setShowDeleteFileConfirm(false)}
+          />
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 relative z-10">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('posts.create.deleteFile')}</h3>
+            <p className="text-gray-600 mb-6">{t('posts.create.deleteFileConfirm')}</p>
+            <div className="p-3 bg-gray-50 rounded-lg mb-4">
+              <p className="text-sm font-medium text-gray-900">{fileToDelete.originalName}</p>
+              <p className="text-xs text-gray-500">
+                {fileToDelete.type === 'image' ? t('posts.create.imageType') : t('posts.create.videoType')} • {formatFileSize(fileToDelete.size)}
+              </p>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowDeleteFileConfirm(false)}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={() => handleDeleteFile(fileToDelete)}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                {t('common.delete')}
               </button>
             </div>
           </div>

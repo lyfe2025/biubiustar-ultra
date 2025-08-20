@@ -78,8 +78,24 @@ const NotificationsList: React.FC = () => {
     )
   }
 
+  const [notificationToDelete, setNotificationToDelete] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
   const deleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id))
+  }
+
+  const showDeleteConfirmModal = (id: string) => {
+    setNotificationToDelete(id)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteNotification = () => {
+    if (notificationToDelete) {
+      deleteNotification(notificationToDelete)
+      setShowDeleteConfirm(false)
+      setNotificationToDelete(null)
+    }
   }
 
   const unreadCount = notifications.filter(n => !n.read).length
@@ -170,7 +186,7 @@ const NotificationsList: React.FC = () => {
                       </button>
                     )}
                     <button
-                      onClick={() => deleteNotification(notification.id)}
+                      onClick={() => showDeleteConfirmModal(notification.id)}
                       className="p-1 text-red-600 hover:text-red-700 rounded"
                       title={t('profile.notifications.delete')}
                     >
@@ -190,6 +206,30 @@ const NotificationsList: React.FC = () => {
           <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
             {t('profile.notifications.loadMore')}
           </button>
+        </div>
+      )}
+
+      {/* 删除确认对话框 */}
+      {showDeleteConfirm && notificationToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profile.notifications.delete')}</h3>
+            <p className="text-gray-600 mb-6">{t('profile.notifications.deleteConfirm')}</p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={confirmDeleteNotification}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                {t('common.delete')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
