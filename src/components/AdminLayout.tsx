@@ -82,7 +82,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navigation = [
     {
       name: t('admin.dashboard.title'),
-      href: '/admin',
+      href: '/admin/dashboard',
       icon: LayoutDashboard
     },
     {
