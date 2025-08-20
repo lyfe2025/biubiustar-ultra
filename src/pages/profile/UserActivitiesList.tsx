@@ -102,7 +102,7 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
           return (
             <Link 
               key={activity.id} 
-              to={`/activity/${activity.id}`}
+              to={`/activities/${activity.id}`}
               state={{ from: currentTab }}
               className="block border-b border-gray-200 last:border-b-0 pb-6 last:pb-0 hover:bg-gray-50 transition-colors duration-200 rounded-lg p-4 -m-4 mb-2 last:mb-0"
             >

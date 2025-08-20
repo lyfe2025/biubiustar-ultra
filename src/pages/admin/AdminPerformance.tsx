@@ -13,6 +13,7 @@ import {
   Globe
 } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
+import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import { useLanguage } from '../../contexts/language'
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor'
 
@@ -28,6 +29,7 @@ const AdminPerformance = () => {
   
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [refreshInterval, setRefreshInterval] = useState(30) // 30秒
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
 
   // 自动刷新功能
   useEffect(() => {
@@ -42,10 +44,13 @@ const AdminPerformance = () => {
   }, [autoRefresh, refreshInterval])
 
   const handleClearMetrics = () => {
-    if (window.confirm(t('admin.performance.clearConfirm') || '确定要清除所有性能指标吗？')) {
-      clearMetrics()
-      toast.success(t('admin.performance.messages.dataCleared') || '性能指标已清除')
-    }
+    setShowClearConfirm(true)
+  }
+
+  const confirmClearMetrics = () => {
+    clearMetrics()
+    toast.success(t('admin.performance.messages.dataCleared') || '性能指标已清除')
+    setShowClearConfirm(false)
   }
 
   const handleExportData = () => {
@@ -333,6 +338,18 @@ const AdminPerformance = () => {
           </ul>
         </div>
       </div>
+
+      {/* 清除性能数据确认对话框 */}
+      <DeleteConfirmModal
+        isOpen={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        onConfirm={confirmClearMetrics}
+        title={t('admin.performance.clearConfirmTitle') || '清除性能数据'}
+        message={t('admin.performance.clearConfirm') || '确定要清除所有性能数据吗？此操作无法撤销。'}
+        itemIcon={<Trash2 className="w-5 h-5 text-red-600" />}
+        confirmText={t('admin.performance.clear') || '清除'}
+        cancelText={t('common.cancel') || '取消'}
+      />
     </AdminLayout>
   )
 }

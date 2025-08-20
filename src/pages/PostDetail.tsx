@@ -14,6 +14,7 @@ import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } fr
 import MediaGrid from '../components/MediaGrid'
 import { usePostDetailData } from '../hooks/useOptimizedData'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
+import { useErrorMessage } from '../utils/errorMessages'
 
 interface ContentCategory {
   id: string
@@ -34,6 +35,7 @@ const PostDetail = () => {
   const location = useLocation()
   const { user, userProfile } = useAuth()
   const { language, t } = useLanguage()
+  const { getErrorMessage } = useErrorMessage()
 
   const openAuthModal = (type: 'login' | 'register') => {
     setAuthModalType(type)
@@ -479,8 +481,8 @@ const PostDetail = () => {
         
         <div className="relative text-center bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 max-w-md mx-4">
           <div className="text-6xl mb-4 animate-bounce">😵</div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">出错了</h2>
-          <p className="text-red-600 mb-6">{error || t('posts.detail.postNotFound')}</p>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">{t('posts.detail.errorTitle')}</h2>
+          <p className="text-red-600 mb-6">{error || getErrorMessage('posts.notFound')}</p>
           <button
             onClick={() => navigate(-1)}
             className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl font-medium hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"

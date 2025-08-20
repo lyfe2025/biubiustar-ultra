@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FileText, Heart, MessageCircle, Trash2, Calendar, Eye, Play } from 'lucide-react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { formatDateByLanguage } from '../../utils/dateFormatter'
 import { useLanguage } from '../../contexts/language'
 import { UserPostsListProps } from './types'
@@ -17,6 +17,7 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
   const { t } = useLanguage()
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const location = useLocation()
+  const navigate = useNavigate()
 
   // 获取当前标签页信息
   const getCurrentTab = () => {
@@ -128,13 +129,12 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
             <div key={post.id} className="border-b border-gray-200 last:border-b-0 pb-6 last:pb-0">
               {/* 帖子标题 */}
               <div className="flex items-start justify-between mb-3">
-                <Link 
-                  to={`/post/${post.id}`}
-                  state={{ from: currentTab }}
-                  className="text-lg font-medium text-gray-900 flex-1 hover:text-purple-600 transition-colors"
+                <button
+                  onClick={() => navigate(`/post/${post.id}`, { state: { from: currentTab } })}
+                  className="text-lg font-medium text-gray-900 flex-1 hover:text-purple-600 transition-colors text-left"
                 >
                   {post.title || t('profile.untitledPost')}
-                </Link>
+                </button>
                 <button
                   onClick={() => handleDeleteClick(post.id)}
                   className="text-red-600 hover:text-red-800 p-1 rounded transition-colors"

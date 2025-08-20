@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { supabaseAdmin } from '../../lib/supabase.js';
+import { supabaseAdmin, verifyAuthToken } from '../../lib/supabase.js';
 import { sendResponse, sendValidationError, sendNotFoundError, sendUnauthorizedError } from '../../utils/response.js';
 import { validatePostStatus } from '../../utils/validation.js';
 import { asyncHandler } from '../../middleware/asyncHandler.js';
@@ -135,8 +135,15 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
 router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-
-    const { data: post, error } = await supabaseAdmin
+    console.log(`🔍 [POST_DETAIL] 请求帖子详情 ID: ${id}`);
+    console.log(`🔍 [POST_DETAIL] Authorization header: ${req.headers.authorization ? '存在' : '不存在'}`);
+    
+    // 验证用户身份
+    const currentUser = await verifyAuthToken(req.headers.authorization);
+    console.log(`🔍 [POST_DETAIL] 用户认证结果:`, currentUser ? `用户ID: ${currentUser.id}` : '未登录');
+    
+    // 构建查询条件
+    let query = supabaseAdmin
       .from('posts')
       .select(`
         *,
@@ -149,9 +156,57 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
           display_order
         )
       `)
-      .eq('id', id)
-      .eq('status', 'published')
-      .single();
+      .eq('id', id);
+    
+    let statusFilter = null;
+    
+    // 如果用户未登录或不是帖子作者，只能查看已发布的帖子
+    if (!currentUser) {
+      statusFilter = 'published';
+      query = query.eq('status', 'published');
+      console.log(`🔍 [POST_DETAIL] 未登录用户，只能查看已发布帖子`);
+    } else {
+      // 先获取帖子基本信息以检查作者
+      console.log(`🔍 [POST_DETAIL] 获取帖子基本信息以检查作者权限`);
+      const { data: postInfo, error: postInfoError } = await supabaseAdmin
+        .from('posts')
+        .select('user_id, status, title')
+        .eq('id', id)
+        .single();
+      
+      if (postInfoError) {
+        console.log(`🔍 [POST_DETAIL] 获取帖子基本信息失败:`, postInfoError);
+      } else {
+        console.log(`🔍 [POST_DETAIL] 帖子基本信息:`, {
+          user_id: postInfo?.user_id,
+          status: postInfo?.status,
+          title: postInfo?.title,
+          isAuthor: postInfo?.user_id === currentUser.id
+        });
+      }
+      
+      // 如果不是帖子作者，只能查看已发布的帖子
+      if (!postInfo || postInfo.user_id !== currentUser.id) {
+        statusFilter = 'published';
+        query = query.eq('status', 'published');
+        console.log(`🔍 [POST_DETAIL] 非作者用户，只能查看已发布帖子`);
+      } else {
+        console.log(`🔍 [POST_DETAIL] 帖子作者，可以查看任何状态的帖子`);
+      }
+      // 如果是帖子作者，可以查看任何状态的帖子（不添加status过滤条件）
+    }
+    
+    console.log(`🔍 [POST_DETAIL] 最终查询条件 - 帖子ID: ${id}, 状态过滤: ${statusFilter || '无限制'}`);
+    
+    const { data: post, error } = await query.single();
+    
+    console.log(`🔍 [POST_DETAIL] 查询结果:`, {
+      success: !error,
+      error: error?.message,
+      errorCode: error?.code,
+      postFound: !!post,
+      postStatus: post?.status
+    });
 
     if (error) {
       if (error.code === 'PGRST116') {

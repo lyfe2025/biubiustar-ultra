@@ -7,6 +7,7 @@ import app from './app.js';
  * start server with port
  */
 const PORT = process.env.PORT || 3001;
+console.log(`Attempting to start server on port ${PORT}...`);
 
 const server = app.listen(PORT, () => {
   console.log(`Server ready on port ${PORT}`);

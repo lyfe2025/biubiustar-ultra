@@ -9,6 +9,7 @@ export const adminPerformanceTranslations = {
         autoRefresh: '自动刷新',
         export: '导出数据',
         clear: '清除数据',
+        clearConfirmTitle: '清除性能数据',
         clearConfirm: '确定要清除所有性能数据吗？此操作无法撤销。',
         
         // 统计卡片
@@ -62,6 +63,7 @@ export const adminPerformanceTranslations = {
         autoRefresh: '自動重新整理',
         export: '匯出資料',
         clear: '清除資料',
+        clearConfirmTitle: '清除效能資料',
         clearConfirm: '確定要清除所有效能資料嗎？此操作無法復原。',
         
         stats: {
@@ -111,6 +113,7 @@ export const adminPerformanceTranslations = {
         autoRefresh: 'Auto Refresh',
         export: 'Export Data',
         clear: 'Clear Data',
+        clearConfirmTitle: 'Clear Performance Data',
         clearConfirm: 'Are you sure you want to clear all performance data? This action cannot be undone.',
         
         stats: {
@@ -160,6 +163,7 @@ export const adminPerformanceTranslations = {
         autoRefresh: 'Tự động làm mới',
         export: 'Xuất dữ liệu',
         clear: 'Xóa dữ liệu',
+        clearConfirmTitle: 'Xóa dữ liệu hiệu suất',
         clearConfirm: 'Bạn có chắc chắn muốn xóa tất cả dữ liệu hiệu suất? Hành động này không thể hoàn tác.',
         
         stats: {

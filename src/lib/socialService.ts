@@ -105,15 +105,48 @@ class SocialService {
   // 获取单个帖子
   async getPost(id: string): Promise<Post | null> {
     try {
-      const response = await fetch(`/api/posts/${id}`);
+      // 尝试获取认证token（如果用户已登录）
+      let headers: Record<string, string> = {};
+      
+      try {
+        const sessionData = localStorage.getItem('supabase.auth.token');
+        if (sessionData) {
+          const session = JSON.parse(sessionData);
+          const accessToken = session.access_token;
+          
+          if (accessToken) {
+            headers['Authorization'] = `Bearer ${accessToken}`;
+            console.log('🔍 [FRONTEND] getPost: 携带认证token');
+          } else {
+            console.log('🔍 [FRONTEND] getPost: 未找到有效的access_token');
+          }
+        } else {
+          console.log('🔍 [FRONTEND] getPost: 未找到session数据，用户未登录');
+        }
+      } catch (tokenError) {
+        console.log('🔍 [FRONTEND] getPost: 获取token失败，继续以未登录状态请求:', tokenError);
+        // 继续执行，不抛出错误
+      }
+      
+      console.log('🔍 [FRONTEND] getPost: 请求帖子详情 ID:', id);
+      
+      const response = await fetch(`/api/posts/${id}`, {
+        headers
+      });
+      
+      console.log('🔍 [FRONTEND] getPost: 响应状态:', response.status);
+      
       if (!response.ok) {
         if (response.status === 404) {
+          console.log('🔍 [FRONTEND] getPost: 帖子不存在 (404)');
           return null;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
+      console.log('🔍 [FRONTEND] getPost: 响应数据:', data.success ? '成功' : '失败');
+      
       // 适应API返回格式：{success: true, data: {post: actualPostData}}
       if (data.success && data.data && data.data.post) {
         return data.data.post;
@@ -121,7 +154,7 @@ class SocialService {
       // 兼容旧格式
       return data;
     } catch (error) {
-      console.error('Error fetching post:', error);
+      console.error('🔍 [FRONTEND] getPost: 请求失败:', error);
       throw error;
     }
   }

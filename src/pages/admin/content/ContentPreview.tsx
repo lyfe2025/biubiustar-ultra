@@ -3,6 +3,8 @@ import { X, Check, Trash2, Calendar, User, Heart, MessageSquare, Eye, Image, Vid
 import { useLanguage } from '../../../contexts/language'
 import { ContentPreviewProps, Post } from './types'
 import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../../../utils/avatarGenerator'
+import MediaGrid from '../../../components/MediaGrid'
+import type { MediaFile } from '../../../types'
 
 const ContentPreview: React.FC<ContentPreviewProps> = ({
   post,
@@ -14,6 +16,42 @@ const ContentPreview: React.FC<ContentPreviewProps> = ({
   const { t } = useLanguage()
 
   if (!isOpen || !post) return null
+
+  // 获取媒体文件数据，支持新的media_files和向后兼容旧的image_url/video字段
+  const getMediaFiles = (post: Post): MediaFile[] => {
+    // 优先使用新的 media_files 数据
+    if (post.media_files && post.media_files.length > 0) {
+      return post.media_files.sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    }
+    
+    // 向后兼容：将旧的 image_url 和 video 转换为 MediaFile 格式
+    const mediaFiles: MediaFile[] = []
+    
+    if (post.image_url) {
+      mediaFiles.push({
+        id: 'legacy-image',
+        post_id: post.id,
+        file_url: post.image_url,
+        file_type: 'image',
+        display_order: 0,
+        created_at: post.created_at
+      })
+    }
+    
+    if (post.video) {
+      mediaFiles.push({
+        id: 'legacy-video',
+        post_id: post.id,
+        file_url: post.video,
+        file_type: 'video',
+        thumbnail_url: post.image_url, // 使用image_url作为视频缩略图
+        display_order: post.image_url ? 1 : 0,
+        created_at: post.created_at
+      })
+    }
+    
+    return mediaFiles
+  }
 
   const getStatusColor = (status: Post['status']) => {
     switch (status) {
@@ -77,28 +115,21 @@ const ContentPreview: React.FC<ContentPreviewProps> = ({
           </div>
 
           {/* 媒体内容 */}
-          {(post.image_url || post.video) && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-900 flex items-center space-x-2">
-                {post.video ? <Video className="w-4 h-4" /> : <Image className="w-4 h-4" />}
-                <span>{post.video ? t('admin.content.video') : t('admin.content.image')}</span>
-              </h4>
-              {post.video ? (
-                <video 
-                  src={post.video} 
-                  controls 
-                  className="w-full max-h-96 rounded-lg"
-                  poster={post.image_url}
-                />
-              ) : post.image_url && (
-                <img 
-                  src={post.image_url} 
-                  alt="内容图片" 
-                  className="w-full max-h-96 object-contain rounded-lg"
-                />
-              )}
-            </div>
-          )}
+          {(() => {
+            const mediaFiles = getMediaFiles(post)
+            return mediaFiles.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-gray-900 flex items-center space-x-2">
+                  <Image className="w-4 h-4" />
+                  <span>{t('admin.content.mediaFiles')} ({mediaFiles.length})</span>
+                </h4>
+                <MediaGrid 
+                   mediaFiles={mediaFiles}
+                   className="rounded-lg"
+                 />
+              </div>
+            )
+          })()}
 
           {/* 正文内容 */}
           <div className="space-y-3">
@@ -129,7 +160,7 @@ const ContentPreview: React.FC<ContentPreviewProps> = ({
             <div className="text-center">
               <div className="flex items-center justify-center space-x-2 text-green-500 mb-1">
                 <Eye className="w-5 h-5" />
-                <span className="text-2xl font-bold text-gray-900">{post.likes_count}</span>
+                <span className="text-2xl font-bold text-gray-900">{post.views_count}</span>
               </div>
               <div className="text-sm text-gray-500">{t('admin.content.views')}</div>
             </div>

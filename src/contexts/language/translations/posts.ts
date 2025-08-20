@@ -93,6 +93,7 @@ export const postTranslations = {
       // 帖子详情页面
       detail: {
         loading: '加载中...',
+        errorTitle: '出错了',
         postNotFound: '帖子不存在',
         loadError: '获取帖子详情失败',
         back: '返回',
@@ -302,6 +303,7 @@ export const postTranslations = {
       // 帖子詳情頁面
       detail: {
         loading: '加載中...',
+        errorTitle: '出錯了',
         postNotFound: '帖子不存在',
         loadError: '獲取帖子詳情失敗',
         back: '返回',
@@ -511,6 +513,7 @@ export const postTranslations = {
       // Post detail page
       detail: {
         loading: 'Loading...',
+        errorTitle: 'Error',
         postNotFound: 'Post not found',
         loadError: 'Failed to load post details',
         back: 'Back',
@@ -720,6 +723,7 @@ export const postTranslations = {
       // Trang chi tiết bài viết
       detail: {
         loading: 'Đang tải...',
+        errorTitle: 'Đã xảy ra lỗi',
         postNotFound: 'Không tìm thấy bài viết',
         loadError: 'Không thể tải chi tiết bài viết',
         back: 'Quay lại',

@@ -22,6 +22,7 @@ import {
   aboutCompanyTranslations,
   aboutTeamTranslations,
   aboutContactTranslations,
+  errorTranslations,
   commonTranslations
 } from './translations'
 
@@ -84,6 +85,7 @@ export const allTranslations = mergeTranslations(
   aboutCompanyTranslations,
   aboutTeamTranslations,
   aboutContactTranslations,
+  errorTranslations,
   commonTranslations
 )
 
