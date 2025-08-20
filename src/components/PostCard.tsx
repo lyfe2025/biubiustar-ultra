@@ -5,12 +5,14 @@ import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
 import { socialService } from '../lib/socialService'
+import { batchStatusService } from '../services/batchStatusService'
 import type { Post, MediaFile } from '../types'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN, enUS, vi } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 import MediaGrid from './MediaGrid'
+import { categoriesCache, type ContentCategory } from '../services/categoriesCache'
 
 interface PostCardProps {
   post: Post
@@ -19,22 +21,15 @@ interface PostCardProps {
   onShare?: (postId: string) => void
   showFullContent?: boolean // 是否显示完整内容，默认false（截断显示）
   maxContentLength?: number // 最大内容长度，默认150字符
+  // 新增：用于批量获取的数据
+  initialCommentsCount?: number
+  initialLikesCount?: number
+  initialIsLiked?: boolean
 }
 
-interface ContentCategory {
-  id: string
-  name: string
-  name_zh: string
-  name_zh_tw: string
-  name_en: string
-  name_vi: string
-  description?: string
-  color?: string
-  icon?: string
-  is_active: boolean
-}
+// ContentCategory 接口已移至 categoriesCache 服务中
 
-const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, maxContentLength = 150 }: PostCardProps) => {
+const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, maxContentLength = 150, initialCommentsCount, initialLikesCount, initialIsLiked }: PostCardProps) => {
   const { user } = useAuth()
   const { language, t } = useLanguage()
   const navigate = useNavigate()
@@ -75,9 +70,9 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     
     return mediaFiles
   }
-  const [isLiked, setIsLiked] = useState(false)
-  const [likesCount, setLikesCount] = useState(post.likes_count || 0)
-  const [commentsCount, setCommentsCount] = useState(post.comments_count || 0)
+  const [isLiked, setIsLiked] = useState<boolean>(initialIsLiked ?? false)
+  const [likesCount, setLikesCount] = useState<number>(initialLikesCount ?? (post.likes_count || 0))
+  const [commentsCount, setCommentsCount] = useState<number>(initialCommentsCount ?? (post.comments_count || 0))
   // const [showShareMenu, setShowShareMenu] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [sharesCount, setSharesCount] = useState(post.shares_count || 0)
@@ -87,8 +82,10 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
   const [categories, setCategories] = useState<ContentCategory[]>([])
   const [categoryDisplayName, setCategoryDisplayName] = useState<string>('')
 
-  // 获取真实的评论数量
+  // 获取真实的评论数量（仅在没有初始数据时调用）
   const fetchCommentsCount = async () => {
+    if (initialCommentsCount !== undefined) return
+    
     try {
       const count = await socialService.getPostCommentsCount(post.id)
       setCommentsCount(count)
@@ -97,11 +94,11 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     }
   }
 
-  // 获取分类数据
+  // 获取分类数据（使用缓存服务）
   const fetchCategories = async () => {
     try {
       console.log(`PostCard: 正在获取分类数据，当前语言: ${language}`)
-      const categoriesData = await socialService.getContentCategories(language)
+      const categoriesData = await categoriesCache.getContentCategories(language)
       console.log('PostCard: 获取到的分类数据:', categoriesData)
       setCategories(categoriesData)
     } catch (error) {
@@ -109,33 +106,24 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
     }
   }
 
-  // 根据当前语言获取分类名称
+  // 根据当前语言获取分类名称（使用缓存服务的工具函数）
   const getCategoryName = (category: ContentCategory): string => {
-    switch (language) {
-      case 'zh':
-        return category.name_zh || category.name
-      case 'zh-TW':
-        return category.name_zh_tw || category.name_zh || category.name
-      case 'en':
-        return category.name_en || category.name
-      case 'vi':
-        return category.name_vi || category.name
-      default:
-        return category.name_zh || category.name
-    }
+    return categoriesCache.getCategoryName(category, language)
   }
 
   const moreMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (user) {
+    if (user && initialIsLiked === undefined) {
       checkIfLiked()
     }
-    // 获取真实的评论数量
-    fetchCommentsCount()
+    // 只有在没有初始数据时才获取评论数量
+    if (initialCommentsCount === undefined) {
+      fetchCommentsCount()
+    }
     // 获取分类数据
     fetchCategories()
-  }, [user, post.id])
+  }, [user, post.id, initialCommentsCount, initialIsLiked])
 
   // 当分类数据或语言变化时，更新分类显示名称
   useEffect(() => {

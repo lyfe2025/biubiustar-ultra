@@ -1,0 +1,9 @@
+# 忽略备份产物
+*.dump
+*.sql
+*.tar
+*.gz
+
+# 保留本文件
+!.gitignore
+

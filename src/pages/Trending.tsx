@@ -4,6 +4,7 @@ import { useLanguage } from '../contexts/language'
 import { useAuth } from '../contexts/AuthContext'
 import { cn } from '../lib/utils'
 import { socialService } from '../lib/socialService'
+import { batchStatusService } from '../services/batchStatusService'
 import type { Post } from '../types'
 import PostCard from '../components/PostCard'
 import CommentModal from '../components/CommentModal'
@@ -34,6 +35,11 @@ export default function Trending() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [selectedPostTitle, setSelectedPostTitle] = useState('')
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
+  const [postStatusMap, setPostStatusMap] = useState<Map<string, {
+    commentsCount: number;
+    likesCount: number;
+    isLiked: boolean;
+  }>>(new Map())
 
   // 根据当前语言获取分类名称
   const getCategoryName = (category: ContentCategory): string => {
@@ -79,11 +85,47 @@ export default function Trending() {
     try {
       const data = await socialService.getTrendingPosts()
       setPosts(data)
+      
+      // 批量获取帖子状态
+      if (data.length > 0) {
+        await loadPostsStatus(data)
+      }
     } catch (error) {
       console.error('Error loading trending posts:', error)
       setPosts([])
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadPostsStatus = async (postsData: Post[]) => {
+    if (!user) return
+    
+    try {
+      const postIds = postsData.map(post => post.id)
+      const [commentsCountMap, likesCountMap, likedStatusMap] = await Promise.all([
+        batchStatusService.batchGetCommentsCount(postIds),
+        batchStatusService.batchGetLikesCount(postIds),
+        batchStatusService.batchCheckLikedStatus(postIds, user.id)
+      ])
+      
+      const statusMap = new Map<string, {
+        commentsCount: number;
+        likesCount: number;
+        isLiked: boolean;
+      }>()
+      
+      postIds.forEach(postId => {
+        statusMap.set(postId, {
+          commentsCount: commentsCountMap[postId] || 0,
+          likesCount: likesCountMap[postId] || 0,
+          isLiked: likedStatusMap[postId] || false
+        })
+      })
+      
+      setPostStatusMap(statusMap)
+    } catch (error) {
+      console.error('批量获取帖子状态失败:', error)
     }
   }
 
@@ -280,6 +322,9 @@ export default function Trending() {
                     onLike={() => handleLike(post.id)}
                     onComment={() => handleComment(post.id)}
                     onShare={() => handleShare(post.id)}
+                    initialCommentsCount={postStatusMap.get(post.id)?.commentsCount}
+                      initialLikesCount={postStatusMap.get(post.id)?.likesCount}
+                      initialIsLiked={postStatusMap.get(post.id)?.isLiked}
                   />
                 </div>
               ))}

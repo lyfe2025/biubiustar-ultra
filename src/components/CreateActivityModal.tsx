@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/language';
 import { getCategoryName } from '../utils/categoryUtils';
 import { toast } from 'sonner';
+import { categoriesCache } from '../services/categoriesCache';
 
 interface CreateActivityModalProps {
   isOpen: boolean;
@@ -36,7 +37,7 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const categoryData = await ActivityService.getActivityCategories(language);
+        const categoryData = await categoriesCache.getActivityCategories(language);
         setCategories(categoryData);
       } catch (error) {
         console.error('Failed to load categories:', error);

@@ -8,27 +8,39 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/language/LanguageContext';
 import { getCategoryName } from '../utils/categoryUtils';
 import { toast } from 'sonner';
+import { categoriesCache, type ActivityCategory } from '../services/categoriesCache';
+import { batchStatusService } from '../services/batchStatusService';
 
 
 interface ActivityCardProps {
   activity: Activity;
   onParticipationChange?: () => void;
   simplified?: boolean; // 新增：是否为简化模式
+  // 新增：用于批量获取的数据
+  initialIsParticipating?: boolean;
+  initialParticipantCount?: number;
 }
 
-export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticipationChange, simplified = false }) => {
+export const ActivityCard: React.FC<ActivityCardProps> = ({ 
+  activity, 
+  onParticipationChange, 
+  simplified = false,
+  initialIsParticipating,
+  initialParticipantCount
+}) => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
-  const [isParticipating, setIsParticipating] = useState(false);
+  const [isParticipating, setIsParticipating] = useState<boolean>(initialIsParticipating ?? false);
   const [isLoading, setIsLoading] = useState(false);
-  const [participantCount, setParticipantCount] = useState(activity.current_participants || 0);
+  const [participantCount, setParticipantCount] = useState<number>(initialParticipantCount ?? (activity.current_participants || 0));
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
-    if (user) {
+    // 只有在没有初始数据且用户已登录时才检查参与状态
+    if (user && initialIsParticipating === undefined) {
       checkParticipation();
     }
-  }, [user, activity.id]);
+  }, [user, activity.id, initialIsParticipating]);
 
   useEffect(() => {
     loadCategories();
@@ -36,7 +48,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
 
   const loadCategories = async () => {
     try {
-      const categoriesData = await ActivityService.getActivityCategories(language);
+      const categoriesData = await categoriesCache.getActivityCategories(language);
       setCategories(categoriesData || []);
     } catch (error) {
       console.error('Failed to load categories:', error);
@@ -46,6 +58,9 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onParticip
 
   const checkParticipation = async () => {
     if (!user) return;
+    
+    // 如果已有初始数据，则不需要重新检查
+    if (initialIsParticipating !== undefined) return;
     
     try {
       const participating = await ActivityService.isUserParticipating(activity.id, user.id);

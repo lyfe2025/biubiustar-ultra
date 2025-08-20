@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
 
 import { socialService } from '../lib/socialService'
+import { batchStatusService } from '../services/batchStatusService'
 import type { Post } from '../types'
 import { ActivityService, Activity as ActivityType } from '../lib/activityService'
 import PostCard from '../components/PostCard'
@@ -47,6 +48,18 @@ const Home = () => {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  
+  // 批量状态数据
+  const [postStatusMap, setPostStatusMap] = useState<{
+    commentsCount: Record<string, number>;
+    likesCount: Record<string, number>;
+    isLiked: Record<string, boolean>;
+  }>({ commentsCount: {}, likesCount: {}, isLiked: {} })
+  
+  const [activityStatusMap, setActivityStatusMap] = useState<{
+    isParticipating: Record<string, boolean>;
+    participantCount: Record<string, number>;
+  }>({ isParticipating: {}, participantCount: {} })
 
   const handleComment = (postId: string) => {
     const post = posts.find(p => p.id === postId)
@@ -56,6 +69,73 @@ const Home = () => {
       setIsCommentModalOpen(true)
     }
   }
+
+  // 批量加载帖子状态
+  const loadPostsStatus = async (posts: any[]) => {
+    try {
+      const postIds = posts.map(post => post.id)
+      
+      // 批量获取评论数量
+      const commentsCountMap = await batchStatusService.batchGetCommentsCount(postIds)
+      
+      // 批量获取点赞数量和状态（如果用户已登录）
+      let likesCountMap: Record<string, number> = {}
+      let isLikedMap: Record<string, boolean> = {}
+      
+      // 批量获取点赞数量
+      likesCountMap = await batchStatusService.batchGetLikesCount(postIds)
+      
+      if (user) {
+        // 批量获取点赞状态
+        isLikedMap = await batchStatusService.batchCheckLikeStatus(postIds, user.id)
+      }
+      
+      setPostStatusMap({
+        commentsCount: commentsCountMap,
+        likesCount: likesCountMap,
+        isLiked: isLikedMap
+      })
+    } catch (error) {
+      console.error('Failed to load posts status:', error)
+      // 静默失败，组件会降级到单独获取数据
+    }
+  }
+  
+  // 批量加载活动状态
+  const loadActivitiesStatus = async (activities: any[]) => {
+    if (!user) return
+    
+    try {
+      const activityIds = activities.map(activity => activity.id)
+      
+      // 批量获取用户参与状态
+      const participationMap = await batchStatusService.batchGetUserParticipationStatus(activityIds, user.id)
+      
+      // 批量获取参与人数
+      const participantCountMap = await batchStatusService.batchGetParticipantCount(activityIds)
+      
+      setActivityStatusMap({
+        isParticipating: Object.fromEntries(participationMap.entries()),
+        participantCount: Object.fromEntries(participantCountMap.entries())
+      })
+    } catch (error) {
+      console.error('Failed to load activities status:', error)
+      // 静默失败，组件会降级到单独获取数据
+    }
+  }
+
+  // 当数据加载完成后，批量获取状态信息
+  useEffect(() => {
+    if (posts && posts.length > 0) {
+      loadPostsStatus(posts)
+    }
+  }, [posts, user])
+  
+  useEffect(() => {
+    if (activities && activities.length > 0 && user) {
+      loadActivitiesStatus(activities)
+    }
+  }, [activities, user])
 
   const handlePostCreated = () => {
     refetch() // 重新加载所有数据
@@ -247,6 +327,9 @@ const Home = () => {
                   key={post.id}
                   post={post}
                   onComment={handleComment}
+                  initialCommentsCount={postStatusMap.commentsCount[post.id]}
+                  initialLikesCount={postStatusMap.likesCount[post.id]}
+                  initialIsLiked={postStatusMap.isLiked[post.id]}
                 />
               ))}
             </div>
@@ -283,6 +366,8 @@ const Home = () => {
                   key={activity.id}
                   activity={activity}
                   simplified={true}
+                  initialIsParticipating={activityStatusMap.isParticipating[activity.id]}
+                  initialParticipantCount={activityStatusMap.participantCount[activity.id]}
                 />
               ))}
             </div>

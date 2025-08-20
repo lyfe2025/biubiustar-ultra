@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/language'
 import { toast } from 'sonner'
 import { socialService } from '../lib/socialService'
 import { supabase } from '../lib/supabase'
+import { categoriesCache } from '../services/categoriesCache'
 
 interface CreatePostModalProps {
   isOpen: boolean
@@ -65,7 +66,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
   // 获取分类数据
   const fetchCategories = async () => {
     try {
-      const categories = await socialService.getContentCategories(language);
+      const categories = await categoriesCache.getContentCategories(language);
       setCategories(categories || []);
     } catch (error) {
       console.error(t('posts.create.categoryError'), error);
@@ -74,16 +75,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
 
   // 获取分类名称（根据当前语言）
   const getCategoryName = (category: ContentCategory): string => {
-    switch (language) {
-      case 'zh-TW':
-        return category.name_zh_tw || category.name_zh || category.name
-      case 'en':
-        return category.name_en || category.name
-      case 'vi':
-        return category.name_vi || category.name
-      default:
-        return category.name_zh || category.name
-    }
+    return categoriesCache.getCategoryName(category, language);
   }
 
   // 处理文件上传

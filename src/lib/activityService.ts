@@ -251,4 +251,20 @@ export class ActivityService {
       return []; // 返回空数组而不是抛出错误
     }
   }
+
+  // 获取活动参与人数
+  static async getParticipantCount(activityId: string): Promise<number> {
+    try {
+      const response = await fetch(`/api/activities/${activityId}/participants/count`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.count || 0;
+    } catch (error) {
+      console.error('Error fetching participant count:', error);
+      return 0;
+    }
+  }
 }

@@ -4,16 +4,23 @@ import { ActivityService, ActivityCategory } from '../lib/activityService';
 import { ActivityCard } from '../components/ActivityCard';
 import { Activity, Category } from '../types';
 import { useActivitiesPageData } from '../hooks/useOptimizedData';
+import { batchStatusService } from '../services/batchStatusService';
+import { useAuth } from '../contexts/AuthContext';
 
 
 const Activities: React.FC = () => {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [selectedStatus, setSelectedStatus] = useState('全部');
+  
+  // 批量状态数据
+  const [participationStatusMap, setParticipationStatusMap] = useState<Record<string, boolean>>({});
+  const [participantCountMap, setParticipantCountMap] = useState<Record<string, number>>({});
   
   // 使用优化的数据获取Hook
   const {
@@ -55,10 +62,47 @@ const Activities: React.FC = () => {
       const activityService = new ActivityService();
       const data = await activityService.getActivities();
       setActivities(data);
+      
+      // 批量获取用户参与状态和参与人数
+      if (data.length > 0) {
+        await loadBatchStatusData(data);
+      }
     } catch (error) {
       console.error('Failed to load activities:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  // 批量加载状态数据
+  const loadBatchStatusData = async (activitiesData: Activity[]) => {
+    try {
+      const activityIds = activitiesData.map(activity => activity.id);
+      
+      // 批量获取用户参与状态（仅在用户登录时）
+      if (user) {
+        const participationStatuses = await batchStatusService.batchCheckParticipation(
+          activityIds,
+          user.id
+        );
+        setParticipationStatusMap(participationStatuses);
+      }
+      
+      // 批量获取参与人数（这里可以扩展batchStatusService来支持批量获取参与人数）
+      // 暂时使用现有的单个API调用，但可以考虑后续优化
+      const countMap: Record<string, number> = {};
+      for (const activity of activitiesData) {
+        try {
+          const count = await ActivityService.getParticipantCount(activity.id);
+          countMap[activity.id] = count;
+        } catch (error) {
+          console.warn(`Failed to get participant count for activity ${activity.id}:`, error);
+          countMap[activity.id] = activity.current_participants || 0;
+        }
+      }
+      setParticipantCountMap(countMap);
+    } catch (error) {
+      console.error('Failed to load batch status data:', error);
     }
   };
 
@@ -99,6 +143,7 @@ const Activities: React.FC = () => {
   };
 
   const handleParticipationChange = () => {
+    // 重新加载活动数据和批量状态
     loadActivities();
   };
 
@@ -301,6 +346,8 @@ const Activities: React.FC = () => {
                     <ActivityCard
                       activity={activity}
                       onParticipationChange={handleParticipationChange}
+                      initialIsParticipating={participationStatusMap[activity.id]}
+                      initialParticipantCount={participantCountMap[activity.id]}
                     />
                   </div>
                 ))}

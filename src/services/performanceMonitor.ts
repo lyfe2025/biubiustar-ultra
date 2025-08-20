@@ -192,6 +192,25 @@ class PerformanceMonitor {
   }
 
   /**
+   * 记录性能指标（简化版本）
+   */
+  recordMetric(name: string, duration: number, success: boolean = true): void {
+    const metric: PerformanceMetric = {
+      name,
+      startTime: Date.now() - duration,
+      endTime: Date.now(),
+      duration,
+      success
+    };
+    
+    this.metrics.push(metric);
+    console.log(`📊 记录指标: ${name} - ${duration}ms ${success ? '成功' : '失败'}`);
+    
+    // 清理旧记录
+    this.cleanupOldMetrics();
+  }
+
+  /**
    * 重置所有指标
    */
   reset(): void {
