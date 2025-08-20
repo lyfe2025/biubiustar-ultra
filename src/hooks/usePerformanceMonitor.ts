@@ -66,13 +66,13 @@ export function usePerformanceMonitor(): UsePerformanceMonitorReturn {
     URL.revokeObjectURL(url)
   }, [exportMetrics])
 
-  // 定期刷新统计数据
+  // 初始化时获取一次统计数据，移除定期刷新避免频繁更新
   useEffect(() => {
     refreshStats()
     
-    const interval = setInterval(refreshStats, 30000) // 每30秒刷新一次
-    
-    return () => clearInterval(interval)
+    // 移除定期刷新，改为手动刷新
+    // const interval = setInterval(refreshStats, 30000) // 每30秒刷新一次
+    // return () => clearInterval(interval)
   }, [refreshStats])
 
   return {

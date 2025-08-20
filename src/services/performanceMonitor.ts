@@ -13,6 +13,7 @@ interface PerformanceConfig {
   maxMetrics: number // 最大存储指标数量
   enableConsoleLog: boolean // 是否启用控制台日志
   enableLocalStorage: boolean // 是否启用本地存储
+  enabled: boolean // 是否启用性能监控
 }
 
 class PerformanceMonitor {
@@ -26,6 +27,7 @@ class PerformanceMonitor {
       maxMetrics: 100,
       enableConsoleLog: process.env.NODE_ENV === 'development',
       enableLocalStorage: true,
+      enabled: this.getEnabledFromStorage(), // 从本地存储获取启用状态
       ...config
     }
 
@@ -42,6 +44,11 @@ class PerformanceMonitor {
 
   // 记录请求性能
   recordRequest(metric: Omit<PerformanceMetric, 'timestamp'>) {
+    // 如果监控被禁用，直接返回
+    if (!this.config.enabled) {
+      return
+    }
+
     const fullMetric: PerformanceMetric = {
       ...metric,
       timestamp: Date.now(),
@@ -184,6 +191,52 @@ class PerformanceMonitor {
     } catch (error) {
       console.warn('保存性能指标失败:', error)
     }
+  }
+
+  // 从本地存储获取启用状态
+  private getEnabledFromStorage(): boolean {
+    try {
+      const stored = localStorage.getItem('performance_monitoring_enabled')
+      return stored ? JSON.parse(stored) : false // 默认关闭
+    } catch (error) {
+      console.warn('获取性能监控启用状态失败:', error)
+      return false
+    }
+  }
+
+  // 保存启用状态到本地存储
+  private saveEnabledToStorage() {
+    try {
+      localStorage.setItem('performance_monitoring_enabled', JSON.stringify(this.config.enabled))
+    } catch (error) {
+      console.warn('保存性能监控启用状态失败:', error)
+    }
+  }
+
+  // 启用性能监控
+  enable() {
+    this.config.enabled = true
+    this.saveEnabledToStorage()
+    console.log('✅ 性能监控已启用')
+  }
+
+  // 禁用性能监控
+  disable() {
+    this.config.enabled = false
+    this.saveEnabledToStorage()
+    console.log('❌ 性能监控已禁用')
+  }
+
+  // 获取监控启用状态
+  isEnabled(): boolean {
+    return this.config.enabled
+  }
+
+  // 设置监控启用状态
+  setEnabled(enabled: boolean) {
+    this.config.enabled = enabled
+    this.saveEnabledToStorage()
+    console.log(enabled ? '✅ 性能监控已启用' : '❌ 性能监控已禁用')
   }
 
   // 记录自定义指标

@@ -8,6 +8,8 @@ import {
   logActivityEvent 
 } from '../../middleware/security'
 import asyncHandler from '../../middleware/asyncHandler.js'
+import { getCachedStats } from '../../services/statsCache.js'
+import { statsRateLimiter } from '../../middleware/rateLimiter.js'
 
 const router = Router()
 
@@ -193,111 +195,25 @@ router.post('/login', ipSecurityCheck, asyncHandler(async (req: Request, res: Re
   }
 }))
 
-// 获取管理员统计信息
-router.get('/stats', requireAdmin, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+// 获取管理员统计信息（使用缓存优化和频率限制）
+router.get('/stats', statsRateLimiter, requireAdmin, asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
-    // 获取用户统计
-    const { data: usersData, error: usersError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('id, created_at')
+    // 使用缓存服务获取统计数据
+    const statsData = await getCachedStats()
     
-    if (usersError) {
-      console.error('获取用户数据失败:', usersError)
-      return res.status(500).json({ error: '获取用户数据失败' })
-    }
-
-    // 计算今日新增用户
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const newUsersToday = usersData?.filter(user => 
-      new Date(user.created_at) >= today
-    ).length || 0
-
-    // 获取帖子统计
-    const { data: postsData, error: postsError } = await supabaseAdmin
-      .from('posts')
-      .select('id, created_at, status, views_count')
-    
-    if (postsError) {
-      console.error('获取帖子数据失败:', postsError)
-      return res.status(500).json({ error: '获取帖子数据失败' })
-    }
-
-    // 计算待审核帖子数
-    const pendingPosts = postsData?.filter(post => post.status === 'pending').length || 0
-    
-    // 计算总浏览量
-    const totalViews = postsData?.reduce((sum, post) => sum + (post.views_count || 0), 0) || 0
-
-    // 获取活动统计
-    const { data: activitiesData, error: activitiesError } = await supabaseAdmin
-      .from('activities')
-      .select('id, created_at, status, start_date, end_date')
-    
-    if (activitiesError) {
-      console.error('获取活动数据失败:', activitiesError)
-      return res.status(500).json({ error: '获取活动数据失败' })
-    }
-
-    // 计算进行中的活动数
-    const now = new Date();
-    const activeActivities = activitiesData?.filter(activity => 
-      activity.status === 'published' && 
-      new Date(activity.start_date) <= now && 
-      new Date(activity.end_date) > now
-    ).length || 0;
-
-    // 计算已完成活动数
-    const completedActivities = activitiesData?.filter(activity => 
-      activity.status === 'completed' || 
-      (activity.status === 'published' && new Date(activity.end_date) <= now)
-    ).length || 0;
-
-    // 获取活动参与人数统计
-    const { data: participantsData, error: participantsError } = await supabaseAdmin
-      .from('activity_participants')
-      .select('id')
-    
-    if (participantsError) {
-      console.error('获取活动参与数据失败:', participantsError)
-      return res.status(500).json({ error: '获取活动参与数据失败' })
-    }
-
-    const totalParticipants = participantsData?.length || 0
-
-    // 获取点赞统计
-    const { data: likesData, error: likesError } = await supabaseAdmin
-      .from('likes')
-      .select('id')
-    
-    if (likesError) {
-      console.error('获取点赞数据失败:', likesError)
-      return res.status(500).json({ error: '获取点赞数据失败' })
-    }
-
-    // 获取评论统计
-    const { data: commentsData, error: commentsError } = await supabaseAdmin
-      .from('comments')
-      .select('id')
-    
-    if (commentsError) {
-      console.error('获取评论数据失败:', commentsError)
-      return res.status(500).json({ error: '获取评论数据失败' })
-    }
-
-    // 返回统计数据
+    // 转换为原有的响应格式
     const stats = {
-      totalUsers: usersData?.length || 0,
-      newUsersToday,
-      totalPosts: postsData?.length || 0,
-      pendingPosts,
-      totalActivities: activitiesData?.length || 0,
-      activeActivities,
-      completedActivities,
-      totalParticipants,
-      totalViews,
-      totalLikes: likesData?.length || 0,
-      totalComments: commentsData?.length || 0
+      totalUsers: statsData.userStats.totalUsers,
+      newUsersToday: statsData.userStats.newUsersToday,
+      totalPosts: statsData.postStats.totalPosts,
+      pendingPosts: statsData.postStats.pendingPosts,
+      totalActivities: statsData.activityStats.totalActivities,
+      activeActivities: statsData.activityStats.activeActivities,
+      completedActivities: statsData.activityStats.completedActivities,
+      totalParticipants: statsData.participationStats.totalParticipants,
+      totalViews: statsData.postStats.totalViews,
+      totalLikes: statsData.likeStats.totalLikes,
+      totalComments: statsData.commentStats.totalComments
     }
 
     res.json(stats)

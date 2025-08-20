@@ -27,21 +27,28 @@ const AdminPerformance = () => {
     exportReport
   } = usePerformanceMonitor()
   
-  const [autoRefresh, setAutoRefresh] = useState(true)
-  const [refreshInterval, setRefreshInterval] = useState(30) // 30秒
+  const [autoRefresh, setAutoRefresh] = useState(false) // 默认关闭自动刷新
+  const [refreshInterval, setRefreshInterval] = useState(30000) // 30秒
+  const [monitoringEnabled, setMonitoringEnabled] = useState(() => {
+    const saved = localStorage.getItem('performance_monitoring_enabled')
+    return saved ? JSON.parse(saved) : false
+  })
   const [showClearConfirm, setShowClearConfirm] = useState(false)
 
-  // 自动刷新功能
+  // 自动刷新逻辑
   useEffect(() => {
-    if (!autoRefresh) return
+    if (autoRefresh && monitoringEnabled) {
+      const interval = setInterval(() => {
+        window.location.reload()
+      }, refreshInterval)
+      return () => clearInterval(interval)
+    }
+  }, [autoRefresh, refreshInterval, monitoringEnabled])
 
-    const interval = setInterval(() => {
-      // 触发数据刷新（usePerformanceMonitor会自动更新）
-      window.location.reload()
-    }, refreshInterval * 1000)
-
-    return () => clearInterval(interval)
-  }, [autoRefresh, refreshInterval])
+  // 监控状态变化时保存到本地存储
+  useEffect(() => {
+    localStorage.setItem('performance_monitoring_enabled', JSON.stringify(monitoringEnabled))
+  }, [monitoringEnabled])
 
   const handleClearMetrics = () => {
     setShowClearConfirm(true)
@@ -92,35 +99,67 @@ const AdminPerformance = () => {
           </div>
           
           <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-            {/* 自动刷新控制 */}
+            {/* 性能监控开关 */}
             <div className="flex items-center space-x-2">
-              <label className="flex items-center space-x-2 text-sm text-gray-600">
-                <input
-                  type="checkbox"
-                  checked={autoRefresh}
-                  onChange={(e) => setAutoRefresh(e.target.checked)}
-                  className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                />
-                <span>{t('admin.performance.autoRefresh') || '自动刷新'}</span>
+              <label className="text-sm font-medium text-gray-700">
+                {t('admin.performance.monitoring') || '性能监控'}
               </label>
-              
-              {autoRefresh && (
-                <select
-                  value={refreshInterval}
-                  onChange={(e) => setRefreshInterval(Number(e.target.value))}
-                  className="text-sm border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                >
-                  <option value={10}>10s</option>
-                  <option value={30}>30s</option>
-                  <option value={60}>60s</option>
-                </select>
-              )}
+              <button
+                onClick={() => setMonitoringEnabled(!monitoringEnabled)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  monitoringEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    monitoringEnabled ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
+
+            {/* 自动刷新开关 */}
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium text-gray-700">
+                {t('admin.performance.autoRefresh') || '自动刷新'}
+              </label>
+              <button
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                disabled={!monitoringEnabled}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  autoRefresh && monitoringEnabled ? 'bg-green-600' : 'bg-gray-200'
+                } ${!monitoringEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    autoRefresh && monitoringEnabled ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* 刷新间隔选择 */}
+            {autoRefresh && monitoringEnabled && (
+              <select
+                value={refreshInterval}
+                onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value={10000}>10秒</option>
+                <option value={30000}>30秒</option>
+                <option value={60000}>60秒</option>
+              </select>
+            )}
             
             {/* 操作按钮 */}
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              disabled={!monitoringEnabled}
+              className={`inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                monitoringEnabled 
+                  ? 'text-gray-700 bg-white hover:bg-gray-50 focus:ring-purple-500' 
+                  : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+              }`}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               {t('admin.performance.refresh') || '刷新'}

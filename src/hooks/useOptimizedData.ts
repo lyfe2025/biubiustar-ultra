@@ -306,10 +306,20 @@ export function useSmartPrefetch() {
 /**
  * 性能监控Hook
  */
-export function useDataPerformance() {
+export function useDataPerformance(refreshInterval: number = 10000) {
   const [stats, setStats] = useState<any>(null);
+  const [monitoringEnabled, setMonitoringEnabled] = useState(() => {
+    const saved = localStorage.getItem('performance_monitoring_enabled');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const refreshStats = useCallback(() => {
+    // 只有在监控启用时才获取统计信息
+    if (!monitoringEnabled) {
+      setStats(null);
+      return;
+    }
+
     const batchStats = batchDataService.getPerformanceStats();
     const prefetchStats = prefetchService.getStats();
     
@@ -318,19 +328,39 @@ export function useDataPerformance() {
       prefetch: prefetchStats,
       timestamp: Date.now()
     });
+  }, [monitoringEnabled]);
+
+  // 监听localStorage变化，实时更新监控状态
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('performance_monitoring_enabled');
+      const enabled = saved ? JSON.parse(saved) : false;
+      setMonitoringEnabled(enabled);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // 定期刷新统计信息
+  // 根据监控状态决定是否启用定时器
   useEffect(() => {
+    if (!monitoringEnabled) {
+      setStats(null);
+      return;
+    }
+
+    // 初始获取一次统计信息
     refreshStats();
-    const interval = setInterval(refreshStats, 10000); // 每10秒刷新一次
-    
+
+    // 启用定时器，根据传入的刷新间隔刷新
+    const interval = setInterval(refreshStats, refreshInterval);
     return () => clearInterval(interval);
-  }, [refreshStats]);
+  }, [monitoringEnabled, refreshStats, refreshInterval]);
 
   return {
     stats,
     refreshStats,
+    monitoringEnabled,
     clearCache: () => {
       batchDataService.clearCache();
       prefetchService.clearCache();

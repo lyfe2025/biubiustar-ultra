@@ -5,6 +5,7 @@ export const adminPerformanceTranslations = {
       performance: {
         title: '性能监控',
         description: '监控系统性能指标和请求统计',
+        monitoring: '性能监控',
         refresh: '刷新',
         autoRefresh: '自动刷新',
         export: '导出数据',
@@ -59,6 +60,7 @@ export const adminPerformanceTranslations = {
       performance: {
         title: '效能監控',
         description: '監控系統效能指標和請求統計',
+        monitoring: '效能監控',
         refresh: '重新整理',
         autoRefresh: '自動重新整理',
         export: '匯出資料',
@@ -109,6 +111,7 @@ export const adminPerformanceTranslations = {
       performance: {
         title: 'Performance Monitor',
         description: 'Monitor system performance metrics and request statistics',
+        monitoring: 'Performance Monitoring',
         refresh: 'Refresh',
         autoRefresh: 'Auto Refresh',
         export: 'Export Data',
@@ -159,6 +162,7 @@ export const adminPerformanceTranslations = {
       performance: {
         title: 'Giám sát hiệu suất',
         description: 'Giám sát các chỉ số hiệu suất hệ thống và thống kê yêu cầu',
+        monitoring: 'Giám sát hiệu suất',
         refresh: 'Làm mới',
         autoRefresh: 'Tự động làm mới',
         export: 'Xuất dữ liệu',
