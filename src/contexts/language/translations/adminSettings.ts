@@ -10,6 +10,8 @@ export const adminSettingsTranslations = {
         export: '导出',
         import: '导入',
         reset: '重置',
+        resetConfirmTitle: '重置设置',
+        resetConfirm: '确定要重置所有设置到默认值吗？此操作无法撤销。',
         save: '保存',
         saving: '保存中...',
         tabs: {
@@ -142,6 +144,8 @@ export const adminSettingsTranslations = {
         export: '導出',
         import: '導入',
         reset: '重置',
+        resetConfirmTitle: '重置設置',
+        resetConfirm: '確定要重置所有設置到默認值嗎？此操作無法撤銷。',
         save: '保存',
         saving: '保存中...',
         tabs: {
@@ -274,6 +278,8 @@ export const adminSettingsTranslations = {
         export: 'Export',
         import: 'Import',
         reset: 'Reset',
+        resetConfirmTitle: 'Reset Settings',
+        resetConfirm: 'Are you sure you want to reset all settings to default values? This action cannot be undone.',
         save: 'Save',
         saving: 'Saving...',
         tabs: {
@@ -406,6 +412,8 @@ export const adminSettingsTranslations = {
         export: 'Xuất',
         import: 'Nhập',
         reset: 'Đặt lại',
+        resetConfirmTitle: 'Đặt lại cài đặt',
+        resetConfirm: 'Bạn có chắc chắn muốn đặt lại tất cả cài đặt về giá trị mặc định không? Hành động này không thể hoàn tác.',
         save: 'Lưu',
         saving: 'Đang lưu...',
         tabs: {

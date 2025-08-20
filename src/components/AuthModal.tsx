@@ -12,9 +12,10 @@ interface AuthModalProps {
   onClose: () => void;
   initialMode?: 'login' | 'register' | 'forgot-password';
   type?: 'login' | 'register';
+  onLoginSuccess?: () => void; // 登录成功后的回调函数
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login', type }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login', type, onLoginSuccess }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [mode, setMode] = useState<'login' | 'register' | 'forgot-password'>(initialMode);
@@ -297,10 +298,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       if (mode === 'login') {
           await signIn(formData.account, formData.password);
         setSuccess(t('auth.success.loginSuccess'));
-        // 登录成功后延迟跳转到个人中心页面
+        // 登录成功后的处理
         setTimeout(() => {
           handleClose();
-          navigate('/profile');
+          if (onLoginSuccess) {
+            // 如果有登录成功回调，调用它而不是跳转到个人中心
+            onLoginSuccess();
+          } else {
+            // 默认行为：跳转到个人中心页面
+            navigate('/profile');
+          }
         }, 1000);
       } else if (mode === 'register') {
         await signUp(formData.email, formData.password, formData.username);

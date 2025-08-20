@@ -141,6 +141,11 @@ class SocialService {
       }
       
       const data = await response.json();
+      // 适应API返回格式：{success: true, data: formattedComment}
+      if (data.success && data.data) {
+        return data.data;
+      }
+      // 兼容旧格式
       return data;
     } catch (error) {
       console.error('Error creating post:', error);
@@ -341,7 +346,9 @@ class SocialService {
       }
       
       const data = await response.json();
-      return data;
+      // 后端API返回格式: {success: true, data: formattedComment}
+      // 需要返回data.data以获取实际的评论对象
+      return data.data || data;
     } catch (error) {
       console.error('Error creating comment:', error);
       throw error;

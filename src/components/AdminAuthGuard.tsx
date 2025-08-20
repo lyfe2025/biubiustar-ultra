@@ -53,7 +53,7 @@ const AuthModal: React.FC<AuthModalProps & { t: (key: string) => string }> = ({ 
               className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
             >
               <LogIn className="w-4 h-4" />
-              <span>{t('admin.login.title')}</span>
+              <span>{t('admin.auth.login.title')}</span>
             </button>
           </div>
         </div>

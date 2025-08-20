@@ -10,6 +10,7 @@ export const useSystemSettings = () => {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<string>('basic')
+  const [resetConfirmModal, setResetConfirmModal] = useState(false)
   const navigate = useNavigate()
 
   // 获取系统设置
@@ -64,15 +65,17 @@ export const useSystemSettings = () => {
 
   // 重置设置到默认值
   const resetToDefaults = async () => {
-    if (!window.confirm('确定要重置所有设置到默认值吗？此操作无法撤销。')) {
-      return
-    }
+    setResetConfirmModal(true)
+  }
 
+  // 确认重置设置
+  const confirmResetToDefaults = async () => {
     try {
       setSaving(true)
       await adminService.resetSystemSettings()
       await fetchSettings()
       toast.success('设置已重置到默认值')
+      setResetConfirmModal(false)
     } catch (error) {
       console.error('重置设置失败:', error)
       toast.error('重置设置失败')
@@ -165,10 +168,13 @@ export const useSystemSettings = () => {
     // UI状态
     activeTab,
     setActiveTab,
+    resetConfirmModal,
+    setResetConfirmModal,
     
     // 操作方法
     updateSettings,
     resetToDefaults,
+    confirmResetToDefaults,
     exportSettings,
     importSettings,
     testEmailConfig,

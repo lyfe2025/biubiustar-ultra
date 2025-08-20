@@ -13,6 +13,7 @@ import AuthModal from '../components/AuthModal'
 import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 import MediaGrid from '../components/MediaGrid'
 import { usePostDetailData } from '../hooks/useOptimizedData'
+import DeleteConfirmModal from '../components/DeleteConfirmModal'
 
 interface ContentCategory {
   id: string
@@ -31,7 +32,7 @@ const PostDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { user } = useAuth()
+  const { user, userProfile } = useAuth()
   const { language, t } = useLanguage()
 
   const openAuthModal = (type: 'login' | 'register') => {
@@ -64,6 +65,15 @@ const PostDetail = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalType, setAuthModalType] = useState<'login' | 'register'>('login')
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const [deleteCommentModal, setDeleteCommentModal] = useState<{
+    isOpen: boolean
+    commentId: string | null
+    commentContent: string
+  }>({
+    isOpen: false,
+    commentId: null,
+    commentContent: ''
+  })
 
   // 处理优化数据的更新
   useEffect(() => {
@@ -283,13 +293,22 @@ const PostDetail = () => {
   }
 
   // 删除评论
-  const handleDeleteComment = async (commentId: string) => {
+  const handleDeleteComment = (commentId: string, commentContent: string) => {
     if (!user) return
-    if (!window.confirm(t('posts.detail.deleteConfirm'))) return
+    setDeleteCommentModal({
+      isOpen: true,
+      commentId,
+      commentContent: commentContent.length > 50 ? commentContent.slice(0, 50) + '...' : commentContent
+    })
+  }
 
+  const confirmDeleteComment = async () => {
+    if (!deleteCommentModal.commentId || !user) return
+    
     try {
-      await socialService.deleteComment(commentId, user.id)
-      setComments(prev => prev.filter(comment => comment.id !== commentId))
+      await socialService.deleteComment(deleteCommentModal.commentId, user.id)
+      setComments(prev => prev.filter(comment => comment.id !== deleteCommentModal.commentId))
+      setDeleteCommentModal({ isOpen: false, commentId: null, commentContent: '' })
       toast.success(t('posts.detail.commentDeleteSuccess'))
     } catch (error) {
       console.error('删除评论失败:', error)
@@ -498,6 +517,16 @@ const PostDetail = () => {
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                {(() => {
+                  console.log('PostDetail 头像调试信息:', {
+                    post: post,
+                    author: post.author,
+                    avatar_url: post.author?.avatar_url,
+                    isDefaultAvatar: post.author?.avatar_url ? isDefaultAvatar(post.author.avatar_url) : 'no avatar_url',
+                    shouldShowRealAvatar: post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url)
+                  })
+                  return null
+                })()} 
                 {post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url) ? (
                   <img
                     src={post.author.avatar_url}
@@ -612,14 +641,19 @@ const PostDetail = () => {
               <form onSubmit={handleSubmitComment} className="mb-6">
                 <div className="flex space-x-4">
                   <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    {user.user_metadata?.avatar_url ? (
+                    {(userProfile?.avatar_url && !isDefaultAvatar(userProfile.avatar_url)) || 
+                     (user.user_metadata?.avatar_url && !isDefaultAvatar(user.user_metadata.avatar_url)) ? (
                       <img
-                        src={user.user_metadata.avatar_url}
-                        alt={user.user_metadata?.username || user.email}
+                        src={userProfile?.avatar_url || user.user_metadata?.avatar_url}
+                        alt={userProfile?.username || user.user_metadata?.username || user.email}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <User className="w-5 h-5 text-white" />
+                      <img
+                        src={getUserDefaultAvatarUrl(userProfile?.username || user.user_metadata?.username || user.email || '')}
+                        alt={userProfile?.username || user.user_metadata?.username || user.email}
+                        className="w-full h-full rounded-full object-cover"
+                      />
                     )}
                   </div>
                   <div className="flex-1">
@@ -700,14 +734,18 @@ const PostDetail = () => {
                     <div className="flex space-x-3">
                       <div className="relative">
                         <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          {comment.author?.avatar_url ? (
+                          {comment.author?.avatar_url && !isDefaultAvatar(comment.author.avatar_url) ? (
                             <img
                               src={comment.author.avatar_url}
                               alt={comment.author.username}
                               className="w-full h-full rounded-full object-cover"
                             />
                           ) : (
-                            <User className="w-5 h-5 text-white" />
+                            <img
+                              src={getUserDefaultAvatarUrl(comment.author?.username || '')}
+                              alt={comment.author?.username || t('posts.card.anonymousUser')}
+                              className="w-full h-full rounded-full object-cover"
+                            />
                           )}
                         </div>
                         {index < comments.length - 1 && (
@@ -727,7 +765,7 @@ const PostDetail = () => {
                             </div>
                             {user && comment.author?.id === user.id && (
                               <button
-                                onClick={() => handleDeleteComment(comment.id)}
+                                onClick={() => handleDeleteComment(comment.id, comment.content)}
                                 className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-all duration-300"
                                 title={t('posts.comments.delete')}
                               >
@@ -753,6 +791,19 @@ const PostDetail = () => {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         type={authModalType}
+      />
+
+      {/* 删除评论确认弹窗 */}
+      <DeleteConfirmModal
+        isOpen={deleteCommentModal.isOpen}
+        onClose={() => setDeleteCommentModal({ isOpen: false, commentId: null, commentContent: '' })}
+        onConfirm={confirmDeleteComment}
+        title={t('posts.comments.deleteConfirmTitle')}
+        message={t('posts.detail.deleteConfirm')}
+        itemName={deleteCommentModal.commentContent}
+        loading={isSubmittingComment}
+        confirmText={t('posts.comments.delete')}
+        cancelText={t('common.cancel')}
       />
     </div>
   )

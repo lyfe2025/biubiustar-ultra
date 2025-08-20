@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Trending from './pages/Trending'
@@ -32,21 +32,44 @@ import { Toaster } from 'sonner'
 import { useFavicon } from './hooks/useFavicon'
 import './utils/debugAuth' // 加载调试工具
 
+// 重定向组件：将 /posts/:id 重定向到 /post/:id
+function PostRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/post/${id}`} replace />
+}
+
 function AppContent() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalType, setAuthModalType] = useState<'login' | 'register'>('login')
+  const [authModalOnLoginSuccess, setAuthModalOnLoginSuccess] = useState<(() => void) | undefined>(undefined)
   useFavicon() // 使网站图标响应系统设置
 
-  const openAuthModal = (type: 'login' | 'register' = 'login') => {
+  const openAuthModal = (type: 'login' | 'register' = 'login', onLoginSuccess?: () => void) => {
     setAuthModalType(type)
+    setAuthModalOnLoginSuccess(() => onLoginSuccess)
     setIsAuthModalOpen(true)
   }
 
   const handleAuthModalClose = () => {
     setIsAuthModalOpen(false)
+    setAuthModalOnLoginSuccess(undefined)
   }
+
+  // 监听全局认证模态框打开事件
+  useEffect(() => {
+    const handleGlobalAuthModal = (event: CustomEvent) => {
+      const { type, onLoginSuccess } = event.detail
+      openAuthModal(type, onLoginSuccess)
+    }
+
+    window.addEventListener('openAuthModal', handleGlobalAuthModal as EventListener)
+    
+    return () => {
+      window.removeEventListener('openAuthModal', handleGlobalAuthModal as EventListener)
+    }
+  }, [])
 
   return (
     <ErrorBoundary>
@@ -59,6 +82,7 @@ function AppContent() {
                   <Route path="/activities" element={<Activities />} />
                   <Route path="/activities/:id" element={<ActivityDetail />} />
                   <Route path="/post/:id" element={<PostDetail />} />
+                  <Route path="/posts/:id" element={<PostRedirect />} />
                   <Route path="/test-categories" element={<TestCategories />} />
                   <Route path="/debug-language" element={<DebugLanguage />} />
                   <Route path="/debug-categories" element={<DebugCategories />} />
@@ -88,6 +112,7 @@ function AppContent() {
           isOpen={isAuthModalOpen}
           onClose={handleAuthModalClose}
           type={authModalType}
+          onLoginSuccess={authModalOnLoginSuccess}
         />
       </div>
     </ErrorBoundary>

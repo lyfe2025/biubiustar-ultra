@@ -9,6 +9,7 @@ import ContentSettings from './ContentSettings'
 import EmailSettings from './EmailSettings'
 import SecuritySettings from './SecuritySettings'
 import ThemeSettings from './ThemeSettings'
+import DeleteConfirmModal from '../../../components/DeleteConfirmModal'
 
 const AdminSettings = () => {
   const { t } = useLanguage()
@@ -24,10 +25,13 @@ const AdminSettings = () => {
     // UI状态
     activeTab,
     setActiveTab,
+    resetConfirmModal,
+    setResetConfirmModal,
     
     // 操作方法
     updateSettings,
-    // resetToDefaults,
+    resetToDefaults,
+    confirmResetToDefaults,
     exportSettings,
     importSettings,
     // testEmailConfig,
@@ -138,6 +142,14 @@ const AdminSettings = () => {
                 <Upload className="w-4 h-4" />
                 <span>{t('admin.settings.import')}</span>
               </button>
+              
+              <button
+                onClick={resetToDefaults}
+                className="flex items-center space-x-2 px-4 py-2 text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>{t('admin.settings.reset')}</span>
+              </button>
             </div>
             
             <div className="flex items-center space-x-3">
@@ -199,6 +211,18 @@ const AdminSettings = () => {
             <span>{t('admin.settings.saving')}</span>
           </div>
         )}
+
+        {/* 重置设置确认弹窗 */}
+        <DeleteConfirmModal
+          isOpen={resetConfirmModal}
+          onClose={() => setResetConfirmModal(false)}
+          onConfirm={confirmResetToDefaults}
+          title={t('admin.settings.resetConfirmTitle')}
+          message={t('admin.settings.resetConfirm')}
+          loading={saving}
+          confirmText={t('admin.settings.reset')}
+          cancelText={t('common.cancel')}
+        />
       </div>
     </AdminLayout>
   )

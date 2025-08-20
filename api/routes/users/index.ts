@@ -217,7 +217,7 @@ router.get('/', async (req: Request, res: Response): Promise<Response | void> =>
       query = query.eq('role', role);
     }
     if (search) {
-      query = query.or(`username.ilike.%${search}%,email.ilike.%${search}%,full_name.ilike.%${search}%`);
+      query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
     }
 
     // 分页

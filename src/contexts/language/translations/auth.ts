@@ -116,6 +116,7 @@ export const authTranslations = {
 
       // 消息提示
       messages: {
+        loginRequired: '请先登录',
         loginSuccess: '登录成功！',
         loginFailed: '登录失败，请检查邮箱和密码',
         registerSuccess: '注册成功！',
@@ -236,6 +237,7 @@ export const authTranslations = {
       },
 
       messages: {
+        loginRequired: '請先登入',
         loginSuccess: '登入成功！',
         loginFailed: '登入失敗，請檢查郵箱和密碼',
         registerSuccess: '註冊成功！',
@@ -356,6 +358,7 @@ export const authTranslations = {
       },
 
       messages: {
+        loginRequired: 'Please log in first',
         loginSuccess: 'Login successful!',
         loginFailed: 'Login failed, please check your email and password',
         registerSuccess: 'Registration successful!',
@@ -476,6 +479,7 @@ export const authTranslations = {
       },
 
       messages: {
+        loginRequired: 'Vui lòng đăng nhập trước',
         loginSuccess: 'Đăng nhập thành công!',
         loginFailed: 'Đăng nhập thất bại, vui lòng kiểm tra email và mật khẩu',
         registerSuccess: 'Đăng ký thành công!',
