@@ -13,7 +13,7 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-
+  Activity,
   Shield
 } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
@@ -367,6 +367,13 @@ const AdminDashboard = () => {
       icon: Calendar,
       link: '/admin/activities',
       color: 'bg-green-500'
+    },
+    {
+      title: t('admin.performance.title') || '性能监控',
+      description: t('admin.performance.description') || '查看系统性能指标和监控数据',
+      icon: Activity,
+      link: '/admin/performance',
+      color: 'bg-indigo-500'
     },
     {
       title: t('admin.dashboard.securityManagement'),

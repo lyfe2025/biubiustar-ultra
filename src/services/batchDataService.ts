@@ -141,10 +141,10 @@ class BatchDataService {
     timeout?: number;
   }): Promise<BatchResponse[]> {
     const requestId = this.generateRequestId();
-    const startTime = Date.now();
+    const batchStartTime = Date.now();
     const metrics: PerformanceMetrics = {
       requestId,
-      startTime,
+      startTime: batchStartTime,
       cacheHit: false,
       batchSize: requests.length,
       errors: []
@@ -157,7 +157,7 @@ class BatchDataService {
         if (cachedResults.length === requests.length) {
           metrics.cacheHit = true;
           metrics.endTime = Date.now();
-          metrics.duration = metrics.endTime - metrics.startTime;
+          metrics.duration = metrics.endTime - batchStartTime;
           this.recordMetrics(metrics);
           return cachedResults;
         }
@@ -172,7 +172,7 @@ class BatchDataService {
       }
 
       metrics.endTime = Date.now();
-      metrics.duration = metrics.endTime - metrics.startTime;
+      metrics.duration = metrics.endTime - batchStartTime;
       this.recordMetrics(metrics);
 
       return results;
@@ -646,14 +646,14 @@ class BatchDataService {
     errors?: any;
   }> {
     const metricName = 'home_page_data_legacy';
-    this.performanceMiddleware.onRequest(metricName, { options });
+    const startTime = this.performanceMiddleware.onRequest(metricName, 'GET');
     
     const cacheKey = `home-data-${options.postsLimit || 3}-${options.activitiesLimit || 2}`;
     
     // 检查缓存
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < cached.ttl) {
-      this.performanceMiddleware.onResponse(metricName, true, true);
+      this.performanceMiddleware.onResponse(startTime, metricName, 'GET', 200);
       return {
         posts: cached.data.posts || [],
         activities: cached.data.activities || [],
@@ -661,7 +661,7 @@ class BatchDataService {
       };
     }
 
-    const startTime = Date.now();
+    const requestStartTime = Date.now();
     
     try {
       // 使用新的批量API端点
@@ -712,11 +712,11 @@ class BatchDataService {
         ttl: this.defaultCacheConfig.ttl
       });
 
-      this.performanceMiddleware.onResponse(metricName, true, false);
+      this.performanceMiddleware.onResponse(startTime, metricName, 'GET', 200);
       return result;
 
     } catch (error) {
-      this.performanceMiddleware.onResponse(metricName, false, false, error instanceof Error ? error.message : 'Unknown error');
+      this.performanceMiddleware.onResponse(startTime, metricName, 'GET', 500, error instanceof Error ? error.message : 'Unknown error');
       // 降级到单独调用
       return this.fallbackToSeparateCalls(options);
     }
@@ -825,14 +825,14 @@ class BatchDataService {
     errors?: any;
   }> {
     const metricName = 'post_detail_data_legacy';
-    this.performanceMiddleware.onRequest(metricName, { postId, userId });
+    const startTime = this.performanceMiddleware.onRequest(metricName, 'GET');
     
     const cacheKey = `post-detail-${postId}-${userId || 'anonymous'}`;
     
     // 检查缓存
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < cached.ttl) {
-      this.performanceMiddleware.onResponse(metricName, true, true);
+      this.performanceMiddleware.onResponse(startTime, metricName, 'GET', 200);
       return cached.data;
     }
 
@@ -902,11 +902,11 @@ class BatchDataService {
         ttl: this.defaultCacheConfig.ttl
       });
 
-      this.performanceMiddleware.onResponse(metricName, true, false);
+      this.performanceMiddleware.onResponse(startTime, metricName, 'GET', 200);
       return result;
 
     } catch (error) {
-      this.performanceMiddleware.onResponse(metricName, false, false, error instanceof Error ? error.message : 'Unknown error');
+      this.performanceMiddleware.onResponse(startTime, metricName, 'GET', 500, error instanceof Error ? error.message : 'Unknown error');
       // 降级到单独调用
       return this.fallbackToSeparatePostDetailCalls(postId, userId);
     }
@@ -1006,14 +1006,14 @@ class BatchDataService {
     errors?: any;
   }> {
     const metricName = 'activities_page_data_legacy';
-    this.performanceMiddleware.onRequest(metricName, { options });
+    const startTime = this.performanceMiddleware.onRequest(metricName, 'GET');
     
     const cacheKey = `activities-data-${options.page || 1}-${options.limit || 10}`;
     
     // 检查缓存
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < cached.ttl) {
-      this.performanceMiddleware.onResponse(metricName, true, true);
+      this.performanceMiddleware.onResponse(startTime, metricName, 'GET', 200);
       return cached.data;
     }
 
@@ -1066,11 +1066,11 @@ class BatchDataService {
         ttl: this.defaultCacheConfig.ttl
       });
 
-      this.performanceMiddleware.onResponse(metricName, true, false);
+      this.performanceMiddleware.onResponse(startTime, metricName, 'GET', 200);
       return result;
 
     } catch (error) {
-      this.performanceMiddleware.onResponse(metricName, false, false, error instanceof Error ? error.message : 'Unknown error');
+      this.performanceMiddleware.onResponse(startTime, metricName, 'GET', 500, error instanceof Error ? error.message : 'Unknown error');
       // 降级到单独调用
       return this.fallbackToSeparateActivitiesCalls(options);
     }

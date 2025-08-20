@@ -1,296 +1,279 @@
-/**
- * 性能监控服务
- * 用于追踪API调用性能、缓存命中率和系统性能指标
- */
-
-export interface PerformanceMetric {
-  name: string;
-  startTime: number;
-  endTime?: number;
-  duration?: number;
-  success: boolean;
-  cached?: boolean;
-  error?: string;
-  metadata?: Record<string, any>;
+interface PerformanceMetric {
+  url: string
+  method: string
+  duration: number
+  status: number
+  timestamp: number
+  userAgent?: string
+  error?: string
 }
 
-export interface CacheMetrics {
-  hits: number;
-  misses: number;
-  hitRate: number;
-  totalRequests: number;
-}
-
-export interface APIMetrics {
-  totalCalls: number;
-  successfulCalls: number;
-  failedCalls: number;
-  averageResponseTime: number;
-  slowestCall: number;
-  fastestCall: number;
-}
-
-export interface SystemMetrics {
-  cacheMetrics: CacheMetrics;
-  apiMetrics: APIMetrics;
-  recentMetrics: PerformanceMetric[];
-  startTime: number;
-  uptime: number;
+interface PerformanceConfig {
+  slowRequestThreshold: number // 慢请求阈值（毫秒）
+  maxMetrics: number // 最大存储指标数量
+  enableConsoleLog: boolean // 是否启用控制台日志
+  enableLocalStorage: boolean // 是否启用本地存储
 }
 
 class PerformanceMonitor {
-  private metrics: PerformanceMetric[] = [];
-  private cacheHits = 0;
-  private cacheMisses = 0;
-  private startTime = Date.now();
-  private maxMetricsHistory = 1000; // 最多保留1000条记录
+  private metrics: PerformanceMetric[] = []
+  private config: PerformanceConfig
+  private static instance: PerformanceMonitor
 
-  /**
-   * 开始性能监控
-   */
-  startMetric(name: string, metadata?: Record<string, any>): string {
-    const metricId = `${name}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const metric: PerformanceMetric = {
-      name,
-      startTime: Date.now(),
-      success: false,
-      metadata
-    };
-    
-    this.metrics.push(metric);
-    console.log(`⏱️ 开始监控: ${name}`);
-    
-    return metricId;
+  constructor(config: Partial<PerformanceConfig> = {}) {
+    this.config = {
+      slowRequestThreshold: 1000, // 1秒
+      maxMetrics: 100,
+      enableConsoleLog: process.env.NODE_ENV === 'development',
+      enableLocalStorage: true,
+      ...config
+    }
+
+    // 从本地存储恢复指标
+    this.loadMetricsFromStorage()
   }
 
-  /**
-   * 结束性能监控
-   */
-  endMetric(name: string, success: boolean, cached?: boolean, error?: string): void {
-    const metric = this.metrics.find(m => 
-      m.name === name && !m.endTime
-    );
+  static getInstance(config?: Partial<PerformanceConfig>): PerformanceMonitor {
+    if (!PerformanceMonitor.instance) {
+      PerformanceMonitor.instance = new PerformanceMonitor(config)
+    }
+    return PerformanceMonitor.instance
+  }
+
+  // 记录请求性能
+  recordRequest(metric: Omit<PerformanceMetric, 'timestamp'>) {
+    const fullMetric: PerformanceMetric = {
+      ...metric,
+      timestamp: Date.now(),
+      userAgent: navigator.userAgent
+    }
+
+    this.metrics.push(fullMetric)
+
+    // 限制存储数量
+    if (this.metrics.length > this.config.maxMetrics) {
+      this.metrics = this.metrics.slice(-this.config.maxMetrics)
+    }
+
+    // 检查是否为慢请求
+    if (metric.duration > this.config.slowRequestThreshold) {
+      this.handleSlowRequest(fullMetric)
+    }
+
+    // 检查是否为错误请求
+    if (metric.status >= 400) {
+      this.handleErrorRequest(fullMetric)
+    }
+
+    // 保存到本地存储
+    this.saveMetricsToStorage()
+
+    // 控制台日志
+    if (this.config.enableConsoleLog) {
+      this.logMetric(fullMetric)
+    }
+  }
+
+  // 处理慢请求
+  private handleSlowRequest(metric: PerformanceMetric) {
+    console.warn('🐌 慢请求检测:', {
+      url: metric.url,
+      method: metric.method,
+      duration: `${metric.duration}ms`,
+      threshold: `${this.config.slowRequestThreshold}ms`
+    })
+
+    // 可以在这里添加更多处理逻辑，如发送到监控服务
+  }
+
+  // 处理错误请求
+  private handleErrorRequest(metric: PerformanceMetric) {
+    console.error('❌ 错误请求检测:', {
+      url: metric.url,
+      method: metric.method,
+      status: metric.status,
+      error: metric.error,
+      duration: `${metric.duration}ms`
+    })
+
+    // 可以在这里添加更多处理逻辑，如发送到错误监控服务
+  }
+
+  // 记录日志
+  private logMetric(metric: PerformanceMetric) {
+    const statusColor = metric.status >= 400 ? '🔴' : metric.status >= 300 ? '🟡' : '🟢'
+    const durationColor = metric.duration > this.config.slowRequestThreshold ? '🐌' : '⚡'
     
-    if (metric) {
-      metric.endTime = Date.now();
-      metric.duration = metric.endTime - metric.startTime;
-      metric.success = success;
-      metric.cached = cached;
-      metric.error = error;
-      
-      // 更新缓存统计
-      if (cached !== undefined) {
-        if (cached) {
-          this.cacheHits++;
-        } else {
-          this.cacheMisses++;
-        }
+    console.log(`${statusColor} ${durationColor} ${metric.method} ${metric.url} - ${metric.status} (${metric.duration}ms)`)
+  }
+
+  // 获取性能统计
+  getStats() {
+    const now = Date.now()
+    const last24h = this.metrics.filter(m => now - m.timestamp < 24 * 60 * 60 * 1000)
+    const last1h = this.metrics.filter(m => now - m.timestamp < 60 * 60 * 1000)
+
+    const calculateStats = (metrics: PerformanceMetric[]) => {
+      if (metrics.length === 0) return null
+
+      const durations = metrics.map(m => m.duration)
+      const errorCount = metrics.filter(m => m.status >= 400).length
+      const slowCount = metrics.filter(m => m.duration > this.config.slowRequestThreshold).length
+
+      return {
+        totalRequests: metrics.length,
+        averageDuration: Math.round(durations.reduce((a, b) => a + b, 0) / durations.length),
+        minDuration: Math.min(...durations),
+        maxDuration: Math.max(...durations),
+        errorRate: Math.round((errorCount / metrics.length) * 100),
+        slowRequestRate: Math.round((slowCount / metrics.length) * 100),
+        errorCount,
+        slowCount
       }
-      
-      console.log(`✅ 监控结束: ${name} - ${metric.duration}ms ${cached ? '(缓存命中)' : ''} ${success ? '成功' : '失败'}`);
-      
-      // 清理旧记录
-      this.cleanupOldMetrics();
+    }
+
+    return {
+      all: calculateStats(this.metrics),
+      last24h: calculateStats(last24h),
+      last1h: calculateStats(last1h)
     }
   }
 
-  /**
-   * 记录缓存命中
-   */
-  recordCacheHit(): void {
-    this.cacheHits++;
+  // 获取慢请求列表
+  getSlowRequests(limit = 10) {
+    return this.metrics
+      .filter(m => m.duration > this.config.slowRequestThreshold)
+      .sort((a, b) => b.duration - a.duration)
+      .slice(0, limit)
   }
 
-  /**
-   * 记录缓存未命中
-   */
-  recordCacheMiss(): void {
-    this.cacheMisses++;
+  // 获取错误请求列表
+  getErrorRequests(limit = 10) {
+    return this.metrics
+      .filter(m => m.status >= 400)
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, limit)
   }
 
-  /**
-   * 获取缓存指标
-   */
-  getCacheMetrics(): CacheMetrics {
-    const totalRequests = this.cacheHits + this.cacheMisses;
-    return {
-      hits: this.cacheHits,
-      misses: this.cacheMisses,
-      hitRate: totalRequests > 0 ? (this.cacheHits / totalRequests) * 100 : 0,
-      totalRequests
-    };
+  // 清除指标
+  clearMetrics() {
+    this.metrics = []
+    this.saveMetricsToStorage()
   }
 
-  /**
-   * 获取API指标
-   */
-  getAPIMetrics(): APIMetrics {
-    const completedMetrics = this.metrics.filter(m => m.endTime && m.duration);
-    const successfulCalls = completedMetrics.filter(m => m.success).length;
-    const failedCalls = completedMetrics.filter(m => !m.success).length;
-    const durations = completedMetrics.map(m => m.duration!).filter(d => d > 0);
-    
-    return {
-      totalCalls: completedMetrics.length,
-      successfulCalls,
-      failedCalls,
-      averageResponseTime: durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0,
-      slowestCall: durations.length > 0 ? Math.max(...durations) : 0,
-      fastestCall: durations.length > 0 ? Math.min(...durations) : 0
-    };
-  }
+  // 从本地存储加载指标
+  private loadMetricsFromStorage() {
+    if (!this.config.enableLocalStorage) return
 
-  /**
-   * 获取系统指标
-   */
-  getSystemMetrics(): SystemMetrics {
-    return {
-      cacheMetrics: this.getCacheMetrics(),
-      apiMetrics: this.getAPIMetrics(),
-      recentMetrics: this.metrics.slice(-50), // 最近50条记录
-      startTime: this.startTime,
-      uptime: Date.now() - this.startTime
-    };
-  }
-
-  /**
-   * 获取性能报告
-   */
-  getPerformanceReport(): string {
-    const cacheMetrics = this.getCacheMetrics();
-    const apiMetrics = this.getAPIMetrics();
-    const uptime = Date.now() - this.startTime;
-    
-    return `
-📊 性能监控报告
-================
-
-🎯 缓存性能:
-  - 命中率: ${cacheMetrics.hitRate.toFixed(2)}%
-  - 总请求: ${cacheMetrics.totalRequests}
-  - 命中次数: ${cacheMetrics.hits}
-  - 未命中次数: ${cacheMetrics.misses}
-
-🚀 API性能:
-  - 总调用次数: ${apiMetrics.totalCalls}
-  - 成功率: ${apiMetrics.totalCalls > 0 ? ((apiMetrics.successfulCalls / apiMetrics.totalCalls) * 100).toFixed(2) : 0}%
-  - 平均响应时间: ${apiMetrics.averageResponseTime.toFixed(2)}ms
-  - 最快响应: ${apiMetrics.fastestCall}ms
-  - 最慢响应: ${apiMetrics.slowestCall}ms
-
-⏰ 系统运行时间: ${Math.floor(uptime / 1000 / 60)}分钟
-    `;
-  }
-
-  /**
-   * 清理旧的性能记录
-   */
-  private cleanupOldMetrics(): void {
-    if (this.metrics.length > this.maxMetricsHistory) {
-      this.metrics = this.metrics.slice(-this.maxMetricsHistory);
-    }
-  }
-
-  /**
-   * 记录性能指标（简化版本）
-   */
-  recordMetric(name: string, duration: number, success: boolean = true): void {
-    const metric: PerformanceMetric = {
-      name,
-      startTime: Date.now() - duration,
-      endTime: Date.now(),
-      duration,
-      success
-    };
-    
-    this.metrics.push(metric);
-    console.log(`📊 记录指标: ${name} - ${duration}ms ${success ? '成功' : '失败'}`);
-    
-    // 清理旧记录
-    this.cleanupOldMetrics();
-  }
-
-  /**
-   * 重置所有指标
-   */
-  reset(): void {
-    this.metrics = [];
-    this.cacheHits = 0;
-    this.cacheMisses = 0;
-    this.startTime = Date.now();
-    console.log('🔄 性能监控指标已重置');
-  }
-
-  /**
-   * 导出性能数据
-   */
-  exportMetrics(): {
-    metrics: PerformanceMetric[];
-    cacheMetrics: CacheMetrics;
-    apiMetrics: APIMetrics;
-    exportTime: number;
-  } {
-    return {
-      metrics: [...this.metrics],
-      cacheMetrics: this.getCacheMetrics(),
-      apiMetrics: this.getAPIMetrics(),
-      exportTime: Date.now()
-    };
-  }
-}
-
-// 创建全局性能监控实例
-export const performanceMonitor = new PerformanceMonitor();
-
-// 性能监控装饰器
-export function withPerformanceMonitoring<T extends (...args: any[]) => Promise<any>>(
-  fn: T,
-  name: string
-): T {
-  return (async (...args: any[]) => {
-    const startTime = Date.now();
-    let success = false;
-    let error: string | undefined;
-    
     try {
-      const result = await fn(...args);
-      success = true;
-      return result;
-    } catch (err) {
-      error = err instanceof Error ? err.message : 'Unknown error';
-      throw err;
-    } finally {
-      const duration = Date.now() - startTime;
-      performanceMonitor.endMetric(name, success, undefined, error);
+      const stored = localStorage.getItem('performance_metrics')
+      if (stored) {
+        this.metrics = JSON.parse(stored)
+      }
+    } catch (error) {
+      console.warn('加载性能指标失败:', error)
     }
-  }) as T;
+  }
+
+  // 保存指标到本地存储
+  private saveMetricsToStorage() {
+    if (!this.config.enableLocalStorage) return
+
+    try {
+      localStorage.setItem('performance_metrics', JSON.stringify(this.metrics))
+    } catch (error) {
+      console.warn('保存性能指标失败:', error)
+    }
+  }
+
+  // 记录自定义指标
+  recordMetric(name: string, duration: number, additionalData?: Record<string, any>) {
+    const metric: PerformanceMetric = {
+      url: `custom:${name}`,
+      method: 'CUSTOM',
+      duration,
+      status: 200,
+      timestamp: Date.now(),
+      userAgent: navigator.userAgent,
+      ...additionalData
+    }
+
+    this.recordRequest({
+      url: metric.url,
+      method: metric.method,
+      duration: metric.duration,
+      status: metric.status,
+      error: metric.error
+    })
+  }
+
+  // 导出指标数据
+  exportMetrics() {
+    return {
+      metrics: this.metrics,
+      stats: this.getStats(),
+      config: this.config,
+      exportTime: new Date().toISOString()
+    }
+  }
 }
 
-// 性能监控中间件
+// 创建全局实例
+export const performanceMonitor = PerformanceMonitor.getInstance()
+
+// 创建性能监控中间件
 export function createPerformanceMiddleware() {
   return {
-    onRequest: (name: string, metadata?: Record<string, any>) => {
-      return performanceMonitor.startMetric(name, metadata);
+    onRequest: (url: string, method: string) => {
+      return performance.now()
     },
-    onResponse: (name: string, success: boolean, cached?: boolean, error?: string) => {
-      performanceMonitor.endMetric(name, success, cached, error);
-    },
-    onCacheHit: () => {
-      performanceMonitor.recordCacheHit();
-    },
-    onCacheMiss: () => {
-      performanceMonitor.recordCacheMiss();
+    onResponse: (startTime: number, url: string, method: string, status: number, error?: string) => {
+      const duration = Math.round(performance.now() - startTime)
+      performanceMonitor.recordRequest({
+        url,
+        method,
+        duration,
+        status,
+        error
+      })
     }
-  };
+  }
 }
 
-// 开发环境下的性能监控日志
-if (import.meta.env.DEV) {
-  // 每30秒输出一次性能报告
-  setInterval(() => {
-    const metrics = performanceMonitor.getSystemMetrics();
-    if (metrics.apiMetrics.totalCalls > 0) {
-      console.log(performanceMonitor.getPerformanceReport());
-    }
-  }, 30000);
+// 拦截 fetch 请求
+const originalFetch = window.fetch
+window.fetch = async function(...args) {
+  const startTime = performance.now()
+  const url = args[0] as string
+  const options = args[1] as RequestInit
+  const method = options?.method || 'GET'
+
+  try {
+    const response = await originalFetch.apply(this, args)
+    const duration = Math.round(performance.now() - startTime)
+
+    performanceMonitor.recordRequest({
+      url,
+      method,
+      duration,
+      status: response.status
+    })
+
+    return response
+  } catch (error) {
+    const duration = Math.round(performance.now() - startTime)
+    
+    performanceMonitor.recordRequest({
+      url,
+      method,
+      duration,
+      status: 0,
+      error: error instanceof Error ? error.message : String(error)
+    })
+
+    throw error
+  }
 }
+
+export default PerformanceMonitor
+export type { PerformanceMetric, PerformanceConfig }

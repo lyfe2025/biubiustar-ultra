@@ -12,7 +12,7 @@ import {
   FileText,
   Users,
   Calendar,
-
+  Activity,
   Settings,
   Shield,
   LogOut,

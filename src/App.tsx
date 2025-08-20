@@ -10,6 +10,8 @@ import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
 import { useFavicon } from './hooks/useFavicon'
+import { useCacheWarmup } from './hooks/useCacheWarmup'
+import './services/PerformanceMonitor' // 初始化性能监控
 import './utils/debugAuth' // 加载调试工具
 
 // 懒加载页面组件
@@ -29,6 +31,7 @@ const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'))
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts'))
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
 const AdminSecurity = lazy(() => import('./pages/admin/AdminSecurity'))
+const AdminPerformance = lazy(() => import('./pages/admin/AdminPerformance'))
 const AdminLogs = lazy(() => import('./pages/admin/AdminLogs'))
 const TestCategories = lazy(() => import('./pages/TestCategories'))
 const DebugLanguage = lazy(() => import('./pages/DebugLanguage'))
@@ -59,6 +62,7 @@ function AppContent() {
   const [authModalType, setAuthModalType] = useState<'login' | 'register'>('login')
   const [authModalOnLoginSuccess, setAuthModalOnLoginSuccess] = useState<(() => void) | undefined>(undefined)
   useFavicon() // 使网站图标响应系统设置
+  const { isInitialized } = useCacheWarmup() // 初始化缓存预热
 
   const openAuthModal = (type: 'login' | 'register' = 'login', onLoginSuccess?: () => void) => {
     setAuthModalType(type)
@@ -116,6 +120,7 @@ function AppContent() {
                   <Route path="/admin/contacts" element={<AdminAuthGuard><AdminContacts /></AdminAuthGuard>} />
                   <Route path="/admin/settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
                   <Route path="/admin/security" element={<AdminAuthGuard><AdminSecurity /></AdminAuthGuard>} />
+                  <Route path="/admin/performance" element={<AdminAuthGuard><AdminPerformance /></AdminAuthGuard>} />
                   <Route path="/admin/logs" element={<AdminAuthGuard><AdminLogs /></AdminAuthGuard>} />
             </Routes>
           </Suspense>
