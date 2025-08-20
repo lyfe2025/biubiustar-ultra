@@ -18,6 +18,8 @@ import {
 import { useLanguage } from '../../../contexts/language'
 import { ContentListProps, Post } from './types'
 import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../../../utils/avatarGenerator'
+import MediaGrid from '../../../components/MediaGrid'
+import type { MediaFile } from '../../../types'
 
 const ContentList: React.FC<ContentListProps> = ({
   posts,
@@ -47,8 +49,22 @@ const ContentList: React.FC<ContentListProps> = ({
   }
 
   const getContentTypeIcon = (post: Post) => {
-    if (post.video) return <Video className="w-4 h-4 text-blue-500" />
-    if (post.image_url) return <Image className="w-4 h-4 text-green-500" />
+    const mediaFiles = getMediaFiles(post)
+    if (mediaFiles.length === 0) return <FileText className="w-4 h-4 text-gray-500" />
+    
+    const hasVideo = mediaFiles.some(file => file.file_type === 'video')
+    const hasImage = mediaFiles.some(file => file.file_type === 'image')
+    
+    if (hasVideo && hasImage) {
+      return (
+        <div className="flex space-x-1">
+          <Image className="w-3 h-3 text-green-500" />
+          <Video className="w-3 h-3 text-blue-500" />
+        </div>
+      )
+    }
+    if (hasVideo) return <Video className="w-4 h-4 text-blue-500" />
+    if (hasImage) return <Image className="w-4 h-4 text-green-500" />
     return <FileText className="w-4 h-4 text-gray-500" />
   }
 
@@ -59,6 +75,42 @@ const ContentList: React.FC<ContentListProps> = ({
   const truncateText = (text: string, maxLength: number = 100) => {
     if (text.length <= maxLength) return text
     return text.slice(0, maxLength) + '...'
+  }
+
+  const getMediaFiles = (post: Post): MediaFile[] => {
+    // 优先使用新的 media_files 数据
+    if (post.media_files && post.media_files.length > 0) {
+      return post.media_files.sort((a, b) => a.display_order - b.display_order)
+    }
+    
+    // 向后兼容：转换旧的 image_url 和 video 字段
+    const mediaFiles: MediaFile[] = []
+    
+    if (post.image_url) {
+      mediaFiles.push({
+        id: `legacy-image-${post.id}`,
+        post_id: post.id,
+        file_url: post.image_url,
+        file_type: 'image',
+        thumbnail_url: null,
+        display_order: 0,
+        created_at: post.created_at
+      })
+    }
+    
+    if (post.video) {
+      mediaFiles.push({
+        id: `legacy-video-${post.id}`,
+        post_id: post.id,
+        file_url: post.video,
+        file_type: 'video',
+        thumbnail_url: post.thumbnail || null,
+        display_order: post.image_url ? 1 : 0,
+        created_at: post.created_at
+      })
+    }
+    
+    return mediaFiles
   }
 
   if (loading) {
@@ -113,39 +165,19 @@ const ContentList: React.FC<ContentListProps> = ({
                       <div className="text-sm text-gray-500">
                         {truncateText(post.content, 80)}
                       </div>
-                      {post.image_url && (
-                        <div className="mt-2">
-                          <img 
-                            src={post.image_url} 
-                            alt="预览" 
-                            className="w-16 h-16 object-cover rounded-md"
-                          />
-                        </div>
-                      )}
-                      {post.video && (
-                        <div className="mt-2">
-                          {post.thumbnail ? (
-                            <div className="relative">
-                              <img 
-                                src={post.thumbnail} 
-                                alt="视频封面" 
-                                className="w-16 h-16 object-cover rounded-md"
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-md">
-                                <Play className="w-4 h-4 text-white" />
-                              </div>
-                            </div>
-                          ) : (
-                            <video 
-                              src={post.video} 
-                              className="w-16 h-16 object-cover rounded-md"
-                              muted
-                              preload="metadata"
+                      {(() => {
+                        const mediaFiles = getMediaFiles(post)
+                        return mediaFiles.length > 0 && (
+                          <div className="mt-2">
+                            <MediaGrid 
+                              mediaFiles={mediaFiles} 
+                              maxItems={3}
+                              className="max-w-[200px]"
+                              itemClassName="h-16"
                             />
-                          )}
-                          <div className="text-xs text-gray-400 mt-1">视频文件</div>
-                        </div>
-                      )}
+                          </div>
+                        )
+                      })()}
                     </div>
                   </div>
                 </td>

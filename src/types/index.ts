@@ -18,6 +18,16 @@ export interface User {
   updated_at: string;
 }
 
+export interface MediaFile {
+  id: string;
+  post_id: string;
+  file_url: string;
+  file_type: 'image' | 'video';
+  thumbnail_url?: string;
+  display_order: number;
+  created_at: string;
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -25,6 +35,7 @@ export interface Post {
   image_url?: string;
   video?: string;
   thumbnail?: string;
+  media_files?: MediaFile[];
   category: string;
   tags?: string[];
   user_id: string;

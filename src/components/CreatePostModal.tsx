@@ -265,6 +265,17 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
       const videoUrl = videos.length > 0 ? videos[0].url : undefined
       const videoThumbnail = videos.length > 0 ? videos[0].thumbnail : undefined
       
+      // 构建media_files数据
+      const mediaFiles = uploadedFiles.map((file, index) => ({
+        id: `temp-${index}`, // 临时ID，后端会生成真实ID
+        post_id: '', // 后端会设置正确的post_id
+        file_url: file.url,
+        file_type: file.type as 'image' | 'video',
+        thumbnail_url: file.type === 'video' ? (file as any).thumbnail : null,
+        display_order: index,
+        created_at: new Date().toISOString() // 临时时间戳
+      }));
+
       const postData = {
         title: title.trim(),
         content: content.trim(),
@@ -276,7 +287,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }: CreatePostModalProp
         category: category,
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
         shares_count: 0,
-        views_count: 0
+        views_count: 0,
+        media_files: mediaFiles
       }
 
       await socialService.createPost(postData)

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Mail, Lock, User, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../contexts/language';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 import { cn } from '../lib/utils';
@@ -15,6 +16,7 @@ interface AuthModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login', type }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<'login' | 'register' | 'forgot-password'>(initialMode);
 
   // 监听type属性变化，同步更新mode状态
@@ -295,8 +297,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       if (mode === 'login') {
           await signIn(formData.account, formData.password);
         setSuccess(t('auth.success.loginSuccess'));
+        // 登录成功后延迟跳转到个人中心页面
         setTimeout(() => {
           handleClose();
+          navigate('/profile');
         }, 1000);
       } else if (mode === 'register') {
         await signUp(formData.email, formData.password, formData.username);

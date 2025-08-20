@@ -1,3 +1,5 @@
+import type { MediaFile } from '../../../types'
+
 // 内容管理相关类型定义
 export interface Post {
   id: string
@@ -16,6 +18,7 @@ export interface Post {
   user_id: string
   category: string
   tags?: string[]
+  media_files?: MediaFile[]
   author?: {
     id: string
     username: string

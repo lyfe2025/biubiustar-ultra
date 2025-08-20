@@ -5,11 +5,12 @@ import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
 import { socialService } from '../lib/socialService'
-import type { Post } from '../types'
+import type { Post, MediaFile } from '../types'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN, enUS, vi } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
+import MediaGrid from './MediaGrid'
 
 interface PostCardProps {
   post: Post
@@ -37,6 +38,43 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
   const { user } = useAuth()
   const { language, t } = useLanguage()
   const navigate = useNavigate()
+
+  // 获取媒体文件数据，支持新的media_files和向后兼容旧的image_url/video字段
+  const getMediaFiles = (): MediaFile[] => {
+    const mediaFiles: MediaFile[] = []
+    
+    // 优先使用新的media_files数据
+    if (post.media_files && post.media_files.length > 0) {
+      return post.media_files.sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    }
+    
+    // 向后兼容：处理旧的image_url字段
+    if (post.image_url) {
+      mediaFiles.push({
+        id: `legacy-image-${post.id}`,
+        post_id: post.id,
+        file_url: post.image_url,
+        file_type: 'image',
+        display_order: 0,
+        created_at: post.created_at
+      })
+    }
+    
+    // 向后兼容：处理旧的video字段
+    if (post.video) {
+      mediaFiles.push({
+        id: `legacy-video-${post.id}`,
+        post_id: post.id,
+        file_url: post.video,
+        file_type: 'video',
+        thumbnail_url: post.thumbnail,
+        display_order: post.image_url ? 1 : 0,
+        created_at: post.created_at
+      })
+    }
+    
+    return mediaFiles
+  }
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(post.likes_count || 0)
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0)
@@ -402,56 +440,15 @@ const PostCard = ({ post, onLike, onComment, onShare, showFullContent = false, m
         </div>
       </div>
 
-      {/* 帖子图片 */}
-      {post.image_url && (
+      {/* 媒体文件展示 */}
+      {getMediaFiles().length > 0 && (
         <div className="mb-4">
-          <img
-            src={post.image_url}
-            alt={post.title}
-            className="w-full h-64 object-cover rounded-lg"
+          <MediaGrid 
+            mediaFiles={getMediaFiles()}
+            className="rounded-lg"
+            showPreview={true}
+            maxItems={9}
           />
-        </div>
-      )}
-
-      {/* 帖子视频 */}
-      {post.video && (
-        <div className="mb-4">
-          {post.thumbnail ? (
-            <div className="relative inline-block cursor-pointer" onClick={() => {
-              // 创建视频播放器
-              const video = document.createElement('video')
-              video.src = post.video
-              video.controls = true
-              video.autoplay = true
-              video.className = 'w-full h-64 object-cover rounded-lg'
-              
-              // 替换封面图片
-              const container = document.getElementById(`video-container-${post.id}`)
-              if (container) {
-                container.innerHTML = ''
-                container.appendChild(video)
-              }
-            }}>
-              <div id={`video-container-${post.id}`}>
-                <img
-                  src={post.thumbnail}
-                  alt="视频封面"
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
-                  <Play className="w-12 h-12 text-white" />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <video
-              src={post.video}
-              className="w-full h-64 object-cover rounded-lg"
-              controls
-              preload="metadata"
-            />
-          )}
-          <div className="text-xs text-gray-400 mt-2">视频内容</div>
         </div>
       )}
 

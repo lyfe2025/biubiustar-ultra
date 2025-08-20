@@ -5,12 +5,13 @@ import { cn } from '../lib/utils'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
 import { socialService } from '../lib/socialService'
-import type { Post, Comment } from '../types'
+import type { Post, Comment, MediaFile } from '../types'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN, enUS, vi } from 'date-fns/locale'
 import { toast } from 'sonner'
 import AuthModal from '../components/AuthModal'
 import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
+import MediaGrid from '../components/MediaGrid'
 
 interface ContentCategory {
   id: string
@@ -269,6 +270,42 @@ const PostDetail = () => {
     }
   }
 
+  // 获取媒体文件列表
+  const getMediaFiles = (post: Post): MediaFile[] => {
+    // 优先使用新的 media_files 数据
+    if (post.media_files && post.media_files.length > 0) {
+      return post.media_files.sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    }
+    
+    // 向后兼容：将旧的 image_url 和 video 转换为 MediaFile 格式
+    const mediaFiles: MediaFile[] = []
+    
+    if (post.image_url) {
+      mediaFiles.push({
+        id: 'legacy-image',
+        post_id: post.id,
+        file_url: post.image_url,
+        file_type: 'image',
+        display_order: 0,
+        created_at: post.created_at
+      })
+    }
+    
+    if (post.video) {
+      mediaFiles.push({
+        id: 'legacy-video',
+        post_id: post.id,
+        file_url: post.video,
+        file_type: 'video',
+        thumbnail_url: post.thumbnail,
+        display_order: post.image_url ? 1 : 0,
+        created_at: post.created_at
+      })
+    }
+    
+    return mediaFiles
+  }
+
   // 处理视频播放
   const handleVideoPlay = () => {
     setIsVideoPlaying(true)
@@ -452,53 +489,14 @@ const PostDetail = () => {
           </div>
 
           {/* 帖子媒体内容 */}
-          {(post.image_url || post.video || post.thumbnail) && (
-            <div className="mb-8">
-              <div className="relative overflow-hidden rounded-xl border border-gray-200">
-                {post.video ? (
-                  // 视频内容
-                  <div className="relative">
-                    {post.thumbnail && !isVideoPlaying ? (
-                      // 显示视频封面
-                      <div className="relative group cursor-pointer" onClick={handleVideoPlay}>
-                        <img
-                          src={post.thumbnail}
-                          alt={post.title}
-                          className="w-full max-h-96 object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition-colors duration-300">
-                          <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                            <Play className="w-6 h-6 text-purple-600 ml-1" />
-                          </div>
-                        </div>
-                        <div className="absolute bottom-3 left-3 bg-black/70 text-white px-2 py-1 rounded text-sm">
-                          视频
-                        </div>
-                      </div>
-                    ) : (
-                      // 直接显示视频
-                      <video
-                        src={post.video}
-                        controls
-                        autoPlay={isVideoPlaying}
-                        className="w-full max-h-96 object-cover"
-                        poster={post.thumbnail}
-                      >
-                        您的浏览器不支持视频播放。
-                      </video>
-                    )}
-                  </div>
-                ) : post.image_url ? (
-                  // 图片内容
-                  <img
-                    src={post.image_url}
-                    alt={post.title}
-                    className="w-full max-h-96 object-cover"
-                  />
-                ) : null}
+          {(() => {
+            const mediaFiles = getMediaFiles(post)
+            return mediaFiles.length > 0 && (
+              <div className="mb-8">
+                <MediaGrid mediaFiles={mediaFiles} />
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* 互动按钮 */}
           <div className="flex items-center justify-between pt-6 border-t border-gray-200">

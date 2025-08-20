@@ -26,7 +26,14 @@ router.get('/', async (req: Request, res: Response) => {
       .from('posts')
       .select(`
         *,
-        likes(count)
+        likes(count),
+        media_files(
+          id,
+          file_url,
+          file_type,
+          thumbnail_url,
+          display_order
+        )
       `, { count: 'exact' })
       .eq('status', status);
 
@@ -132,7 +139,14 @@ router.get('/:id', async (req: Request, res: Response) => {
       .from('posts')
       .select(`
         *,
-        likes(count)
+        likes(count),
+        media_files(
+          id,
+          file_url,
+          file_type,
+          thumbnail_url,
+          display_order
+        )
       `)
       .eq('id', id)
       .eq('status', 'published')
@@ -189,7 +203,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 // Create new post
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { title, content, category, tags, images, image_url, video, thumbnail, user_id } = req.body;
+    const { title, content, category, tags, images, image_url, video, thumbnail, user_id, media_files } = req.body;
 
     if (!title?.trim() || !content?.trim() || !user_id) {
       sendValidationError(res, '标题、内容和用户ID不能为空');
@@ -228,7 +242,48 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    sendResponse(res, true, { post }, '帖子创建成功', 201);
+    // Handle media_files if provided
+    if (media_files && Array.isArray(media_files) && media_files.length > 0) {
+      try {
+        const mediaFilesData = media_files.map((file: any, index: number) => ({
+          post_id: post.id,
+          file_url: file.file_url || file.url,
+          file_type: file.file_type || file.type,
+          thumbnail_url: file.thumbnail_url || file.thumbnail,
+          display_order: file.display_order !== undefined ? file.display_order : index,
+          created_at: new Date().toISOString()
+        }));
+
+        const { error: mediaError } = await supabaseAdmin
+          .from('media_files')
+          .insert(mediaFilesData);
+
+        if (mediaError) {
+          console.error('Error creating media files:', mediaError);
+          // Don't fail the entire request, just log the error
+        }
+      } catch (mediaError) {
+        console.error('Error processing media files:', mediaError);
+      }
+    }
+
+    // Fetch the complete post with media_files
+    const { data: completePost } = await supabaseAdmin
+      .from('posts')
+      .select(`
+        *,
+        media_files(
+          id,
+          file_url,
+          file_type,
+          thumbnail_url,
+          display_order
+        )
+      `)
+      .eq('id', post.id)
+      .single();
+
+    sendResponse(res, true, { post: completePost || post }, '帖子创建成功', 201);
 
   } catch (error) {
     console.error('Error in create post:', error);

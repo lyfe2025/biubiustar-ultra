@@ -5,6 +5,8 @@ import { formatDateByLanguage } from '../../utils/dateFormatter'
 import { useLanguage } from '../../contexts/language'
 import { UserPostsListProps } from './types'
 import { toast } from 'sonner'
+import MediaGrid from '../../components/MediaGrid'
+import type { MediaFile } from '../../types'
 
 const UserPostsList: React.FC<UserPostsListProps> = ({ 
   posts, 
@@ -77,6 +79,43 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
     return content.slice(0, maxLength) + '...'
   }
 
+  // 获取媒体文件数据，支持新的media_files和向后兼容旧的image_url/video字段
+  const getMediaFiles = (post: any): MediaFile[] => {
+    const mediaFiles: MediaFile[] = []
+    
+    // 优先使用新的media_files数据
+    if (post.media_files && Array.isArray(post.media_files) && post.media_files.length > 0) {
+      return post.media_files.sort((a: MediaFile, b: MediaFile) => (a.display_order || 0) - (b.display_order || 0))
+    }
+    
+    // 向后兼容：转换旧的image_url和video字段
+    if (post.image_url) {
+      mediaFiles.push({
+        id: `legacy-image-${post.id}`,
+        post_id: post.id,
+        file_url: post.image_url,
+        file_type: 'image',
+        thumbnail_url: post.image_url,
+        display_order: 0,
+        created_at: post.created_at
+      })
+    }
+    
+    if (post.video) {
+      mediaFiles.push({
+        id: `legacy-video-${post.id}`,
+        post_id: post.id,
+        file_url: post.video,
+        file_type: 'video',
+        thumbnail_url: post.thumbnail || post.video,
+        display_order: post.image_url ? 1 : 0,
+        created_at: post.created_at
+      })
+    }
+    
+    return mediaFiles
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('profile.myPosts')}</h3>
@@ -113,44 +152,14 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
               </div>
 
               {/* 帖子媒体 */}
-              {post.image_url && (
-                <div className="mb-4">
-                  <img
-                    src={post.image_url}
-                    alt="Post image"
-                    className="max-w-full h-auto rounded-lg border border-gray-200"
-                    style={{ maxHeight: '300px' }}
-                  />
-                </div>
-              )}
-
-              {/* 帖子视频 */}
-              {post.video && (
-                <div className="mb-4">
-                  {post.thumbnail ? (
-                    <div className="relative inline-block">
-                      <img
-                        src={post.thumbnail}
-                        alt="视频封面"
-                        className="max-w-full h-auto rounded-lg border border-gray-200"
-                        style={{ maxHeight: '300px' }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
-                        <Play className="w-12 h-12 text-white" />
-                      </div>
-                    </div>
-                  ) : (
-                    <video
-                      src={post.video}
-                      className="max-w-full h-auto rounded-lg border border-gray-200"
-                      style={{ maxHeight: '300px' }}
-                      controls
-                      preload="metadata"
-                    />
-                  )}
-                  <div className="text-xs text-gray-400 mt-2">视频内容</div>
-                </div>
-              )}
+              {(() => {
+                const mediaFiles = getMediaFiles(post)
+                return mediaFiles.length > 0 ? (
+                  <div className="mb-4">
+                    <MediaGrid mediaFiles={mediaFiles} maxItems={9} />
+                  </div>
+                ) : null
+              })()}
 
               {/* 帖子统计和操作 */}
               <div className="flex items-center justify-between text-sm text-gray-500">
