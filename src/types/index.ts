@@ -91,3 +91,18 @@ export interface Activity {
     full_name?: string
   }
 }
+
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  name_zh: string;
+  name_zh_tw: string;
+  name_en: string;
+  name_vi: string;
+  description_zh?: string;
+  description_zh_tw?: string;
+  description_en?: string;
+  description_vi?: string;
+  created_at: string;
+}

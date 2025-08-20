@@ -1,21 +1,28 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Activity, ActivityService, ActivityCategory } from '../lib/activityService';
-import { ActivityCard } from '../components/ActivityCard';
 import { useLanguage } from '../contexts/language';
-import { toast } from 'sonner';
-import { usePageTitle } from '../hooks/usePageTitle';
-import { getCategoryName } from '../utils/categoryUtils';
+import { ActivityService, ActivityCategory } from '../lib/activityService';
+import { ActivityCard } from '../components/ActivityCard';
+import { Activity, Category } from '../types';
+import { useActivitiesPageData } from '../hooks/useOptimizedData';
 
 
-const Activities = () => {
+const Activities: React.FC = () => {
   const { t, language } = useLanguage();
-  usePageTitle(t('activities.title'));
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [categories, setCategories] = useState<ActivityCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [selectedStatus, setSelectedStatus] = useState('全部');
+  
+  // 使用优化的数据获取Hook
+  const {
+    activities: optimizedActivities,
+    categories: optimizedCategories,
+    isLoading: optimizedLoading,
+    error: optimizedError,
+    refetch: optimizedRefetch
+  } = useActivitiesPageData();
 
   // 硬编码分类作为降级处理
   const fallbackCategories = ['全部', '文化交流', '技术分享', '户外运动', '美食聚会', '学习交流', '娱乐活动', '志愿服务', '商务网络', '艺术创作', '其他'];
@@ -24,49 +31,56 @@ const Activities = () => {
   useEffect(() => {
     loadActivities();
     loadCategories();
-  }, []);
-
-  // 监听语言变化，重新加载分类并重置筛选器
-  useEffect(() => {
-    loadCategories();
-    // 重置筛选器为对应语言的"全部"
-    setSelectedCategory('全部');
-    setSelectedStatus('全部');
   }, [language]);
-
-  // 清理调试代码
+  
+  // 处理优化数据更新
+  useEffect(() => {
+    if (optimizedActivities && optimizedCategories && !optimizedLoading && !optimizedError) {
+      console.log('🚀 Activities页面使用批量数据:', { activities: optimizedActivities, categories: optimizedCategories });
+      setActivities(optimizedActivities || []);
+      setCategories(optimizedCategories || []);
+      setIsLoading(false);
+      setIsCategoriesLoading(false);
+    } else if (optimizedError) {
+      console.warn('⚠️ 批量数据获取失败，降级到独立API调用:', optimizedError);
+      // 降级到原有逻辑
+      loadActivities();
+      loadCategories();
+    }
+  }, [optimizedActivities, optimizedCategories, optimizedLoading, optimizedError]);
 
   const loadActivities = async () => {
-    setIsLoading(true);
     try {
+      setIsLoading(true);
       const activityService = new ActivityService();
       const data = await activityService.getActivities();
       setActivities(data);
     } catch (error) {
-      console.error('Error loading activities:', error);
-      toast.error(t('activities.messages.loadFailed'));
+      console.error('Failed to load activities:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const loadCategories = async () => {
-    setIsCategoriesLoading(true);
-    
     try {
-      const categoriesData = await ActivityService.getActivityCategories(language);
-      
-      if (Array.isArray(categoriesData) && categoriesData.length > 0) {
-        setCategories(categoriesData);
-      } else {
-        setCategories([]);
-      }
+      setIsCategoriesLoading(true);
+      const data = await ActivityService.getActivityCategories(language);
+      // 转换ActivityCategory到Category类型
+      const categories: Category[] = data.map((cat: ActivityCategory) => ({
+        ...cat,
+        name_zh: cat.name_zh || cat.name,
+        name_zh_tw: cat.name_zh_tw || cat.name,
+        name_en: cat.name_en || cat.name,
+        name_vi: cat.name_vi || cat.name,
+        created_at: new Date().toISOString() // ActivityCategory没有created_at，使用当前时间
+      }));
+      setCategories(categories);
     } catch (error) {
-      console.error('❌ 加载分类失败:', error);
-      setCategories([]);
+      console.error('Failed to load categories:', error);
+    } finally {
+      setIsCategoriesLoading(false);
     }
-    
-    setIsCategoriesLoading(false);
   };
 
   // 获取活动状态
@@ -86,6 +100,23 @@ const Activities = () => {
 
   const handleParticipationChange = () => {
     loadActivities();
+  };
+
+  // 获取分类的本地化名称
+  const getCategoryName = (category: Category, language: string) => {
+    // 根据语言返回对应的本地化名称
+    switch (language) {
+      case 'zh':
+        return category.name_zh || category.name || category.name_en || '未知分类';
+      case 'en':
+        return category.name_en || category.name || category.name_zh || 'Unknown Category';
+      case 'zh-TW':
+        return category.name_zh_tw || category.name_zh || category.name || category.name_en || '未知分類';
+      case 'vi':
+        return category.name_vi || category.name_en || category.name || category.name_zh || 'Danh mục không xác định';
+      default:
+        return category.name || category.name_zh || category.name_en || '未知分类';
+    }
   };
 
   // 获取显示的分类列表（API分类 + 降级处理）

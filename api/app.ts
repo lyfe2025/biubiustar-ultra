@@ -14,6 +14,7 @@ import followsRoutes from './routes/follows.js';
 import contactRoutes from './routes/contact.js';
 import settingsRoutes from './routes/settings.js';
 import avatarRoutes from './routes/avatar.js';
+import batchRoutes from './routes/batch.js';
 
 // for esm mode
 const __filename = fileURLToPath(import.meta.url);
@@ -72,6 +73,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 
 app.use('/api/avatar', avatarRoutes);
+
+app.use('/api/batch', batchRoutes);
 
 // 静态文件服务
 const staticPath = path.join(__dirname, '../public');

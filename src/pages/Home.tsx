@@ -16,6 +16,7 @@ import { ActivityCard } from '../components/ActivityCard'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useSiteInfo, useLocalizedSiteDescription } from '../hooks/useSettings'
 import { useMetaDescription, useSocialMetaTags } from '../hooks/useMetaDescription'
+import { useHomePageData } from '../hooks/useOptimizedData'
 
 const Home = () => {
   const { user } = useAuth()
@@ -29,60 +30,23 @@ const Home = () => {
   useSocialMetaTags(
     siteName || 'BiuBiuStar',
     localizedDescription,
-    // 可以在这里添加站点Logo作为分享图片
+    '/images/big-logo.png' // 添加站点Logo作为分享图片
   )
-  const [posts, setPosts] = useState<Post[]>([])
-  const [activities, setActivities] = useState<ActivityType[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isActivitiesLoading, setIsActivitiesLoading] = useState(true)
+  // 使用优化的数据获取Hook
+  const { 
+    posts, 
+    activities, 
+    isLoading, 
+    isActivitiesLoading, 
+    error,
+    refetch 
+  } = useHomePageData()
+  
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [selectedPostTitle, setSelectedPostTitle] = useState('')
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-
-
-
-  useEffect(() => {
-    // 添加错误边界，确保即使API调用失败，页面也能渲染
-    const initializeData = async () => {
-      try {
-        await Promise.allSettled([loadPosts(), loadActivities()]);
-      } catch (error) {
-        console.error('Error initializing home page data:', error);
-      }
-    };
-    
-    initializeData();
-  }, [])
-
-  const loadPosts = async () => {
-    try {
-      setIsLoading(true);
-      const data = await socialService.getPosts(1, 3); // 只获取前3个帖子
-      setPosts(data || []); // 确保即使返回null也设置为空数组
-    } catch (error) {
-      console.error('Error loading posts:', error);
-      // 设置空数组作为回退，确保组件能正常渲染
-      setPosts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadActivities = async () => {
-    try {
-      setIsActivitiesLoading(true);
-      const data = await ActivityService.getUpcomingActivities(2); // 获取前2个即将到来的活动
-      setActivities(data || []); // 确保即使返回null也设置为空数组
-    } catch (error) {
-      console.error('Error loading activities:', error);
-      // 设置空数组作为回退，确保组件能正常渲染
-      setActivities([]);
-    } finally {
-      setIsActivitiesLoading(false);
-    }
-  };
 
   const handleComment = (postId: string) => {
     const post = posts.find(p => p.id === postId)
@@ -94,7 +58,7 @@ const Home = () => {
   }
 
   const handlePostCreated = () => {
-    loadPosts() // 重新加载帖子列表
+    refetch() // 重新加载所有数据
   }
 
 
@@ -103,11 +67,12 @@ const Home = () => {
 
   // 调试信息（仅在开发环境中显示）
   if (process.env.NODE_ENV === 'development') {
-    console.log('Home component data:', {
+    console.log('Home component data (optimized):', {
       postsCount: posts?.length,
       activitiesCount: activities?.length,
       isLoading,
-      isActivitiesLoading
+      isActivitiesLoading,
+      error: error ? 'Error occurred' : 'No error'
     });
   }
 

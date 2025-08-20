@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import AuthModal from '../components/AuthModal'
 import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 import MediaGrid from '../components/MediaGrid'
+import { usePostDetailData } from '../hooks/useOptimizedData'
 
 interface ContentCategory {
   id: string
@@ -50,13 +51,68 @@ const PostDetail = () => {
   const [categoryDisplayName, setCategoryDisplayName] = useState<string>('')
   const [comments, setComments] = useState<Comment[]>([])
   const [commentsLoading, setCommentsLoading] = useState(false)
+  
+  // 使用优化的数据获取Hook
+  const {
+    data: optimizedData,
+    loading: optimizedLoading,
+    error: optimizedError,
+    refetch: refetchOptimizedData
+  } = usePostDetailData(id || '', user?.id)
   const [newComment, setNewComment] = useState('')
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalType, setAuthModalType] = useState<'login' | 'register'>('login')
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
 
-  // 获取帖子详情
+  // 处理优化数据的更新
+  useEffect(() => {
+    if (optimizedData) {
+      console.log('PostDetail: 使用优化数据', optimizedData)
+      
+      if (optimizedData.post_details?.post) {
+        setPost(optimizedData.post_details.post)
+        setLikesCount(optimizedData.post_details.post.likes_count || 0)
+        setCommentsCount(optimizedData.post_details.commentsCount || optimizedData.post_details.post.comments_count || 0)
+        setSharesCount(optimizedData.post_details.post.shares_count || 0)
+      }
+      
+      if (optimizedData.content_categories) {
+        setCategories(optimizedData.content_categories)
+      }
+      
+      if (optimizedData.post_comments) {
+        setComments(optimizedData.post_comments)
+      }
+      
+      if (optimizedData.post_details?.isLiked !== undefined) {
+        setIsLiked(optimizedData.post_details.isLiked)
+      }
+      
+      setLoading(false)
+      setCommentsLoading(false)
+    }
+  }, [optimizedData])
+  
+  // 处理优化数据的错误状态
+  useEffect(() => {
+    if (optimizedError) {
+      console.error('PostDetail: 优化数据获取失败', optimizedError)
+      setError(optimizedError)
+      setLoading(false)
+      setCommentsLoading(false)
+    }
+  }, [optimizedError])
+  
+  // 处理优化数据的加载状态
+  useEffect(() => {
+    setLoading(optimizedLoading)
+    if (optimizedLoading) {
+      setCommentsLoading(true)
+    }
+  }, [optimizedLoading])
+  
+  // 降级方案：如果优化数据获取失败，使用原有逻辑
   const fetchPost = async () => {
     if (!id) {
       setError(t('posts.detail.postIdMissing'))
@@ -338,10 +394,14 @@ const PostDetail = () => {
   };
 
   useEffect(() => {
-    fetchPost()
-    fetchCategories()
-    fetchComments()
-  }, [id])
+    // 如果优化数据获取失败，使用降级方案
+    if (optimizedError && id) {
+      console.log('PostDetail: 使用降级方案获取数据')
+      fetchPost()
+      fetchCategories()
+      fetchComments()
+    }
+  }, [id, optimizedError])
 
   // 当分类数据或语言变化时，更新分类显示名称
   useEffect(() => {
