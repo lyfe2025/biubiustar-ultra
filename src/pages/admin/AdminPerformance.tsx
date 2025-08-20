@@ -23,7 +23,7 @@ const AdminPerformance = () => {
     slowRequests,
     errorRequests,
     clearMetrics,
-    exportMetrics
+    exportReport
   } = usePerformanceMonitor()
   
   const [autoRefresh, setAutoRefresh] = useState(true)
@@ -50,7 +50,7 @@ const AdminPerformance = () => {
 
   const handleExportData = () => {
     try {
-      exportMetrics()
+      exportReport()
       toast.success(t('admin.performance.messages.dataExported') || '数据已导出')
     } catch (error) {
       toast.error(t('admin.performance.messages.exportFailed') || '导出失败')

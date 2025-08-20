@@ -23,6 +23,7 @@ interface UsePerformanceMonitorReturn {
   refreshStats: () => void
   clearMetrics: () => void
   exportMetrics: () => any
+  exportReport: () => void
 }
 
 /**
@@ -49,6 +50,22 @@ export function usePerformanceMonitor(): UsePerformanceMonitorReturn {
     return performanceMonitor.exportMetrics()
   }, [])
 
+  // 导出性能报告为文件
+  const exportReport = useCallback(() => {
+    const data = exportMetrics()
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json'
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `performance-report-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, [exportMetrics])
+
   // 定期刷新统计数据
   useEffect(() => {
     refreshStats()
@@ -64,7 +81,8 @@ export function usePerformanceMonitor(): UsePerformanceMonitorReturn {
     errorRequests,
     refreshStats,
     clearMetrics,
-    exportMetrics
+    exportMetrics,
+    exportReport
   }
 }
 
