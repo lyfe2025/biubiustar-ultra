@@ -158,12 +158,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50">
-      {/* 开发调试信息 */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed top-0 left-0 bg-black/80 text-white text-xs p-2 z-50">
-          Posts: {posts?.length || 0} | Activities: {activities?.length || 0} | Loading: {isLoading ? 'Yes' : 'No'}
-        </div>
-      )}
+
       
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden">

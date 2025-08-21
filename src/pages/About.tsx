@@ -349,8 +349,11 @@ export default function About() {
           </div>
 
           <div className="relative">
-            {/* Enhanced Timeline Line */}
-            <div className="absolute left-1/2 transform -translate-x-px h-full w-1 bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 rounded-full shadow-lg"></div>
+            {/* Enhanced Timeline Line - Extended to connect with content below */}
+            <div className="hidden md:block absolute left-1/2 transform -translate-x-px w-1 bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 rounded-full shadow-lg" style={{height: 'calc(100% + 120px)'}}></div>
+            
+            {/* Mobile Timeline Line - Extended to connect with content below */}
+            <div className="md:hidden absolute left-4 w-0.5 bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 rounded-full shadow-lg" style={{height: 'calc(100% + 120px)', top: '24px'}}></div>
             
             <div className="space-y-12">
               {[
@@ -447,18 +450,20 @@ export default function About() {
               ].map((item, index) => {
                 const IconComponent = item.icon;
                 return (
-                  <div key={index} className={`relative flex items-center ${index % 2 === 0 ? 'justify-start' : 'justify-end'} group`}>
+                  <div key={index} className={`relative flex items-center ${index % 2 === 0 ? 'md:justify-start justify-start' : 'md:justify-end justify-start'} group`}>
                     {/* Enhanced Timeline Node */}
-                    <div className="absolute left-1/2 transform -translate-x-1/2 z-20">
+                    <div className="absolute md:left-1/2 left-4 md:transform md:-translate-x-1/2 z-20">
                       <div className={`w-6 h-6 bg-gradient-to-r ${item.color} rounded-full border-4 border-white shadow-xl group-hover:scale-125 transition-all duration-500 flex items-center justify-center`}>
                         <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                       </div>
 
                     </div>
                     
+
+                    
                     {/* Enhanced Content Card */}
-                    <div className={`w-5/12 ${index % 2 === 0 ? 'pr-8' : 'pl-8'}`}>
-                      <div className="group/card bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-100 hover:shadow-2xl hover:-translate-y-3 hover:border-purple-200 transition-all duration-500 transform hover:scale-105 relative overflow-hidden">
+                    <div className={`md:w-5/12 w-full ${index % 2 === 0 ? 'md:pr-8 pl-12' : 'md:pl-8 pl-12'}`}>
+                      <div className="group/card bg-white/80 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-lg border border-purple-100 hover:shadow-2xl hover:-translate-y-3 hover:border-purple-200 transition-all duration-500 transform hover:scale-105 relative overflow-hidden">
                         {/* Background Pattern */}
                         <div className="absolute inset-0 opacity-5 group-hover/card:opacity-10 transition-opacity duration-500">
                           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white to-transparent rounded-full transform translate-x-16 -translate-y-16"></div>
@@ -466,20 +471,20 @@ export default function About() {
                         
                         {/* Header with Icon and Milestone */}
                         <div className="relative z-10">
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center">
-                              <div className={`bg-gradient-to-r ${item.color} w-12 h-12 rounded-xl flex items-center justify-center mr-4 group-hover/card:scale-110 group-hover/card:rotate-6 transition-all duration-500 shadow-lg`}>
-                                <IconComponent className="w-6 h-6 text-white" />
+                          <div className="flex items-start md:items-center justify-between mb-4 flex-col md:flex-row">
+                            <div className="flex items-start md:items-center flex-col md:flex-row w-full md:w-auto">
+                              <div className={`bg-gradient-to-r ${item.color} w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center md:mr-4 mb-3 md:mb-0 group-hover/card:scale-110 group-hover/card:rotate-6 transition-all duration-500 shadow-lg flex-shrink-0`}>
+                                <IconComponent className="w-5 h-5 md:w-6 md:h-6 text-white" />
                               </div>
-                              <div ref={categoryDropdownRef}>
-                                <h3 className={headingStyles.h4}>{item.period}</h3>
-                                <span className={`text-xs font-semibold px-2 py-1 rounded-full bg-gradient-to-r ${item.color} text-white`}>
+                              <div className="min-w-0 flex-1">
+                                <h3 className={`${headingStyles.h4} text-sm md:text-base break-words`}>{item.period}</h3>
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full bg-gradient-to-r ${item.color} text-white inline-block mt-1`}>
                                   {t(`about.timeline.milestones.${item.milestone}`)}
                                 </span>
                               </div>
                             </div>
                             {/* Achievement Badge */}
-                            <div className="opacity-0 group-hover/card:opacity-100 transition-all duration-300 transform translate-x-4 group-hover/card:translate-x-0">
+                            <div className="opacity-0 group-hover/card:opacity-100 transition-all duration-300 transform translate-x-4 group-hover/card:translate-x-0 hidden md:block">
                               <div className={`w-8 h-8 bg-gradient-to-r ${item.color} rounded-full flex items-center justify-center shadow-lg`}>
                                 <Star className="w-4 h-4 text-white" />
                               </div>
@@ -487,11 +492,11 @@ export default function About() {
                           </div>
                           
                           {/* Events List */}
-                          <ul className="space-y-3">
+                          <ul className="space-y-2 md:space-y-3">
                             {item.events.map((event, eventIndex) => (
-                              <li key={eventIndex} className="text-gray-700 text-sm leading-relaxed flex items-start group-hover/card:text-gray-900 transition-colors duration-300">
-                                <div className={`w-2 h-2 bg-gradient-to-r ${item.color} rounded-full mt-2 mr-3 flex-shrink-0 group-hover/card:scale-125 transition-transform duration-300`}></div>
-                                <span className="font-medium">
+                              <li key={eventIndex} className="text-gray-700 text-xs md:text-sm leading-relaxed flex items-start group-hover/card:text-gray-900 transition-colors duration-300">
+                                <div className={`w-1.5 h-1.5 md:w-2 md:h-2 bg-gradient-to-r ${item.color} rounded-full mt-1.5 md:mt-2 mr-2 md:mr-3 flex-shrink-0 group-hover/card:scale-125 transition-transform duration-300`}></div>
+                                <span className="font-medium break-words">
                                   {t(`about.timeline.events.${item.period.replace('.', '')}.${event}`)}
                                 </span>
                               </li>

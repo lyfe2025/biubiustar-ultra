@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, LogOut, Globe, ChevronUp } from 'lucide-react'
 import { useLanguage } from '../contexts/language'
@@ -20,7 +20,9 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
   const { user, userProfile, logout } = useAuth()
   const { t } = useLanguage()
   const location = useLocation()
+  const navigate = useNavigate()
   const { siteName, siteLogo } = useSiteInfo()
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
 
   // 监听页面滚动
   useEffect(() => {
@@ -33,6 +35,23 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // 监听点击外部区域关闭移动端菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMenuOpen && mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMenuOpen])
 
   const openAuthModal = (type: 'login' | 'register') => {
     onRequireAuth(type)
@@ -67,6 +86,17 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
 
   const isActive = (path: string) => location.pathname === path
 
+  // 处理首页导航
+  const handleHomeNavigation = () => {
+    if (location.pathname === '/') {
+      // 如果已经在首页，刷新页面
+      window.location.reload()
+    } else {
+      // 否则导航到首页
+      navigate('/')
+    }
+  }
+
 
 
   return (
@@ -80,7 +110,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
+            <button onClick={handleHomeNavigation} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
               {siteLogo ? (
                 <img 
                   src={siteLogo} 
@@ -99,7 +129,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
               <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 {siteName || 'Biubiustar'}
               </span>
-            </Link>
+            </button>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
@@ -120,10 +150,10 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
             </div>
 
             {/* 语言选择器和用户菜单 */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4">
               <LanguageSelector />
               {user ? (
-                <div className="flex items-center space-x-4">
+                <div className="hidden md:flex items-center space-x-4">
                   <Link
                     to="/profile"
                     className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
@@ -147,16 +177,16 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-0 md:space-x-3">
                   <button
                     onClick={() => openAuthModal('login')}
-                    className="px-4 py-2 text-gray-700 hover:text-purple-600 transition-colors duration-200"
+                    className="px-2 md:px-4 py-2 text-sm md:text-base bg-purple-600 hover:bg-purple-700 text-white rounded-lg md:bg-transparent md:text-gray-700 md:hover:text-purple-600 md:hover:bg-transparent transition-all duration-200"
                   >
                     {t('nav.login')}
                   </button>
                   <button
                     onClick={() => openAuthModal('register')}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-all duration-200"
+                    className="hidden md:block px-2 md:px-4 py-2 text-sm md:text-base bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-all duration-200"
                   >
                     {t('nav.register')}
                   </button>
@@ -177,28 +207,53 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
 
           {/* Mobile Navigation */}
           {isMenuOpen && (
-            <div className="md:hidden">
+            <div className="md:hidden" ref={mobileMenuRef}>
               <div className={cn(
                 "px-2 pt-2 pb-3 space-y-1 rounded-lg mt-2 border transition-all duration-300",
                 isScrolled 
                   ? "bg-white/90 backdrop-blur-sm border-purple-100/50" 
                   : "bg-white border-purple-100"
               )}>
-                {navItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={cn(
-                      'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200',
-                      isActive(item.path)
-                        ? 'text-purple-600 bg-purple-50'
-                        : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
-                    )}
-                  >
-                    {t(item.key)}
-                  </Link>
-                ))}
+                {navItems.map((item) => {
+                  if (item.path === '/') {
+                    return (
+                      <button
+                        key={item.path}
+                        onClick={() => {
+                          setIsMenuOpen(false)
+                          handleHomeNavigation()
+                        }}
+                        className={cn(
+                          'block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors duration-200',
+                          isActive(item.path)
+                            ? 'text-purple-600 bg-purple-50'
+                            : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
+                        )}
+                      >
+                        {t(item.key)}
+                      </button>
+                    )
+                  }
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={cn(
+                        'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200',
+                        isActive(item.path)
+                          ? 'text-purple-600 bg-purple-50'
+                          : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
+                      )}
+                    >
+                      {t(item.key)}
+                    </Link>
+                  )
+                })}
+                {/* 移动端语言选择器 */}
+                <div className="px-3 py-2">
+                  <LanguageSelector />
+                </div>
                 <div className="pt-2 border-t border-purple-100">
                   {user ? (
                     <>
