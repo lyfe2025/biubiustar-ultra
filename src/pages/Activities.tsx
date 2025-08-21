@@ -208,7 +208,7 @@ const Activities: React.FC = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 text-white pt-20 pb-12 md:pt-24 md:pb-24 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 text-white overflow-hidden min-h-[50vh] flex items-center justify-center pt-16">
         {/* 动态背景效果 */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-600/90 to-purple-800/90"></div>
@@ -218,7 +218,7 @@ const Activities: React.FC = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="animate-fade-in-up">
-            <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-8 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
               {t('activities.title')}
             </h1>
             <p className="text-lg md:text-xl lg:text-2xl text-purple-100 max-w-4xl mx-auto leading-relaxed">
