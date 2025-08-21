@@ -242,7 +242,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ activity, isOpen, onClose
                     {participants.map((participant, index) => (
                        <div key={participant.id || index} className="flex items-center space-x-3 p-2 bg-white rounded border">
                          <div className="flex-shrink-0">
-                           {participant.user?.avatar_url && !isDefaultAvatar(participant.user.avatar_url) ? (
+                           {participant.user?.avatar_url ? (
                              <img
                                src={participant.user.avatar_url}
                                alt={participant.user.username || participant.user.full_name}

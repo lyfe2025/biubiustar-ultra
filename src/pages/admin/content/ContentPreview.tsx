@@ -99,7 +99,7 @@ const ContentPreview: React.FC<ContentPreviewProps> = ({
 
           {/* 作者信息 */}
           <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-            {post.author.avatar_url && !isDefaultAvatar(post.author.avatar_url) ? (
+            {post.author.avatar_url ? (
               <img className="h-12 w-12 rounded-full object-cover" src={post.author.avatar_url} alt="" />
             ) : (
               <img 

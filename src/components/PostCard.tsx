@@ -10,7 +10,7 @@ import type { Post, MediaFile } from '../types'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN, enUS, vi } from 'date-fns/locale'
 import { toast } from 'sonner'
-import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
+import { generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 import MediaGrid from './MediaGrid'
 import LazyImage from './LazyImage'
 import { categoriesCache, type ContentCategory } from '../services/categoriesCache'
@@ -326,7 +326,7 @@ const PostCard = memo(({ post, onLike, onComment, onShare, showFullContent = fal
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
             <LazyImage
-              src={post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url) 
+              src={post.author?.avatar_url 
                 ? post.author.avatar_url 
                 : getUserDefaultAvatarUrl(post.author?.username || 'User', post.author?.avatar_url)
               }

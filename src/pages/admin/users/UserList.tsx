@@ -109,7 +109,7 @@ const UserList: React.FC<UserListProps> = ({
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-3">
-                    {user.avatar && !isDefaultAvatar(user.avatar) ? (
+                    {user.avatar ? (
                       <img className="h-10 w-10 rounded-full object-cover" src={user.avatar} alt="" />
                     ) : (
                       <img 

@@ -113,9 +113,9 @@ export function useSiteInfo() {
     }
     
     if (url.startsWith('/uploads/site-')) {
-      // 对于站点资源文件，添加时间戳参数
-      const separator = url.includes('?') ? '&' : '?'
-      return `${url}${separator}t=${Math.floor(Date.now() / 60000)}` // 每分钟更新一次
+      // 对于站点资源文件，使用更稳定的缓存策略
+      // 只有在管理员更新设置时才需要刷新缓存，不需要频繁的时间戳
+      return url
     }
     
     return url

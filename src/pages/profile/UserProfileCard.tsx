@@ -70,10 +70,10 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
                 <img
-                  src={displayProfile?.avatar_url && !isDefaultAvatar(displayProfile.avatar_url) 
-                    ? displayProfile.avatar_url 
-                    : getUserDefaultAvatarUrl(displayProfile?.username || t('profile.basic.username'), displayProfile?.avatar_url)
-                  }
+                  src={displayProfile?.avatar_url
+                     ? displayProfile.avatar_url
+                     : getUserDefaultAvatarUrl(displayProfile?.username || 'User', displayProfile?.avatar_url)
+                   }
                   alt={displayProfile?.full_name || displayProfile?.username || t('profile.basic.username')}
                   className="w-full h-full object-cover"
                 />

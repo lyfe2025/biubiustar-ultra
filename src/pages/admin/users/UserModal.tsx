@@ -48,7 +48,7 @@ export const UserModal: React.FC<UserModalProps> = ({
         <div className="p-6 space-y-6">
           {/* 用户头像和基本信息 */}
           <div className="flex items-center space-x-4">
-            {user.avatar && !isDefaultAvatar(user.avatar) ? (
+            {user.avatar ? (
               <img className="h-16 w-16 rounded-full object-cover" src={user.avatar} alt="" />
             ) : (
               <img 

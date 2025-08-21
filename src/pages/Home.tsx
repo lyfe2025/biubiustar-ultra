@@ -322,15 +322,20 @@ const Home = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {posts.map((post) => (
-                <PostCard
+              {posts.map((post, index) => (
+                <div
                   key={post.id}
-                  post={post}
-                  onComment={handleComment}
-                  initialCommentsCount={postStatusMap.commentsCount[post.id]}
-                  initialLikesCount={postStatusMap.likesCount[post.id]}
-                  initialIsLiked={postStatusMap.isLiked[post.id]}
-                />
+                  className="transform hover:scale-105 transition-all duration-300"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <PostCard
+                    post={post}
+                    onComment={handleComment}
+                    initialCommentsCount={postStatusMap.commentsCount[post.id]}
+                    initialLikesCount={postStatusMap.likesCount[post.id]}
+                    initialIsLiked={postStatusMap.isLiked[post.id]}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -361,14 +366,19 @@ const Home = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-8">
-              {activities.map((activity) => (
-                <ActivityCard
+              {activities.map((activity, index) => (
+                <div
                   key={activity.id}
-                  activity={activity}
-                  simplified={true}
-                  initialIsParticipating={activityStatusMap.isParticipating[activity.id]}
-                  initialParticipantCount={activityStatusMap.participantCount[activity.id]}
-                />
+                  className="transform hover:scale-105 transition-all duration-300"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <ActivityCard
+                    activity={activity}
+                    simplified={true}
+                    initialIsParticipating={activityStatusMap.isParticipating[activity.id]}
+                    initialParticipantCount={activityStatusMap.participantCount[activity.id]}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -378,27 +388,37 @@ const Home = () => {
       {/* Community Invitation */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-3xl p-8 md:p-12 text-white">
-            <Star className="w-12 h-12 mx-auto mb-6 text-yellow-300" />
-            <h2 className="text-3xl font-bold mb-4">{t('home.joinCommunity')}</h2>
-            <p className="text-xl mb-8 text-purple-100">
-              {t('home.communityDescription')}
-            </p>
-            {!user ? (
-              <button 
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-8 py-3 bg-white text-purple-600 rounded-lg hover:bg-purple-50 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
-              >
-                {t('home.registerNow')}
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsCreatePostModalOpen(true)}
-                className="px-8 py-3 bg-white text-purple-600 rounded-lg hover:bg-purple-50 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
-              >
-                {t('home.shareStory')}
-              </button>
-            )}
+          <div className="relative bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 rounded-3xl p-8 md:p-12 text-white shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 transition-all duration-300 overflow-hidden group">
+            {/* 背景装饰元素 */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl transform translate-x-16 -translate-y-16 group-hover:scale-150 transition-transform duration-700"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-yellow-300/20 rounded-full blur-2xl transform -translate-x-12 translate-y-12 group-hover:scale-125 transition-transform duration-700"></div>
+            
+            <div className="relative z-10">
+              <div className="transform group-hover:scale-110 transition-transform duration-300">
+                <Star className="w-12 h-12 mx-auto mb-6 text-yellow-300 drop-shadow-lg" />
+              </div>
+              <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">{t('home.joinCommunity')}</h2>
+              <p className="text-xl mb-8 text-purple-100 leading-relaxed">
+                {t('home.communityDescription')}
+              </p>
+              {!user ? (
+                <button 
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="group/btn relative px-8 py-4 bg-white text-purple-600 rounded-xl hover:bg-gradient-to-r hover:from-white hover:to-purple-50 transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 hover:-translate-y-1 border border-white/20 backdrop-blur-sm overflow-hidden"
+                >
+                  <span className="relative z-10">{t('home.registerNow')}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-indigo-600/10 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsCreatePostModalOpen(true)}
+                  className="group/btn relative px-8 py-4 bg-white text-purple-600 rounded-xl hover:bg-gradient-to-r hover:from-white hover:to-purple-50 transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 hover:-translate-y-1 border border-white/20 backdrop-blur-sm overflow-hidden"
+                >
+                  <span className="relative z-10">{t('home.shareStory')}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-indigo-600/10 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </section>

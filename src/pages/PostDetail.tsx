@@ -10,7 +10,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { zhCN, enUS, vi } from 'date-fns/locale'
 import { toast } from 'sonner'
 import AuthModal from '../components/AuthModal'
-import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
+import { generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 import MediaGrid from '../components/MediaGrid'
 import { usePostDetailData } from '../hooks/useOptimizedData'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
@@ -525,13 +525,11 @@ const PostDetail = () => {
                   console.log('PostDetail 头像调试信息:', {
                     post: post,
                     author: post.author,
-                    avatar_url: post.author?.avatar_url,
-                    isDefaultAvatar: post.author?.avatar_url ? isDefaultAvatar(post.author.avatar_url) : 'no avatar_url',
-                    shouldShowRealAvatar: post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url)
+                    avatar_url: post.author?.avatar_url
                   })
                   return null
                 })()} 
-                {post.author?.avatar_url && !isDefaultAvatar(post.author.avatar_url) ? (
+                {post.author?.avatar_url ? (
                   <img
                     src={post.author.avatar_url}
                     alt={post.author.username}
@@ -645,8 +643,7 @@ const PostDetail = () => {
               <form onSubmit={handleSubmitComment} className="mb-6">
                 <div className="flex space-x-4">
                   <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    {(userProfile?.avatar_url && !isDefaultAvatar(userProfile.avatar_url)) || 
-                     (user.user_metadata?.avatar_url && !isDefaultAvatar(user.user_metadata.avatar_url)) ? (
+                    {userProfile?.avatar_url || user.user_metadata?.avatar_url ? (
                       <img
                         src={userProfile?.avatar_url || user.user_metadata?.avatar_url}
                         alt={userProfile?.username || user.user_metadata?.username || user.email}
@@ -738,7 +735,7 @@ const PostDetail = () => {
                     <div className="flex space-x-3">
                       <div className="relative">
                         <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          {comment.author?.avatar_url && !isDefaultAvatar(comment.author.avatar_url) ? (
+                          {comment.author?.avatar_url ? (
                             <img
                               src={comment.author.avatar_url}
                               alt={comment.author.username}

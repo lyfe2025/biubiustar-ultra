@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, LogOut, Globe, ChevronUp } from 'lucide-react'
 import { useLanguage } from '../contexts/language'
 import { useAuth } from '../contexts/AuthContext'
-import { isDefaultAvatar, generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
+import { generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 import LanguageSelector from './LanguageSelector'
 import { cn } from '../utils/cn'
 import { useSiteInfo } from '../hooks/useSettings'
@@ -129,10 +129,10 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
                     className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
                   >
                     <img
-                      src={userProfile?.avatar_url && !isDefaultAvatar(userProfile.avatar_url) 
-                        ? userProfile.avatar_url 
-                        : getUserDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User', userProfile?.avatar_url)
-                      }
+                      src={userProfile?.avatar_url
+                  ? userProfile.avatar_url
+                  : getUserDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User', userProfile?.avatar_url)
+                }
                       alt={userProfile?.username || 'User'}
                       className="h-6 w-6 rounded-full object-cover border border-white/30"
                     />
@@ -209,10 +209,10 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <img
-                          src={userProfile?.avatar_url && !isDefaultAvatar(userProfile.avatar_url) 
-                            ? userProfile.avatar_url 
-                            : getUserDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User', userProfile?.avatar_url)
-                          }
+                          src={userProfile?.avatar_url
+                    ? userProfile.avatar_url
+                    : getUserDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User', userProfile?.avatar_url)
+                  }
                           alt={userProfile?.username || 'User'}
                           className="h-6 w-6 rounded-full object-cover border border-gray-200"
                         />

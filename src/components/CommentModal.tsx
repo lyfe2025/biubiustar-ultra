@@ -9,7 +9,7 @@ import type { Comment } from '../types'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN, enUS, vi } from 'date-fns/locale'
 import { toast } from 'sonner'
-import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
+import { generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
 import DeleteConfirmModal from './DeleteConfirmModal'
 
 interface CommentModalProps {
@@ -330,7 +330,7 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
               {comments.map((comment) => (
                 <div key={comment.id} className="flex space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    {comment.author?.avatar_url && !isDefaultAvatar(comment.author.avatar_url) ? (
+                    {comment.author?.avatar_url ? (
                       <img
                         src={comment.author.avatar_url}
                         alt={comment.author.username}
@@ -380,7 +380,7 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
           {user ? (
             <form onSubmit={handleSubmitComment} className="flex space-x-3">
               <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
-                {userProfile?.avatar_url && !isDefaultAvatar(userProfile.avatar_url) ? (
+                {userProfile?.avatar_url ? (
                   <img
                     src={userProfile.avatar_url}
                     alt={userProfile.username || user.email}
