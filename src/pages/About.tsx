@@ -9,7 +9,7 @@ import { useSiteInfo, useLocalizedSiteDescription } from '../hooks/useSettings';
 import { useMetaDescription, useSocialMetaTags } from '../hooks/useMetaDescription';
 
 export default function About() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { siteName } = useSiteInfo();
   const { localizedDescription } = useLocalizedSiteDescription();
   usePageTitle(t('about.title'));
@@ -29,6 +29,30 @@ export default function About() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
+
+  // 根据语言计算对应的货币金额
+  const getLocalizedValue = (baseValue: number) => {
+    const exchangeRates = {
+      'zh-CN': 1,      // 人民币基准
+      'zh-TW': 4.6,    // 台币汇率
+      'en': 0.14,      // 美元汇率
+      'vi': 35         // 越南盾汇率（调整为35，使30万人民币=1050 triệu）
+    };
+    
+    const rate = exchangeRates[language as keyof typeof exchangeRates] || 1;
+    const convertedValue = baseValue * rate;
+    
+    // 根据货币类型决定小数位数
+    if (language === 'vi') {
+      // 越南盾直接显示triệu单位的数值
+      // 例如：30万人民币 * 35 = 1050 triệu，显示为1050
+      return Math.round(convertedValue);
+    } else if (language === 'zh-TW') {
+      return Math.round(convertedValue); // 台币不显示小数
+    } else {
+      return Math.round(convertedValue * 10) / 10; // 其他货币保留1位小数
+    }
+  };
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
@@ -509,20 +533,23 @@ export default function About() {
               { period: 'q1q2', value: 30, description: 'q1q2Description', color: 'from-blue-500 to-blue-600' },
               { period: 'q3', value: 60, description: 'q3Description', color: 'from-green-500 to-green-600' },
               { period: 'q4', value: 150, description: 'q4Description', color: 'from-purple-500 to-purple-600' }
-            ].map((item, index) => (
-              <div key={index} className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100 hover:shadow-2xl hover:border-purple-200 transform hover:-translate-y-2 hover:scale-105 transition-all duration-500 text-center">
-                <div className={`bg-gradient-to-r ${item.color} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500`}>
-                  <TrendingUp className="w-8 h-8 text-white" />
+            ].map((item, index) => {
+              const localizedValue = getLocalizedValue(item.value);
+              return (
+                <div key={index} className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-100 hover:shadow-2xl hover:border-purple-200 transform hover:-translate-y-2 hover:scale-105 transition-all duration-500 text-center">
+                  <div className={`bg-gradient-to-r ${item.color} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500`}>
+                    <TrendingUp className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{t(`about.performance.periods.${item.period}`)}</h3>
+                  <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">
+                    <AnimatedNumberDisplay targetValue={localizedValue} />{t('common.units.tenThousand')}+
+                  </div>
+                  <p className="text-gray-600 leading-relaxed">
+                    {t(`about.performance.${item.description}`)}
+                  </p>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{t(`about.performance.periods.${item.period}`)}</h3>
-                <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">
-                  <AnimatedNumberDisplay targetValue={item.value} />{t('common.units.tenThousand')}+
-                </div>
-                <p className="text-gray-600 leading-relaxed">
-                  {t(`about.performance.${item.description}`)}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

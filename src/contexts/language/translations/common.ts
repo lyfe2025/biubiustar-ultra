@@ -551,10 +551,10 @@ export const commonTranslations = {
       
       // Đơn vị số
       units: {
-        tenThousand: 'Nghìn',
-        thousand: 'Nghìn',
-        million: 'Triệu',
-        billion: 'Tỷ',
+        tenThousand: 'triệu',
+        thousand: 'nghìn',
+        million: 'triệu',
+        billion: 'tỷ',
         percent: '%',
         rmb: 'RMB',
         usd: 'USD',

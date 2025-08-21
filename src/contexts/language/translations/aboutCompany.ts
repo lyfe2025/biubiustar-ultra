@@ -189,9 +189,9 @@ export const aboutCompanyTranslations = {
           q3: '7-9月',
           q4: '10-12月'
         },
-        q1q2Description: '月均業績30萬(RMB)，穩步發展階段',
-        q3Description: '月均業績翻倍至60萬(RMB)，快速增長期',
-        q4Description: '月均業績達150萬(RMB)，爆發式增長'
+        q1q2Description: '月均業績138萬(TWD)，穩步發展階段',
+        q3Description: '月均業績翻倍至276萬(TWD)，快速增長期',
+        q4Description: '月均業績達690萬(TWD)，爆發式增長'
       },
       partners: {
         title: '合作夥伴',
@@ -291,9 +291,9 @@ export const aboutCompanyTranslations = {
           q3: "Jul-Sep", 
           q4: "Oct-Dec"
         },
-        q1q2Description: "Monthly average performance 300K (RMB)",
-        q3Description: "Monthly average doubled to 600K (RMB)",
-        q4Description: "Monthly average reached 1.5M (RMB)"
+        q1q2Description: "Monthly average performance $4.2K, steady development stage",
+        q3Description: "Monthly average doubled to $8.4K, rapid growth period",
+        q4Description: "Monthly average reached $21K, explosive growth"
       },
       partners: {
         title: "Partners",
@@ -393,9 +393,9 @@ export const aboutCompanyTranslations = {
           q3: "Tháng 7-9",
           q4: "Tháng 10-12"
         },
-        q1q2Description: "Hiệu suất trung bình hàng tháng 300K (RMB)",
-        q3Description: "Hiệu suất trung bình tăng gấp đôi lên 600K (RMB)", 
-        q4Description: "Hiệu suất trung bình đạt 1.5M (RMB)"
+        q1q2Description: "Hiệu suất trung bình hàng tháng 1050 triệu(VND), giai đoạn phát triển ổn định",
+        q3Description: "Hiệu suất trung bình tăng gấp đôi lên 2100 triệu(VND), thời kỳ tăng trưởng nhanh", 
+        q4Description: "Hiệu suất trung bình đạt 5250 triệu(VND), tăng trưởng bùng nổ"
       },
       partners: {
         title: "Đối tác",
