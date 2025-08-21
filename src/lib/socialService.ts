@@ -175,12 +175,21 @@ class SocialService {
       }
       
       const data = await response.json();
+      let createdPost;
       // 适应API返回格式：{success: true, data: formattedComment}
       if (data.success && data.data) {
-        return data.data;
+        createdPost = data.data;
+      } else {
+        // 兼容旧格式
+        createdPost = data;
       }
-      // 兼容旧格式
-      return data;
+      
+      // 清除相关缓存，确保新帖子能立即显示
+      apiCache.invalidatePattern('posts:*'); // 清除帖子列表缓存
+      apiCache.invalidatePattern('user_posts:*'); // 清除用户帖子缓存
+      apiCache.invalidatePattern('post_*_count:*'); // 清除帖子统计缓存
+      
+      return createdPost;
     } catch (error) {
       console.error('Error creating post:', error);
       throw error;

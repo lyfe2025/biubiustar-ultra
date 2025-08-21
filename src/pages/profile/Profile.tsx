@@ -58,6 +58,11 @@ const Profile: React.FC = () => {
     cancelEdit
   } = useUserProfile()
 
+  // 处理帖子创建成功
+  const handlePostCreated = () => {
+    loadUserData(true) // 重新加载用户数据，包括帖子列表和统计信息
+  }
+
   // 从URL参数初始化标签页
   useEffect(() => {
     const tabFromUrl = searchParams.get('tab')
@@ -273,6 +278,7 @@ const Profile: React.FC = () => {
               userDataCache.markForRefresh(user.id)
             }
           }}
+          onPostCreated={handlePostCreated}
         />
       </div>
     </div>
