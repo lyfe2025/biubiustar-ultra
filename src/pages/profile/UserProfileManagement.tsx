@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { User, Camera, MapPin, Globe, FileText, Save, X, Edit3 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { headingStyles } from '../../utils/cn'
 import { useLanguage } from '../../contexts/language'
 import { formatJoinDate } from '../../utils/dateFormatter'
 import { UserProfile, UserProfileManagementProps } from './types'
@@ -182,7 +183,7 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
                 </div>
               ) : (
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className={headingStyles.h2Simple}>
                     {displayProfile?.full_name || displayProfile?.username || user?.email?.split('@')[0] || t('profile.basic.username')}
                   </h2>
                   <p className="text-gray-600 mt-1">
@@ -305,7 +306,7 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
 
       {/* 个人资料统计 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profile.profileCompleteness.title')}</h3>
+                      <h3 className={headingStyles.h3}>{t('profile.profileCompleteness.title')}</h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">{t('profile.profileCompleteness.basicInfo')}</span>

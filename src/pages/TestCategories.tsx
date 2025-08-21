@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityService, ActivityCategory } from '../lib/activityService';
 import { useLanguage } from '../contexts/language';
+import { headingStyles } from '../utils/cn';
 
 const TestCategories = () => {
   const { language } = useLanguage();
@@ -46,7 +47,7 @@ const TestCategories = () => {
 
   return (
     <div className="pt-20 p-8">
-      <h1 className="text-2xl font-bold mb-4">分类测试页面</h1>
+      <h1 className={headingStyles.h2}>分类测试页面</h1>
       <p className="mb-4">获取到 {categories.length} 个分类:</p>
       <div className="grid gap-2">
         {categories.map((category, index) => (

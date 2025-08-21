@@ -195,7 +195,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = React.memo(({
 
         <div className="p-6">
           {/* 活动标题 */}
-          <h3 className="text-xl font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-purple-700 transition-colors">
+          <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4 line-clamp-2 group-hover:from-purple-700 group-hover:to-purple-900 transition-all">
             {activity.title}
           </h3>
           
@@ -307,7 +307,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = React.memo(({
       <div className="p-8">
         {/* 活动标题 */}
         <Link to={`/activities/${activity.id}`} className="block">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-purple-700 transition-colors leading-tight hover:text-purple-600">
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4 line-clamp-2 group-hover:from-purple-700 group-hover:to-purple-900 transition-all leading-tight">
             {activity.title}
           </h3>
         </Link>

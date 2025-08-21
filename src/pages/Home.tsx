@@ -279,12 +279,15 @@ const Home = () => {
       {/* Featured Content */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-12">
-            <div className="text-center flex-1">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('home.featuredPosts')}</h2>
+          <div className="relative mb-12">
+            {/* 标题区域 - 绝对居中 */}
+            <div className="text-center">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">{t('home.featuredPosts')}</h2>
               <p className="text-gray-600">{t('home.featuredDescription')}</p>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* 按钮区域 - 绝对定位到右侧 */}
+            <div className="absolute top-0 right-0 flex items-center space-x-4">
               {user && (
                 <button
                   onClick={() => setIsCreatePostModalOpen(true)}
@@ -346,7 +349,7 @@ const Home = () => {
       <section className="py-16 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('home.upcomingActivities')}</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">{t('home.upcomingActivities')}</h2>
             <p className="text-gray-600">{t('home.activitiesDescription')}</p>
           </div>
           

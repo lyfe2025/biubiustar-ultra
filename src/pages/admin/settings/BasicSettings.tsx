@@ -18,7 +18,8 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
     site_logo: '',
     site_favicon: '',
     contact_email: '',
-    site_domain: ''
+    site_domain: '',
+    default_language: 'zh'
   }
   
   // 表单数据状态
@@ -54,7 +55,8 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
         site_logo: settings['basic.siteLogo']?.value ?? '',
         site_favicon: settings['basic.siteFavicon']?.value ?? '',
         contact_email: settings['basic.contactEmail']?.value ?? '',
-        site_domain: settings['basic.siteDomain']?.value ?? ''
+        site_domain: settings['basic.siteDomain']?.value ?? '',
+        default_language: (settings['basic.defaultLanguage']?.value as 'zh' | 'zh-TW' | 'en' | 'vi') ?? 'zh'
       })
       // 数据更新后重置编辑状态
       setIsEditing(false)
@@ -84,7 +86,8 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
       'basic.siteLogo': field === 'site_logo' ? safeValue : formData.site_logo,
       'basic.siteFavicon': field === 'site_favicon' ? safeValue : formData.site_favicon,
       'basic.contactEmail': field === 'contact_email' ? safeValue : formData.contact_email,
-      'basic.siteDomain': field === 'site_domain' ? safeValue : formData.site_domain
+      'basic.siteDomain': field === 'site_domain' ? safeValue : formData.site_domain,
+      'basic.defaultLanguage': field === 'default_language' ? safeValue : formData.default_language
     }
     onUpdate(settingsToSave)
   }
@@ -267,6 +270,26 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
           />
           <p className="mt-1 text-sm text-gray-500">
             {t('admin.settings.basic.siteNameDescription')}
+          </p>
+        </div>
+
+        {/* 默认语言 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t('admin.settings.basic.defaultLanguage')}
+          </label>
+          <select
+            value={formData.default_language}
+            onChange={(e) => handleChange('default_language', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          >
+            <option value="zh">{t('admin.settings.basic.languages.zh')}</option>
+            <option value="zh-TW">{t('admin.settings.basic.languages.zh-TW')}</option>
+            <option value="en">{t('admin.settings.basic.languages.en')}</option>
+            <option value="vi">{t('admin.settings.basic.languages.vi')}</option>
+          </select>
+          <p className="mt-1 text-sm text-gray-500">
+            {t('admin.settings.basic.defaultLanguageDescription')}
           </p>
         </div>
 

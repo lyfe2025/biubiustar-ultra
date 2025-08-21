@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useLanguage } from '../contexts/language'
 import { ActivityService, ActivityCategory } from '../lib/activityService'
 import { getCategoryName } from '../utils/categoryUtils'
+import { headingStyles } from '../utils/cn'
 
 const DebugCategories: React.FC = () => {
   const { language, setLanguage } = useLanguage()
@@ -54,7 +55,7 @@ const DebugCategories: React.FC = () => {
       
       {/* 当前状态 */}
       <div className="bg-blue-50 p-4 rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-3">📊 当前状态</h2>
+        <h2 className={headingStyles.h3Simple}>📊 当前状态</h2>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <strong>当前语言:</strong> {language}
@@ -79,7 +80,7 @@ const DebugCategories: React.FC = () => {
 
       {/* 语言切换 */}
       <div className="bg-gray-50 p-4 rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-3">🌐 语言切换测试</h2>
+        <h2 className={headingStyles.h3Simple}>🌐 语言切换测试</h2>
         <div className="flex gap-2">
           {[
             { code: 'zh', name: '简体中文' },
@@ -107,7 +108,7 @@ const DebugCategories: React.FC = () => {
 
       {/* 原始API响应 */}
       <div className="bg-yellow-50 p-4 rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-3">📡 原始API响应</h2>
+        <h2 className={headingStyles.h3Simple}>📡 原始API响应</h2>
         <pre className="bg-white p-3 rounded border text-xs overflow-auto max-h-40">
           {JSON.stringify(rawApiResponse, null, 2)}
         </pre>
@@ -115,7 +116,7 @@ const DebugCategories: React.FC = () => {
 
       {/* ActivityService处理后的数据 */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-3">⚙️ ActivityService处理后的数据</h2>
+        <h2 className={headingStyles.h3Simple}>⚙️ ActivityService处理后的数据</h2>
         <div className="text-sm mb-3">
           <strong>分类数量:</strong> {categories.length}
         </div>
@@ -126,11 +127,11 @@ const DebugCategories: React.FC = () => {
 
       {/* 测试分类详情 */}
       <div className="bg-purple-50 p-4 rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-3">🎯 测试分类 (ID: 1ca52152-11f7-451c-9fa0-ca71a6771e51)</h2>
+        <h2 className={headingStyles.h3Simple}>🎯 测试分类 (ID: 1ca52152-11f7-451c-9fa0-ca71a6771e51)</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h3 className="font-semibold mb-2">原始API数据:</h3>
+                            <h3 className={headingStyles.h3Simple}>原始API数据:</h3>
             {testCategoryFromRaw ? (
               <div className="bg-white p-3 rounded border text-sm">
                 <div><strong>ID:</strong> {testCategoryFromRaw.id}</div>
@@ -143,7 +144,7 @@ const DebugCategories: React.FC = () => {
           </div>
           
           <div>
-            <h3 className="font-semibold mb-2">ActivityService处理后:</h3>
+                            <h3 className={headingStyles.h3Simple}>ActivityService处理后:</h3>
             {testCategory ? (
               <div className="bg-white p-3 rounded border text-sm">
                 <div><strong>ID:</strong> {testCategory.id}</div>
@@ -160,7 +161,7 @@ const DebugCategories: React.FC = () => {
 
       {/* 所有分类列表 */}
       <div className="bg-gray-50 p-4 rounded-lg">
-        <h2 className="text-xl font-semibold mb-3">📋 所有分类列表</h2>
+        <h2 className={headingStyles.h3Simple}>📋 所有分类列表</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {categories.map(category => (
             <div key={category.id} className="bg-white p-3 rounded border text-sm">

@@ -16,6 +16,7 @@ export interface SystemSettings {
   'basic.contactEmail': string
   'basic.siteDomain': string
   'basic.timezone': string
+  'basic.defaultLanguage': string
 
   // 语言设置
   'language.defaultLanguage': string
@@ -65,27 +66,35 @@ class SettingsService {
    * 获取公开的系统设置
    */
   async getPublicSettings(): Promise<Partial<SystemSettings>> {
+    console.log('[SettingsService] 开始获取公开设置')
     const cacheKey = 'public_settings'
     const cached = this.cache.get(cacheKey)
     
     // 检查缓存
     if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      console.log('[SettingsService] 使用缓存的设置数据')
       return cached.data
     }
 
+    const apiUrl = this.baseUrl ? `${this.baseUrl}/api/settings/public` : '/api/settings/public'
+    console.log('[SettingsService] 调用API获取设置:', apiUrl)
+
     try {
-      const response = await fetch(this.baseUrl ? `${this.baseUrl}/api/settings/public` : '/api/settings/public', {
+      const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       })
 
+      console.log('[SettingsService] API响应状态:', response.status)
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const settings = await response.json()
+      console.log('[SettingsService] 获取到的设置数据:', settings)
       
       // 缓存结果
       this.cache.set(cacheKey, {
@@ -95,9 +104,11 @@ class SettingsService {
 
       return settings
     } catch (error) {
-      console.error('Failed to fetch public settings:', error)
+      console.error('[SettingsService] Failed to fetch public settings:', error)
       // 返回默认设置
-      return this.getDefaultSettings()
+      const defaultSettings = this.getDefaultSettings()
+      console.log('[SettingsService] 使用默认设置:', defaultSettings)
+      return defaultSettings
     }
   }
 
@@ -105,8 +116,11 @@ class SettingsService {
    * 获取特定设置项
    */
   async getSetting<T = unknown>(key: keyof SystemSettings): Promise<T | null> {
+    console.log('[SettingsService] 获取特定设置项:', key)
     const settings = await this.getPublicSettings()
-    return settings[key] as T || null
+    const value = settings[key] as T || null
+    console.log('[SettingsService] 设置项值:', key, '=', value)
+    return value
   }
 
   /**
@@ -146,6 +160,7 @@ class SettingsService {
       'basic.contactEmail': 'contact@biubiustar.com',
       'basic.siteDomain': 'biubiustar.com',
       'basic.timezone': 'Asia/Shanghai',
+      'basic.defaultLanguage': 'zh-CN',
       'language.defaultLanguage': 'zh-CN',
       'language.supportedLanguages': ['zh-CN', 'zh-TW', 'en', 'vi'],
       'language.enableMultiLanguage': true,

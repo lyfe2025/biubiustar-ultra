@@ -40,7 +40,13 @@ router.get('/public', asyncHandler(async (req: Request, res: Response): Promise<
 
       // 转换数据库字段名为前端使用的格式
       let frontendKey = setting.setting_key
-      if (setting.category === 'basic') {
+      let categoryForKey = setting.category
+      
+      // 特殊处理 default_language 字段：无论在数据库中属于哪个分类，都映射到 basic.defaultLanguage
+      if (setting.setting_key === 'default_language') {
+        frontendKey = 'defaultLanguage'
+        categoryForKey = 'basic'  // 强制映射到 basic 分类
+      } else if (setting.category === 'basic') {
         // 将下划线命名转换为驼峰命名
         if (setting.setting_key === 'site_name') frontendKey = 'siteName'
         else if (setting.setting_key === 'site_description') frontendKey = 'siteDescription'
@@ -58,7 +64,7 @@ router.get('/public', asyncHandler(async (req: Request, res: Response): Promise<
       }
 
       // 使用 category.key 格式作为键名
-      const categoryKey = `${setting.category}.${frontendKey}`
+      const categoryKey = `${categoryForKey}.${frontendKey}`
       acc[categoryKey] = value
       
       return acc

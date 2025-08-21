@@ -6,6 +6,7 @@ import { Activity, Category } from '../types';
 import { useActivitiesPageData } from '../hooks/useOptimizedData';
 import { batchStatusService } from '../services/batchStatusService';
 import { useAuth } from '../contexts/AuthContext';
+import { headingStyles } from '../utils/cn';
 
 
 const Activities: React.FC = () => {
@@ -234,7 +235,7 @@ const Activities: React.FC = () => {
             {/* 分类筛选 */}
             <div className="mb-8">
               <div className="text-center mb-4 md:mb-6">
-                <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                <h3 className={headingStyles.h3}>
                   {t('activities.ui.filterByCategory')}
                 </h3>
                 <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
@@ -265,7 +266,7 @@ const Activities: React.FC = () => {
             {/* 状态筛选 */}
             <div>
               <div className="text-center mb-4 md:mb-6">
-                <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                <h3 className={headingStyles.h3}>
                   {t('activities.ui.filterByStatus')}
                 </h3>
                 <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
@@ -311,7 +312,7 @@ const Activities: React.FC = () => {
                 <div className="text-6xl md:text-8xl mb-4 md:mb-6 animate-bounce">🎯</div>
                 <div className="absolute -top-2 -right-2 w-4 md:w-6 h-4 md:h-6 bg-purple-500 rounded-full animate-ping"></div>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-gray-700 mb-4">{t('activities.ui.noMatchingActivities')}</h3>
+              <h3 className={headingStyles.h3}>{t('activities.ui.noMatchingActivities')}</h3>
               <p className="text-base md:text-lg text-gray-500 mb-6 md:mb-8 max-w-md mx-auto">{t('activities.ui.tryAdjustFilters')}</p>
               <button 
                 onClick={() => {
@@ -326,7 +327,7 @@ const Activities: React.FC = () => {
           ) : (
             <div className="space-y-6 md:space-y-8">
               <div className="text-center">
-                <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                <h2 className={headingStyles.h2}>
                   {t('activities.ui.foundActivities').replace('{count}', filteredActivities.length.toString())}
                 </h2>
                 <div className="w-32 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>

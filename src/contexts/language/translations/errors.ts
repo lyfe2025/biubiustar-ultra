@@ -12,7 +12,15 @@ export const errorTranslations = {
         forbidden: '禁止访问',
         notFound: '资源未找到',
         timeout: '请求超时',
-        maintenance: '系统维护中'
+        maintenance: '系统维护中',
+        // 新增网络连接相关错误
+        serviceUnavailable: '服务暂时不可用',
+        connectionRefused: '连接被拒绝',
+        serverNotStarted: '服务器未启动',
+        networkUnreachable: '网络不可达',
+        dnsResolutionFailed: '域名解析失败',
+        sslHandshakeFailed: 'SSL握手失败',
+        proxyConnectionFailed: '代理连接失败'
       },
       
       // 帖子相关错误
@@ -82,7 +90,15 @@ export const errorTranslations = {
         forbidden: '禁止存取',
         notFound: '資源未找到',
         timeout: '請求逾時',
-        maintenance: '系統維護中'
+        maintenance: '系統維護中',
+        // 新增网络连接相关错误
+        serviceUnavailable: '服務暫時不可用',
+        connectionRefused: '連線被拒絕',
+        serverNotStarted: '伺服器未啟動',
+        networkUnreachable: '網路不可達',
+        dnsResolutionFailed: '網域名稱解析失敗',
+        sslHandshakeFailed: 'SSL握手失敗',
+        proxyConnectionFailed: '代理連線失敗'
       },
       
       posts: {
@@ -147,7 +163,15 @@ export const errorTranslations = {
         forbidden: 'Access forbidden',
         notFound: 'Resource not found',
         timeout: 'Request timeout',
-        maintenance: 'System under maintenance'
+        maintenance: 'System under maintenance',
+        // 新增网络连接相关错误
+        serviceUnavailable: 'Service temporarily unavailable',
+        connectionRefused: 'Connection refused',
+        serverNotStarted: 'Server not started',
+        networkUnreachable: 'Network unreachable',
+        dnsResolutionFailed: 'DNS resolution failed',
+        sslHandshakeFailed: 'SSL handshake failed',
+        proxyConnectionFailed: 'Proxy connection failed'
       },
       
       posts: {
@@ -212,7 +236,15 @@ export const errorTranslations = {
         forbidden: 'Truy cập bị cấm',
         notFound: 'Không tìm thấy tài nguyên',
         timeout: 'Yêu cầu quá thời gian',
-        maintenance: 'Hệ thống đang bảo trì'
+        maintenance: 'Hệ thống đang bảo trì',
+        // 新增网络连接相关错误
+        serviceUnavailable: 'Dịch vụ tạm thời không khả dụng',
+        connectionRefused: 'Kết nối bị từ chối',
+        serverNotStarted: 'Máy chủ chưa khởi động',
+        networkUnreachable: 'Mạng không thể truy cập',
+        dnsResolutionFailed: 'Phân giải DNS thất bại',
+        sslHandshakeFailed: 'SSL handshake thất bại',
+        proxyConnectionFailed: 'Kết nối proxy thất bại'
       },
       
       posts: {

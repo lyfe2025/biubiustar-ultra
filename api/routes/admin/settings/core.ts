@@ -70,21 +70,29 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
       
       // 转换字段名为驼峰命名
       let camelKey = setting_key;
-      if (setting_key === 'contact_email') camelKey = 'contactEmail';
-      if (setting_key === 'site_domain') camelKey = 'siteDomain';
-      if (setting_key === 'site_name') camelKey = 'siteName';
-      if (setting_key === 'site_description') camelKey = 'siteDescription';
-      if (setting_key === 'site_description_zh') camelKey = 'siteDescriptionZh';
-      if (setting_key === 'site_description_zh_tw') camelKey = 'siteDescriptionZhTw';
-      if (setting_key === 'site_description_en') camelKey = 'siteDescriptionEn';
-      if (setting_key === 'site_description_vi') camelKey = 'siteDescriptionVi';
-      if (setting_key === 'site_logo') camelKey = 'siteLogo';
-      if (setting_key === 'site_favicon') camelKey = 'siteFavicon';
-      if (setting_key === 'site_keywords') camelKey = 'siteKeywords';
-      if (setting_key === 'tech_stack') camelKey = 'techStack';
+      let categoryForKey = category;
+      
+      // 特殊处理 default_language 字段：无论在数据库中属于哪个分类，都映射到 basic.defaultLanguage
+      if (setting_key === 'default_language') {
+        camelKey = 'defaultLanguage';
+        categoryForKey = 'basic';  // 强制映射到 basic 分类
+      } else {
+        if (setting_key === 'contact_email') camelKey = 'contactEmail';
+        if (setting_key === 'site_domain') camelKey = 'siteDomain';
+        if (setting_key === 'site_name') camelKey = 'siteName';
+        if (setting_key === 'site_description') camelKey = 'siteDescription';
+        if (setting_key === 'site_description_zh') camelKey = 'siteDescriptionZh';
+        if (setting_key === 'site_description_zh_tw') camelKey = 'siteDescriptionZhTw';
+        if (setting_key === 'site_description_en') camelKey = 'siteDescriptionEn';
+        if (setting_key === 'site_description_vi') camelKey = 'siteDescriptionVi';
+        if (setting_key === 'site_logo') camelKey = 'siteLogo';
+        if (setting_key === 'site_favicon') camelKey = 'siteFavicon';
+        if (setting_key === 'site_keywords') camelKey = 'siteKeywords';
+        if (setting_key === 'tech_stack') camelKey = 'techStack';
+      }
       
       // 创建 category.key 格式的键名
-      const fullKey = `${category}.${camelKey}`;
+      const fullKey = `${categoryForKey}.${camelKey}`;
       
       // 创建符合前端期望的数据结构
       result[fullKey] = {
@@ -120,7 +128,13 @@ router.put('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
         
         // 将前端格式转换为数据库字段名
         let dbKey = frontendKey
-        if (category === 'basic') {
+        let targetCategory = category
+        
+        // 特殊处理 defaultLanguage：无论前端发送的是哪个分类，都需要找到数据库中的实际分类
+        if (frontendKey === 'defaultLanguage') {
+          dbKey = 'default_language'
+          // 保持原有的分类逻辑，让数据库操作时自动匹配现有记录的分类
+        } else if (category === 'basic') {
           if (frontendKey === 'siteName') dbKey = 'site_name'
           else if (frontendKey === 'siteDescription') dbKey = 'site_description'
           else if (frontendKey === 'siteDescriptionZh') dbKey = 'site_description_zh'
@@ -170,31 +184,80 @@ router.put('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
     // 批量更新设置
     try {
       const updatePromises = updates.map(async (update) => {
-        // 首先尝试更新
-        const { data: updateData, error: updateError } = await supabaseAdmin
+        let updateQuery = supabaseAdmin
           .from('system_settings')
           .update({
             setting_value: update.setting_value,
             updated_at: update.updated_at
           })
           .eq('setting_key', update.setting_key)
-          .select()
+        
+        // 执行更新操作
+        const { data: updateData, error: updateError } = await updateQuery.select()
+        
+        console.log(`更新设置 ${update.setting_key}:`, { updateData, updateError })
         
         // 如果更新失败或没有影响行数，尝试插入
         if (updateError || !updateData || updateData.length === 0) {
+          // 对于 default_language，如果更新失败，先检查是否存在于其他分类中
+          if (update.setting_key === 'default_language') {
+            console.log('default_language 更新失败，检查是否存在于数据库中...')
+            
+            const { data: existingData, error: checkError } = await supabaseAdmin
+              .from('system_settings')
+              .select('*')
+              .eq('setting_key', 'default_language')
+            
+            console.log('检查 default_language 存在性:', { existingData, checkError })
+            
+            if (!checkError && existingData && existingData.length > 0) {
+              // 记录存在，但可能在不同分类中，强制更新
+              console.log('找到 default_language 记录，执行强制更新...')
+              
+              const { data: forceUpdateData, error: forceUpdateError } = await supabaseAdmin
+                .from('system_settings')
+                .update({
+                  setting_value: update.setting_value,
+                  updated_at: update.updated_at
+                })
+                .eq('setting_key', 'default_language')
+                .select()
+              
+              console.log('强制更新结果:', { forceUpdateData, forceUpdateError })
+              
+              if (forceUpdateError) {
+                console.error(`强制更新 default_language 失败:`, forceUpdateError)
+                throw new Error(`强制更新设置失败: ${forceUpdateError.message}`)
+              }
+              
+              return forceUpdateData
+            } else {
+              console.log('default_language 记录不存在，将创建新记录')
+            }
+          }
+          
+          // 如果记录不存在，插入新记录
+          console.log(`准备插入新设置记录: ${update.setting_key}`)
+          
+          const insertRecord = {
+            setting_key: update.setting_key,
+            setting_value: update.setting_value,
+            setting_type: 'string',
+            category: update.setting_key === 'default_language' ? 'basic' : 'basic',
+            description: `Setting: ${update.setting_key}`,
+            is_public: true,
+            created_at: update.updated_at,
+            updated_at: update.updated_at
+          }
+          
+          console.log('插入记录数据:', insertRecord)
+          
           const { data: insertData, error: insertError } = await supabaseAdmin
             .from('system_settings')
-            .insert({
-              setting_key: update.setting_key,
-              setting_value: update.setting_value,
-              setting_type: 'string',
-              category: 'basic',
-              description: `Setting: ${update.setting_key}`,
-              is_public: true,
-              created_at: update.updated_at,
-              updated_at: update.updated_at
-            })
+            .insert(insertRecord)
             .select()
+          
+          console.log(`插入设置 ${update.setting_key} 结果:`, { insertData, insertError })
           
           if (insertError) {
             console.error(`插入设置 ${update.setting_key} 失败:`, insertError)

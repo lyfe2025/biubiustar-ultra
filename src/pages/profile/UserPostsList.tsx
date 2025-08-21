@@ -7,6 +7,7 @@ import { UserPostsListProps } from './types'
 import { toast } from 'sonner'
 import MediaGrid from '../../components/MediaGrid'
 import type { MediaFile } from '../../types'
+import { headingStyles } from '../../utils/cn'
 
 const UserPostsList: React.FC<UserPostsListProps> = ({ 
   posts, 
@@ -56,7 +57,7 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="text-center py-12">
           <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('profile.noPosts')}</h3>
+          <h3 className={headingStyles.h3}>{t('profile.noPosts')}</h3>
           <p className="text-gray-500">{t('profile.createFirstPost')}</p>
         </div>
       </div>
@@ -119,7 +120,7 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('profile.myPosts')}</h3>
+      <h3 className={headingStyles.h3}>{t('profile.myPosts')}</h3>
       
       <div className="space-y-6">
         {posts.map((post) => {
@@ -211,7 +212,7 @@ const UserPostsList: React.FC<UserPostsListProps> = ({
       {pendingDeleteId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('common.delete')}</h3>
+            <h3 className={headingStyles.h3Simple}>{t('common.delete')}</h3>
             <p className="text-gray-600 mb-6">{t('profile.confirmDeletePost')}</p>
             <div className="flex space-x-3">
               <button

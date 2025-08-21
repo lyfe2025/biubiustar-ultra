@@ -9,6 +9,7 @@ import type { Post } from '../types'
 import PostCard from '../components/PostCard'
 import CommentModal from '../components/CommentModal'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { headingStyles } from '../utils/cn'
 
 // 内容分类接口
 interface ContentCategory {
@@ -221,7 +222,7 @@ export default function Trending() {
           {/* 搜索栏 */}
           <div className="mb-8">
             <div className="text-center mb-4 md:mb-6">
-              <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+              <h3 className={headingStyles.h3}>
                 {t('trending.searchTitle')}
               </h3>
               <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
@@ -250,7 +251,7 @@ export default function Trending() {
           {/* 分类筛选 */}
           <div>
             <div className="text-center mb-4 md:mb-6">
-              <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+              <h3 className={headingStyles.h3}>
                 {t('trending.filterByCategory')}
               </h3>
               <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
@@ -297,7 +298,7 @@ export default function Trending() {
               <div className="text-6xl md:text-8xl mb-4 md:mb-6 animate-bounce">📝</div>
               <div className="absolute -top-2 -right-2 w-4 md:w-6 h-4 md:h-6 bg-purple-500 rounded-full animate-ping"></div>
             </div>
-            <h3 className="text-xl md:text-2xl font-bold text-gray-700 mb-4">{t('trending.noPosts')}</h3>
+            <h3 className={headingStyles.h3}>{t('trending.noPosts')}</h3>
             <p className="text-base md:text-lg text-gray-500 mb-6 md:mb-8 max-w-md mx-auto">{t('trending.noPostsDescription')}</p>
             <button 
               onClick={() => {
@@ -312,7 +313,7 @@ export default function Trending() {
         ) : (
           <div className="space-y-6 md:space-y-8">
             <div className="text-center">
-              <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+              <h2 className={headingStyles.h2}>
                 {t('trending.foundPosts').replace('{count}', filteredPosts.length.toString())}
               </h2>
               <div className="w-32 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>

@@ -21,6 +21,7 @@ export interface BasicSettingsData {
   site_favicon?: string
   contact_email: string
   site_domain: string
+  default_language: 'zh' | 'zh-TW' | 'en' | 'vi'
 }
 
 export interface UserSettingsData {

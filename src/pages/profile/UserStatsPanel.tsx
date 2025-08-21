@@ -2,6 +2,7 @@ import React from 'react'
 import { FileText, Users, UserPlus, Heart } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
 import { UserStatsPanelProps } from './types'
+import { headingStyles } from '../../utils/cn'
 
 const UserStatsPanel: React.FC<UserStatsPanelProps> = ({ stats, isLoading }) => {
   const { t } = useLanguage()
@@ -55,7 +56,7 @@ const UserStatsPanel: React.FC<UserStatsPanelProps> = ({ stats, isLoading }) => 
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('profile.statistics')}</h3>
+      <h3 className={headingStyles.h3Simple}>{t('profile.statistics')}</h3>
       
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {statItems.map((item) => {

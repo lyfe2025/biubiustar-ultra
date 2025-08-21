@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Heart, MessageCircle, Share2, User, Calendar, Tag, Send, Trash2, Play } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { headingStyles } from '../utils/cn'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/language'
 import { socialService } from '../lib/socialService'
@@ -483,7 +484,7 @@ const PostDetail = () => {
         
         <div className="relative text-center bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 max-w-md mx-4">
           <div className="text-6xl mb-4 animate-bounce">😵</div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">{t('posts.detail.errorTitle')}</h2>
+                      <h2 className={headingStyles.h2}>{t('posts.detail.errorTitle')}</h2>
           <p className="text-red-600 mb-6">{error || getErrorMessage('posts.notFound')}</p>
           <button
             onClick={() => navigate(-1)}
@@ -633,7 +634,7 @@ const PostDetail = () => {
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
                 <MessageCircle className="w-4 h-4 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className={headingStyles.h3}>
                 {t('posts.comments.title')} ({comments.length})
               </h3>
             </div>

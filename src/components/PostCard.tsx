@@ -506,7 +506,7 @@ const PostCard = memo(({ post, onLike, onComment, onShare, showFullContent = fal
             onClick={() => setShowDeleteConfirm(false)}
           />
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 relative z-10">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">
               {t('posts.card.delete')}
             </h3>
             <p className="text-gray-600 mb-6">

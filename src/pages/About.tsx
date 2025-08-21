@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Star, Users, Globe, Heart, Building, Calendar, TrendingUp, Search, Trophy, Award, MapPin, UserPlus, Play, Zap, Target, Sparkles, ChevronDown } from 'lucide-react';
-import { cn } from '../utils/cn';
+import { cn, headingStyles } from '../utils/cn';
 import { useLanguage } from '../contexts/language';
 import { contactService, type ContactFormData } from '../services/ContactService';
 import { toast } from 'sonner';
@@ -300,7 +300,7 @@ export default function About() {
       <section className="py-16 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.company.title')}</h2>
+            <h2 className={headingStyles.h2}>{t('about.company.title')}</h2>
             <p className="text-xl text-gray-600">{t('about.company.subtitle')}</p>
           </div>
 
@@ -311,7 +311,7 @@ export default function About() {
                 <div className="bg-gradient-to-r from-purple-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-500">
                   <Building className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">{t('about.company.profile.title')}</h3>
+                <h3 className={headingStyles.h3}>{t('about.company.profile.title')}</h3>
               </div>
               <p className="text-gray-600 leading-relaxed mb-6">
                 {t('about.company.profile.description')}
@@ -327,7 +327,7 @@ export default function About() {
                 <div className="bg-gradient-to-r from-purple-500 to-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-500">
                   <Globe className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">{t('about.company.overview.title')}</h3>
+                <h3 className={headingStyles.h3}>{t('about.company.overview.title')}</h3>
               </div>
               <p className="text-gray-600 leading-relaxed mb-6">
                 {t('about.company.overview.business')}
@@ -344,7 +344,7 @@ export default function About() {
       <section className="py-16 bg-gradient-to-br from-purple-50/30 via-white to-purple-50/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.timeline.title')}</h2>
+            <h2 className={headingStyles.h2}>{t('about.timeline.title')}</h2>
             <p className="text-xl text-gray-600">{t('about.timeline.subtitle')}</p>
           </div>
 
@@ -472,7 +472,7 @@ export default function About() {
                                 <IconComponent className="w-6 h-6 text-white" />
                               </div>
                               <div ref={categoryDropdownRef}>
-                                <h3 className="text-lg font-bold text-gray-900">{item.period}</h3>
+                                <h3 className={headingStyles.h4}>{item.period}</h3>
                                 <span className={`text-xs font-semibold px-2 py-1 rounded-full bg-gradient-to-r ${item.color} text-white`}>
                                   {t(`about.timeline.milestones.${item.milestone}`)}
                                 </span>
@@ -521,7 +521,7 @@ export default function About() {
       <section className="py-16 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.performance.title')}</h2>
+            <h2 className={headingStyles.h2}>{t('about.performance.title')}</h2>
             <p className="text-xl text-gray-600">{t('about.performance.subtitle')}</p>
           </div>
 
@@ -540,7 +540,7 @@ export default function About() {
                   <div className={`bg-gradient-to-r ${item.color} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500`}>
                     <TrendingUp className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{t(`about.performance.periods.${item.period}`)}</h3>
+                  <h3 className={headingStyles.h3}>{t(`about.performance.periods.${item.period}`)}</h3>
                   <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-4">
                     <AnimatedNumberDisplay targetValue={localizedValue} />{t('common.units.tenThousand')}+
                   </div>
@@ -561,7 +561,7 @@ export default function About() {
       <section className="py-16 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.partners.title')}</h2>
+            <h2 className={headingStyles.h2}>{t('about.partners.title')}</h2>
             <p className="text-xl text-gray-600">{t('about.partners.subtitle')}</p>
           </div>
 
@@ -613,7 +613,7 @@ export default function About() {
       <section className="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('about.contactForm.title')}</h2>
+            <h2 className={headingStyles.h2}>{t('about.contactForm.title')}</h2>
             <p className="text-xl text-gray-600">{t('about.contactForm.subtitle')}</p>
           </div>
 

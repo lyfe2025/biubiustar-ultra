@@ -6,6 +6,7 @@ import { useLanguage } from '../../contexts/language'
 import { UserActivitiesListProps } from './types'
 import { ActivityCategory, ActivityService } from '../../lib/activityService'
 import { getCategoryName } from '../../utils/categoryUtils'
+import { headingStyles } from '../../utils/cn'
 
 const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isLoading }) => {
   const { t, language } = useLanguage()
@@ -61,7 +62,7 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="text-center py-12">
           <Calendar className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('profile.noActivities')}</h3>
+          <h3 className={headingStyles.h3}>{t('profile.noActivities')}</h3>
           <p className="text-gray-500">{t('profile.joinFirstActivity')}</p>
         </div>
       </div>
@@ -92,7 +93,7 @@ const UserActivitiesList: React.FC<UserActivitiesListProps> = ({ activities, isL
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('profile.myActivities')}</h3>
+      <h3 className={headingStyles.h3}>{t('profile.myActivities')}</h3>
       
       <div className="space-y-6">
         {activities.map((activity) => {

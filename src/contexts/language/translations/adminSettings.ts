@@ -46,7 +46,15 @@ export const adminSettingsTranslations = {
           siteDomainDescription: '网站的主域名，用于页脚显示和SEO优化',
           techStack: '技术支持',
           techStackPlaceholder: '请输入技术支持信息，如：React & TypeScript',
-          techStackDescription: '网站的技术支持信息，将显示在页脚等位置'
+          techStackDescription: '网站的技术支持信息，将显示在页脚等位置',
+          defaultLanguage: '默认语言',
+          defaultLanguageDescription: '用户首次访问网站时的默认语言',
+          languages: {
+            zh: '简体中文',
+            'zh-TW': '繁体中文',
+            en: 'English',
+            vi: 'Tiếng Việt'
+          }
         },
         user: {
           title: '用户设置',
@@ -180,7 +188,15 @@ export const adminSettingsTranslations = {
           siteDomainDescription: '網站的主域名，用於頁腳顯示和SEO優化',
           techStack: '技術支持',
           techStackPlaceholder: '請輸入技術支持信息，如：React & TypeScript',
-          techStackDescription: '網站的技術支持信息，將顯示在頁腳等位置'
+          techStackDescription: '網站的技術支持信息，將顯示在頁腳等位置',
+          defaultLanguage: '默認語言',
+          defaultLanguageDescription: '用戶首次訪問網站時的默認語言',
+          languages: {
+            zh: '簡體中文',
+            'zh-TW': '繁體中文',
+            en: 'English',
+            vi: 'Tiếng Việt'
+          }
         },
         user: {
           title: '用戶設置',
@@ -314,7 +330,15 @@ export const adminSettingsTranslations = {
           siteDomainDescription: 'Main domain of the website, used for footer display and SEO optimization',
           techStack: 'Technical Support',
           techStackPlaceholder: 'Enter technical support info, e.g.: React & TypeScript',
-          techStackDescription: 'Technical support information for the website, displayed in footer and other locations'
+          techStackDescription: 'Technical support information for the website, displayed in footer and other locations',
+          defaultLanguage: 'Default Language',
+          defaultLanguageDescription: 'Default language for users when they first visit the website',
+          languages: {
+            zh: '简体中文',
+            'zh-TW': '繁體中文',
+            en: 'English',
+            vi: 'Tiếng Việt'
+          }
         },
         user: {
           title: 'User Settings',
@@ -448,7 +472,15 @@ export const adminSettingsTranslations = {
           siteDomainDescription: 'Tên miền chính của trang web, dùng để hiển thị ở footer và tối ưu SEO',
           techStack: 'Hỗ trợ kỹ thuật',
           techStackPlaceholder: 'Nhập thông tin hỗ trợ kỹ thuật, ví dụ: React & TypeScript',
-          techStackDescription: 'Thông tin hỗ trợ kỹ thuật của trang web, hiển thị ở footer và các vị trí khác'
+          techStackDescription: 'Thông tin hỗ trợ kỹ thuật của trang web, hiển thị ở footer và các vị trí khác',
+          defaultLanguage: 'Ngôn ngữ mặc định',
+          defaultLanguageDescription: 'Ngôn ngữ mặc định cho người dùng khi lần đầu truy cập trang web',
+          languages: {
+            zh: '简体中文',
+            'zh-TW': '繁體中文',
+            en: 'English',
+            vi: 'Tiếng Việt'
+          }
         },
         user: {
           title: 'Cài đặt người dùng',

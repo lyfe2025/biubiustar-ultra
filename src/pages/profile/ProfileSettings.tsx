@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Bell, Mail, Smartphone, LogOut, Shield, Globe } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
 import { ProfileSettingsProps } from './types'
+import { headingStyles } from '../../utils/cn'
 
 const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   notificationSettings,
@@ -37,7 +38,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center space-x-2 mb-6">
           <Bell className="w-5 h-5 text-purple-600" />
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className={headingStyles.h3Simple}>
             {t('profile.settings.notifications')}
           </h3>
         </div>
@@ -109,7 +110,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center space-x-2 mb-6">
           <Shield className="w-5 h-5 text-purple-600" />
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className={headingStyles.h3Simple}>
             {t('profile.settings.privacy')}
           </h3>
         </div>
@@ -142,7 +143,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center space-x-2 mb-6">
           <Globe className="w-5 h-5 text-purple-600" />
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className={headingStyles.h3Simple}>
             {t('profile.settings.language')}
           </h3>
         </div>
@@ -161,7 +162,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
 
       {/* 账户操作 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
+        <h3 className={headingStyles.h3Simple}>
           {t('profile.settings.account')}
         </h3>
 
@@ -184,7 +185,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold mb-4">{t('profile.settings.signOut')}</h3>
+            <h3 className={headingStyles.h3Simple}>{t('profile.settings.signOut')}</h3>
             <p className="text-gray-600 mb-6">
               {t('profile.confirmSignOut')}
             </p>

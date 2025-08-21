@@ -6,6 +6,7 @@ import { generateDefaultAvatarUrl, isDefaultAvatar, getUserDefaultAvatarUrl } fr
 import { UserProfileCardProps } from './types'
 import type { UserProfile } from './types'
 import { useAuth } from '../../contexts/AuthContext'
+import { headingStyles } from '../../utils/cn'
 
 // 生成基于用户注册信息的默认个人资料数据
 const generateDefaultProfile = (user: any): UserProfile | null => {
@@ -85,7 +86,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
           <div className="w-full text-center">
           {/* 基本信息 */}
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className={headingStyles.h3Simple}>
               {displayProfile?.full_name || displayProfile?.username || t('profile.basic.username')}
             </h2>
             <p className="text-purple-600 font-medium">

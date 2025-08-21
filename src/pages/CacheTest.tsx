@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { apiCache } from '../services/apiCache';
 import { socialService } from '../lib/socialService';
 import { ActivityService } from '../lib/activityService';
+import { headingStyles } from '../utils/cn';
 
 const CacheTest: React.FC = () => {
   const [testResults, setTestResults] = useState<string[]>([]);
@@ -84,7 +85,7 @@ const CacheTest: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">API 缓存测试</h1>
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">缓存功能测试</h2>
+          <h2 className={headingStyles.h3Simple}>缓存功能测试</h2>
           
           <div className="space-y-4">
             <div className="flex flex-wrap gap-4">
@@ -129,7 +130,7 @@ const CacheTest: React.FC = () => {
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">测试结果</h2>
+          <h2 className={headingStyles.h3Simple}>测试结果</h2>
           
           <div className="bg-gray-100 rounded p-4 h-96 overflow-y-auto">
             {testResults.length === 0 ? (
@@ -147,7 +148,7 @@ const CacheTest: React.FC = () => {
         </div>
         
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">缓存优化说明</h3>
+                      <h3 className={headingStyles.h3Simple}>缓存优化说明</h3>
           <ul className="text-blue-700 space-y-1 text-sm">
             <li>• 社交服务缓存：点赞数(1分钟)、评论数(1分钟)、用户关注状态(2分钟)、用户资料(10分钟)</li>
             <li>• 活动服务缓存：活动列表(5分钟)、活动详情(10分钟)、参与状态(2分钟)、分类(15分钟)</li>
