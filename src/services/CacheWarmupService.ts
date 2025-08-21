@@ -28,8 +28,8 @@ class CacheWarmupService {
     const startTime = performance.now();
 
     try {
-      // 并行预热关键数据
-      await Promise.allSettled([
+      // 设置超时控制，避免长时间阻塞
+      const warmupPromise = Promise.allSettled([
         this.warmupCategories(),
         this.warmupRecentPosts(),
         this.warmupRecentActivities(),
@@ -37,11 +37,20 @@ class CacheWarmupService {
         this.warmupUserStats()
       ]);
 
+      // 10秒超时
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('缓存预热超时')), 10000);
+      });
+
+      await Promise.race([warmupPromise, timeoutPromise]);
+
       this.isWarmedUp = true;
       const endTime = performance.now();
       console.log(`✅ 缓存预热完成，耗时: ${(endTime - startTime).toFixed(2)}ms`);
     } catch (error) {
       console.error('❌ 缓存预热失败:', error);
+      // 即使预热失败，也标记为已预热，避免重复尝试
+      this.isWarmedUp = true;
     }
   }
 
@@ -73,13 +82,17 @@ class CacheWarmupService {
       const { data: posts } = await supabase
         .from('posts')
         .select(`
-          *,
+          id,
+          title,
+          content,
+          created_at,
+          status,
           categories(name, color),
           profiles(username, avatar_url)
         `)
         .eq('status', 'published')
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(5);
 
       if (posts) {
         this.setCache('recent_posts', posts);
@@ -98,14 +111,18 @@ class CacheWarmupService {
       const { data: activities } = await supabase
         .from('activities')
         .select(`
-          *,
+          id,
+          title,
+          description,
+          event_date,
+          status,
           categories(name, color),
           profiles(username, avatar_url)
         `)
         .eq('status', 'published')
         .gte('event_date', new Date().toISOString())
         .order('event_date', { ascending: true })
-        .limit(5);
+        .limit(3);
 
       if (activities) {
         this.setCache('recent_activities', activities);
@@ -141,25 +158,37 @@ class CacheWarmupService {
 
   /**
    * 预热用户统计数据
+   * 使用轻量级查询避免网络请求被中止
    */
   private async warmupUserStats(): Promise<void> {
     try {
-      const [postsCount, activitiesCount, usersCount] = await Promise.all([
-        supabase.from('posts').select('id', { count: 'exact', head: true }),
-        supabase.from('activities').select('id', { count: 'exact', head: true }),
-        supabase.from('profiles').select('id', { count: 'exact', head: true })
+      // 使用轻量级查询检查表是否有数据，而不是获取精确计数
+      const [postsCheck, activitiesCheck, usersCheck] = await Promise.allSettled([
+        supabase.from('posts').select('id').limit(1).single(),
+        supabase.from('activities').select('id').limit(1).single(),
+        supabase.from('profiles').select('id').limit(1).single()
       ]);
 
       const stats = {
-        posts_count: postsCount.count || 0,
-        activities_count: activitiesCount.count || 0,
-        users_count: usersCount.count || 0
+        posts_count: postsCheck.status === 'fulfilled' && postsCheck.value.data ? '有数据' : '暂无数据',
+        activities_count: activitiesCheck.status === 'fulfilled' && activitiesCheck.value.data ? '有数据' : '暂无数据',
+        users_count: usersCheck.status === 'fulfilled' && usersCheck.value.data ? '有数据' : '暂无数据',
+        last_updated: new Date().toISOString()
       };
 
       this.setCache('user_stats', stats);
       console.log('📊 用户统计预热完成');
     } catch (error) {
       console.error('用户统计预热失败:', error);
+      // 即使失败也设置一个默认状态，避免影响其他功能
+      const fallbackStats = {
+        posts_count: '检查失败',
+        activities_count: '检查失败',
+        users_count: '检查失败',
+        last_updated: new Date().toISOString(),
+        error: true
+      };
+      this.setCache('user_stats', fallbackStats);
     }
   }
 
