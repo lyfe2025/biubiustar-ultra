@@ -20,6 +20,18 @@ export const aboutCompanyTranslations = {
       timeline: {
         title: '发展历程',
         subtitle: '见证我们的成长足迹',
+        milestones: {
+          startup: '起步阶段',
+          preparation: '筹备阶段',
+          trial: '试运营',
+          launch: '正式启动',
+          firstAward: '首次获奖',
+          expansion: '团队扩张',
+          partnership: '平台合作',
+          tiktokAward: 'TikTok奖项',
+          douyinAward: '抖音奖项',
+          excellence: '卓越成就'
+        },
         events: {
           '202310': {
             market: '深入了解越南市场环境',
@@ -112,6 +124,18 @@ export const aboutCompanyTranslations = {
       timeline: {
         title: '發展歷程',
         subtitle: '見證我們的成長足跡',
+        milestones: {
+          startup: '起步階段',
+          preparation: '籌備階段',
+          trial: '試運營',
+          launch: '正式啟動',
+          firstAward: '首次獲獎',
+          expansion: '團隊擴張',
+          partnership: '平台合作',
+          tiktokAward: 'TikTok獎項',
+          douyinAward: '抖音獎項',
+          excellence: '卓越成就'
+        },
         events: {
           '202310': {
             market: '深入了解越南市場環境',
@@ -202,6 +226,18 @@ export const aboutCompanyTranslations = {
       timeline: {
         title: "Development History",
         subtitle: "Witness Our Growth Journey",
+        milestones: {
+          startup: 'Startup Phase',
+          preparation: 'Preparation Phase',
+          trial: 'Trial Operation',
+          launch: 'Official Launch',
+          firstAward: 'First Award',
+          expansion: 'Team Expansion',
+          partnership: 'Platform Partnership',
+          tiktokAward: 'TikTok Award',
+          douyinAward: 'Douyin Award',
+          excellence: 'Excellence Achievement'
+        },
         events: {
           '202310': {
             market: 'Market research in Vietnam',
@@ -292,6 +328,18 @@ export const aboutCompanyTranslations = {
       timeline: {
         title: "Lịch sử phát triển",
         subtitle: "Chứng kiến hành trình phát triển của chúng tôi",
+        milestones: {
+          startup: 'Giai đoạn khởi nghiệp',
+          preparation: 'Giai đoạn chuẩn bị',
+          trial: 'Thử nghiệm vận hành',
+          launch: 'Ra mắt chính thức',
+          firstAward: 'Giải thưởng đầu tiên',
+          expansion: 'Mở rộng đội ngũ',
+          partnership: 'Hợp tác nền tảng',
+          tiktokAward: 'Giải thưởng TikTok',
+          douyinAward: 'Giải thưởng Douyin',
+          excellence: 'Thành tựu xuất sắc'
+        },
         events: {
           '202310': {
             market: 'Nghiên cứu thị trường Việt Nam',

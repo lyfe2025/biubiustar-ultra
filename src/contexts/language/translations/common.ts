@@ -12,6 +12,18 @@ export const commonTranslations = {
       creating: '创建中...',
       updating: '更新中...',
       
+      // 数字单位
+      units: {
+        tenThousand: '万',
+        thousand: '千',
+        million: '百万',
+        billion: '亿',
+        percent: '%',
+        rmb: 'RMB',
+        usd: 'USD',
+        eur: 'EUR'
+      },
+      
       // 通用操作
       actions: {
         save: '保存',
@@ -184,6 +196,18 @@ export const commonTranslations = {
       creating: '創建中...',
       updating: '更新中...',
       
+      // 數字單位
+      units: {
+        tenThousand: '萬',
+        thousand: '千',
+        million: '百萬',
+        billion: '億',
+        percent: '%',
+        rmb: 'RMB',
+        usd: 'USD',
+        eur: 'EUR'
+      },
+      
       actions: {
         save: '保存',
         cancel: '取消',
@@ -349,6 +373,18 @@ export const commonTranslations = {
       creating: 'Creating...',
       updating: 'Updating...',
       
+      // Number units
+      units: {
+        tenThousand: 'K',
+        thousand: 'K',
+        million: 'M',
+        billion: 'B',
+        percent: '%',
+        rmb: 'RMB',
+        usd: 'USD',
+        eur: 'EUR'
+      },
+      
       actions: {
         save: 'Save',
         cancel: 'Cancel',
@@ -512,6 +548,18 @@ export const commonTranslations = {
       update: 'Cập nhật',
       creating: 'Đang tạo...',
       updating: 'Đang cập nhật...',
+      
+      // Đơn vị số
+      units: {
+        tenThousand: 'Nghìn',
+        thousand: 'Nghìn',
+        million: 'Triệu',
+        billion: 'Tỷ',
+        percent: '%',
+        rmb: 'RMB',
+        usd: 'USD',
+        eur: 'EUR'
+      },
       
       actions: {
         save: 'Lưu',
