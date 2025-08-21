@@ -40,7 +40,11 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isMenuOpen && mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false)
+        // 检查点击的是否是菜单按钮本身
+        const menuButton = document.querySelector('[data-menu-button]')
+        if (menuButton && !menuButton.contains(event.target as Node)) {
+          setIsMenuOpen(false)
+        }
       }
     }
 
@@ -153,29 +157,46 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
             <div className="flex items-center space-x-2 md:space-x-4">
               <LanguageSelector />
               {user ? (
-                <div className="hidden md:flex items-center space-x-4">
+                <>
+                  {/* 桌面端用户菜单 */}
+                  <div className="hidden md:flex items-center space-x-4">
+                    <Link
+                      to="/profile"
+                      className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
+                    >
+                      <img
+                        src={userProfile?.avatar_url
+                    ? userProfile.avatar_url
+                    : getUserDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User', userProfile?.avatar_url)
+                  }
+                        alt={userProfile?.username || 'User'}
+                        className="h-6 w-6 rounded-full object-cover border border-white/30"
+                      />
+                      <span className="text-sm font-medium">{t('nav.profile')}</span>
+                    </Link>
+                    <button
+                      onClick={handleLogoutClick}
+                      className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>{t('nav.logout')}</span>
+                    </button>
+                  </div>
+                  {/* 移动端用户头像按钮 */}
                   <Link
                     to="/profile"
-                    className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
+                    className="md:hidden p-2 rounded-lg hover:bg-purple-50 transition-all duration-200"
                   >
                     <img
                       src={userProfile?.avatar_url
-                  ? userProfile.avatar_url
-                  : getUserDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User', userProfile?.avatar_url)
-                }
+                    ? userProfile.avatar_url
+                    : getUserDefaultAvatarUrl(userProfile?.username || user?.email?.split('@')[0] || 'User', userProfile?.avatar_url)
+                  }
                       alt={userProfile?.username || 'User'}
-                      className="h-6 w-6 rounded-full object-cover border border-white/30"
+                      className="h-8 w-8 rounded-full object-cover border-2 border-purple-200 hover:border-purple-400 transition-all duration-200"
                     />
-                    <span className="text-sm font-medium">{t('nav.profile')}</span>
                   </Link>
-                  <button
-                    onClick={handleLogoutClick}
-                    className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>{t('nav.logout')}</span>
-                  </button>
-                </div>
+                </>
               ) : (
                 <div className="flex items-center space-x-0 md:space-x-3">
                   <button
@@ -197,6 +218,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
             {/* Mobile menu button */}
             <div className="md:hidden">
               <button
+                data-menu-button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="p-2 rounded-md text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-colors duration-200"
               >
@@ -209,7 +231,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
           {isMenuOpen && (
             <div className="md:hidden" ref={mobileMenuRef}>
               <div className={cn(
-                "px-2 pt-2 pb-3 space-y-1 rounded-lg mt-2 border transition-all duration-300",
+                "px-2 pt-2 pb-3 space-y-1 rounded-lg mt-2 border transition-all duration-300 max-w-full overflow-hidden",
                 isScrolled 
                   ? "bg-white/90 backdrop-blur-sm border-purple-100/50" 
                   : "bg-white border-purple-100"
@@ -224,7 +246,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
                           handleHomeNavigation()
                         }}
                         className={cn(
-                          'block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors duration-200',
+                          'block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 whitespace-nowrap overflow-hidden text-ellipsis',
                           isActive(item.path)
                             ? 'text-purple-600 bg-purple-50'
                             : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
@@ -240,7 +262,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
                       to={item.path}
                       onClick={() => setIsMenuOpen(false)}
                       className={cn(
-                        'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200',
+                        'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 whitespace-nowrap overflow-hidden text-ellipsis',
                         isActive(item.path)
                           ? 'text-purple-600 bg-purple-50'
                           : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50'
@@ -260,7 +282,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
                       <div className="px-3 py-2 text-sm text-gray-700">{t('nav.welcome')}, {user.email}</div>
                       <Link
                         to="/profile"
-                        className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors duration-200"
+                        className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors duration-200 whitespace-nowrap overflow-hidden"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <img
@@ -278,7 +300,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
                           setIsMenuOpen(false)
                           handleLogoutClick()
                         }}
-                        className="flex items-center space-x-2 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors duration-200 w-full text-left"
+                        className="flex items-center space-x-2 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors duration-200 w-full text-left whitespace-nowrap overflow-hidden"
                       >
                         <LogOut className="w-5 h-5" />
                         <span>{t('nav.logout')}</span>
@@ -291,7 +313,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
                           openAuthModal('login')
                           setIsMenuOpen(false)
                         }}
-                        className="block w-full text-left px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors duration-200"
+                        className="block w-full text-left px-3 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors duration-200 whitespace-nowrap overflow-hidden text-ellipsis"
                       >
                         {t('nav.login')}
                       </button>
@@ -300,7 +322,7 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
                           openAuthModal('register')
                           setIsMenuOpen(false)
                         }}
-                        className="block w-full text-left px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors duration-200"
+                        className="block w-full text-left px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors duration-200 whitespace-nowrap overflow-hidden text-ellipsis"
                       >
                         {t('nav.register')}
                       </button>

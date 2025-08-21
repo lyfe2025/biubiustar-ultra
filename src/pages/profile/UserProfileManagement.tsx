@@ -25,6 +25,7 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
   const { t, language } = useLanguage()
   const { user } = useAuth()
   const [dragActive, setDragActive] = useState(false)
+  const [isHighlighted, setIsHighlighted] = useState(false)
 
   // 生成默认个人资料数据
   const generateDefaultProfileData = (): UserProfile => {
@@ -112,11 +113,27 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
     )
   }
 
+  // 监听编辑状态变化，在移动端添加高亮效果
+  useEffect(() => {
+    if (isEditingProfile && window.innerWidth < 768) {
+      setIsHighlighted(true)
+      const timer = setTimeout(() => {
+        setIsHighlighted(false)
+      }, 2000) // 2秒后移除高亮
+      return () => clearTimeout(timer)
+    } else {
+      setIsHighlighted(false)
+    }
+  }, [isEditingProfile])
+
   // 有个人资料时的管理界面
   return (
     <div className="space-y-6">
       {/* 个人资料卡片 */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className={cn(
+        "bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-500",
+        isHighlighted && "ring-2 ring-purple-400 ring-opacity-75 shadow-lg"
+      )}>
         {/* 头部区域 */}
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-32 relative">
           <div className="absolute inset-0 bg-black bg-opacity-20"></div>

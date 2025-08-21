@@ -159,6 +159,16 @@
   background: rgba(241, 245, 249, 0.8);
 }
 
+/* 隐藏滚动条样式 */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 /* 移动端导航栏适配 - 确保内容不被固定导航栏遮挡 */
 .page-content {
   padding-top: 5rem; /* 80px - 适配移动端导航栏高度 */

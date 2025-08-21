@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { User, FileText, Users, Settings, Bell, Plus, UserCircle } from 'lucide-react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { cn } from '../../lib/utils'
@@ -20,6 +20,7 @@ const Profile: React.FC = () => {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   usePageTitle(t('profile.title'))
+  const profileEditRef = useRef<HTMLDivElement>(null)
   
   const {
     // 数据状态
@@ -119,6 +120,15 @@ const Profile: React.FC = () => {
                 onStartEdit={() => {
                   startEdit()
                   handleTabChange('profile')
+                  // 移动端自动滚动到编辑区域
+                  if (window.innerWidth < 768) {
+                    setTimeout(() => {
+                      profileEditRef.current?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                      })
+                    }, 100)
+                  }
                 }}
               />
 
@@ -135,7 +145,8 @@ const Profile: React.FC = () => {
             {/* 标签页导航 */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
               <div className="border-b border-gray-200">
-                <nav className="-mb-px flex space-x-8 px-6">
+                {/* 桌面端导航 */}
+                <nav className="-mb-px hidden md:flex space-x-8 px-6">
                   {tabs.map((tab) => {
                     const Icon = tab.icon
                     return (
@@ -143,7 +154,7 @@ const Profile: React.FC = () => {
                         key={tab.id}
                         onClick={() => handleTabChange(tab.id)}
                         className={cn(
-                          'py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2',
+                          'py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap',
                           activeTab === tab.id
                             ? 'border-purple-500 text-purple-600'
                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -155,6 +166,30 @@ const Profile: React.FC = () => {
                     )
                   })}
                 </nav>
+                
+                {/* 移动端可滚动导航 */}
+                <div className="md:hidden overflow-x-auto scrollbar-hide">
+                  <nav className="-mb-px flex px-4 min-w-max">
+                    {tabs.map((tab) => {
+                      const Icon = tab.icon
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => handleTabChange(tab.id)}
+                          className={cn(
+                            'py-3 px-3 mr-4 border-b-2 font-medium text-xs flex items-center space-x-1.5 whitespace-nowrap flex-shrink-0',
+                            activeTab === tab.id
+                              ? 'border-purple-500 text-purple-600'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          )}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                          <span>{tab.name}</span>
+                        </button>
+                      )
+                    })}
+                  </nav>
+                </div>
               </div>
             </div>
 
@@ -176,18 +211,20 @@ const Profile: React.FC = () => {
               )}
 
               {activeTab === 'profile' && (
-                <UserProfileManagement
-                  profile={userProfile}
-                  isLoading={isLoading}
-                  isEditingProfile={isEditingProfile}
-                  editForm={editForm}
-                  onEditFormChange={handleEditFormChange}
-                  onSaveProfile={saveProfile}
-                  onCancelEdit={cancelEdit}
-                  onStartEdit={startEdit}
-                  onAvatarUpload={previewAvatar}
-                  avatarPreview={avatarPreview}
-                />
+                <div ref={profileEditRef}>
+                  <UserProfileManagement
+                    profile={userProfile}
+                    isLoading={isLoading}
+                    isEditingProfile={isEditingProfile}
+                    editForm={editForm}
+                    onEditFormChange={handleEditFormChange}
+                    onSaveProfile={saveProfile}
+                    onCancelEdit={cancelEdit}
+                    onStartEdit={startEdit}
+                    onAvatarUpload={previewAvatar}
+                    avatarPreview={avatarPreview}
+                  />
+                </div>
               )}
 
               {activeTab === 'content' && (
