@@ -56,6 +56,82 @@ export class ActivityService {
     );
   }
 
+  // 分页获取活动
+  async getActivitiesPaginated(page: number = 1, limit: number = 20, filters?: {
+    category?: string;
+    status?: string;
+    search?: string;
+  }): Promise<{
+    activities: Activity[];
+    total: number;
+    hasMore: boolean;
+    currentPage: number;
+  }> {
+    const offset = (page - 1) * limit;
+    const queryParams = new URLSearchParams({
+      limit: limit.toString(),
+      offset: offset.toString()
+    });
+
+    // 添加筛选参数
+    if (filters?.category) {
+      queryParams.append('category', filters.category);
+    }
+    if (filters?.status) {
+      queryParams.append('status', filters.status);
+    }
+    if (filters?.search) {
+      queryParams.append('search', filters.search);
+    }
+
+    const cacheKey = `activities:paginated:${page}:${limit}:${JSON.stringify(filters || {})}`;
+    
+    return apiCache.cached(
+      cacheKey,
+      async () => {
+        try {
+          const response = await fetch(`/api/activities?${queryParams.toString()}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          // 处理不同的响应格式
+          let activities: Activity[];
+          let total: number;
+          
+          if (Array.isArray(data)) {
+            // 如果API直接返回数组（旧格式）
+            activities = data;
+            total = data.length;
+          } else if (data.data && Array.isArray(data.data)) {
+            // 如果API返回包装格式 {data: [...], total: n}
+            activities = data.data;
+            total = data.total || data.data.length;
+          } else {
+            // 其他格式
+            activities = [];
+            total = 0;
+          }
+          
+          const hasMore = activities.length === limit && (offset + limit) < total;
+          
+          return {
+            activities,
+            total,
+            hasMore,
+            currentPage: page
+          };
+        } catch (error) {
+          console.error('Error fetching paginated activities:', error);
+          throw error;
+        }
+      },
+      2 * 60 * 1000 // 2分钟缓存（分页数据缓存时间较短）
+    );
+  }
+
   // 获取单个活动
   async getActivity(id: string): Promise<Activity | null> {
     return apiCache.cached(

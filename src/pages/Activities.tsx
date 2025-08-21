@@ -1,132 +1,84 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useLanguage } from '../contexts/language';
-import { ActivityService, ActivityCategory } from '../lib/activityService';
+import { Activity, ActivityCategory } from '../lib/activityService';
 import { ActivityCard } from '../components/ActivityCard';
-import { Activity, Category } from '../types';
-import { useActivitiesPageData } from '../hooks/useOptimizedData';
-import { batchStatusService } from '../services/batchStatusService';
-import { useAuth } from '../contexts/AuthContext';
+import { usePaginatedData, useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { ActivityService } from '../lib/activityService';
+import LoadingIndicator from '../components/LoadingIndicator';
+import ErrorMessage from '../components/ErrorMessage';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import { LoadingSpinner, CardSkeleton } from '../components/LoadingSpinner';
 import { headingStyles } from '../utils/cn';
+import { toast } from 'sonner';
 
 
-const Activities: React.FC = () => {
+function ActivitiesContent() {
   const { t, language } = useLanguage();
-  const { user } = useAuth();
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [selectedStatus, setSelectedStatus] = useState('全部');
   
-  // 批量状态数据
-  const [participationStatusMap, setParticipationStatusMap] = useState<Record<string, boolean>>({});
-  const [participantCountMap, setParticipantCountMap] = useState<Record<string, number>>({});
+
   
-  // 使用优化的数据获取Hook
+  // 使用分页数据获取
   const {
-    activities: optimizedActivities,
-    categories: optimizedCategories,
-    isLoading: optimizedLoading,
-    error: optimizedError,
-    refetch: optimizedRefetch
-  } = useActivitiesPageData();
+    data: activities,
+    loading: isLoading,
+    error,
+    hasMore,
+    loadNextPage: loadMore,
+    reset
+  } = usePaginatedData({
+    onFetchPage: async (page, limit) => {
+       const activityService = new ActivityService();
+       const result = await activityService.getActivitiesPaginated(page, limit, {
+         category: selectedCategory === '全部' ? undefined : selectedCategory,
+         status: selectedStatus === '全部' ? undefined : selectedStatus
+       })
+       return result.activities
+     }
+  });
+
+  // 获取分类数据 - 保持原有逻辑
+  const [categories, setCategoriesData] = useState([]);
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsCategoriesLoading(true);
+        const data = await ActivityService.getActivityCategories();
+        setCategoriesData(data || []);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        setCategoriesData([]);
+      } finally {
+        setIsCategoriesLoading(false);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   // 硬编码分类作为降级处理
   const fallbackCategories = ['全部', '文化交流', '技术分享', '户外运动', '美食聚会', '学习交流', '娱乐活动', '志愿服务', '商务网络', '艺术创作', '其他'];
   const statusOptions = ['全部', '即将开始', '进行中', '已结束'];
 
-  useEffect(() => {
-    loadActivities();
-    loadCategories();
-  }, [language]);
-  
-  // 处理优化数据更新
-  useEffect(() => {
-    if (optimizedActivities && optimizedCategories && !optimizedLoading && !optimizedError) {
-      console.log('🚀 Activities页面使用批量数据:', { activities: optimizedActivities, categories: optimizedCategories });
-      setActivities(optimizedActivities || []);
-      setCategories(optimizedCategories || []);
-      setIsLoading(false);
-      setIsCategoriesLoading(false);
-    } else if (optimizedError) {
-      console.warn('⚠️ 批量数据获取失败，降级到独立API调用:', optimizedError);
-      // 降级到原有逻辑
-      loadActivities();
-      loadCategories();
-    }
-  }, [optimizedActivities, optimizedCategories, optimizedLoading, optimizedError]);
 
-  const loadActivities = async () => {
-    try {
-      setIsLoading(true);
-      const activityService = new ActivityService();
-      const data = await activityService.getActivities();
-      setActivities(data);
-      
-      // 批量获取用户参与状态和参与人数
-      if (data.length > 0) {
-        await loadBatchStatusData(data);
-      }
-    } catch (error) {
-      console.error('Failed to load activities:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
   
-  // 批量加载状态数据
-  const loadBatchStatusData = async (activitiesData: Activity[]) => {
-    try {
-      const activityIds = activitiesData.map(activity => activity.id);
-      
-      // 批量获取用户参与状态（仅在用户登录时）
-      if (user) {
-        const participationStatuses = await batchStatusService.batchCheckParticipation(
-          activityIds,
-          user.id
-        );
-        setParticipationStatusMap(participationStatuses);
-      }
-      
-      // 批量获取参与人数（这里可以扩展batchStatusService来支持批量获取参与人数）
-      // 暂时使用现有的单个API调用，但可以考虑后续优化
-      const countMap: Record<string, number> = {};
-      for (const activity of activitiesData) {
-        try {
-          const count = await ActivityService.getParticipantCount(activity.id);
-          countMap[activity.id] = count;
-        } catch (error) {
-          console.warn(`Failed to get participant count for activity ${activity.id}:`, error);
-          countMap[activity.id] = activity.current_participants || 0;
-        }
-      }
-      setParticipantCountMap(countMap);
-    } catch (error) {
-      console.error('Failed to load batch status data:', error);
-    }
-  };
+  // 无限滚动设置
+  const { targetRef: loadMoreRef } = useInfiniteScroll({
+    onLoadMore: loadMore,
+    enabled: hasMore && !isLoading
+  });
 
-  const loadCategories = async () => {
-    try {
-      setIsCategoriesLoading(true);
-      const data = await ActivityService.getActivityCategories(language);
-      // 转换ActivityCategory到Category类型
-      const categories: Category[] = data.map((cat: ActivityCategory) => ({
-        ...cat,
-        name_zh: cat.name_zh || cat.name,
-        name_zh_tw: cat.name_zh_tw || cat.name,
-        name_en: cat.name_en || cat.name,
-        name_vi: cat.name_vi || cat.name,
-        created_at: new Date().toISOString() // ActivityCategory没有created_at，使用当前时间
-      }));
-      setCategories(categories);
-    } catch (error) {
-      console.error('Failed to load categories:', error);
-    } finally {
-      setIsCategoriesLoading(false);
-    }
-  };
+
+
+  // 当筛选条件改变时重置数据
+  useEffect(() => {
+    reset();
+  }, [selectedCategory, selectedStatus]);
+
+
 
   // 获取活动状态
   const getActivityStatus = (activity: Activity) => {
@@ -145,11 +97,11 @@ const Activities: React.FC = () => {
 
   const handleParticipationChange = () => {
     // 重新加载活动数据和批量状态
-    loadActivities();
+    reset();
   };
 
   // 获取分类的本地化名称
-  const getCategoryName = (category: Category, language: string) => {
+  const getCategoryName = useCallback((category: ActivityCategory, language: string) => {
     // 根据语言返回对应的本地化名称
     switch (language) {
       case 'zh':
@@ -163,7 +115,7 @@ const Activities: React.FC = () => {
       default:
         return category.name || category.name_zh || category.name_en || '未知分类';
     }
-  };
+  }, []);
 
   // 获取显示的分类列表（API分类 + 降级处理）
   const displayCategories = useMemo(() => {
@@ -177,25 +129,10 @@ const Activities: React.FC = () => {
     
     // 降级到硬编码分类
     return fallbackCategories;
-  }, [categories, isCategoriesLoading, language, t]);
+  }, [categories, isCategoriesLoading, language]);
 
-  const filteredActivities = activities.filter(activity => {
-    let categoryMatch = selectedCategory === '全部';
-    
-    if (!categoryMatch) {
-      // 如果有API分类数据，根据本地化名称匹配
-      if (categories.length > 0) {
-        const matchedCategory = categories.find(cat => getCategoryName(cat, language) === selectedCategory);
-        categoryMatch = matchedCategory ? activity.category === matchedCategory.name : false;
-      } else {
-        // 降级到直接匹配
-        categoryMatch = activity.category === selectedCategory;
-      }
-    }
-    
-    const statusMatch = selectedStatus === '全部' || getActivityStatus(activity) === selectedStatus;
-    return categoryMatch && statusMatch;
-  });
+  // 由于筛选已在API层面处理，这里直接使用activities
+  const filteredActivities = activities;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 relative overflow-hidden">
@@ -243,7 +180,7 @@ const Activities: React.FC = () => {
               <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
                 {displayCategories.map((category, index) => (
                   <button
-                    key={category}
+                    key={`category-${category}-${index}`}
                     onClick={() => setSelectedCategory(category)}
                     className={`group relative px-3 md:px-6 py-2 md:py-3 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 text-sm md:text-base ${
                       selectedCategory === category
@@ -274,7 +211,7 @@ const Activities: React.FC = () => {
               <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
                 {statusOptions.map((status, index) => (
                   <button
-                    key={status}
+                    key={`status-${status}-${index}`}
                     onClick={() => setSelectedStatus(status)}
                     className={`group relative px-3 md:px-6 py-2 md:py-3 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 text-sm md:text-base ${
                       selectedStatus === status
@@ -336,24 +273,69 @@ const Activities: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
                 {filteredActivities.map((activity, index) => (
                   <div 
-                    key={activity.id} 
+                    key={`activity-${activity.id}-${index}`} 
                     className="transform hover:scale-105 transition-all duration-300"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <ActivityCard
                       activity={activity}
                       onParticipationChange={handleParticipationChange}
-                      initialIsParticipating={participationStatusMap[activity.id]}
-                      initialParticipantCount={participantCountMap[activity.id]}
                     />
                   </div>
                 ))}
               </div>
+              
+              {/* 加载更多区域 */}
+              {hasMore && (
+                <div ref={loadMoreRef} className="flex justify-center py-8">
+                  {isLoading ? (
+                    <LoadingIndicator 
+                      size="lg" 
+                      color="purple" 
+                      text={t('activities.ui.loadingMore')} 
+                      className="py-4"
+                    />
+                  ) : (
+                    <button
+                      onClick={loadMore}
+                      className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl font-medium hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      {t('activities.ui.loadMore')}
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {/* 错误处理 */}
+              {error && (
+                <div className="py-8">
+                  <ErrorMessage
+                    title="加载失败"
+                    message="获取活动数据时出现错误，请稍后重试。"
+                    error={error}
+                    onRetry={reset}
+                    variant="compact"
+                    className="max-w-md mx-auto"
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
     </div>
   );
-};
+}
 
-export default Activities;
+// 用ErrorBoundary包装的默认导出
+export default function Activities() {
+  return (
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        console.error('Activities page error:', error, errorInfo);
+        toast.error('页面加载出现问题，请刷新重试');
+      }}
+    >
+      <ActivitiesContent />
+    </ErrorBoundary>
+  );
+}

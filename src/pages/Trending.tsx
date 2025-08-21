@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Search } from 'lucide-react'
 import { useLanguage } from '../contexts/language'
 import { useAuth } from '../contexts/AuthContext'
@@ -10,6 +10,12 @@ import PostCard from '../components/PostCard'
 import CommentModal from '../components/CommentModal'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { headingStyles } from '../utils/cn'
+import { usePaginatedData, useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { ErrorBoundary } from '../components/ErrorBoundary'
+import { LoadingSpinner, CardSkeleton } from '../components/LoadingSpinner'
+import LoadingIndicator from '../components/LoadingIndicator'
+import ErrorMessage from '../components/ErrorMessage'
+import { toast } from 'sonner'
 
 // 内容分类接口
 interface ContentCategory {
@@ -24,15 +30,13 @@ interface ContentCategory {
   icon?: string
 }
 
-export default function Trending() {
+function TrendingContent() {
   const { t, language } = useLanguage()
   const { user } = useAuth()
   usePageTitle(t('trending.title'))
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [posts, setPosts] = useState<Post[]>([])
   const [categories, setCategories] = useState<ContentCategory[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [selectedPostTitle, setSelectedPostTitle] = useState('')
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
@@ -41,6 +45,32 @@ export default function Trending() {
     likesCount: number;
     isLiked: boolean;
   }>>(new Map())
+  
+  // 使用分页数据获取
+  const {
+    data: posts,
+    loading: isLoading,
+    error,
+    hasMore,
+    loadNextPage: loadMore,
+    reset
+  } = usePaginatedData({
+    onFetchPage: async (page, limit) => {
+       const result = await socialService.getTrendingPostsPaginated(
+         page, 
+         limit, 
+         selectedCategory === 'all' ? undefined : selectedCategory,
+         searchTerm || undefined
+       )
+       return result.posts
+     }
+  })
+  
+  // 无限滚动设置
+  const { targetRef: loadMoreRef } = useInfiniteScroll({
+    onLoadMore: loadMore,
+    enabled: hasMore && !isLoading
+  })
 
   // 根据当前语言获取分类名称
   const getCategoryName = (category: ContentCategory): string => {
@@ -71,33 +101,15 @@ export default function Trending() {
     }
   }
 
-  useEffect(() => {
-    loadTrendingPosts();
-    loadCategories();
-  }, []);
-
-  // 语言变化时重新加载分类
+  // 组件挂载和语言变化时加载分类（合并到一个useEffect中避免重复调用）
   useEffect(() => {
     loadCategories();
-  }, [language]);
-
-  const loadTrendingPosts = async () => {
-    setIsLoading(true)
-    try {
-      const data = await socialService.getTrendingPosts()
-      setPosts(data)
-      
-      // 批量获取帖子状态
-      if (data.length > 0) {
-        await loadPostsStatus(data)
-      }
-    } catch (error) {
-      console.error('Error loading trending posts:', error)
-      setPosts([])
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [language]); // 只依赖language，组件挂载时language已经有初始值
+  
+  // 当筛选条件改变时重置数据
+  useEffect(() => {
+    reset();
+  }, [selectedCategory, searchTerm]); // 移除reset依赖，避免无限循环
 
   const loadPostsStatus = async (postsData: Post[]) => {
     if (!user) return
@@ -156,7 +168,7 @@ export default function Trending() {
       }
       
       // 重新加载帖子数据以更新点赞状态
-      await loadTrendingPosts()
+      reset()
     } catch (error) {
       console.error('点赞失败:', error)
     }
@@ -179,12 +191,8 @@ export default function Trending() {
     }))
   ]
 
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || (post.category && post.category === selectedCategory);
-    return matchesSearch && matchesCategory;
-  });
+  // 筛选现在在API层面处理，直接使用posts数据
+  const filteredPosts = posts;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 relative overflow-hidden">
@@ -259,7 +267,7 @@ export default function Trending() {
             <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
               {categoryOptions.map((category, index) => (
                 <button
-                  key={category.id}
+                  key={`category-${category.id}-${index}`}
                   onClick={() => setSelectedCategory(category.id)}
                   className={cn(
                     'group relative px-3 md:px-6 py-2 md:py-3 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 text-sm md:text-base',
@@ -322,7 +330,7 @@ export default function Trending() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
               {filteredPosts.map((post, index) => (
                 <div 
-                  key={post.id} 
+                  key={`post-${post.id}-${index}`} 
                   className="transform hover:scale-105 transition-all duration-300"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
@@ -338,6 +346,41 @@ export default function Trending() {
                 </div>
               ))}
             </div>
+            
+            {/* 加载更多区域 */}
+            {hasMore && (
+              <div ref={loadMoreRef} className="flex flex-col items-center py-8">
+                {isLoading ? (
+                  <LoadingIndicator 
+                    size="lg" 
+                    color="blue" 
+                    text="加载更多帖子..." 
+                    className="py-4"
+                  />
+                ) : (
+                  <button
+                    onClick={loadMore}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl font-medium hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  >
+                    加载更多
+                  </button>
+                )}
+              </div>
+            )}
+            
+            {/* 错误处理 */}
+            {error && (
+              <div className="py-8">
+                <ErrorMessage
+                  title="加载失败"
+                  message="获取帖子数据时出现错误，请稍后重试。"
+                  error={error}
+                  onRetry={reset}
+                  variant="compact"
+                  className="max-w-md mx-auto"
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -352,5 +395,19 @@ export default function Trending() {
         />
       )}
     </div>
+  );
+}
+
+// 用ErrorBoundary包装的默认导出
+export default function Trending() {
+  return (
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        console.error('Trending page error:', error, errorInfo);
+        toast.error('页面加载出现问题，请刷新重试');
+      }}
+    >
+      <TrendingContent />
+    </ErrorBoundary>
   );
 }

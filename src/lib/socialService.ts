@@ -795,7 +795,7 @@ class SocialService {
     );
   }
 
-  // 获取热门帖子
+  // 获取热门帖子（保持向后兼容）
   async getTrendingPosts(limit: number = 20): Promise<Post[]> {
     try {
       const url = `/api/posts?limit=${limit}&sort=trending`;
@@ -839,6 +839,92 @@ class SocialService {
       // 返回空数组而不是抛出错误，保持与其他方法一致
       return [];
     }
+  }
+
+  // 获取热门帖子（支持分页）
+  async getTrendingPostsPaginated(
+    page: number = 1, 
+    limit: number = 20, 
+    category?: string, 
+    search?: string
+  ): Promise<{ posts: Post[]; total: number; hasMore: boolean }> {
+    const cacheKey = `trending_posts_paginated_${page}_${limit}_${category || 'all'}_${search || 'none'}`;
+    
+    return apiCache.cached(
+      'trending_posts_paginated',
+      async () => {
+        try {
+          const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+            sort: 'trending'
+          });
+          
+          if (category) {
+            params.append('category', category);
+          }
+          
+          if (search) {
+            params.append('search', search);
+          }
+          
+          const url = `/api/posts?${params}`;
+          console.log('getTrendingPostsPaginated: 请求URL:', url);
+          
+          const response = await fetch(url);
+          console.log('getTrendingPostsPaginated: 响应状态:', response.status, response.statusText);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          console.log('getTrendingPostsPaginated: 原始响应数据:', data);
+          
+          // 处理不同的API返回格式
+          let posts: Post[] = [];
+          let total = 0;
+          
+          if (data.success && data.data) {
+            // 新格式：{success: true, data: {posts: [...], pagination: {total_count: number}}}
+            posts = data.data.posts || [];
+            total = data.data.pagination?.total_count || data.data.total || 0;
+          } else if (data.posts) {
+            // 兼容格式：{posts: [...], total: number}
+            posts = data.posts;
+            total = data.total || 0;
+          } else if (Array.isArray(data)) {
+            // 直接数组格式
+            posts = data;
+            total = data.length;
+          }
+          
+          if (!Array.isArray(posts)) {
+            console.warn('getTrendingPostsPaginated: API returned non-array data, using empty array');
+            posts = [];
+          }
+          
+          const hasMore = page * limit < total;
+          
+          console.log('getTrendingPostsPaginated: 返回结果 - posts数量:', posts.length, 'total:', total, 'hasMore:', hasMore);
+          
+          return {
+            posts,
+            total,
+            hasMore
+          };
+        } catch (error) {
+          console.error('Error fetching trending posts paginated:', error);
+          return {
+            posts: [],
+            total: 0,
+            hasMore: false
+          };
+        }
+      },
+      { cacheKey },
+      2 * 60 * 1000 // 2分钟缓存
+    );
   }
 
   // 获取用户的帖子

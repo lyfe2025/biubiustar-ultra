@@ -38,8 +38,13 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   // 初始化语言设置：按优先级处理语言选择
   useEffect(() => {
+    if (isInitialized) {
+      console.log('[LanguageProvider] 已初始化，跳过重复初始化')
+      return
+    }
+    
     const initializeLanguage = async () => {
-      console.log('[LanguageProvider] 开始初始化语言设置')
+      console.log('[LanguageProvider] 开始初始化语言设置，当前language:', language)
       
       // 检查用户是否已手动设置过语言（通过userLanguageChoice标记区分）
       const savedLanguage = localStorage.getItem('language')
@@ -50,7 +55,9 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       if (savedLanguage && ['zh', 'zh-TW', 'en', 'vi'].includes(savedLanguage) && isUserChoice) {
         // 用户已手动设置，优先级最高
         console.log('[LanguageProvider] 用户已手动设置语言，使用:', savedLanguage)
-        setLanguage(savedLanguage as Language)
+        if (savedLanguage !== language) {
+          setLanguage(savedLanguage as Language)
+        }
         setIsInitialized(true)
         return
       }
@@ -91,8 +98,12 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
           }
           
           console.log('[LanguageProvider] 转换后的语言代码:', normalizedLanguage, '当前语言:', language)
-          console.log('[LanguageProvider] 应用系统默认语言:', normalizedLanguage)
-          setLanguage(normalizedLanguage)
+          if (normalizedLanguage !== language) {
+            console.log('[LanguageProvider] 应用系统默认语言:', normalizedLanguage)
+            setLanguage(normalizedLanguage)
+          } else {
+            console.log('[LanguageProvider] 语言未变化，跳过设置')
+          }
         } else {
           console.log('[LanguageProvider] 系统设置中未找到默认语言，保持当前语言:', language)
         }
@@ -106,7 +117,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     }
     
     initializeLanguage()
-  }, [])
+  }, [isInitialized])
   
   // 保存语言设置到localStorage（仅在初始化完成后）
   useEffect(() => {
