@@ -3,11 +3,23 @@ import { supabaseAdmin, verifyAuthToken } from '../../lib/supabase.js';
 import { sendResponse, sendValidationError, sendNotFoundError, sendUnauthorizedError } from '../../utils/response.js';
 import { validatePostStatus } from '../../utils/validation.js';
 import { asyncHandler } from '../../middleware/asyncHandler.js';
+import { createCacheMiddleware, createUserSpecificCacheMiddleware } from '../../middleware/cache';
+import { contentCache } from '../../lib/cacheInstances';
+import { invalidatePostCache, invalidateContentCache } from '../../services/cacheInvalidation';
+import { CACHE_TTL } from '../../config/cache';
 
 const router = Router();
 
 // Get all posts with pagination and filtering
-router.get('/', asyncHandler(async (req: Request, res: Response) => {
+router.get('/', 
+  createCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: (req) => {
+      const { page = 1, limit = 10, category, status, author } = req.query;
+      return `posts:list:${page}:${limit}:${category || 'all'}:${status || 'all'}:${author || 'all'}`;
+    }
+  }),
+  asyncHandler(async (req: Request, res: Response) => {
   try {
     const { 
       page = '1', 
@@ -132,7 +144,12 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
 }));
 
 // Get single post by ID
-router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
+router.get('/:id', 
+  createCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: (req) => `post:${req.params.id}`
+  }),
+  asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     console.log(`🔍 [POST_DETAIL] 请求帖子详情 ID: ${id}`);
@@ -355,6 +372,10 @@ router.post('/', asyncHandler(async (req: Request, res: Response) => {
       .eq('id', post.id)
       .single();
 
+    // 清除相关缓存
+    await invalidatePostCache(post.id);
+    await invalidateContentCache();
+
     sendResponse(res, true, { post: completePost || post }, '帖子创建成功', 201);
 
   } catch (error) {
@@ -421,6 +442,10 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response) => {
       return;
     }
 
+    // 清除相关缓存
+    await invalidatePostCache(id);
+    await invalidateContentCache();
+
     sendResponse(res, true, { post }, '帖子更新成功');
 
   } catch (error) {
@@ -467,6 +492,10 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
       sendResponse(res, false, null, '删除帖子失败', 500);
       return;
     }
+
+    // 清除相关缓存
+    await invalidatePostCache(id);
+    await invalidateContentCache();
 
     sendResponse(res, true, null, '帖子删除成功');
 
@@ -525,6 +554,10 @@ router.put('/:id/status', asyncHandler(async (req: Request, res: Response) => {
       sendResponse(res, false, null, '更新帖子状态失败', 500);
       return;
     }
+
+    // 清除相关缓存
+    await invalidatePostCache(id);
+    await invalidateContentCache();
 
     sendResponse(res, true, { post }, '帖子状态更新成功');
 

@@ -31,7 +31,8 @@ const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'))
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts'))
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
 const AdminSecurity = lazy(() => import('./pages/admin/AdminSecurity'))
-const AdminPerformance = lazy(() => import('./pages/admin/AdminPerformance'))
+const AdminSystemPerformance = lazy(() => import('./pages/admin/AdminSystemPerformance'))
+const AdminCachePerformance = lazy(() => import('./pages/admin/AdminCachePerformance'))
 const AdminLogs = lazy(() => import('./pages/admin/AdminLogs'))
 const TestCategories = lazy(() => import('./pages/TestCategories'))
 const DebugLanguage = lazy(() => import('./pages/DebugLanguage'))
@@ -120,7 +121,8 @@ function AppContent() {
                   <Route path="/admin/contacts" element={<AdminAuthGuard><AdminContacts /></AdminAuthGuard>} />
                   <Route path="/admin/settings" element={<AdminAuthGuard><AdminSettings /></AdminAuthGuard>} />
                   <Route path="/admin/security" element={<AdminAuthGuard><AdminSecurity /></AdminAuthGuard>} />
-                  <Route path="/admin/performance" element={<AdminAuthGuard><AdminPerformance /></AdminAuthGuard>} />
+                  <Route path="/admin/system-performance" element={<AdminAuthGuard><AdminSystemPerformance /></AdminAuthGuard>} />
+                  <Route path="/admin/cache-performance" element={<AdminAuthGuard><AdminCachePerformance /></AdminAuthGuard>} />
                   <Route path="/admin/logs" element={<AdminAuthGuard><AdminLogs /></AdminAuthGuard>} />
             </Routes>
           </Suspense>

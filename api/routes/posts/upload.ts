@@ -7,6 +7,10 @@ import { authenticateToken } from '../../middleware/auth.js'
 import { UploadSecurity, DEFAULT_UPLOAD_CONFIGS } from '../../utils/uploadSecurity.js'
 import { VideoThumbnailGenerator } from '../../utils/videoThumbnail.js'
 import asyncHandler from '../../middleware/asyncHandler.js'
+import { createCacheMiddleware } from '../../middleware/cache'
+import { contentCache } from '../../lib/cacheInstances'
+import { invalidateContentCache } from '../../services/cacheInvalidation'
+import { CACHE_TTL } from '../../config/cache'
 
 const router = Router()
 
@@ -136,6 +140,9 @@ router.post('/media', authenticateToken, upload.array('files', 9), asyncHandler(
       return sendResponse(res, false, null, '所有文件上传失败', 400)
     }
     
+    // 清除内容缓存，因为新的媒体文件可能影响帖子内容
+    await invalidateContentCache();
+
     sendResponse(res, true, {
       files: uploadedFiles,
       count: uploadedFiles.length
@@ -178,6 +185,10 @@ router.delete('/media', authenticateToken, asyncHandler(async (req: Request, res
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath)
       console.log(`[UPLOAD_SECURITY] 文件删除成功: ${sanitizedFilename}, 用户: ${(req as any).user?.id}`)
+      
+      // 清除内容缓存，因为媒体文件删除可能影响帖子内容
+      await invalidateContentCache();
+      
       sendResponse(res, true, null, '文件删除成功')
     } else {
       sendResponse(res, false, null, '文件不存在', 404)
@@ -185,7 +196,12 @@ router.delete('/media', authenticateToken, asyncHandler(async (req: Request, res
 }))
 
 // 获取帖子媒体文件列表
-router.get('/media', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/media', 
+  createCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: (req) => `post:${req.params.id}:media`
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'posts')
     
     if (!fs.existsSync(uploadsDir)) {

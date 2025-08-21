@@ -15,6 +15,11 @@ import contactRoutes from './routes/contact.js';
 import settingsRoutes from './routes/settings.js';
 import avatarRoutes from './routes/avatar.js';
 import batchRoutes from './routes/batch.js';
+import healthRoutes from './routes/health.js';
+import cacheDebugRoutes from './routes/cache-debug.js';
+import cacheTestRoutes from './routes/cache-test.js';
+import cacheManagementRoutes from './routes/cache-management.js';
+import { createCacheMonitorMiddleware } from './middleware/cacheMonitor.js';
 
 // 条件导入morgan日志中间件
 let morgan: any = null;
@@ -62,6 +67,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// 5. 缓存监控中间件
+app.use(createCacheMonitorMiddleware());
+
 // 5. 内存监控中间件（仅开发环境）
 if (process.env.NODE_ENV === 'development') {
   // 每5分钟输出一次内存使用情况
@@ -76,10 +84,17 @@ if (process.env.NODE_ENV === 'development') {
   }, 5 * 60 * 1000);
 }
 
-// 健康检查端点
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// Health check routes
+app.use('/api/health', healthRoutes);
+
+// 缓存调试路由（仅开发环境）
+if (process.env.NODE_ENV === 'development') {
+  app.use('/api/cache-debug', cacheDebugRoutes);
+  app.use('/api/cache-test', cacheTestRoutes);
+}
+
+// 缓存管理API路由
+app.use('/api/cache-management', cacheManagementRoutes);
 
 // ===== ROUTE MODULES =====
 // Use separated route modules

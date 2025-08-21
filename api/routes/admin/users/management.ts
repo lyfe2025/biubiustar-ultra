@@ -3,6 +3,7 @@ import { supabaseAdmin } from '../../../lib/supabase'
 import { clearAuthUsersCache } from './cache'
 import { requireAdmin } from '../auth'
 import asyncHandler from '../../../middleware/asyncHandler.js'
+import { CacheInvalidationService } from '../../../services/cacheInvalidation'
 
 const router = Router()
 
@@ -38,6 +39,9 @@ router.patch('/:id/status', asyncHandler(async (req: Request, res: Response): Pr
 
     // 清除缓存
     clearAuthUsersCache()
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidateUserCache(id)
+    await invalidationService.invalidateContentCache()
 
     res.json({ message: '用户状态更新成功', user: data })
   } catch (error) {
@@ -75,6 +79,9 @@ router.patch('/:id/role', asyncHandler(async (req: Request, res: Response): Prom
 
     // 清除缓存
     clearAuthUsersCache()
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidateUserCache(id)
+    await invalidationService.invalidateContentCache()
 
     res.json({ message: '用户角色更新成功', user: data })
   } catch (error) {
@@ -110,6 +117,9 @@ router.patch('/:id/password', asyncHandler(async (req: Request, res: Response): 
 
     // 清除缓存
     clearAuthUsersCache()
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidateUserCache(id)
+    await invalidationService.invalidateContentCache()
 
     res.json({ message: '用户密码更新成功' })
   } catch (error) {
@@ -145,6 +155,12 @@ router.patch('/batch/status', asyncHandler(async (req: Request, res: Response): 
 
     // 清除缓存
     clearAuthUsersCache()
+    const invalidationService = new CacheInvalidationService()
+    // 批量操作时清除所有用户缓存
+    for (const userId of userIds) {
+      await invalidationService.invalidateUserCache(userId)
+    }
+    await invalidationService.invalidateContentCache()
 
     res.json({ 
       message: `成功更新${data?.length || 0}个用户的状态`, 
@@ -181,6 +197,9 @@ router.post('/:id/reset-password', asyncHandler(async (req: Request, res: Respon
 
     // 清除缓存
     clearAuthUsersCache()
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidateUserCache(id)
+    await invalidationService.invalidateContentCache()
 
     res.json({ 
       message: '用户密码重置成功', 
@@ -223,6 +242,9 @@ router.patch('/:id/lock', asyncHandler(async (req: Request, res: Response): Prom
 
     // 清除缓存
     clearAuthUsersCache()
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidateUserCache(id)
+    await invalidationService.invalidateContentCache()
 
     res.json({ 
       message: locked ? '用户账户已锁定' : '用户账户已解锁', 

@@ -14,7 +14,9 @@ import {
   CheckCircle,
   Clock,
   Activity,
-  Shield
+  Shield,
+  BarChart3,
+  Database
 } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
 import { useLanguage } from '../../contexts/language'
@@ -369,11 +371,18 @@ const AdminDashboard = () => {
       color: 'bg-green-500'
     },
     {
-      title: t('admin.performance.title') || '性能监控',
+      title: t('admin.performance.title') || '系统性能监控',
       description: t('admin.performance.description') || '查看系统性能指标和监控数据',
-      icon: Activity,
-      link: '/admin/performance',
+      icon: BarChart3,
+      link: '/admin/system-performance',
       color: 'bg-indigo-500'
+    },
+    {
+      title: t('admin.cache.title') || '缓存性能监控',
+      description: t('admin.cache.description') || '查看缓存性能和健康状态',
+      icon: Database,
+      link: '/admin/cache-performance',
+      color: 'bg-cyan-500'
     },
     {
       title: t('admin.dashboard.securityManagement'),

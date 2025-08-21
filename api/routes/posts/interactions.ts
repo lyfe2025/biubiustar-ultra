@@ -2,6 +2,10 @@ import { Router, Request, Response } from 'express';
 import { supabaseAdmin, verifyAuthToken } from '../../lib/supabase.js';
 import { sendResponse, sendValidationError, sendNotFoundError } from '../../utils/response.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
+import { createCacheMiddleware, createUserSpecificCacheMiddleware } from '../../middleware/cache';
+import { contentCache } from '../../lib/cacheInstances';
+import { invalidatePostCache } from '../../services/cacheInvalidation';
+import { CACHE_TTL } from '../../config/cache';
 
 const router = Router();
 
@@ -72,6 +76,9 @@ router.post('/:id/like', asyncHandler(async (req: Request, res: Response) => {
       return;
     }
 
+    // 清除相关缓存
+    await invalidatePostCache(id);
+
     sendResponse(res, true, null, '点赞成功');
 
   } catch (error) {
@@ -108,6 +115,9 @@ router.delete('/:id/like', asyncHandler(async (req: Request, res: Response) => {
       return;
     }
 
+    // 清除相关缓存
+    await invalidatePostCache(id);
+
     sendResponse(res, true, null, '取消点赞成功');
 
   } catch (error) {
@@ -117,7 +127,12 @@ router.delete('/:id/like', asyncHandler(async (req: Request, res: Response) => {
 }));
 
 // Get post likes count
-router.get('/:id/likes/count', asyncHandler(async (req: Request, res: Response) => {
+router.get('/:id/likes/count', 
+  createCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: (req) => `post:${req.params.id}:likes:count`
+  }),
+  asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -141,7 +156,12 @@ router.get('/:id/likes/count', asyncHandler(async (req: Request, res: Response) 
 }));
 
 // Check if user liked a post
-router.get('/:id/likes/:userId', asyncHandler(async (req: Request, res: Response) => {
+router.get('/:id/likes/:userId', 
+  createUserSpecificCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: (req) => `post:${req.params.id}:likes:${req.params.userId}`
+  }),
+  asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id, userId } = req.params;
 

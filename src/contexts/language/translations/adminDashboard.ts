@@ -69,7 +69,7 @@ export const adminDashboardTranslations = {
   'zh-TW': {
     admin: {
       dashboard: {
-        title: '儀表板',
+        title: '仪表板',
         welcome: '歡迎',
         totalUsers: '總用戶數',
         newToday: '今日新增',

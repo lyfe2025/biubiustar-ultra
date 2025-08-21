@@ -1,4 +1,5 @@
-import { supabaseAdmin } from '../lib/supabase.js'
+import { supabaseAdmin } from '../lib/supabase.js';
+import { statsCache } from '../lib/cacheInstances.js';
 
 // 统计数据接口定义
 export interface StatsData {
@@ -27,48 +28,67 @@ export interface StatsData {
   }
 }
 
-interface StatsCache {
-  data: StatsData
-  timestamp: number
-  ttl: number // 缓存有效期（毫秒）
-}
-
-let statsCache: StatsCache | null = null
-const CACHE_TTL = 5 * 60 * 1000 // 5分钟缓存
+// 缓存键常量
+const STATS_CACHE_KEY = 'system:stats:all';
+const CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
 
 /**
  * 获取缓存的统计数据
  */
 export const getCachedStats = async (): Promise<StatsData> => {
-  const now = Date.now()
-  
-  // 检查缓存是否有效
-  if (statsCache && (now - statsCache.timestamp) < statsCache.ttl) {
-    console.log('使用缓存的统计数据')
-    return statsCache.data
+  try {
+    // 尝试从增强版缓存获取数据
+    const cachedData = await statsCache.get<StatsData>(STATS_CACHE_KEY);
+    
+    if (cachedData) {
+      console.log('使用缓存的统计数据');
+      return cachedData;
+    }
+    
+    // 缓存未命中，重新获取数据
+    console.log('缓存失效，重新获取统计数据...');
+    const statsData = await fetchStatsFromDatabase();
+    
+    // 存储到增强版缓存
+    statsCache.set(STATS_CACHE_KEY, statsData, CACHE_TTL);
+    
+    console.log(`统计数据已缓存，缓存有效期${CACHE_TTL/1000}秒`);
+    return statsData;
+  } catch (error) {
+    console.error('获取缓存统计数据失败:', error);
+    // 缓存失败时直接从数据库获取
+    return await fetchStatsFromDatabase();
   }
-  
-  // 缓存无效或不存在，重新获取
-  console.log('缓存失效，重新获取统计数据...')
-  const statsData = await fetchStatsFromDatabase()
-  
-  // 更新缓存
-  statsCache = {
-    data: statsData,
-    timestamp: now,
-    ttl: CACHE_TTL
-  }
-  
-  console.log(`统计数据已缓存，缓存有效期${CACHE_TTL/1000}秒`)
-  return statsData
 }
 
 /**
  * 清除统计数据缓存
  */
 export const clearStatsCache = () => {
-  statsCache = null
-  console.log('统计数据缓存已清除')
+  try {
+    statsCache.delete(STATS_CACHE_KEY);
+    console.log('统计数据缓存已清除');
+  } catch (error) {
+    console.error('清除统计数据缓存失败:', error);
+  }
+}
+
+/**
+ * 获取统计缓存状态
+ */
+export const getStatsCacheInfo = () => {
+  try {
+    const stats = statsCache.getStats();
+    return {
+      hasCache: statsCache.get(STATS_CACHE_KEY) !== null,
+      cacheStats: stats,
+      cacheKey: STATS_CACHE_KEY,
+      ttl: CACHE_TTL
+    };
+  } catch (error) {
+    console.error('获取统计缓存信息失败:', error);
+    return null;
+  }
 }
 
 /**
@@ -157,11 +177,11 @@ async function getPostStats() {
       .from('posts')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'pending'),
-    // 获取总浏览量（使用聚合函数）
+    // 获取所有帖子的浏览量数据
     supabaseAdmin
       .from('posts')
-      .select('views.sum()')
-      .single()
+      .select('views')
+      .not('views', 'is', null)
   ])
   
   if (totalPostsResult.error) {
@@ -180,10 +200,19 @@ async function getPostStats() {
     console.warn('浏览量统计失败，使用默认值0')
   }
   
+  // 在应用层计算总浏览量
+  let totalViews = 0
+  if (viewsResult.data && Array.isArray(viewsResult.data)) {
+    totalViews = viewsResult.data.reduce((sum, post) => {
+      const views = post.views || 0
+      return sum + (typeof views === 'number' ? views : 0)
+    }, 0)
+  }
+  
   return {
     totalPosts: totalPostsResult.count || 0,
     pendingPosts: pendingPostsResult.count || 0,
-    totalViews: viewsResult.data?.sum || 0
+    totalViews
   }
 }
 

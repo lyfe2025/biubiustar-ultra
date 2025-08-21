@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../lib/supabase.js'
 import { requireAdmin } from './auth.js'
 import asyncHandler from '../../middleware/asyncHandler.js'
+import { CacheInvalidationService } from '../../services/cacheInvalidation'
 
 const router = Router()
 
@@ -148,6 +149,9 @@ router.put('/:id/status', asyncHandler(async (req: Request, res: Response): Prom
       console.error('更新活动状态失败:', error)
       return res.status(500).json({ error: '更新活动状态失败' })
     }
+
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidateContentCache()
 
     res.json({ success: true })
   } catch (error) {
@@ -335,6 +339,9 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
       participants_count: participantsCount || 0
     }
 
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidateContentCache()
+
     res.status(201).json(formattedActivity)
   } catch (error) {
     console.error('创建活动失败:', error)
@@ -442,6 +449,9 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
       updated_at: activity.updated_at
     }
 
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidateContentCache()
+
     res.json(formattedActivity)
   } catch (error) {
     console.error('更新活动失败:', error)
@@ -467,6 +477,9 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
       console.error('删除活动失败:', error)
       return res.status(500).json({ error: '删除活动失败' })
     }
+
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidateContentCache()
 
     res.json({ success: true })
   } catch (error) {

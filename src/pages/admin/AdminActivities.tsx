@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from "../../contexts/language"
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, RefreshCw, Activity } from 'lucide-react'
 import { toast } from 'sonner'
 import AdminLayout from '../../components/AdminLayout'
 import ActivityList from '../../components/admin/ActivityList'
@@ -60,6 +60,7 @@ const AdminActivities = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const loadActivities = async (page: number = pagination.page, limit: number = pagination.limit) => {
     try {
@@ -208,6 +209,20 @@ const AdminActivities = () => {
     loadCategories()
   }
 
+  // 刷新数据
+  const handleRefreshData = async () => {
+    setIsRefreshing(true)
+    try {
+      await loadActivities(pagination.page, pagination.limit)
+      await loadCategories()
+      toast.success(t('admin.activities.messages.refreshed') || '数据已刷新')
+    } catch (error) {
+      toast.error(t('admin.activities.messages.refreshFailed') || '刷新数据失败')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
 
   if (loading) {
     return (
@@ -222,11 +237,33 @@ const AdminActivities = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* 页面标题和标签页 */}
+        {/* 页面标题和操作 */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('admin.activities.title')}</h1>
-            <p className="text-gray-600">{t('admin.activities.description')}</p>
+            <p className="mt-1 text-sm text-gray-500">{t('admin.activities.description')}</p>
+          </div>
+          
+          <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+            {/* 刷新按钮 */}
+            <button
+              onClick={handleRefreshData}
+              disabled={isRefreshing || loading}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {t('admin.performance.refresh') || '刷新'}
+            </button>
+            
+            {activeTab === 'activities' && (
+              <button
+                onClick={() => setShowCreateActivityModal(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <Activity className="h-4 w-4 mr-2" />
+{t('admin.activities.create')}
+              </button>
+            )}
           </div>
         </div>
 
@@ -237,11 +274,12 @@ const AdminActivities = () => {
               onClick={() => setActiveTab('activities')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'activities'
-                  ? 'border-purple-500 text-purple-600'
+                  ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               <div className="flex items-center space-x-2">
+                <Activity className="w-4 h-4" />
                 <span>{t('admin.activities.tabs.activities')}</span>
               </div>
             </button>
@@ -249,7 +287,7 @@ const AdminActivities = () => {
               onClick={() => setActiveTab('categories')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'categories'
-                  ? 'border-purple-500 text-purple-600'
+                  ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -334,7 +372,7 @@ const AdminActivities = () => {
                           onClick={() => changePage(pageNum)}
                           className={`px-3 py-1 rounded border ${
                             pageNum === pagination.page
-                              ? 'bg-purple-600 text-white border-purple-600'
+                              ? 'bg-blue-600 text-white border-blue-600'
                               : 'border-gray-300 hover:bg-gray-50'
                           }`}
                         >

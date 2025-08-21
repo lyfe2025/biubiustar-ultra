@@ -9,6 +9,10 @@ import fs from 'fs';
 import { supabaseAdmin } from '../../lib/supabase.js';
 import { asyncHandler } from '../../middleware/asyncHandler';
 import { UploadSecurity, DEFAULT_UPLOAD_CONFIGS } from '../../utils/uploadSecurity';
+import { createUserSpecificCacheMiddleware } from '../../middleware/cache';
+import { userCache } from '../../lib/cacheInstances';
+import { invalidateUserCache } from '../../services/cacheInvalidation';
+import { CACHE_TTL } from '../../config/cache';
 
 const router = Router();
 
@@ -34,7 +38,12 @@ const upload = multer({
 });
 
 // GET /api/users/:id/profile - 获取用户资料
-router.get('/:id/profile', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/profile', 
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => `user:${req.params.id}:profile`
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   const { id } = req.params;
 
   // 获取用户基本信息
@@ -87,6 +96,9 @@ router.put('/:id/profile', asyncHandler(async (req: Request, res: Response): Pro
     res.status(500).json({ error: 'Failed to update user profile' });
     return;
   }
+
+  // 清除相关缓存
+  await invalidateUserCache(id);
 
   res.json(data);
 }));
@@ -175,6 +187,9 @@ router.post('/avatar', upload.single('avatar'), asyncHandler(async (req: Request
     }
 
     console.log(`头像上传成功: ${safeFileName}, 大小: ${file.size} bytes, URL: ${avatarUrl}`);
+
+    // 清除用户缓存
+    await invalidateUserCache(user.id);
 
     res.json({
       message: '头像上传成功',

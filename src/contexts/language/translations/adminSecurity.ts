@@ -4,10 +4,25 @@ export const adminSecurityTranslations = {
     admin: {
       security: {
         title: '安全管理',
+        description: '管理登录安全、IP黑名单和安全日志',
         overview: '安全概览',
         loginAttempts: '登录尝试',
         ipBlacklist: 'IP黑名单',
         securityLogs: '安全日志',
+        
+        // 标签页
+        tabs: {
+          stats: '安全概览',
+          attempts: '登录记录',
+          blacklist: 'IP黑名单',
+          logs: '安全日志'
+        },
+        
+        // 消息
+        messages: {
+          refreshed: '数据已刷新',
+          refreshFailed: '刷新数据失败'
+        },
         
         // 统计数据
         stats: {
@@ -19,6 +34,7 @@ export const adminSecurityTranslations = {
         
         // 登录尝试
         attempts: {
+          title: '登录尝试记录',
           ipAddress: 'IP地址',
           email: '邮箱',
           success: '成功',
@@ -31,6 +47,7 @@ export const adminSecurityTranslations = {
         
         // IP黑名单
         blacklist: {
+          title: 'IP黑名单',
           reason: '原因',
           blockedUntil: '阻止至',
           permanent: '永久',
@@ -51,6 +68,7 @@ export const adminSecurityTranslations = {
         
         // 安全日志
         logs: {
+          title: '安全日志',
           eventType: '事件类型',
           severity: '严重程度',
           userId: '用户ID',
@@ -82,10 +100,25 @@ export const adminSecurityTranslations = {
     admin: {
       security: {
         title: '安全管理',
+        description: '管理登錄安全、IP黑名單和安全日誌',
         overview: '安全概覽',
         loginAttempts: '登入嘗試',
         ipBlacklist: 'IP黑名單',
         securityLogs: '安全日誌',
+        
+        // 標籤頁
+        tabs: {
+          stats: '安全概覽',
+          attempts: '登錄記錄',
+          blacklist: 'IP黑名單',
+          logs: '安全日誌'
+        },
+        
+        // 消息
+        messages: {
+          refreshed: '數據已刷新',
+          refreshFailed: '刷新數據失敗'
+        },
         
         // 統計數據
         stats: {
@@ -97,6 +130,7 @@ export const adminSecurityTranslations = {
         
         // 登入嘗試
         attempts: {
+          title: '登入嘗試記錄',
           ipAddress: 'IP地址',
           email: '郵箱',
           success: '成功',
@@ -109,6 +143,7 @@ export const adminSecurityTranslations = {
         
         // IP黑名單
         blacklist: {
+          title: 'IP黑名單',
           reason: '原因',
           blockedUntil: '阻止至',
           permanent: '永久',
@@ -129,6 +164,7 @@ export const adminSecurityTranslations = {
         
         // 安全日誌
         logs: {
+          title: '安全日誌',
           eventType: '事件類型',
           severity: '嚴重程度',
           userId: '用戶ID',
@@ -160,10 +196,25 @@ export const adminSecurityTranslations = {
     admin: {
       security: {
         title: 'Security Management',
+        description: 'Manage login security, IP blacklist and security logs',
         overview: 'Security Overview',
         loginAttempts: 'Login Attempts',
         ipBlacklist: 'IP Blacklist',
         securityLogs: 'Security Logs',
+        
+        // Tabs
+        tabs: {
+          stats: 'Security Overview',
+          attempts: 'Login Records',
+          blacklist: 'IP Blacklist',
+          logs: 'Security Logs'
+        },
+        
+        // Messages
+        messages: {
+          refreshed: 'Data refreshed',
+          refreshFailed: 'Failed to refresh data'
+        },
         
         // Statistics
         stats: {
@@ -175,6 +226,7 @@ export const adminSecurityTranslations = {
         
         // Login attempts
         attempts: {
+          title: 'Login Attempt Records',
           ipAddress: 'IP Address',
           email: 'Email',
           success: 'Success',
@@ -187,6 +239,7 @@ export const adminSecurityTranslations = {
         
         // IP blacklist
         blacklist: {
+          title: 'IP Blacklist',
           reason: 'Reason',
           blockedUntil: 'Blocked Until',
           permanent: 'Permanent',
@@ -207,6 +260,7 @@ export const adminSecurityTranslations = {
         
         // Security logs
         logs: {
+          title: 'Security Logs',
           eventType: 'Event Type',
           severity: 'Severity',
           userId: 'User ID',
@@ -238,10 +292,25 @@ export const adminSecurityTranslations = {
     admin: {
       security: {
         title: 'Quản lý Bảo mật',
+        description: 'Quản lý bảo mật đăng nhập, danh sách IP đen và nhật ký bảo mật',
         overview: 'Tổng quan Bảo mật',
         loginAttempts: 'Lần thử Đăng nhập',
         ipBlacklist: 'Danh sách IP Đen',
         securityLogs: 'Nhật ký Bảo mật',
+        
+        // Tabs
+        tabs: {
+          stats: 'Tổng quan Bảo mật',
+          attempts: 'Bản ghi Đăng nhập',
+          blacklist: 'Danh sách IP Đen',
+          logs: 'Nhật ký Bảo mật'
+        },
+        
+        // Messages
+        messages: {
+          refreshed: 'Dữ liệu đã được làm mới',
+          refreshFailed: 'Không thể làm mới dữ liệu'
+        },
         
         // Thống kê
         stats: {
@@ -253,6 +322,7 @@ export const adminSecurityTranslations = {
         
         // Lần thử đăng nhập
         attempts: {
+          title: 'Bản ghi Lần thử Đăng nhập',
           ipAddress: 'Địa chỉ IP',
           email: 'Email',
           success: 'Thành công',
@@ -265,6 +335,7 @@ export const adminSecurityTranslations = {
         
         // Danh sách IP đen
         blacklist: {
+          title: 'Danh sách IP Đen',
           reason: 'Lý do',
           blockedUntil: 'Chặn đến',
           permanent: 'Vĩnh viễn',
@@ -285,6 +356,7 @@ export const adminSecurityTranslations = {
         
         // Nhật ký bảo mật
         logs: {
+          title: 'Nhật ký Bảo mật',
           eventType: 'Loại sự kiện',
           severity: 'Mức độ nghiêm trọng',
           userId: 'ID người dùng',

@@ -8,7 +8,6 @@ import {
   Download,
   RefreshCw,
   Trash2,
-  BarChart3,
   Zap,
   Globe
 } from 'lucide-react'
@@ -17,7 +16,7 @@ import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import { useLanguage } from '../../contexts/language'
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor'
 
-const AdminPerformance = () => {
+const AdminSystemPerformance = () => {
   const { t } = useLanguage()
   const {
     stats,
@@ -91,10 +90,10 @@ const AdminPerformance = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {t('admin.performance.title') || '性能监控'}
+              系统性能监控
             </h1>
             <p className="mt-1 text-sm text-gray-500">
-              {t('admin.performance.description') || '监控系统性能指标和请求统计'}
+              监控系统性能指标、请求统计和响应时间
             </p>
           </div>
           
@@ -393,4 +392,4 @@ const AdminPerformance = () => {
   )
 }
 
-export default AdminPerformance
+export default AdminSystemPerformance

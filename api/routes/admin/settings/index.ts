@@ -3,6 +3,7 @@ import coreRoutes from './core';
 import emailRoutes from './email';
 import publicRoutes from './public';
 import testRoutes from './test';
+import cacheRoutes from './cache';
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use('/', testRoutes);      // 测试功能（调试用）- 无认证
 router.use('/', coreRoutes);      // 系统设置核心功能 - 需要认证
 router.use('/', emailRoutes);     // 邮件测试功能
 router.use('/', publicRoutes);    // 公开设置获取功能
+router.use('/cache', cacheRoutes); // 缓存配置管理 - 需要认证
 
 export default router;

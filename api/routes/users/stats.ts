@@ -5,11 +5,19 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../../lib/supabase';
 import asyncHandler from '../../middleware/asyncHandler.js';
+import { createUserSpecificCacheMiddleware } from '../../middleware/cache';
+import { userCache } from '../../lib/cacheInstances';
+import { CACHE_TTL } from '../../config/cache';
 
 const router = Router();
 
 // GET /api/users/:id/stats - 获取用户统计数据
-router.get('/:id/stats', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/stats', 
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => `user:${req.params.id}:stats`
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 

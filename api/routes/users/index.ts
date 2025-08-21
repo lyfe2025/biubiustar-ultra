@@ -9,6 +9,10 @@ import statsRoutes from './stats';
 import postsRoutes from './posts';
 import socialRoutes from './social';
 import asyncHandler from '../../middleware/asyncHandler.js';
+import { createCacheMiddleware, createUserSpecificCacheMiddleware } from '../../middleware/cache';
+import { userCache } from '../../lib/cacheInstances';
+import { invalidateUserCache } from '../../services/cacheInvalidation';
+import { CACHE_TTL } from '../../config/cache';
 
 const router = Router();
 
@@ -65,6 +69,9 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
       return;
     }
 
+    // 清除相关缓存
+    await invalidateUserCache(id);
+
     res.json({ data });
   } catch (error) {
     console.error('Error in PUT /users/:id:', error);
@@ -73,7 +80,12 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
 }));
 
 // GET /api/users/:id - 获取单个用户信息
-router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id', 
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => `user:${req.params.id}`
+  }),
+  asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -132,6 +144,9 @@ router.put('/:id/status', asyncHandler(async (req: Request, res: Response): Prom
       return;
     }
 
+    // 清除相关缓存
+    await invalidateUserCache(id);
+
     res.json({ data });
   } catch (error) {
     console.error('Update user status error:', error);
@@ -169,6 +184,9 @@ router.put('/:id/role', asyncHandler(async (req: Request, res: Response): Promis
       return;
     }
 
+    // 清除相关缓存
+    await invalidateUserCache(id);
+
     res.json({ data });
   } catch (error) {
     console.error('Update user role error:', error);
@@ -193,6 +211,9 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
       return;
     }
 
+    // 清除相关缓存
+    await invalidateUserCache(id);
+
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Delete user error:', error);
@@ -201,7 +222,15 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
 }));
 
 // GET /api/users - 获取用户列表（管理员功能）
-router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/', 
+  createCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => {
+      const { page = 1, limit = 10, status, role, search } = req.query;
+      return `users:list:${page}:${limit}:${status || 'all'}:${role || 'all'}:${search || 'none'}`;
+    }
+  }),
+  asyncHandler(async (req, res) => {
   try {
     const { page = 1, limit = 20, status, role, search } = req.query;
     

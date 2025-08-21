@@ -20,7 +20,9 @@ import {
   X,
   Globe,
   ChevronDown,
-  Mail
+  Mail,
+  BarChart3,
+  Database
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -144,29 +146,31 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </div>
 
             {/* 中间：桌面端导航菜单 */}
-            <div className="hidden lg:flex items-center space-x-1">
-              {navigation.map((item) => {
-                const IconComponent = item.icon
-                const isActive = location.pathname === item.href
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={cn(
-                      "group flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 relative",
-                      isActive
-                        ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/25"
-                        : "text-gray-700 hover:bg-purple-50 hover:text-purple-700"
-                    )}
-                  >
-                    <IconComponent className={cn(
-                      "mr-2 h-4 w-4 transition-all duration-200",
-                      isActive ? "text-white" : "text-gray-400 group-hover:text-purple-500"
-                    )} />
-                    <span>{item.name}</span>
-                  </Link>
-                )
-              })}
+            <div className="hidden md:flex items-center flex-1 justify-center mx-4">
+              <div className="flex items-center space-x-1 overflow-x-auto max-w-full scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
+                {navigation.map((item) => {
+                  const IconComponent = item.icon
+                  const isActive = location.pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={cn(
+                        "group flex items-center px-2 lg:px-3 py-2 text-xs lg:text-sm font-medium rounded-lg transition-all duration-200 relative whitespace-nowrap flex-shrink-0",
+                        isActive
+                          ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/25"
+                          : "text-gray-700 hover:bg-purple-50 hover:text-purple-700"
+                      )}
+                    >
+                      <IconComponent className={cn(
+                        "mr-1 lg:mr-2 h-3 lg:h-4 w-3 lg:w-4 transition-all duration-200 flex-shrink-0",
+                        isActive ? "text-white" : "text-gray-400 group-hover:text-purple-500"
+                      )} />
+                      <span className="whitespace-nowrap">{item.name}</span>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
 
             {/* 右侧：管理员操作 */}
@@ -262,7 +266,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               {/* 移动端菜单按钮 */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                className="md:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -272,7 +276,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
         {/* 移动端下拉菜单 */}
         <div className={cn(
-          "lg:hidden border-t border-gray-200/50 bg-white/95 backdrop-blur-xl transition-all duration-300 ease-in-out overflow-hidden",
+          "md:hidden border-t border-gray-200/50 bg-white/95 backdrop-blur-xl transition-all duration-300 ease-in-out overflow-hidden",
           mobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         )}>
           <div className="px-4 py-4 space-y-2">

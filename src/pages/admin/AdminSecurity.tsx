@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useLanguage } from '../../contexts/language'
-import { Shield, AlertTriangle, Unlock, Ban, Eye } from 'lucide-react'
+import { Shield, AlertTriangle, Unlock, Ban, Eye, RefreshCw } from 'lucide-react'
 import { adminService } from '../../services/AdminService'
 import { toast } from 'sonner'
+import AdminLayout from '../../components/AdminLayout'
 
 interface LoginAttempt {
   id: string
@@ -49,9 +50,10 @@ interface PaginationInfo {
 }
 
 const AdminSecurity: React.FC = () => {
-  // const { t } = useLanguage()
+  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<'attempts' | 'blacklist' | 'logs' | 'stats'>('stats')
   const [loading, setLoading] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   
   // 统计数据
   const [stats, setStats] = useState<SecurityStats | null>(null)
@@ -95,6 +97,26 @@ const AdminSecurity: React.FC = () => {
     ip_address: '',
     reason: ''
   })
+
+  // 刷新数据
+  const handleRefreshData = async () => {
+    setIsRefreshing(true)
+    try {
+      await loadStats()
+      if (activeTab === 'attempts') {
+        await loadLoginAttempts(attemptsPagination.page)
+      } else if (activeTab === 'blacklist') {
+        await loadIPBlacklist(blacklistPagination.page)
+      } else if (activeTab === 'logs') {
+        await loadSecurityLogs(logsPagination.page)
+      }
+      toast.success(t('admin.security.messages.refreshed') || '数据已刷新')
+    } catch (error) {
+      toast.error(t('admin.security.messages.refreshFailed') || '刷新数据失败')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
 
   // 加载统计数据
   const loadStats = async () => {
@@ -264,95 +286,124 @@ const AdminSecurity: React.FC = () => {
   }, [logsFilter])
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">安全管理</h1>
-        <p className="text-gray-200">管理登录安全、IP黑名单和安全日志</p>
-      </div>
-
-      {/* 标签页导航 */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
-          {[
-            { key: 'stats', label: '安全概览', icon: Shield },
-            { key: 'attempts', label: '登录记录', icon: Eye },
-            { key: 'blacklist', label: 'IP黑名单', icon: Ban },
-            { key: 'logs', label: '安全日志', icon: AlertTriangle }
-          ].map(({ key, label, icon: Icon }) => (
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* 页面标题和操作 */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{t('admin.security.title') || '安全管理'}</h1>
+            <p className="mt-1 text-sm text-gray-500">{t('admin.security.description') || '管理登录安全、IP黑名单和安全日志'}</p>
+          </div>
+          
+          <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+            {/* 刷新按钮 */}
             <button
-              key={key}
-              onClick={() => setActiveTab(key as any)}
-              className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === key
-                  ? 'border-blue-400 text-blue-300'
-                  : 'border-transparent text-gray-300 hover:text-white hover:border-gray-400'
-              }`}
+              onClick={handleRefreshData}
+              disabled={isRefreshing || loading}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Icon className="w-4 h-4" />
-              <span>{label}</span>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {t('admin.performance.refresh') || '刷新'}
             </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* 安全概览 */}
-      {activeTab === 'stats' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Eye className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">总登录尝试</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.totalLoginAttempts || 0}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">24小时失败次数</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.failedAttempts24h || 0}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Ban className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">被阻止IP</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.blockedIPs || 0}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Shield className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">7天安全事件</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.securityEvents7d || 0}</p>
-              </div>
-            </div>
           </div>
         </div>
-      )}
 
-      {/* 登录尝试记录 */}
-      {activeTab === 'attempts' && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">登录尝试记录</h3>
+        {/* 标签页导航 */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            {[
+              { key: 'stats', label: t('admin.security.tabs.stats') || '安全概览', icon: Shield },
+              { key: 'attempts', label: t('admin.security.tabs.attempts') || '登录记录', icon: Eye },
+              { key: 'blacklist', label: t('admin.security.tabs.blacklist') || 'IP黑名单', icon: Ban },
+              { key: 'logs', label: t('admin.security.tabs.logs') || '安全日志', icon: AlertTriangle }
+            ].map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key as any)}
+                className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === key
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* 安全概览 */}
+        {activeTab === 'stats' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Eye className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">总登录尝试</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats?.totalLoginAttempts || 0}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-red-100 rounded-lg">
+                    <AlertTriangle className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">24小时失败次数</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats?.failedAttempts24h || 0}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <Ban className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">被阻止IP</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats?.blockedIPs || 0}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Shield className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">7天安全事件</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats?.securityEvents7d || 0}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 登录尝试记录 */}
+        {activeTab === 'attempts' && (
+          <div className="bg-white shadow overflow-hidden sm:rounded-md">
+            <div className="px-4 py-5 sm:px-6">
+              <div className="flex items-center">
+                <Eye className="h-5 w-5 text-blue-600 mr-2" />
+                <h3 className="text-lg leading-6 font-medium text-gray-900">{t('admin.security.attempts.title') || '登录尝试记录'}</h3>
+              </div>
+            </div>
+            <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
             
             {loading ? (
               <div className="text-center py-4">加载中...</div>
@@ -399,27 +450,32 @@ const AdminSecurity: React.FC = () => {
               </div>
             )}
             
-            <Pagination 
-              pagination={attemptsPagination} 
-              onPageChange={(page) => loadLoginAttempts(page)} 
-            />
-          </div>
-        </div>
-      )}
-
-      {/* IP黑名单 */}
-      {activeTab === 'blacklist' && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">IP黑名单</h3>
-              <button
-                onClick={() => setShowAddIPForm(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                添加IP
-              </button>
+              <Pagination 
+                pagination={attemptsPagination} 
+                onPageChange={(page) => loadLoginAttempts(page)} 
+              />
             </div>
+          </div>
+        )}
+
+        {/* IP黑名单 */}
+        {activeTab === 'blacklist' && (
+          <div className="bg-white shadow overflow-hidden sm:rounded-md">
+            <div className="px-4 py-5 sm:px-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Ban className="h-5 w-5 text-yellow-600 mr-2" />
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">{t('admin.security.blacklist.title') || 'IP黑名单'}</h3>
+                </div>
+                <button
+                  onClick={() => setShowAddIPForm(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+{t('admin.security.blacklist.addIP') || '添加IP'}
+                </button>
+              </div>
+            </div>
+            <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
             
             {/* 添加IP表单 */}
             {showAddIPForm && (
@@ -520,49 +576,54 @@ const AdminSecurity: React.FC = () => {
               </div>
             )}
             
-            <Pagination 
-              pagination={blacklistPagination} 
-              onPageChange={(page) => loadIPBlacklist(page)} 
-            />
+              <Pagination 
+                pagination={blacklistPagination} 
+                onPageChange={(page) => loadIPBlacklist(page)} 
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 安全日志 */}
-      {activeTab === 'logs' && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">安全日志</h3>
-              
-              {/* 过滤器 */}
-              <div className="flex space-x-2">
-                <select
-                  value={logsFilter.eventType}
-                  onChange={(e) => setLogsFilter({ ...logsFilter, eventType: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="">所有事件类型</option>
-                  <option value="admin_login_success">管理员登录成功</option>
-                  <option value="unauthorized_admin_access_attempt">未授权访问尝试</option>
-                  <option value="ip_auto_block">IP自动阻止</option>
-                  <option value="ip_manual_unlock">IP手动解锁</option>
-                  <option value="ip_manual_block">IP手动阻止</option>
-                  <option value="login_system_error">登录系统错误</option>
-                </select>
+        {/* 安全日志 */}
+        {activeTab === 'logs' && (
+          <div className="bg-white shadow overflow-hidden sm:rounded-md">
+            <div className="px-4 py-5 sm:px-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">{t('admin.security.logs.title') || '安全日志'}</h3>
+                </div>
                 
-                <select
-                  value={logsFilter.severity}
-                  onChange={(e) => setLogsFilter({ ...logsFilter, severity: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="">所有严重程度</option>
-                  <option value="info">信息</option>
-                  <option value="warning">警告</option>
-                  <option value="error">错误</option>
-                </select>
+                {/* 过滤器 */}
+                <div className="flex space-x-2">
+                  <select
+                    value={logsFilter.eventType}
+                    onChange={(e) => setLogsFilter({ ...logsFilter, eventType: e.target.value })}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">所有事件类型</option>
+                    <option value="admin_login_success">管理员登录成功</option>
+                    <option value="unauthorized_admin_access_attempt">未授权访问尝试</option>
+                    <option value="ip_auto_block">IP自动阻止</option>
+                    <option value="ip_manual_unlock">IP手动解锁</option>
+                    <option value="ip_manual_block">IP手动阻止</option>
+                    <option value="login_system_error">登录系统错误</option>
+                  </select>
+                  
+                  <select
+                    value={logsFilter.severity}
+                    onChange={(e) => setLogsFilter({ ...logsFilter, severity: e.target.value })}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">所有严重程度</option>
+                    <option value="info">信息</option>
+                    <option value="warning">警告</option>
+                    <option value="error">错误</option>
+                  </select>
+                </div>
               </div>
             </div>
+            <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
             
             {loading ? (
               <div className="text-center py-4">加载中...</div>
@@ -607,14 +668,15 @@ const AdminSecurity: React.FC = () => {
               </div>
             )}
             
-            <Pagination 
-              pagination={logsPagination} 
-              onPageChange={(page) => loadSecurityLogs(page)} 
-            />
+              <Pagination 
+                pagination={logsPagination} 
+                onPageChange={(page) => loadSecurityLogs(page)} 
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
+    </AdminLayout>
   )
 }
 

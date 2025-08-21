@@ -2,11 +2,23 @@ import { Router, Request, Response } from 'express';
 import { supabase, createUserClient, supabaseAdmin } from '../lib/supabase';
 import { authenticateToken } from '../middleware/auth';
 import asyncHandler from '../middleware/asyncHandler.js';
+import { createCacheMiddleware, createUserSpecificCacheMiddleware } from '../middleware/cache';
+import { contentCache } from '../lib/cacheInstances';
+import { CacheInvalidationService } from '../services/cacheInvalidation.js';
+import { CACHE_TTL } from '../config/cache';
 
 const router = Router();
 
 // GET /api/activities - 获取所有活动
-router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/', 
+  createCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: (req) => {
+      const { page = 1, limit = 10, category, status } = req.query;
+      return `activities:list:${page}:${limit}:${category || 'all'}:${status || 'all'}`;
+    }
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { 
       limit = 10, 
@@ -64,7 +76,12 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
 }));
 
 // GET /api/activities/upcoming - 获取即将到来的活动
-router.get('/upcoming', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/upcoming', 
+  createCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: () => 'activities:upcoming'
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { limit = 10 } = req.query;
     const now = new Date().toISOString();
@@ -103,7 +120,12 @@ router.get('/upcoming', asyncHandler(async (req: Request, res: Response): Promis
 }));
 
 // GET /api/activities/:id - 获取单个活动详情
-router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id', 
+  createCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: (req) => `activity:${req.params.id}`
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
 
@@ -142,7 +164,12 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
 }));
 
 // GET /api/activities/:id/participants - 获取活动参与者
-router.get('/:id/participants', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/participants', 
+  createCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: (req) => `activity:${req.params.id}:participants`
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { limit = 50, offset = 0 } = req.query;
@@ -214,7 +241,12 @@ router.get('/:id/participants', asyncHandler(async (req: Request, res: Response)
 }));
 
 // GET /api/activities/:id/participants/:userId - 检查用户是否参与了特定活动
-router.get('/:id/participants/:userId', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/participants/:userId', 
+  createUserSpecificCacheMiddleware({
+    cacheService: contentCache,
+    keyGenerator: (req) => `activity:${req.params.id}:participants:${req.params.userId}`
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id, userId } = req.params;
 
@@ -352,6 +384,10 @@ router.post('/', authenticateToken, asyncHandler(async (req: Request, res: Respo
       });
     }
 
+    // 清除活动相关缓存
+    const invalidationService = new CacheInvalidationService();
+    await invalidationService.invalidateContentCache();
+
     res.status(201).json(data);
   } catch (error) {
     console.error('Error in POST /activities:', error);
@@ -385,6 +421,10 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
       return res.status(500).json({ error: 'Failed to update activity' });
     }
 
+    // 清除活动相关缓存
+    const invalidationService = new CacheInvalidationService();
+    await invalidationService.invalidateContentCache();
+
     res.json(data);
   } catch (error) {
     console.error('Error in PUT /activities/:id:', error);
@@ -406,6 +446,10 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
       console.error('Error deleting activity:', error);
       return res.status(500).json({ error: 'Failed to delete activity' });
     }
+
+    // 清除活动相关缓存
+    const invalidationService = new CacheInvalidationService();
+    await invalidationService.invalidateContentCache();
 
     res.status(204).send();
   } catch (error) {
@@ -472,6 +516,10 @@ router.post('/:id/join', asyncHandler(async (req: Request, res: Response): Promi
       console.error('Error updating participant count:', updateError);
     }
 
+    // 清除活动相关缓存
+    const invalidationService = new CacheInvalidationService();
+    await invalidationService.invalidateContentCache();
+
     res.status(201).json({ message: 'Successfully joined activity' });
   } catch (error) {
     console.error('Error in POST /activities/:id/join:', error);
@@ -514,6 +562,10 @@ router.delete('/:id/leave', asyncHandler(async (req: Request, res: Response): Pr
         .update({ current_participants: activity.current_participants - 1 })
         .eq('id', id);
     }
+
+    // 清除活动相关缓存
+    const invalidationService = new CacheInvalidationService();
+    await invalidationService.invalidateContentCache();
 
     res.status(204).send();
   } catch (error) {

@@ -3,6 +3,7 @@ import { supabaseAdmin, supabase } from '../../lib/supabase'
 import { requireAdmin } from './auth'
 import asyncHandler from '../../middleware/asyncHandler.js'
 import { apiCache } from '../../utils/cache.js'
+import { CacheInvalidationService } from '../../services/cacheInvalidation'
 
 const router = Router()
 
@@ -230,6 +231,9 @@ router.put('/:id/status', asyncHandler(async (req: Request, res: Response): Prom
 
     // 清除相关缓存
     clearPostsCache()
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidatePostCache(id)
+    await invalidationService.invalidateContentCache()
 
     res.json({ success: true })
   } catch (error) {
@@ -260,6 +264,9 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
 
     // 清除相关缓存
     clearPostsCache()
+    const invalidationService = new CacheInvalidationService()
+    await invalidationService.invalidatePostCache(id)
+    await invalidationService.invalidateContentCache()
 
     res.json({ success: true })
   } catch (error) {

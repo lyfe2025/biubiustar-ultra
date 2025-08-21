@@ -135,7 +135,9 @@ export const adminActivitiesTranslations = {
           updateSuccess: '活动更新成功',
           updateFailed: '活动更新失败',
           deleteSuccess: '活动删除成功',
-          deleteFailed: '活动删除失败'
+          deleteFailed: '活动删除失败',
+          refreshed: '数据已刷新',
+          refreshFailed: '刷新数据失败'
         }
       }
     }
@@ -272,7 +274,9 @@ export const adminActivitiesTranslations = {
           updateSuccess: '活動更新成功',
           updateFailed: '活動更新失敗',
           deleteSuccess: '活動刪除成功',
-          deleteFailed: '活動刪除失敗'
+          deleteFailed: '活動刪除失敗',
+          refreshed: '數據已刷新',
+          refreshFailed: '刷新數據失敗'
         }
       }
     }
@@ -408,7 +412,9 @@ export const adminActivitiesTranslations = {
           updateSuccess: 'Activity updated successfully',
           updateFailed: 'Failed to update activity',
           deleteSuccess: 'Activity deleted successfully',
-          deleteFailed: 'Failed to delete activity'
+          deleteFailed: 'Failed to delete activity',
+          refreshed: 'Data refreshed',
+          refreshFailed: 'Failed to refresh data'
         }
       }
     }
@@ -544,7 +550,9 @@ export const adminActivitiesTranslations = {
           updateSuccess: 'Cập nhật hoạt động thành công',
           updateFailed: 'Cập nhật hoạt động thất bại',
           deleteSuccess: 'Xóa hoạt động thành công',
-          deleteFailed: 'Xóa hoạt động thất bại'
+          deleteFailed: 'Xóa hoạt động thất bại',
+          refreshed: 'Dữ liệu đã được làm mới',
+          refreshFailed: 'Không thể làm mới dữ liệu'
         }
       }
     }
