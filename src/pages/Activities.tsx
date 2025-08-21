@@ -228,15 +228,11 @@ const Activities: React.FC = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-
-
-
         {/* 筛选器 */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
           <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-4 md:p-8 mb-8 md:mb-12 transform hover:scale-[1.02] transition-all duration-500">
             {/* 分类筛选 */}
-            <div className="mb-6 md:mb-8">
+            <div className="mb-8">
               <div className="text-center mb-4 md:mb-6">
                 <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                   {t('activities.ui.filterByCategory')}
@@ -355,9 +351,6 @@ const Activities: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
-
-
     </div>
   );
 };

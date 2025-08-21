@@ -215,27 +215,37 @@ export default function Trending() {
         </div>
       </div>
 
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-purple-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
+      {/* 搜索和筛选区域 */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-4 md:p-8 mb-8 md:mb-12 transform hover:scale-[1.02] transition-all duration-500">
           {/* 搜索栏 */}
-          <div className="mb-6 md:mb-8">
+          <div className="mb-8">
             <div className="text-center mb-4 md:mb-6">
               <h3 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                 {t('trending.searchTitle')}
               </h3>
               <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto"></div>
             </div>
-            <div className="relative max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400 w-6 h-6" />
+            <div className="relative max-w-2xl mx-auto group">
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-all duration-300 group-focus-within:text-purple-600 group-hover:text-purple-500">
+                <Search className="text-purple-400 w-6 h-6 drop-shadow-sm" />
+              </div>
               <input
                 type="text"
                 placeholder={t('trending.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-6 py-4 border-2 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-lg placeholder-purple-300"
+                className="w-full pl-12 pr-6 py-4 border-2 border-purple-200/60 rounded-2xl 
+                          focus:ring-4 focus:ring-purple-500/25 focus:border-purple-500 focus:shadow-xl focus:shadow-purple-500/10
+                          hover:border-purple-300 hover:shadow-lg hover:shadow-purple-500/5
+                          transition-all duration-300 ease-in-out
+                          bg-white/90 backdrop-blur-md 
+                          text-lg placeholder-purple-300/80 
+                          transform hover:scale-[1.02] focus:scale-[1.02]
+                          outline-none"
               />
+              {/* 搜索框底部装饰线 */}
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full transition-all duration-300 group-focus-within:w-full group-hover:w-1/2"></div>
             </div>
           </div>
 
