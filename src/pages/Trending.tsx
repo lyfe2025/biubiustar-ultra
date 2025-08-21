@@ -244,8 +244,6 @@ export default function Trending() {
                           transform hover:scale-[1.02] focus:scale-[1.02]
                           outline-none"
               />
-              {/* 搜索框底部装饰线 */}
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full transition-all duration-300 group-focus-within:w-full group-hover:w-1/2"></div>
             </div>
           </div>
 
