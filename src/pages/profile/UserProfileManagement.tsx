@@ -92,6 +92,19 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
     )
   }
 
+  // 监听编辑状态变化，在移动端添加高亮效果
+  useEffect(() => {
+    if (isEditingProfile && window.innerWidth < 768) {
+      setIsHighlighted(true)
+      const timer = setTimeout(() => {
+        setIsHighlighted(false)
+      }, 2000) // 2秒后移除高亮
+      return () => clearTimeout(timer)
+    } else {
+      setIsHighlighted(false)
+    }
+  }, [isEditingProfile])
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -112,19 +125,6 @@ const UserProfileManagement: React.FC<UserProfileManagementProps> = ({
       </div>
     )
   }
-
-  // 监听编辑状态变化，在移动端添加高亮效果
-  useEffect(() => {
-    if (isEditingProfile && window.innerWidth < 768) {
-      setIsHighlighted(true)
-      const timer = setTimeout(() => {
-        setIsHighlighted(false)
-      }, 2000) // 2秒后移除高亮
-      return () => clearTimeout(timer)
-    } else {
-      setIsHighlighted(false)
-    }
-  }, [isEditingProfile])
 
   // 有个人资料时的管理界面
   return (

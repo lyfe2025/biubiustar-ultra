@@ -5,6 +5,8 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../lib/supabase';
 import asyncHandler from '../middleware/asyncHandler.js';
+import { invalidateUserCache } from '../services/cacheInvalidation.js';
+import { invalidateOnSocialChange } from '../utils/profileCacheInvalidation.js';
 
 const router = Router();
 
@@ -53,6 +55,10 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
       return;
     }
 
+    // 失效两个用户的统计缓存
+    await invalidateOnSocialChange(follower_id); // 关注者的 following_count
+    await invalidateOnSocialChange(following_id); // 被关注者的 followers_count
+
     res.status(201).json(data);
   } catch (error) {
     console.error('Error in POST /follows:', error);
@@ -65,6 +71,19 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
   try {
     const { id } = req.params;
 
+    // 先获取关注关系中的用户ID，用于缓存失效
+    const { data: followRelation, error: fetchError } = await supabase
+      .from('follows')
+      .select('follower_id, following_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching follow relationship:', fetchError);
+      res.status(500).json({ error: 'Failed to fetch follow relationship' });
+      return;
+    }
+
     const { error } = await supabase
       .from('follows')
       .delete()
@@ -74,6 +93,12 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
       console.error('Error deleting follow relationship:', error);
       res.status(500).json({ error: 'Failed to unfollow user' });
       return;
+    }
+
+    // 失效两个用户的统计缓存
+    if (followRelation) {
+      await invalidateOnSocialChange(followRelation.follower_id); // 关注者的 following_count
+      await invalidateOnSocialChange(followRelation.following_id); // 被关注者的 followers_count
     }
 
     res.status(204).send();
@@ -104,6 +129,10 @@ router.delete('/unfollow', asyncHandler(async (req: Request, res: Response): Pro
       res.status(500).json({ error: 'Failed to unfollow user' });
       return;
     }
+
+    // 失效两个用户的统计缓存
+    await invalidateOnSocialChange(follower_id); // 关注者的 following_count
+    await invalidateOnSocialChange(following_id); // 被关注者的 followers_count
 
     res.status(204).send();
   } catch (error) {

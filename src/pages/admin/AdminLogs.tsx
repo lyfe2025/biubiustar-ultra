@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/language';
-import { Activity, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Activity, Search, Filter, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { adminService } from '../../services/AdminService';
-// import { toast } from 'sonner';
-
+import { toast } from 'sonner';
+import AdminLayout from '../../components/AdminLayout';
 interface ActivityLog {
   id: string;
   user_id?: string;
@@ -26,36 +26,60 @@ interface PaginationInfo {
 const AdminLogs: React.FC = () => {
   const { t } = useLanguage();
   const [logs, setLogs] = useState<ActivityLog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAction, setFilterAction] = useState('');
   const [filterResourceType, setFilterResourceType] = useState('');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [pagination, setPagination] = useState<PaginationInfo>({
+  const [dateRange, setDateRange] = useState({
+    start: '',
+    end: ''
+  });
+  const [pagination, setPagination] = useState({
     page: 1,
-    totalPages: 1,
+    limit: 20,
     total: 0,
-    limit: 20
+    totalPages: 0
   });
 
-  const loadLogs = async (page = 1) => {
+  // 刷新数据
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
     try {
-      setLoading(true);
+      await loadLogs(pagination.page);
+      toast.success(t('admin.logs.messages.refreshed') || '数据已刷新');
+    } catch (error) {
+      toast.error(t('admin.logs.messages.refreshFailed') || '刷新数据失败');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // 加载活动日志
+  const loadLogs = async (page = 1) => {
+    setLoading(true);
+    try {
       const params = {
         page,
         limit: pagination.limit,
-        search: searchTerm,
-        action: filterAction,
-        type: filterResourceType,
-        start_date: dateRange.start,
-        end_date: dateRange.end
+        search: searchTerm || undefined,
+        action: filterAction || undefined,
+        resource_type: filterResourceType || undefined,
+        start_date: dateRange.start || undefined,
+        end_date: dateRange.end || undefined
       };
       
-      const response = await adminService.getActivityLogs(page, params.limit, params.search, params.type);
+      const response = await adminService.getActivityLogs(
+        params.page,
+        params.limit,
+        params.search || undefined,
+        params.action || undefined
+      );
       setLogs(response.data);
       setPagination(response.pagination);
     } catch (error) {
-      console.error('Failed to load logs:', error);
+      console.error('加载活动日志失败:', error);
+      toast.error('加载活动日志失败');
     } finally {
       setLoading(false);
     }
@@ -99,221 +123,203 @@ const AdminLogs: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <Activity className="w-6 h-6 text-white" />
-          <h1 className="text-2xl font-bold text-white">
-            {t('admin.logs.title')}
-          </h1>
-        </div>
-        <p className="text-gray-200">
-          {t('admin.logs.description')}
-        </p>
-      </div>
-
-      {/* 筛选器 */}
-      <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* 搜索 */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder={t('admin.logs.search.placeholder')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
+    <AdminLayout>
+      <div className="p-6">
+        {/* 页面标题和操作 */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Activity className="w-6 h-6 text-blue-600" />
+              <h1 className="text-2xl font-bold text-gray-900">
+                {t('admin.logs.title') || '活动日志'}
+              </h1>
+            </div>
+                          <p className="text-gray-600">
+                {t('admin.logs.description') || '查看系统中所有用户活动和操作记录'}
+              </p>
           </div>
-
-          {/* 操作类型筛选 */}
-          <select
-            value={filterAction}
-            onChange={(e) => setFilterAction(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          >
-            <option value="">{t('admin.logs.filter.allActions')}</option>
-            <option value="create">{t('admin.logs.actions.create')}</option>
-            <option value="update">{t('admin.logs.actions.update')}</option>
-            <option value="delete">{t('admin.logs.actions.delete')}</option>
-            <option value="login">{t('admin.logs.actions.login')}</option>
-          </select>
-
-          {/* 资源类型筛选 */}
-          <select
-            value={filterResourceType}
-            onChange={(e) => setFilterResourceType(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          >
-            <option value="">{t('admin.logs.filter.allResources')}</option>
-            <option value="user">{t('admin.logs.resources.user')}</option>
-            <option value="post">{t('admin.logs.resources.post')}</option>
-            <option value="comment">{t('admin.logs.resources.comment')}</option>
-            <option value="activity">{t('admin.logs.resources.activity')}</option>
-            <option value="category">{t('admin.logs.resources.category')}</option>
-            <option value="setting">{t('admin.logs.resources.setting')}</option>
-          </select>
-
-          {/* 清除筛选器 */}
           <button
-            onClick={clearFilters}
-            className="flex items-center justify-center gap-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+            onClick={handleRefreshData}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <Filter className="w-4 h-4" />
-            清除筛选
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? (t('common.actions.loading') || '刷新中...') : (t('common.actions.refresh') || '刷新')}
           </button>
         </div>
 
-        {/* 日期范围 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              开始时间
-            </label>
-            <input
-              type="datetime-local"
-              value={dateRange.start}
-              onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              结束时间
-            </label>
-            <input
-              type="datetime-local"
-              value={dateRange.end}
-              onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-        </div>
-      </div>
 
-      {/* 活动日志列表 */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">
-            活动日志列表
-          </h2>
-          <p className="text-sm text-gray-600 mt-1">
-            共 {pagination.total} 条记录
-          </p>
-        </div>
 
-        {loading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-            <p className="text-gray-600 mt-2">{t('admin.logs.loading')}</p>
+        {/* 活动日志列表 */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          {/* 表格头部 */}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-gray-600" />
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {t('admin.logs.title') || '活动日志'}
+                </h3>
+              </div>
+              <div className="text-sm text-gray-500">
+                共 {pagination.total} 条记录
+              </div>
+            </div>
+            
+            {/* 筛选器 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* 搜索 */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={t('admin.logs.search.placeholder') || '搜索活动...'}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+
+              {/* 操作类型 */}
+              <select
+                value={filterAction}
+                onChange={(e) => setFilterAction(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              >
+                <option value="">{t('admin.logs.filter.allActions') || '所有操作'}</option>
+                <option value="create">{t('admin.logs.actions.create') || '创建'}</option>
+                <option value="update">{t('admin.logs.actions.update') || '更新'}</option>
+                <option value="delete">{t('admin.logs.actions.delete') || '删除'}</option>
+                <option value="login">{t('admin.logs.actions.login') || '登录'}</option>
+                <option value="logout">{t('admin.logs.actions.logout') || '登出'}</option>
+              </select>
+
+              {/* 资源类型 */}
+              <select
+                value={filterResourceType}
+                onChange={(e) => setFilterResourceType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              >
+                <option value="">{t('admin.logs.filter.allResources') || '所有资源类型'}</option>
+                <option value="user">{t('admin.logs.resources.user') || '用户'}</option>
+                <option value="activity">{t('admin.logs.resources.activity') || '活动'}</option>
+                <option value="category">{t('admin.logs.resources.category') || '分类'}</option>
+                <option value="system">{t('admin.logs.resources.system') || '系统'}</option>
+              </select>
+
+              {/* 操作按钮 */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => loadLogs(1)}
+                  className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                >
+                  {t('admin.logs.filter.apply') || '应用'}
+                </button>
+                <button
+                  onClick={clearFilters}
+                  className="flex-1 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                >
+                  {t('admin.logs.filter.clear') || '清除'}
+                </button>
+              </div>
+            </div>
           </div>
-        ) : logs.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <Activity className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p>{t('admin.logs.noData')}</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('admin.logs.table.time')}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('admin.logs.table.user')}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('admin.logs.table.action')}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('admin.logs.table.resource')}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('admin.logs.table.details')}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('admin.logs.table.ip')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDate(log.created_at)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.user_email || log.user_id}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getActionColor(log.action)}`}>
-                        {log.action}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.type}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-900 max-w-xs truncate">
-                      {log.details ? JSON.stringify(log.details) : '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {log.ip_address || '-'}
-                    </td>
+
+          {loading ? (
+            <div className="p-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+              <p className="text-gray-600 mt-2">{t('admin.logs.loading')}</p>
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              <Activity className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <p>{t('admin.logs.noData')}</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('admin.logs.table.user') || '用户'}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('admin.logs.table.action') || '操作'}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('admin.logs.table.resource') || '资源类型'}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('admin.logs.table.details') || '详情'}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('admin.logs.table.time') || '时间'}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
+                </thead>
+                 <tbody className="bg-white divide-y divide-gray-200">
+                   {logs.map((log) => (
+                     <tr key={log.id} className="hover:bg-gray-50">
+                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                         {log.user_email || t('admin.logs.system') || 'System'}
+                       </td>
+                       <td className="px-6 py-4 whitespace-nowrap">
+                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                           getActionColor(log.action)
+                         }`}>
+                           {log.action}
+                         </span>
+                       </td>
+                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                         {log.type}
+                       </td>
+                       <td className="px-6 py-4 text-sm text-gray-900">
+                         {log.details || '-'}
+                       </td>
+                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                         {formatDate(log.created_at)}
+                       </td>
+                     </tr>
+                   ))}
+                 </tbody>
             </table>
           </div>
         )}
 
-        {/* 分页 */}
-        {pagination.totalPages > 1 && (
-          <div className="px-4 py-3 border-t bg-gray-50 flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              {t('admin.logs.pagination.showing')} {(pagination.page - 1) * pagination.limit + 1} {t('admin.logs.pagination.to')} {Math.min(pagination.page * pagination.limit, pagination.total)} {t('admin.logs.pagination.of')} {pagination.total} {t('admin.logs.pagination.entries')}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePageChange(pagination.page - 1)}
-                disabled={pagination.page === 1}
-                className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                  const page = i + 1;
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 text-sm rounded ${
-                        page === pagination.page
-                          ? 'bg-purple-600 text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
+          {/* 分页 */}
+          {pagination.totalPages > 1 && (
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-700">
+                  显示第 {(pagination.page - 1) * pagination.limit + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} 条，共 {pagination.total} 条记录
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => loadLogs(pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    上一页
+                  </button>
+                  <span className="px-3 py-2 text-sm font-medium text-gray-700">
+                    第 {pagination.page} 页，共 {pagination.totalPages} 页
+                  </span>
+                  <button
+                    onClick={() => loadLogs(pagination.page + 1)}
+                    disabled={pagination.page === pagination.totalPages}
+                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    下一页
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              
-              <button
-                onClick={() => handlePageChange(pagination.page + 1)}
-                disabled={pagination.page === pagination.totalPages}
-                className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
             </div>
-          </div>
-        )}
+          )}
       </div>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

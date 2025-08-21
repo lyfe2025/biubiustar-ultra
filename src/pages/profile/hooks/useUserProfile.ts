@@ -5,6 +5,8 @@ import { socialService } from '../../../lib/socialService'
 import { User } from '../../../lib/supabase'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ActivityService } from '../../../lib/activityService'
+import { userDataCache } from '../../../services/userDataCache'
+import { apiCache } from '../../../services/apiCache'
 import type { Post } from '../../admin/content/types'
 import type { Activity } from '../../../types'
 import type { UserProfile, UserStats, NotificationSettings, EditProfileForm, ProfileTab } from '../types'
@@ -42,15 +44,22 @@ export const useUserProfile = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
 
   // 加载用户数据
-  const loadUserData = useCallback(async () => {
+  const loadUserData = useCallback(async (forceRefresh = false) => {
     if (!user) return
     
     try {
       setIsLoading(true)
       
-      // 获取用户资料
-      const profile = await socialService.getUserProfile(user.id)
-      setUserProfile(profile)
+      // 使用全局缓存管理器加载数据，自动检查缓存有效性
+      const cachedData = forceRefresh 
+        ? await userDataCache.loadUserData(user.id, true)
+        : await userDataCache.checkAndRefresh(user.id)
+      
+      // 更新组件状态
+      setUserProfile(cachedData.profile)
+      setUserPosts(cachedData.posts)
+      setUserActivities(cachedData.activities)
+      setUserStats(cachedData.stats)
       
       // 生成默认数据（当profile为null时使用）
       const defaultProfile = {
@@ -61,33 +70,20 @@ export const useUserProfile = () => {
       };
       
       // 初始化编辑表单 - 优先使用profile，否则使用默认数据
-      const formData = profile ? {
-        full_name: profile.full_name || '',
-        bio: profile.bio || '',
-        location: profile.location || '',
-        website: profile.website || ''
+      const formData = cachedData.profile ? {
+        full_name: cachedData.profile.full_name || '',
+        bio: cachedData.profile.bio || '',
+        location: cachedData.profile.location || '',
+        website: cachedData.profile.website || ''
       } : defaultProfile;
       
       setEditForm(formData);
       
-      if (!profile) {
+      if (!cachedData.profile) {
         console.warn('用户资料为空，可能需要创建用户资料')
       }
       
-      // 获取用户统计数据
-      const postsResponse = await socialService.getUserPosts(user.id)
-      const posts = Array.isArray(postsResponse) ? postsResponse : postsResponse.posts || []
-      setUserPosts(posts)
-      
-      const activities = await ActivityService.getUserActivities(user.id)
-      setUserActivities(activities)
-      
-      setUserStats({
-        postsCount: posts.length,
-        followersCount: profile?.followers_count || 0,
-        followingCount: profile?.following_count || 0,
-        likes: (posts as Post[]).reduce((sum: number, post: Post) => sum + (post.likes_count || 0), 0)
-      })
+      console.log('个人中心数据加载完成 (通过全局缓存管理器)')
       
     } catch (error) {
       console.error('加载用户数据失败:', error)
@@ -115,16 +111,21 @@ export const useUserProfile = () => {
       }
       
       const updatedProfile = await socialService.updateUserProfile(user.id, editForm)
-      setUserProfile(updatedProfile)
       setIsEditingProfile(false)
+      
+      // 标记缓存需要刷新，确保下次访问时获取最新数据
+      userDataCache.markForRefresh(user.id)
+      
+      // 清除前端API缓存中的用户资料数据
+      apiCache.invalidatePattern(`user_profile_${user.id}`)
       
       // 同步更新AuthContext中的全局状态
       await refreshProfile()
       
-      toast.success('资料保存成功')
+      // 强制刷新所有用户数据，确保UI显示最新信息
+      await loadUserData(true)
       
-      // 保存成功后重新加载数据以确保同步
-      await loadUserData()
+      toast.success('资料保存成功')
     } catch (error) {
       console.error('保存用户资料失败:', error)
       toast.error('保存用户资料失败')
@@ -136,6 +137,11 @@ export const useUserProfile = () => {
     try {
       await socialService.deletePost(postId)
       setUserPosts(prev => prev.filter(post => post.id !== postId))
+      // 从全局缓存中删除帖子，并标记需要刷新统计
+      if (user) {
+        userDataCache.removePostFromCache(user.id, postId)
+        userDataCache.markForRefresh(user.id) // 统计数据可能变化
+      }
       toast.success('帖子删除成功')
     } catch (error) {
       console.error('删除帖子失败:', error)
@@ -149,8 +155,8 @@ export const useUserProfile = () => {
     
     try {
       await socialService.toggleLike(postId, user.id)
-      // 重新加载用户数据以更新统计
-      loadUserData()
+      // 标记缓存需要刷新以更新统计
+      userDataCache.markForRefresh(user.id)
     } catch (error) {
       console.error('点赞操作失败:', error)
       toast.error('操作失败')
@@ -217,13 +223,11 @@ export const useUserProfile = () => {
       
       const result = await response.json()
       
-      // 更新本地用户资料状态
-      if (result.profile) {
-        setUserProfile(result.profile)
-      }
-      
       // 同步更新AuthContext中的全局状态
       await refreshProfile()
+      
+      // 强制刷新所有用户数据，确保UI显示最新头像
+      await loadUserData(true)
       
       console.log('=== 头像上传到服务器完成 ===')
       return true
@@ -241,6 +245,8 @@ export const useUserProfile = () => {
       [field]: value
     }))
   }
+
+
 
   // 初始化
   useEffect(() => {

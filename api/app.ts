@@ -18,6 +18,7 @@ import batchRoutes from './routes/batch.js';
 import healthRoutes from './routes/health.js';
 import cacheDebugRoutes from './routes/cache-debug.js';
 import cacheTestRoutes from './routes/cache-test.js';
+import cacheInvalidationTestRoutes from './routes/cache-invalidation-test.js';
 import cacheManagementRoutes from './routes/cache-management.js';
 import { createCacheMonitorMiddleware } from './middleware/cacheMonitor.js';
 
@@ -91,6 +92,7 @@ app.use('/api/health', healthRoutes);
 if (process.env.NODE_ENV === 'development') {
   app.use('/api/cache-debug', cacheDebugRoutes);
   app.use('/api/cache-test', cacheTestRoutes);
+  app.use('/api/cache-invalidation-test', cacheInvalidationTestRoutes);
 }
 
 // 缓存管理API路由

@@ -3,6 +3,13 @@ import { supabaseAdmin } from '../../../lib/supabase'
 import { clearAuthUsersCache } from './cache'
 import { authenticateToken, requireAdmin } from '../../../middleware/auth'
 import asyncHandler from '../../../middleware/asyncHandler'
+import { userCache, statsCache } from '../../../lib/cacheInstances.js'
+import { CacheKeyGenerator, CACHE_TTL } from '../../../config/cache.js'
+import { 
+  invalidateOnUserCreate, 
+  invalidateOnUserDelete, 
+  invalidateOnBatchUserDelete 
+} from '../../../utils/userCacheInvalidation.js'
 
 const router = Router()
 
@@ -147,8 +154,8 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
       role
     })
 
-    // 清除缓存
-    clearAuthUsersCache()
+    // 智能缓存失效
+    await invalidateOnUserCreate()
 
     res.status(201).json({
       message: '用户创建成功',
@@ -235,8 +242,8 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
       // 注意：即使删除认证用户失败，用户资料已被删除，所以仍然返回成功
     }
 
-    // 清除缓存
-    clearAuthUsersCache()
+    // 智能缓存失效
+    await invalidateOnUserDelete(id)
 
     res.json({ message: '用户删除成功' })
   } catch (error) {
@@ -306,8 +313,10 @@ router.delete('/batch', asyncHandler(async (req: Request, res: Response): Promis
       }
     }
 
-    // 清除缓存
-    clearAuthUsersCache()
+    // 智能缓存失效（只对成功删除的用户进行缓存失效）
+    if (results.success.length > 0) {
+      await invalidateOnBatchUserDelete(results.success)
+    }
 
     res.json({
       message: `批量删除完成：成功${results.success.length}个，失败${results.failed.length}个`,
@@ -316,6 +325,96 @@ router.delete('/batch', asyncHandler(async (req: Request, res: Response): Promis
   } catch (error) {
     console.error('批量删除用户失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
+  }
+}))
+
+// 获取用户统计数据
+router.get('/stats', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+  try {
+    const cacheKey = CacheKeyGenerator.adminUserStats()
+    
+    // 尝试从缓存获取统计数据
+    const cachedStats = await statsCache.get(cacheKey)
+    if (cachedStats && typeof cachedStats === 'object') {
+      return res.json({
+        success: true,
+        data: cachedStats,
+        _cacheInfo: {
+          cached: true,
+          timestamp: new Date().toISOString()
+        }
+      })
+    }
+    
+    // 并行执行多个统计查询
+    const [
+      { count: totalUsers },
+      { count: activeUsers },
+      { count: newUsersThisMonth },
+      { data: roleDistribution }
+    ] = await Promise.all([
+      // 总用户数
+      supabaseAdmin.from('user_profiles').select('*', { count: 'exact', head: true }),
+      
+      // 活跃用户数（状态为active）
+      supabaseAdmin.from('user_profiles').select('*', { count: 'exact', head: true })
+        .eq('status', 'active'),
+      
+      // 本月新增用户数
+      supabaseAdmin.from('user_profiles').select('*', { count: 'exact', head: true })
+        .gte('created_at', new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString()),
+      
+      // 所有活跃用户的角色信息
+      supabaseAdmin.from('user_profiles').select('role').eq('status', 'active')
+    ])
+    
+    // 处理角色分布统计
+    const roleStats = (roleDistribution || []).reduce((acc: any, user: any) => {
+      const role = user.role || 'user'
+      acc[role] = (acc[role] || 0) + 1
+      return acc
+    }, {})
+    
+    // 计算增长率（与上月对比）
+    const lastMonth = new Date()
+    lastMonth.setMonth(lastMonth.getMonth() - 2)
+    const { count: lastMonthUsers } = await supabaseAdmin
+      .from('user_profiles')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', lastMonth.toISOString())
+      .lt('created_at', new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString())
+    
+    const growthRate = lastMonthUsers > 0 
+      ? ((newUsersThisMonth || 0) - lastMonthUsers) / lastMonthUsers * 100 
+      : 100
+    
+    const statsData = {
+      totalUsers: totalUsers || 0,
+      activeUsers: activeUsers || 0,
+      newUsersThisMonth: newUsersThisMonth || 0,
+      roleDistribution: roleStats,
+      growthRate: Math.round(growthRate * 100) / 100, // 保留两位小数
+      lastUpdated: new Date().toISOString()
+    }
+    
+    // 缓存统计数据 (TTL: 15分钟)
+    await statsCache.set(cacheKey, statsData, CACHE_TTL.MEDIUM)
+    
+    return res.json({
+      success: true,
+      data: statsData,
+      _cacheInfo: {
+        cached: false,
+        timestamp: new Date().toISOString()
+      }
+    })
+    
+  } catch (error) {
+    console.error('获取用户统计失败:', error)
+    return res.status(500).json({
+      success: false,
+      error: '获取用户统计失败'
+    })
   }
 }))
 

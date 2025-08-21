@@ -22,6 +22,10 @@ const AdminSettings = () => {
     loading,
     saving,
     
+    // 缓存状态
+    isCacheHit,
+    cacheTimestamp,
+    
     // UI状态
     activeTab,
     setActiveTab,
@@ -36,7 +40,8 @@ const AdminSettings = () => {
     importSettings,
     // testEmailConfig,
     // clearCache,
-    fetchSettings
+    fetchSettings,
+    forceRefresh
   } = useSystemSettings()
 
   // 处理设置更新（不立即保存，只更新待保存状态）
@@ -118,13 +123,29 @@ const AdminSettings = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
+              {/* 缓存状态显示 */}
+              {!loading && (
+                <div className="flex items-center space-x-2 text-sm">
+                  <div className={`w-2 h-2 rounded-full ${isCacheHit ? 'bg-green-500' : 'bg-blue-500'}`} />
+                  <span className="text-gray-600">
+                    {isCacheHit ? '缓存数据' : '实时数据'}
+                    {cacheTimestamp && (
+                      <span className="ml-1 text-xs">
+                        ({new Date(cacheTimestamp).toLocaleTimeString()})
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
+              
               <button
-                onClick={fetchSettings}
+                onClick={forceRefresh}
                 disabled={loading}
-                className="flex items-center space-x-2 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                className="flex items-center space-x-2 text-purple-600 hover:text-purple-800 px-3 py-2 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50"
+                title={isCacheHit ? '刷新设置缓存' : '刷新设置'}
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>{t('admin.settings.refresh')}</span>
+                <span>{isCacheHit ? '刷新缓存' : '刷新'}</span>
               </button>
               
               <button

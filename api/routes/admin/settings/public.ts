@@ -1,12 +1,30 @@
 import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase.js'
 import asyncHandler from '../../../middleware/asyncHandler.js'
+import { configCache } from '../../../lib/cacheInstances.js'
+import { CacheKeyGenerator, CACHE_TTL } from '../../../config/cache.js'
 
 const router = Router()
 
 // 获取公开设置
 router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
+    // 生成缓存键
+    const cacheKey = CacheKeyGenerator.publicSettings()
+
+    // 尝试从缓存获取数据
+    const cachedData = await configCache.get(cacheKey)
+    if (cachedData && typeof cachedData === 'object') {
+      return res.json({
+        ...cachedData,
+        _cacheInfo: {
+          cached: true,
+          timestamp: new Date().toISOString()
+        }
+      })
+    }
+
+    // 缓存未命中，从数据库获取数据
     // 只获取公开的设置
     const { data: settings, error } = await supabaseAdmin
       .from('system_settings')
@@ -80,8 +98,19 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
       }
       result[category][camelKey] = convertedValue;
     });
+
+    const responseData = { success: true, data: result };
+
+    // 缓存数据 (TTL: 2小时，公开设置变化更不频繁)
+    await configCache.set(cacheKey, responseData, CACHE_TTL.VERY_LONG * 2)
     
-    res.json({ success: true, data: result });
+    res.json({
+      ...responseData,
+      _cacheInfo: {
+        cached: false,
+        timestamp: new Date().toISOString()
+      }
+    });
   } catch (error) {
     console.error('获取分类设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
@@ -96,7 +125,23 @@ router.get('/:category', asyncHandler(async (req: Request, res: Response): Promi
     if (!category) {
       return res.status(400).json({ error: '分类参数不能为空' })
     }
+
+    // 生成缓存键
+    const cacheKey = CacheKeyGenerator.publicSettings(category)
+
+    // 尝试从缓存获取数据
+    const cachedData = await configCache.get(cacheKey)
+    if (cachedData && typeof cachedData === 'object') {
+      return res.json({
+        ...cachedData,
+        _cacheInfo: {
+          cached: true,
+          timestamp: new Date().toISOString()
+        }
+      })
+    }
     
+    // 缓存未命中，从数据库获取数据
     // 只获取指定分类的公开设置
     const { data: settings, error } = await supabaseAdmin
       .from('system_settings')
@@ -166,8 +211,19 @@ router.get('/:category', asyncHandler(async (req: Request, res: Response): Promi
       
       result[camelKey] = convertedValue;
     });
+
+    const responseData = { success: true, data: result };
+
+    // 缓存数据 (TTL: 2小时，公开设置变化更不频繁)
+    await configCache.set(cacheKey, responseData, CACHE_TTL.VERY_LONG * 2)
     
-    res.json({ success: true, data: result });
+    res.json({
+      ...responseData,
+      _cacheInfo: {
+        cached: false,
+        timestamp: new Date().toISOString()
+      }
+    });
   } catch (error) {
     console.error('获取公开系统设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })

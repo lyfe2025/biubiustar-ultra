@@ -190,6 +190,110 @@ export class EnhancedCacheService {
     }
     return validKeys;
   }
+
+  /**
+   * 获取所有缓存条目（用于调试和监控）
+   */
+  getAllEntries(limit: number = 10, offset: number = 0): {
+    entries: Array<{
+      key: string;
+      data: any;
+      size: number;
+      ttl: number;
+      accessCount: number;
+      lastAccess: string;
+      createdAt: string;
+      expiresAt: string;
+    }>;
+    total: number;
+  } {
+    const allEntries: Array<{
+      key: string;
+      data: any;
+      size: number;
+      ttl: number;
+      accessCount: number;
+      lastAccess: string;
+      createdAt: string;
+      expiresAt: string;
+    }> = [];
+
+    for (const [key, item] of this.cache.entries()) {
+      if (!this.isExpired(item)) {
+        // 估算数据大小
+        const dataSize = JSON.stringify(item.data).length;
+        
+        allEntries.push({
+          key,
+          data: item.data,
+          size: dataSize,
+          ttl: item.ttl,
+          accessCount: item.accessCount,
+          lastAccess: new Date(item.lastAccess).toISOString(),
+          createdAt: new Date(item.timestamp).toISOString(),
+          expiresAt: new Date(item.timestamp + item.ttl).toISOString()
+        });
+      } else {
+        this.cache.delete(key);
+      }
+    }
+
+    // 按访问次数排序（热点数据优先）
+    allEntries.sort((a, b) => b.accessCount - a.accessCount);
+
+    // 分页
+    const paginatedEntries = allEntries.slice(offset, offset + limit);
+
+    return {
+      entries: paginatedEntries,
+      total: allEntries.length
+    };
+  }
+
+  /**
+   * 获取热点键（访问频率最高的键）
+   */
+  getHotKeys(limit: number = 20): {
+    keys: Array<{
+      key: string;
+      accessCount: number;
+      hitRate: number;
+      lastAccess: string;
+      size: number;
+    }>;
+  } {
+    const hotKeys: Array<{
+      key: string;
+      accessCount: number;
+      hitRate: number;
+      lastAccess: string;
+      size: number;
+    }> = [];
+
+    for (const [key, item] of this.cache.entries()) {
+      if (!this.isExpired(item)) {
+        const dataSize = JSON.stringify(item.data).length;
+        const hitRate = item.accessCount > 0 ? 1 : 0; // 简化的命中率计算
+        
+        hotKeys.push({
+          key,
+          accessCount: item.accessCount,
+          hitRate,
+          lastAccess: new Date(item.lastAccess).toISOString(),
+          size: dataSize
+        });
+      } else {
+        this.cache.delete(key);
+      }
+    }
+
+    // 按访问次数排序
+    hotKeys.sort((a, b) => b.accessCount - a.accessCount);
+
+    return {
+      keys: hotKeys.slice(0, limit)
+    };
+  }
   
   /**
    * 获取缓存统计

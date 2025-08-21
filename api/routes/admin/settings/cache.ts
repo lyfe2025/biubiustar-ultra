@@ -4,6 +4,7 @@
  */
 import { Router, Request, Response } from 'express';
 import asyncHandler from '../../../middleware/asyncHandler.js';
+import { requireAdmin } from '../auth.js';
 import { 
   userCache, 
   contentCache, 
@@ -16,6 +17,9 @@ import {
 import { EnhancedCacheService } from '../../../lib/enhancedCache.js';
 
 const router = Router();
+
+// 对所有路由应用管理员权限验证
+router.use(requireAdmin);
 
 // 缓存配置存储（可以后续改为数据库存储）
 let cacheConfig = {

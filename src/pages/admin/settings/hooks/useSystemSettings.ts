@@ -11,14 +11,27 @@ export const useSystemSettings = () => {
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<string>('basic')
   const [resetConfirmModal, setResetConfirmModal] = useState(false)
+  const [isCacheHit, setIsCacheHit] = useState(false)
+  const [cacheTimestamp, setCacheTimestamp] = useState<string>('')
   const navigate = useNavigate()
 
   // 获取系统设置
   const fetchSettings = async () => {
     try {
       setLoading(true)
-      const data = await adminService.getSystemSettings()
-      setSettings(data as SystemSettings)
+      const response = await adminService.getSystemSettings()
+      
+      // 处理缓存信息
+      const cacheInfo = response._cacheInfo
+      if (cacheInfo) {
+        setIsCacheHit(cacheInfo.cached || false)
+        setCacheTimestamp(cacheInfo.timestamp || '')
+      } else {
+        setIsCacheHit(false)
+        setCacheTimestamp('')
+      }
+      
+      setSettings(response.data as SystemSettings)
     } catch (error) {
       console.error('获取系统设置失败:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
@@ -27,6 +40,45 @@ export const useSystemSettings = () => {
         return
       }
       toast.error('获取系统设置失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 强制刷新设置（绕过缓存）
+  const forceRefresh = async () => {
+    try {
+      setLoading(true)
+      const timestamp = Date.now()
+      const response = await fetch(`/api/admin/settings?_t=${timestamp}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('刷新设置失败')
+      }
+      
+      const data = await response.json()
+      
+      // 处理缓存信息
+      const cacheInfo = data._cacheInfo
+      if (cacheInfo) {
+        setIsCacheHit(cacheInfo.cached || false)
+        setCacheTimestamp(cacheInfo.timestamp || '')
+      } else {
+        setIsCacheHit(false)
+        setCacheTimestamp('')
+      }
+      
+      setSettings(data.data as SystemSettings)
+      toast.success('设置数据已刷新')
+    } catch (error) {
+      console.error('强制刷新设置失败:', error)
+      toast.error('刷新设置失败，请重试')
     } finally {
       setLoading(false)
     }
@@ -165,6 +217,10 @@ export const useSystemSettings = () => {
     loading,
     saving,
     
+    // 缓存状态
+    isCacheHit,
+    cacheTimestamp,
+    
     // UI状态
     activeTab,
     setActiveTab,
@@ -179,6 +235,7 @@ export const useSystemSettings = () => {
     importSettings,
     testEmailConfig,
     clearCache,
-    fetchSettings
+    fetchSettings,
+    forceRefresh
   }
 }

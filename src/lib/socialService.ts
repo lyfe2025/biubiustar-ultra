@@ -930,9 +930,10 @@ class SocialService {
   // 获取用户的帖子
   async getUserPosts(userId: string, page = 1, limit = 10): Promise<{ posts: Post[]; total: number }> {
     try {
+      const offset = (page - 1) * limit;
       const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString()
+        limit: limit.toString(),
+        offset: offset.toString()
       });
       
       const response = await fetch(`/api/users/${userId}/posts?${params}`);
@@ -954,7 +955,7 @@ class SocialService {
   // 获取用户资料
   async getUserProfile(userId: string): Promise<User | null> {
     return apiCache.cached(
-      'user_profile',
+      `user_profile_${userId}`, // 修复缓存键冲突问题
       async () => {
         try {
           const response = await fetch(`/api/users/${userId}`);

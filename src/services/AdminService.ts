@@ -396,8 +396,16 @@ class AdminService {
   }
 
   // 活动管理相关API
-  async getActivities(page: number = 1, limit: number = 10): Promise<{ activities: AdminActivity[], pagination: { page: number, limit: number, total: number, totalPages: number } }> {
-    return this.request<{ activities: AdminActivity[], pagination: { page: number, limit: number, total: number, totalPages: number } }>(`/admin/activities?page=${page}&limit=${limit}`)
+  async getActivities(page: number = 1, limit: number = 10): Promise<{ 
+    activities: AdminActivity[], 
+    pagination: { page: number, limit: number, total: number, totalPages: number },
+    _cacheInfo?: { cached: boolean, timestamp: string }
+  }> {
+    return this.request<{ 
+      activities: AdminActivity[], 
+      pagination: { page: number, limit: number, total: number, totalPages: number },
+      _cacheInfo?: { cached: boolean, timestamp: string }
+    }>(`/admin/activities?page=${page}&limit=${limit}`)
   }
 
   async getRecentActivities(): Promise<RecentActivity[]> {
@@ -442,8 +450,21 @@ class AdminService {
   }
 
   // 活动分类管理相关API
-  async getCategories(): Promise<ActivityCategory[]> {
-    return this.request<ActivityCategory[]>('/admin/categories/activity')
+  async getCategories(): Promise<{
+    categories: ActivityCategory[],
+    _cacheInfo?: { cached: boolean, timestamp: string }
+  }> {
+    const response = await this.request<{
+      categories: ActivityCategory[],
+      _cacheInfo?: { cached: boolean, timestamp: string }
+    }>('/admin/categories/activity')
+    
+    // 如果返回的是数组（向后兼容旧格式），则包装成新格式
+    if (Array.isArray(response)) {
+      return { categories: response }
+    }
+    
+    return response
   }
 
   async createCategory(categoryData: {
@@ -532,6 +553,8 @@ class AdminService {
     return this.request<DashboardStats>('/admin/stats')
   }
 
+
+
   // 系统设置相关API
   async getSettings(category?: string): Promise<Record<string, unknown>> {
     const url = category ? `/admin/settings?category=${category}` : '/admin/settings'
@@ -557,9 +580,20 @@ class AdminService {
   }
 
   // 添加缺失的系统设置方法
-  async getSystemSettings(): Promise<Record<string, unknown>> {
-    const response = await this.request<{ success: boolean; data: Record<string, unknown> }>('/admin/settings')
-    return response.data
+  async getSystemSettings(): Promise<{
+    data: Record<string, unknown>,
+    _cacheInfo?: { cached: boolean, timestamp: string }
+  }> {
+    const response = await this.request<{ 
+      success: boolean; 
+      data: Record<string, unknown>;
+      _cacheInfo?: { cached: boolean, timestamp: string };
+    }>('/admin/settings')
+    
+    return {
+      data: response.data,
+      _cacheInfo: response._cacheInfo
+    }
   }
 
   async updateSystemSettings(settings: Record<string, unknown>): Promise<void> {
@@ -675,6 +709,31 @@ class AdminService {
     securityEvents7d: number
   }> {
     return this.request('/admin/security/stats')
+  }
+
+  // 用户统计数据API
+  async getUserStats(): Promise<{
+    totalUsers: number
+    activeUsers: number
+    newUsersToday: number
+    userGrowthRate: number
+    _cacheInfo?: { cached: boolean, timestamp: string }
+  }> {
+    const response = await this.request<{
+      success: boolean
+      data: {
+        totalUsers: number
+        activeUsers: number
+        newUsersToday: number
+        userGrowthRate: number
+      }
+      _cacheInfo?: { cached: boolean, timestamp: string }
+    }>('/admin/users/stats')
+    
+    return {
+      ...response.data,
+      _cacheInfo: response._cacheInfo
+    }
   }
 
   async unlockIP(ip: string): Promise<{ success: boolean }> {

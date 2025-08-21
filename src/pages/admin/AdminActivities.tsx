@@ -61,11 +61,26 @@ const AdminActivities = () => {
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isCacheHit, setIsCacheHit] = useState(false)
+  const [cacheTimestamp, setCacheTimestamp] = useState<string>('')
+  const [categoryCacheHit, setCategoryCacheHit] = useState(false)
+  const [categoryCacheTimestamp, setCategoryCacheTimestamp] = useState<string>('')
 
   const loadActivities = async (page: number = pagination.page, limit: number = pagination.limit) => {
     try {
       setLoading(true)
       const response = await adminService.getActivities(page, limit)
+      
+      // 处理缓存信息
+      const cacheInfo = response._cacheInfo
+      if (cacheInfo) {
+        setIsCacheHit(cacheInfo.cached || false)
+        setCacheTimestamp(cacheInfo.timestamp || '')
+      } else {
+        setIsCacheHit(false)
+        setCacheTimestamp('')
+      }
+      
       setActivities(response.activities)
       setPagination(response.pagination)
     } catch (error) {
@@ -84,11 +99,81 @@ const AdminActivities = () => {
     }
   }
 
-  const loadCategories = async () => {
+  const forceRefresh = async () => {
+    const timestamp = Date.now()
     try {
-      const data = await adminService.getCategories()
+      setIsRefreshing(true)
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        _t: timestamp.toString()
+      })
+      
+      const response = await fetch(`/api/admin/activities?${params.toString()}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('刷新失败')
+      }
+      
+      const data = await response.json()
+      
+      // 处理缓存信息
+      const cacheInfo = data._cacheInfo
+      if (cacheInfo) {
+        setIsCacheHit(cacheInfo.cached || false)
+        setCacheTimestamp(cacheInfo.timestamp || '')
+      } else {
+        setIsCacheHit(false)
+        setCacheTimestamp('')
+      }
+      
+      setActivities(data.activities)
+      setPagination(data.pagination)
+      toast.success('数据已刷新')
+    } catch (error) {
+      console.error('强制刷新失败:', error)
+      toast.error('刷新失败，请重试')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  const forceRefreshCategories = async () => {
+    try {
+      setIsRefreshing(true)
+      const timestamp = Date.now()
+      const response = await fetch(`/api/admin/categories/activity?_t=${timestamp}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('刷新分类失败')
+      }
+      
+      const data = await response.json()
+      
+      // 处理分类缓存信息
+      const cacheInfo = data._cacheInfo
+      if (cacheInfo) {
+        setCategoryCacheHit(cacheInfo.cached || false)
+        setCategoryCacheTimestamp(cacheInfo.timestamp || '')
+      } else {
+        setCategoryCacheHit(false)
+        setCategoryCacheTimestamp('')
+      }
+      
       // 将ActivityCategory转换为Category类型
-      const convertedCategories: Category[] = data.map((cat: ActivityCategory) => ({
+      const convertedCategories: Category[] = data.categories.map((cat: ActivityCategory) => ({
         id: cat.id,
         name: cat.name,
         description: cat.description || '',
@@ -100,7 +185,48 @@ const AdminActivities = () => {
         description_zh_tw: cat.description_zh_tw || cat.description || '',
         description_en: cat.description_en || cat.description || '',
         description_vi: cat.description_vi || cat.description || '',
-        color: cat.color,
+        color: cat.color || '#3B82F6',
+        created_at: cat.created_at || new Date().toISOString(),
+        updated_at: cat.updated_at || new Date().toISOString()
+      }))
+      setCategories(convertedCategories)
+      toast.success('分类数据已刷新')
+    } catch (error) {
+      console.error('强制刷新分类失败:', error)
+      toast.error('刷新分类失败，请重试')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  const loadCategories = async () => {
+    try {
+      const response = await adminService.getCategories()
+      
+      // 处理分类缓存信息
+      const cacheInfo = response._cacheInfo
+      if (cacheInfo) {
+        setCategoryCacheHit(cacheInfo.cached || false)
+        setCategoryCacheTimestamp(cacheInfo.timestamp || '')
+      } else {
+        setCategoryCacheHit(false)
+        setCategoryCacheTimestamp('')
+      }
+      
+      // 将ActivityCategory转换为Category类型
+      const convertedCategories: Category[] = response.categories.map((cat: ActivityCategory) => ({
+        id: cat.id,
+        name: cat.name,
+        description: cat.description || '',
+        name_zh: cat.name_zh || cat.name,
+        name_zh_tw: cat.name_zh_tw || cat.name,
+        name_en: cat.name_en || cat.name,
+        name_vi: cat.name_vi || cat.name,
+        description_zh: cat.description_zh || cat.description || '',
+        description_zh_tw: cat.description_zh_tw || cat.description || '',
+        description_en: cat.description_en || cat.description || '',
+        description_vi: cat.description_vi || cat.description || '',
+        color: cat.color || '#3B82F6',
         created_at: cat.created_at || new Date().toISOString(),
         updated_at: cat.updated_at || new Date().toISOString()
       }))
@@ -241,18 +367,34 @@ const AdminActivities = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('admin.activities.title')}</h1>
-            <p className="mt-1 text-sm text-gray-500">{t('admin.activities.description')}</p>
+            <div className="flex items-center space-x-4 mt-1">
+              <p className="text-sm text-gray-500">{t('admin.activities.description')}</p>
+              {!loading && (
+                <div className="flex items-center space-x-2 text-sm">
+                  <div className={`w-2 h-2 rounded-full ${isCacheHit ? 'bg-green-500' : 'bg-blue-500'}`} />
+                  <span className="text-gray-500">
+                    {isCacheHit ? '缓存数据' : '实时数据'}
+                    {cacheTimestamp && (
+                      <span className="ml-1 text-xs">
+                        ({new Date(cacheTimestamp).toLocaleTimeString()})
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
           
           <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-            {/* 刷新按钮 */}
+            {/* 强制刷新按钮 */}
             <button
-              onClick={handleRefreshData}
+              onClick={forceRefresh}
               disabled={isRefreshing || loading}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center space-x-2 text-purple-600 hover:text-purple-800 px-3 py-2 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50"
+              title={isCacheHit ? '刷新缓存' : '刷新'}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {t('admin.performance.refresh') || '刷新'}
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isCacheHit ? '刷新缓存' : '刷新'}</span>
             </button>
             
             {activeTab === 'activities' && (
@@ -397,10 +539,41 @@ const AdminActivities = () => {
 
         {/* 分类管理标签页内容 */}
         {activeTab === 'categories' && (
-          <CategoryManagement
-            categories={categories}
-            onCategoriesUpdated={handleCategoriesUpdated}
-          />
+          <div className="space-y-4">
+            {/* 分类缓存状态信息 */}
+            {!loading && (
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm font-medium text-gray-700">分类数据状态:</span>
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-2 h-2 rounded-full ${categoryCacheHit ? 'bg-green-500' : 'bg-blue-500'}`} />
+                    <span className="text-sm text-gray-600">
+                      {categoryCacheHit ? '缓存数据' : '实时数据'}
+                      {categoryCacheTimestamp && (
+                        <span className="ml-1 text-xs">
+                          ({new Date(categoryCacheTimestamp).toLocaleTimeString()})
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={forceRefreshCategories}
+                  disabled={isRefreshing}
+                  className="flex items-center space-x-2 text-purple-600 hover:text-purple-800 px-3 py-2 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50"
+                  title={categoryCacheHit ? '刷新分类缓存' : '刷新分类'}
+                >
+                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <span>{categoryCacheHit ? '刷新缓存' : '刷新'}</span>
+                </button>
+              </div>
+            )}
+            
+            <CategoryManagement
+              categories={categories}
+              onCategoriesUpdated={handleCategoriesUpdated}
+            />
+          </div>
         )}
 
         {/* 活动详情弹窗 */}

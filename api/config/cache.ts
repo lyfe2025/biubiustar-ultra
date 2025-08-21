@@ -256,6 +256,53 @@ export class CacheKeyGenerator {
     const paramString = params ? `:${JSON.stringify(params)}` : '';
     return `${CACHE_PREFIXES.API}${endpoint}${paramString}`;
   }
+
+  // 管理后台用户相关缓存键
+  static adminUsersList(page: number, limit: number, search: string, status: string, role: string): string {
+    const params = JSON.stringify({ page, limit, search, status, role })
+    return `${CACHE_PREFIXES.USER}admin:list:${params}`
+  }
+  
+  static adminUserDetail(userId: string): string {
+    return `${CACHE_PREFIXES.USER}admin:detail:${userId}`
+  }
+  
+  static adminUserStats(): string {
+    return `${CACHE_PREFIXES.STATS}admin:users`
+  }
+
+  // 管理后台活动相关缓存键
+  static adminActivitiesList(page: number, limit: number): string {
+    const params = JSON.stringify({ page, limit })
+    return `${CACHE_PREFIXES.CONTENT}admin:activities:list:${params}`
+  }
+  
+  static adminActivityDetail(activityId: string): string {
+    return `${CACHE_PREFIXES.CONTENT}admin:activity:detail:${activityId}`
+  }
+  
+  static adminActivityStats(): string {
+    return `${CACHE_PREFIXES.STATS}admin:activities`
+  }
+
+  static adminActivityCategories(): string {
+    return `${CACHE_PREFIXES.CONTENT}admin:activity:categories`
+  }
+
+  // 系统设置相关缓存键
+  static systemSettings(category?: string): string {
+    if (category) {
+      return `${CACHE_PREFIXES.CONFIG}system:settings:${category}`
+    }
+    return `${CACHE_PREFIXES.CONFIG}system:settings:all`
+  }
+
+  static publicSettings(category?: string): string {
+    if (category) {
+      return `${CACHE_PREFIXES.CONFIG}public:settings:${category}`
+    }
+    return `${CACHE_PREFIXES.CONFIG}public:settings:all`
+  }
 }
 
 /**

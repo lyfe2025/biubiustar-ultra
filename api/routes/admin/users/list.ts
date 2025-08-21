@@ -3,6 +3,8 @@ import { supabaseAdmin } from '../../../lib/supabase'
 import { getCachedAuthUsers } from './cache'
 import { requireAdmin } from '../auth'
 import asyncHandler from '../../../middleware/asyncHandler.js'
+import { userCache, statsCache } from '../../../lib/cacheInstances.js'
+import { CacheKeyGenerator, CACHE_TTL } from '../../../config/cache.js'
 
 const router = Router()
 
@@ -21,6 +23,21 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
     const search = req.query.search as string || ''
     const status = req.query.status as string || 'all'
     const role = req.query.role as string || 'all'
+
+    // 生成缓存键
+    const cacheKey = CacheKeyGenerator.adminUsersList(page, limit, search, status, role)
+    
+    // 尝试从缓存获取
+    const cachedData = await userCache.get(cacheKey)
+    if (cachedData && typeof cachedData === 'object') {
+      return res.json({
+        ...cachedData,
+        _cacheInfo: {
+          cached: true,
+          timestamp: new Date().toISOString()
+        }
+      })
+    }
 
     // 构建查询条件
     let countQuery = supabaseAdmin.from('user_profiles').select('*', { count: 'exact', head: true })
@@ -132,15 +149,26 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
       updated_at: user.updated_at
     })) || []
 
-    // 返回分页数据
-    const totalPages = Math.ceil((totalUsers || 0) / limit)
-    res.json({
+    // 构造响应数据
+    const responseData = {
       users: formattedUsers,
       pagination: {
         page,
         limit,
         total: totalUsers || 0,
-        totalPages
+        totalPages: Math.ceil((totalUsers || 0) / limit)
+      }
+    }
+
+    // 缓存结果 (TTL: 10分钟)
+    await userCache.set(cacheKey, responseData, CACHE_TTL.MEDIUM)
+
+    // 返回响应，添加缓存信息
+    res.json({
+      ...responseData,
+      _cacheInfo: {
+        cached: false,
+        timestamp: new Date().toISOString()
       }
     })
   } catch (error) {

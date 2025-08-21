@@ -108,7 +108,17 @@ const AdminCachePerformance = () => {
   // 获取缓存配置
   const fetchCacheConfigs = async () => {
     try {
-      const response = await fetch('/api/admin/settings/cache')
+      const adminToken = localStorage.getItem('adminToken')
+      if (!adminToken) {
+        throw new Error('未找到认证令牌')
+      }
+      
+      const response = await fetch('/api/admin/settings/cache', {
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json'
+        }
+      })
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
@@ -129,10 +139,16 @@ const AdminCachePerformance = () => {
   const updateCacheConfig = async (cacheType: string, config: any) => {
     setIsSavingConfig(true)
     try {
+      const adminToken = localStorage.getItem('adminToken')
+      if (!adminToken) {
+        throw new Error('未找到认证令牌')
+      }
+      
       const response = await fetch('/api/admin/settings/cache', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
         },
         body: JSON.stringify({
           cacheType,

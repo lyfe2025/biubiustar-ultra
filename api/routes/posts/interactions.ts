@@ -4,7 +4,8 @@ import { sendResponse, sendValidationError, sendNotFoundError } from '../../util
 import asyncHandler from '../../middleware/asyncHandler.js';
 import { createCacheMiddleware, createUserSpecificCacheMiddleware } from '../../middleware/cache';
 import { contentCache } from '../../lib/cacheInstances';
-import { invalidatePostCache } from '../../services/cacheInvalidation';
+import { invalidatePostCache, invalidateUserCache } from '../../services/cacheInvalidation';
+import { invalidateOnLikeChange } from '../../utils/profileCacheInvalidation.js';
 import { CACHE_TTL } from '../../config/cache';
 
 const router = Router();
@@ -25,10 +26,10 @@ router.post('/:id/like', asyncHandler(async (req: Request, res: Response) => {
     
     const user_id = user.id;
 
-    // Check if post exists
-    const { error: postError } = await supabaseAdmin
+    // Check if post exists and get author ID
+    const { data: post, error: postError } = await supabaseAdmin
       .from('posts')
-      .select('id')
+      .select('id, user_id')
       .eq('id', id)
       .single();
 
@@ -78,6 +79,7 @@ router.post('/:id/like', asyncHandler(async (req: Request, res: Response) => {
 
     // 清除相关缓存
     await invalidatePostCache(id);
+    await invalidateOnLikeChange(post.user_id); // 失效帖子作者的统计缓存
 
     sendResponse(res, true, null, '点赞成功');
 
@@ -103,6 +105,19 @@ router.delete('/:id/like', asyncHandler(async (req: Request, res: Response) => {
     
     const user_id = user.id;
 
+    // 先获取帖子的作者ID，用于缓存失效
+    const { data: post, error: postError } = await supabaseAdmin
+      .from('posts')
+      .select('user_id')
+      .eq('id', id)
+      .single();
+
+    if (postError) {
+      console.error('Error fetching post for unlike:', postError);
+      sendResponse(res, false, null, '获取帖子信息失败', 500);
+      return;
+    }
+
     const { error } = await supabaseAdmin
       .from('likes')
       .delete()
@@ -117,6 +132,7 @@ router.delete('/:id/like', asyncHandler(async (req: Request, res: Response) => {
 
     // 清除相关缓存
     await invalidatePostCache(id);
+    await invalidateOnLikeChange(post.user_id); // 失效帖子作者的统计缓存
 
     sendResponse(res, true, null, '取消点赞成功');
 

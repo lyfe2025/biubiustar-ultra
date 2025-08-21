@@ -3,6 +3,14 @@ import { supabaseAdmin } from '../../lib/supabase.js'
 import { requireAdmin } from './auth.js'
 import asyncHandler from '../../middleware/asyncHandler.js'
 import { CacheInvalidationService } from '../../services/cacheInvalidation'
+import { contentCache, statsCache } from '../../lib/cacheInstances.js'
+import { CacheKeyGenerator, CACHE_TTL } from '../../config/cache.js'
+import { 
+  invalidateOnActivityCreate,
+  invalidateOnActivityUpdate,
+  invalidateOnActivityDelete,
+  invalidateOnActivityStatusChange
+} from '../../utils/activityCacheInvalidation.js'
 
 const router = Router()
 
@@ -15,6 +23,23 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
     // 获取分页参数
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 10
+
+    // 生成缓存键
+    const cacheKey = CacheKeyGenerator.adminActivitiesList(page, limit)
+
+    // 尝试从缓存获取数据
+    const cachedData = await contentCache.get(cacheKey)
+    if (cachedData && typeof cachedData === 'object') {
+      return res.json({
+        ...cachedData,
+        _cacheInfo: {
+          cached: true,
+          timestamp: new Date().toISOString()
+        }
+      })
+    }
+
+    // 缓存未命中，从数据库获取数据
     const offset = (page - 1) * limit
 
     // 获取总活动数
@@ -113,15 +138,26 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
       }
     }) || []
 
-    // 返回分页数据
+    // 构建响应数据
     const totalPages = Math.ceil((totalActivities || 0) / limit)
-    res.json({
+    const responseData = {
       activities: formattedActivities,
       pagination: {
         page,
         limit,
         total: totalActivities || 0,
         totalPages
+      }
+    }
+
+    // 缓存数据 (TTL: 10分钟)
+    await contentCache.set(cacheKey, responseData, CACHE_TTL.MEDIUM)
+
+    res.json({
+      ...responseData,
+      _cacheInfo: {
+        cached: false,
+        timestamp: new Date().toISOString()
       }
     })
   } catch (error) {
@@ -150,8 +186,8 @@ router.put('/:id/status', asyncHandler(async (req: Request, res: Response): Prom
       return res.status(500).json({ error: '更新活动状态失败' })
     }
 
-    const invalidationService = new CacheInvalidationService()
-    await invalidationService.invalidateContentCache()
+    // 智能缓存失效
+    await invalidateOnActivityStatusChange(id)
 
     res.json({ success: true })
   } catch (error) {
@@ -339,8 +375,8 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
       participants_count: participantsCount || 0
     }
 
-    const invalidationService = new CacheInvalidationService()
-    await invalidationService.invalidateContentCache()
+    // 智能缓存失效
+    await invalidateOnActivityCreate()
 
     res.status(201).json(formattedActivity)
   } catch (error) {
@@ -449,8 +485,8 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
       updated_at: activity.updated_at
     }
 
-    const invalidationService = new CacheInvalidationService()
-    await invalidationService.invalidateContentCache()
+    // 智能缓存失效
+    await invalidateOnActivityUpdate(id)
 
     res.json(formattedActivity)
   } catch (error) {
@@ -478,8 +514,8 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
       return res.status(500).json({ error: '删除活动失败' })
     }
 
-    const invalidationService = new CacheInvalidationService()
-    await invalidationService.invalidateContentCache()
+    // 智能缓存失效
+    await invalidateOnActivityDelete(id)
 
     res.json({ success: true })
   } catch (error) {

@@ -1,10 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { supabase, createUserClient, supabaseAdmin } from '../lib/supabase';
 import { authenticateToken } from '../middleware/auth';
+import { clearActivityCaches } from '../lib/cacheUtils.js';
 import asyncHandler from '../middleware/asyncHandler.js';
 import { createCacheMiddleware, createUserSpecificCacheMiddleware } from '../middleware/cache';
 import { contentCache } from '../lib/cacheInstances';
-import { CacheInvalidationService } from '../services/cacheInvalidation.js';
+import { CacheInvalidationService, invalidateUserCache } from '../services/cacheInvalidation.js';
 import { CACHE_TTL } from '../config/cache';
 
 const router = Router();
@@ -83,6 +84,9 @@ router.get('/upcoming',
   }),
   asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
+    // 清理活动相关缓存以确保获取最新数据
+    clearActivityCaches();
+    
     const { limit = 10 } = req.query;
     const now = new Date().toISOString();
 
@@ -387,6 +391,7 @@ router.post('/', authenticateToken, asyncHandler(async (req: Request, res: Respo
     // 清除活动相关缓存
     const invalidationService = new CacheInvalidationService();
     await invalidationService.invalidateContentCache();
+    await invalidateUserCache(user_id); // 失效用户统计缓存
 
     res.status(201).json(data);
   } catch (error) {
@@ -437,6 +442,18 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
   try {
     const { id } = req.params;
 
+    // 先获取活动的创建者ID，用于缓存失效
+    const { data: activity, error: fetchError } = await supabase
+      .from('activities')
+      .select('user_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching activity for deletion:', fetchError);
+      return res.status(500).json({ error: 'Failed to fetch activity' });
+    }
+
     const { error } = await supabase
       .from('activities')
       .delete()
@@ -450,6 +467,9 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
     // 清除活动相关缓存
     const invalidationService = new CacheInvalidationService();
     await invalidationService.invalidateContentCache();
+    if (activity?.user_id) {
+      await invalidateUserCache(activity.user_id); // 失效用户统计缓存
+    }
 
     res.status(204).send();
   } catch (error) {
@@ -519,6 +539,7 @@ router.post('/:id/join', asyncHandler(async (req: Request, res: Response): Promi
     // 清除活动相关缓存
     const invalidationService = new CacheInvalidationService();
     await invalidationService.invalidateContentCache();
+    await invalidateUserCache(user_id); // 失效用户活动缓存
 
     res.status(201).json({ message: 'Successfully joined activity' });
   } catch (error) {
@@ -566,6 +587,7 @@ router.delete('/:id/leave', asyncHandler(async (req: Request, res: Response): Pr
     // 清除活动相关缓存
     const invalidationService = new CacheInvalidationService();
     await invalidationService.invalidateContentCache();
+    await invalidateUserCache(user_id); // 失效用户活动缓存
 
     res.status(204).send();
   } catch (error) {

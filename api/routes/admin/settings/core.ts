@@ -2,6 +2,9 @@ import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase.js'
 import { requireAdmin } from '../auth.js'
 import asyncHandler from '../../../middleware/asyncHandler.js'
+import { configCache } from '../../../lib/cacheInstances.js'
+import { CacheKeyGenerator, CACHE_TTL } from '../../../config/cache.js'
+import { invalidateOnSettingsUpdate } from '../../../utils/settingsCacheInvalidation.js'
 
 const router = Router()
 
@@ -11,7 +14,24 @@ router.use(requireAdmin)
 // 获取系统设置
 router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
-    const { category } = req.query
+    const { category } = req.query as { category?: string }
+    
+    // 生成缓存键
+    const cacheKey = CacheKeyGenerator.systemSettings(category)
+
+    // 尝试从缓存获取数据
+    const cachedData = await configCache.get(cacheKey)
+    if (cachedData && typeof cachedData === 'object') {
+      return res.json({
+        ...cachedData,
+        _cacheInfo: {
+          cached: true,
+          timestamp: new Date().toISOString()
+        }
+      })
+    }
+
+    // 缓存未命中，从数据库获取数据
     let query = supabaseAdmin
       .from('system_settings')
       .select('*')
@@ -102,7 +122,19 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
         is_public: is_public || false
       };
     });
-    res.json({ success: true, data: result });
+
+    const responseData = { success: true, data: result };
+
+    // 缓存数据 (TTL: 1小时，系统设置变化不频繁)
+    await configCache.set(cacheKey, responseData, CACHE_TTL.VERY_LONG)
+
+    res.json({
+      ...responseData,
+      _cacheInfo: {
+        cached: false,
+        timestamp: new Date().toISOString()
+      }
+    });
   } catch (error) {
     console.error('获取系统设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
@@ -278,6 +310,28 @@ router.put('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
         error: '保存系统设置失败',
         details: error.message
       })
+    }
+
+    // 智能缓存失效 - 分析受影响的分类
+    try {
+      const affectedCategories = new Set<string>();
+      
+      // 从更新的设置中提取分类信息
+      for (const [fullKey] of Object.entries(settings)) {
+        if (fullKey.includes('.')) {
+          const [category] = fullKey.split('.');
+          affectedCategories.add(category);
+        } else {
+          // 兼容旧格式，假设为basic分类
+          affectedCategories.add('basic');
+        }
+      }
+
+      await invalidateOnSettingsUpdate(Array.from(affectedCategories));
+      console.log('系统设置缓存失效完成，受影响分类:', Array.from(affectedCategories));
+    } catch (cacheError) {
+      console.error('系统设置缓存失效失败:', cacheError);
+      // 缓存失效失败不应该影响设置保存的成功响应
     }
     
     res.json({ success: true, message: '系统设置保存成功' })

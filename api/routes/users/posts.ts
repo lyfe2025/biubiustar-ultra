@@ -5,11 +5,25 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../../lib/supabase';
 import asyncHandler from '../../middleware/asyncHandler.js';
+import { createUserSpecificCacheMiddleware } from '../../middleware/cache.js';
+import { userCache } from '../../lib/cacheInstances.js';
+import { CACHE_TTL } from '../../config/cache.js';
 
 const router = Router();
 
 // GET /api/users/:id/posts - 获取用户帖子列表
-router.get('/:id/posts', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/posts', 
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => {
+      const { id } = req.params;
+      const { limit = 10, offset = 0, category, status } = req.query;
+      const queryParams = JSON.stringify({ limit: Number(limit), offset: Number(offset), category, status });
+      return `user:${id}:posts:${queryParams}`;
+    },
+    ttl: CACHE_TTL.MEDIUM
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { 
@@ -97,7 +111,18 @@ router.get('/:id/posts', asyncHandler(async (req: Request, res: Response): Promi
 }));
 
 // GET /api/users/:id/activities - 获取用户参加的活动列表
-router.get('/:id/activities', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/activities', 
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => {
+      const { id } = req.params;
+      const { limit = 10, offset = 0, category, status = 'published' } = req.query;
+      const queryParams = JSON.stringify({ limit: Number(limit), offset: Number(offset), category, status });
+      return `user:${id}:activities:${queryParams}`;
+    },
+    ttl: CACHE_TTL.MEDIUM
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { 
@@ -176,7 +201,18 @@ router.get('/:id/activities', asyncHandler(async (req: Request, res: Response): 
 }));
 
 // GET /api/users/:id/created-activities - 获取用户创建的活动
-router.get('/:id/created-activities', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/created-activities', 
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => {
+      const { id } = req.params;
+      const { limit = 10, offset = 0, category, status = 'published' } = req.query;
+      const queryParams = JSON.stringify({ limit: Number(limit), offset: Number(offset), category, status });
+      return `user:${id}:created_activities:${queryParams}`;
+    },
+    ttl: CACHE_TTL.MEDIUM
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params;
     const { 

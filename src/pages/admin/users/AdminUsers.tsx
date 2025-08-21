@@ -1,9 +1,10 @@
 import React from 'react'
-import { UserPlus, ChevronLeft, ChevronRight, X, Trash2, User } from 'lucide-react'
+import { UserPlus, ChevronLeft, ChevronRight, X, Trash2, User, RefreshCw } from 'lucide-react'
 import AdminLayout from '../../../components/AdminLayout'
 import { useLanguage } from '../../../contexts/language'
 import UserFilters from './UserFilters'
 import UserList from './UserList'
+import UserStatsPanel from './UserStatsPanel'
 import { UserModal, AddUserModal, PasswordModal } from './UserModal'
 import { useUserManagement } from './hooks/useUserManagement'
 import { generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '../../../utils/avatarGenerator'
@@ -18,6 +19,10 @@ const AdminUsers = () => {
     isSubmitting,
     isUpdatingPassword,
     pagination,
+    
+    // 缓存状态
+    isCacheHit,
+    cacheTimestamp,
     
     // 筛选状态
     searchTerm,
@@ -35,6 +40,7 @@ const AdminUsers = () => {
     
     // 操作方法
     fetchUsers,
+    forceRefresh,
     updateUserStatus,
     updateUserRole,
     deleteUser,
@@ -81,15 +87,46 @@ const AdminUsers = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('admin.users.title')}</h1>
-            <p className="text-gray-600 mt-1">{t('admin.users.description')}</p>
+            <div className="flex items-center space-x-4 mt-1">
+              <p className="text-gray-600">{t('admin.users.description')}</p>
+              
+              {/* 缓存状态指示器 */}
+              {!loading && (
+                <div className="flex items-center space-x-2 text-sm">
+                  <div className={`w-2 h-2 rounded-full ${isCacheHit ? 'bg-green-500' : 'bg-blue-500'}`} />
+                  <span className="text-gray-500">
+                    {isCacheHit ? '缓存数据' : '实时数据'}
+                    {cacheTimestamp && (
+                      <span className="ml-1 text-xs">
+                        ({new Date(cacheTimestamp).toLocaleTimeString()})
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-          <button
-            onClick={() => setShowAddUserModal(true)}
-            className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-          >
-            <UserPlus className="w-5 h-5" />
-            <span>{t('admin.users.addUser')}</span>
-          </button>
+          
+          <div className="flex items-center space-x-2">
+            {/* 强制刷新按钮 */}
+            <button
+              onClick={forceRefresh}
+              disabled={loading}
+              className="flex items-center space-x-2 text-purple-600 hover:text-purple-800 px-3 py-2 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50"
+              title={isCacheHit ? '刷新缓存' : '刷新'}
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <span>{isCacheHit ? '刷新缓存' : '刷新'}</span>
+            </button>
+            
+            <button
+              onClick={() => setShowAddUserModal(true)}
+              className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <UserPlus className="w-5 h-5" />
+              <span>{t('admin.users.addUser')}</span>
+            </button>
+          </div>
         </div>
 
         {/* 筛选器 */}
@@ -101,6 +138,9 @@ const AdminUsers = () => {
           selectedRole={selectedRole}
           setSelectedRole={setSelectedRole}
         />
+
+        {/* 用户统计面板 */}
+        <UserStatsPanel />
 
         {/* 用户列表 */}
         <UserList

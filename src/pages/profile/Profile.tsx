@@ -5,6 +5,7 @@ import { cn } from '../../lib/utils'
 import { useLanguage } from '../../contexts/language'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import CreatePostModal from '../../components/CreatePostModal'
+import CacheStatusIndicator from '../../components/CacheStatusIndicator'
 import UserProfileCard from './UserProfileCard'
 import UserStatsPanel from './UserStatsPanel'
 import UserPostsList from './UserPostsList'
@@ -13,6 +14,7 @@ import ProfileSettings from './ProfileSettings.tsx'
 import NotificationsList from './NotificationsList.tsx'
 import UserProfileManagement from './UserProfileManagement'
 import { useUserProfile } from './hooks/useUserProfile'
+import userDataCache from '../../services/userDataCache'
 
 const Profile: React.FC = () => {
   const { t } = useLanguage()
@@ -100,13 +102,16 @@ const Profile: React.FC = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">{t('profile.title')}</h1>
             <p className="text-gray-600 mt-1">{t('profile.subtitle')}</p>
           </div>
-          <button
-            onClick={() => setIsCreatePostModalOpen(true)}
-            className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{t('profile.createPost')}</span>
-          </button>
+          <div className="flex items-center space-x-3">
+
+            <button
+              onClick={() => setIsCreatePostModalOpen(true)}
+              className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t('profile.createPost')}</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -263,7 +268,10 @@ const Profile: React.FC = () => {
           isOpen={isCreatePostModalOpen}
           onClose={() => {
             setIsCreatePostModalOpen(false)
-            loadUserData() // 重新加载用户数据
+            // 创建新帖子后标记缓存需要刷新
+            if (user) {
+              userDataCache.markForRefresh(user.id)
+            }
           }}
         />
       </div>

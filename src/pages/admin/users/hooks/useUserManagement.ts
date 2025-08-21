@@ -24,6 +24,8 @@ export const useUserManagement = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
+  const [isCacheHit, setIsCacheHit] = useState(false)
+  const [cacheTimestamp, setCacheTimestamp] = useState<string>('')
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 10,
@@ -47,6 +49,17 @@ export const useUserManagement = () => {
         selectedStatus, 
         selectedRole
       )
+      
+      // 处理缓存信息
+      const cacheInfo = (response as any)._cacheInfo
+      if (cacheInfo) {
+        setIsCacheHit(cacheInfo.cached || false)
+        setCacheTimestamp(cacheInfo.timestamp || '')
+      } else {
+        setIsCacheHit(false)
+        setCacheTimestamp('')
+      }
+      
       setUsers(response.users)
       setPagination(response.pagination)
     } catch (error) {
@@ -64,6 +77,63 @@ export const useUserManagement = () => {
       setLoading(false)
     }
   }, [pagination.page, pagination.limit, searchTerm, selectedStatus, selectedRole, navigate])
+
+  // 强制刷新（跳过缓存）
+  const forceRefresh = useCallback(async () => {
+    // 添加一个时间戳参数来强制跳过缓存
+    const timestamp = Date.now()
+    try {
+      setLoading(true)
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        _t: timestamp.toString()
+      })
+      
+      if (searchTerm && searchTerm.trim()) {
+        params.append('search', searchTerm.trim())
+      }
+      if (selectedStatus && selectedStatus !== 'all') {
+        params.append('status', selectedStatus)
+      }
+      if (selectedRole && selectedRole !== 'all') {
+        params.append('role', selectedRole)
+      }
+      
+      // 直接调用 fetch 来绕过可能的客户端缓存
+      const response = await fetch(`/api/admin/users?${params.toString()}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      
+      const data = await response.json()
+      
+      // 处理缓存信息
+      const cacheInfo = data._cacheInfo
+      if (cacheInfo) {
+        setIsCacheHit(cacheInfo.cached || false)
+        setCacheTimestamp(cacheInfo.timestamp || '')
+      } else {
+        setIsCacheHit(false)
+        setCacheTimestamp('')
+      }
+      
+      setUsers(data.users)
+      setPagination(data.pagination)
+      toast.success('数据已刷新')
+    } catch (error) {
+      console.error('强制刷新失败:', error)
+      toast.error('刷新失败')
+    } finally {
+      setLoading(false)
+    }
+  }, [pagination.page, pagination.limit, searchTerm, selectedStatus, selectedRole])
 
   // 切换页面
   const changePage = (page: number) => {
@@ -214,6 +284,10 @@ export const useUserManagement = () => {
     isUpdatingPassword,
     pagination,
     
+    // 缓存状态
+    isCacheHit,
+    cacheTimestamp,
+    
     // 筛选状态
     searchTerm,
     setSearchTerm,
@@ -230,6 +304,7 @@ export const useUserManagement = () => {
     
     // 操作方法
     fetchUsers,
+    forceRefresh,
     updateUserStatus,
     updateUserRole,
     deleteUser,

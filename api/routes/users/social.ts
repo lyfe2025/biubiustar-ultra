@@ -5,11 +5,24 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../../lib/supabase';
 import asyncHandler from '../../middleware/asyncHandler.js';
+import { createUserSpecificCacheMiddleware } from '../../middleware/cache.js';
+import { userCache } from '../../lib/cacheInstances.js';
+import { CACHE_TTL } from '../../config/cache.js';
 
 const router = Router();
 
 // GET /api/users/:id/followers - 获取粉丝列表
-router.get('/:id/followers', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/followers', 
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => {
+      const { id } = req.params;
+      const { limit = 10, offset = 0 } = req.query;
+      return `user:${id}:followers:${limit}:${offset}`;
+    },
+    ttl: CACHE_TTL.MEDIUM
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { id } = req.params;
     const { limit = 10, offset = 0 } = req.query;
 
@@ -40,7 +53,17 @@ router.get('/:id/followers', asyncHandler(async (req: Request, res: Response): P
 }));
 
 // GET /api/users/:id/following - 获取关注列表
-router.get('/:id/following', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/following',
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => {
+      const { id } = req.params;
+      const { limit = 10, offset = 0 } = req.query;
+      return `user:${id}:following:${limit}:${offset}`;
+    },
+    ttl: CACHE_TTL.MEDIUM
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { id } = req.params;
     const { limit = 10, offset = 0 } = req.query;
 
@@ -71,7 +94,16 @@ router.get('/:id/following', asyncHandler(async (req: Request, res: Response): P
 }));
 
 // GET /api/users/:id/followers/count - 获取粉丝数
-router.get('/:id/followers/count', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/followers/count',
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => {
+      const { id } = req.params;
+      return `user:${id}:followers:count`;
+    },
+    ttl: CACHE_TTL.MEDIUM
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { id } = req.params;
 
     const { count, error } = await supabase
@@ -89,7 +121,16 @@ router.get('/:id/followers/count', asyncHandler(async (req: Request, res: Respon
 }));
 
 // GET /api/users/:id/following/count - 获取关注数
-router.get('/:id/following/count', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.get('/:id/following/count',
+  createUserSpecificCacheMiddleware({
+    cacheService: userCache,
+    keyGenerator: (req) => {
+      const { id } = req.params;
+      return `user:${id}:following:count`;
+    },
+    ttl: CACHE_TTL.MEDIUM
+  }),
+  asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
     const { id } = req.params;
 
     const { count, error } = await supabase

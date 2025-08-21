@@ -12,6 +12,7 @@ import { UploadSecurity, DEFAULT_UPLOAD_CONFIGS } from '../../utils/uploadSecuri
 import { createUserSpecificCacheMiddleware } from '../../middleware/cache';
 import { userCache } from '../../lib/cacheInstances';
 import { invalidateUserCache } from '../../services/cacheInvalidation';
+import { invalidateOnProfileUpdate, invalidateOnAvatarChange } from '../../utils/profileCacheInvalidation.js';
 import { CACHE_TTL } from '../../config/cache';
 
 const router = Router();
@@ -98,7 +99,7 @@ router.put('/:id/profile', asyncHandler(async (req: Request, res: Response): Pro
   }
 
   // 清除相关缓存
-  await invalidateUserCache(id);
+  await invalidateOnProfileUpdate(id);
 
   res.json(data);
 }));
@@ -189,7 +190,7 @@ router.post('/avatar', upload.single('avatar'), asyncHandler(async (req: Request
     console.log(`头像上传成功: ${safeFileName}, 大小: ${file.size} bytes, URL: ${avatarUrl}`);
 
     // 清除用户缓存
-    await invalidateUserCache(user.id);
+    await invalidateOnAvatarChange(user.id);
 
     res.json({
       message: '头像上传成功',

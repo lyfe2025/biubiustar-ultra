@@ -2,6 +2,9 @@ import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase.js'
 import { requireAdmin } from '../auth.js'
 import asyncHandler from '../../../middleware/asyncHandler.js'
+import { contentCache } from '../../../lib/cacheInstances.js'
+import { CacheKeyGenerator, CACHE_TTL } from '../../../config/cache.js'
+import { invalidateOnCategoryDataChange } from '../../../utils/activityCacheInvalidation.js'
 
 const router = Router()
 
@@ -13,6 +16,22 @@ router.use(requireAdmin)
 // 获取所有分类
 router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
+    // 生成缓存键
+    const cacheKey = CacheKeyGenerator.adminActivityCategories()
+
+    // 尝试从缓存获取数据
+    const cachedData = await contentCache.get(cacheKey)
+    if (cachedData && Array.isArray(cachedData)) {
+      return res.json({
+        categories: cachedData,
+        _cacheInfo: {
+          cached: true,
+          timestamp: new Date().toISOString()
+        }
+      })
+    }
+
+    // 缓存未命中，从数据库获取数据
     const { data: categories, error } = await supabaseAdmin
       .from('activity_categories')
       .select('*')
@@ -23,7 +42,18 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
       return res.status(500).json({ error: '获取分类列表失败' })
     }
 
-    res.json(categories || [])
+    const responseData = categories || []
+
+    // 缓存数据 (TTL: 30分钟，分类变化不频繁)
+    await contentCache.set(cacheKey, responseData, CACHE_TTL.LONG)
+
+    res.json({
+      categories: responseData,
+      _cacheInfo: {
+        cached: false,
+        timestamp: new Date().toISOString()
+      }
+    })
   } catch (error) {
     console.error('获取分类列表失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
@@ -91,6 +121,9 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
       console.error('创建分类失败:', error)
       return res.status(500).json({ error: '创建分类失败' })
     }
+
+    // 智能缓存失效
+    await invalidateOnCategoryDataChange()
 
     res.status(201).json(category)
   } catch (error) {
@@ -184,6 +217,9 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
       return res.status(404).json({ error: '分类不存在' })
     }
 
+    // 智能缓存失效
+    await invalidateOnCategoryDataChange()
+
     res.json(category)
   } catch (error) {
     console.error('更新分类失败:', error)
@@ -223,6 +259,9 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
       return res.status(500).json({ error: '删除分类失败' })
     }
 
+    // 智能缓存失效
+    await invalidateOnCategoryDataChange()
+
     res.json({ success: true })
   } catch (error) {
     console.error('删除分类失败:', error)
@@ -261,6 +300,9 @@ router.put('/:id/toggle', asyncHandler(async (req: Request, res: Response): Prom
       console.error('切换分类状态失败:', error)
       return res.status(500).json({ error: '切换分类状态失败' })
     }
+
+    // 智能缓存失效
+    await invalidateOnCategoryDataChange()
 
     res.json(updatedCategory)
   } catch (error) {
