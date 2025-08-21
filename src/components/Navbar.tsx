@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X, LogOut, Globe } from 'lucide-react'
+import { Menu, X, LogOut, Globe, ChevronUp } from 'lucide-react'
 import { useLanguage } from '../contexts/language'
 import { useAuth } from '../contexts/AuthContext'
 import { isDefaultAvatar, generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '../utils/avatarGenerator'
@@ -15,10 +15,24 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [showBackToTop, setShowBackToTop] = useState(false)
   const { user, userProfile, logout } = useAuth()
   const { t } = useLanguage()
   const location = useLocation()
   const { siteName, siteLogo } = useSiteInfo()
+
+  // 监听页面滚动
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      setIsScrolled(scrollTop > 10)
+      setShowBackToTop(scrollTop > 200)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const openAuthModal = (type: 'login' | 'register') => {
     onRequireAuth(type)
@@ -37,6 +51,13 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
     setShowLogoutConfirm(false)
   }
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }
+
   const navItems = [
     { key: 'nav.home', path: '/' },
     { key: 'nav.trending', path: '/trending' },
@@ -50,7 +71,12 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-purple-100">
+      <nav className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out border-b",
+        isScrolled 
+          ? "bg-white/80 backdrop-blur-md border-purple-100/50" 
+          : "bg-white border-purple-100"
+      )}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -152,7 +178,12 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
           {/* Mobile Navigation */}
           {isMenuOpen && (
             <div className="md:hidden">
-              <div className="px-2 pt-2 pb-3 space-y-1 bg-white/90 backdrop-blur-sm rounded-lg mt-2 border border-purple-100">
+              <div className={cn(
+                "px-2 pt-2 pb-3 space-y-1 rounded-lg mt-2 border transition-all duration-300",
+                isScrolled 
+                  ? "bg-white/90 backdrop-blur-sm border-purple-100/50" 
+                  : "bg-white border-purple-100"
+              )}>
                 {navItems.map((item) => (
                   <Link
                     key={item.path}
@@ -253,6 +284,19 @@ const Navbar: React.FC<NavbarProps> = ({ onRequireAuth }) => {
           </div>
         </div>
       )}
+
+      {/* Back to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-6 right-6 z-40 w-10 h-10 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-600 ease-out transform hover:scale-110 flex items-center justify-center group ${
+          showBackToTop 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+        aria-label="回到顶部"
+      >
+        <ChevronUp className="w-5 h-5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5" />
+      </button>
     </>
   )
 }
