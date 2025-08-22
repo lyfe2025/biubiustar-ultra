@@ -81,30 +81,34 @@ export default defineConfig({
         manualChunks: (id) => {
           // 第三方库分组 - 更细粒度的分割
           if (id.includes('node_modules')) {
-            // React 生态系统
-            if (id.includes('react') && !id.includes('react-router')) {
-              return 'vendor-react';
+            // React 核心库
+            if (id.includes('react/') && !id.includes('react-dom') && !id.includes('react-router')) {
+              return 'vendor-react-core';
             }
+            
+            // React DOM
             if (id.includes('react-dom')) {
               return 'vendor-react-dom';
             }
+            
+            // 路由相关
             if (id.includes('react-router')) {
               return 'vendor-router';
             }
             
-            // UI 和图标库
-            if (id.includes('lucide-react')) {
-              return 'vendor-icons';
+            // Supabase 相关
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
             }
             
-            // 日期和国际化
+            // 日期处理库
             if (id.includes('date-fns')) {
               return 'vendor-date';
             }
             
-            // 数据库和API
-            if (id.includes('@supabase') || id.includes('supabase')) {
-              return 'vendor-supabase';
+            // 图标库 - 单独分组
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
             }
             
             // 状态管理
@@ -121,25 +125,62 @@ export default defineConfig({
             return 'vendor-misc';
           }
           
-          // 应用代码分组 - 按功能模块分割
+          // 应用代码分组 - 按功能模块细分
           if (id.includes('src/')) {
-            // 管理员相关
+            // 管理员模块细分 - 按子功能分割
             if (id.includes('src/pages/admin') || id.includes('src/components/admin')) {
-              return 'app-admin';
+              // 管理员用户管理
+              if (id.includes('admin/users') || id.includes('AdminUsers') || id.includes('UserManagement')) {
+                return 'app-admin-users';
+              }
+              
+              // 管理员内容管理
+              if (id.includes('admin/content') || id.includes('AdminContent') || id.includes('ContentManagement')) {
+                return 'app-admin-content';
+              }
+              
+              // 管理员设置
+              if (id.includes('admin/settings') || id.includes('AdminSettings') || id.includes('SystemSettings')) {
+                return 'app-admin-settings';
+              }
+              
+              // 管理员性能监控
+              if (id.includes('AdminSystemPerformance') || id.includes('AdminCachePerformance') || id.includes('CacheConfigManager')) {
+                return 'app-admin-performance';
+              }
+              
+              // 管理员核心功能（仪表板、登录等）
+              if (id.includes('AdminDashboard') || id.includes('AdminLogin') || id.includes('AdminLogs') || id.includes('AdminSecurity')) {
+                return 'app-admin-core';
+              }
+              
+              // 其他管理员功能
+              return 'app-admin-misc';
             }
             
-            // 用户相关
+            // 用户相关 - 进一步细分
             if (id.includes('src/pages/profile') || id.includes('src/components/profile')) {
-              return 'app-profile';
+              // 用户设置和管理
+              if (id.includes('ProfileSettings') || id.includes('UserProfileManagement') || id.includes('NotificationsList')) {
+                return 'app-profile-settings';
+              }
+              
+              // 用户活动和内容
+              if (id.includes('UserActivitiesList') || id.includes('UserPostsList') || id.includes('UserStatsPanel')) {
+                return 'app-profile-content';
+              }
+              
+              // 用户基础信息
+              return 'app-profile-core';
             }
             
             // 活动相关
-            if (id.includes('src/pages/activities') || id.includes('src/components/activities')) {
+            if (id.includes('src/pages/Activities') || id.includes('src/pages/ActivityDetail') || id.includes('src/components/activities')) {
               return 'app-activities';
             }
             
             // 帖子相关
-            if (id.includes('src/pages/posts') || id.includes('src/components/posts')) {
+            if (id.includes('src/pages/posts') || id.includes('src/components/posts') || id.includes('PostDetail')) {
               return 'app-posts';
             }
             
@@ -243,8 +284,8 @@ export default defineConfig({
     target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
     cssCodeSplit: true,
     sourcemap: process.env.NODE_ENV === 'development',
-    // 设置 chunk 大小警告限制
-    chunkSizeWarningLimit: 800,
+    // 设置 chunk 大小警告限制 - 调整到更合理的值
+    chunkSizeWarningLimit: 600,
     // 启用实验性功能
     reportCompressedSize: false,
     // 优化资源内联
