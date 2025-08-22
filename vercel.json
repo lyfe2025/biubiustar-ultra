@@ -3,24 +3,6 @@
   "env": {
     "NPM_CONFIG_REGISTRY": "https://registry.npmmirror.com"
   },
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "50mb",
-        "runtime": "nodejs18.x",
-        "includeFiles": "api/**",
-        "excludeFiles": [
-          "api/**/!(index).ts",
-          "api/**/!(index).js",
-          "api/**/*.d.ts"
-        ]
-      }
-    }
-  ],
-
-
   "rewrites": [
     {
       "source": "/api/(.*)",
