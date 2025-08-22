@@ -73,8 +73,6 @@ tailwind.config.js
 tailwind.config.ts
 postcss.config.js
 postcss.config.ts
-tsconfig.json
-tsconfig.*.json
 
 # 📜 脚本目录（防止被识别为 API 路由）
 scripts/
