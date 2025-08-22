@@ -96,9 +96,22 @@ export default defineConfig({
               return 'vendor-router';
             }
             
-            // Supabase 相关
+            // Supabase 相关 - 细粒度分割
             if (id.includes('@supabase')) {
-              return 'vendor-supabase';
+              // Supabase 核心客户端
+              if (id.includes('@supabase/supabase-js') && !id.includes('realtime') && !id.includes('storage')) {
+                return 'vendor-supabase-core';
+              }
+              // Supabase 实时功能
+              if (id.includes('realtime') || id.includes('websocket')) {
+                return 'vendor-supabase-realtime';
+              }
+              // Supabase 存储功能
+              if (id.includes('storage')) {
+                return 'vendor-supabase-storage';
+              }
+              // 其他 Supabase 功能
+              return 'vendor-supabase-misc';
             }
             
             // 日期处理库
@@ -106,9 +119,22 @@ export default defineConfig({
               return 'vendor-date';
             }
             
-            // 图标库 - 单独分组
+            // 图标库 - 更细粒度分组
             if (id.includes('lucide-react')) {
-              return 'vendor-icons';
+              // 常用图标单独分组
+              if (id.includes('/user') || id.includes('/calendar') || id.includes('/map-pin') || 
+                  id.includes('/users') || id.includes('/clock') || id.includes('/heart') ||
+                  id.includes('/message-circle') || id.includes('/share-2') || id.includes('/search')) {
+                return 'vendor-icons-common';
+              }
+              // 管理员图标
+              if (id.includes('/settings') || id.includes('/shield') || id.includes('/database') ||
+                  id.includes('/bar-chart') || id.includes('/activity') || id.includes('/server') ||
+                  id.includes('/monitor') || id.includes('/cpu') || id.includes('/hard-drive')) {
+                return 'vendor-icons-admin';
+              }
+              // 其他图标
+              return 'vendor-icons-misc';
             }
             
             // 状态管理
@@ -130,17 +156,33 @@ export default defineConfig({
             // 管理员模块细分 - 按子功能分割
             if (id.includes('src/pages/admin') || id.includes('src/components/admin')) {
               // 管理员用户管理
-              if (id.includes('admin/users') || id.includes('AdminUsers') || id.includes('UserManagement')) {
+              if (id.includes('admin/users') || id.includes('AdminUsers') || id.includes('UserManagement') ||
+                  id.includes('UserFilters') || id.includes('UserList') || id.includes('UserModal') || id.includes('UserActions') ||
+                  id.includes('UserStatsPanel') || id.includes('useUserManagement')) {
                 return 'app-admin-users';
               }
               
-              // 管理员内容管理
-              if (id.includes('admin/content') || id.includes('AdminContent') || id.includes('ContentManagement')) {
-                return 'app-admin-content';
+              // 管理员内容列表和预览
+              if (id.includes('ContentList') || id.includes('ContentPreview') || id.includes('ContentFilters')) {
+                return 'app-admin-content-list';
+              }
+              
+              // 管理员分类管理
+              if (id.includes('CategoryManagement') || id.includes('CreateContentCategoryForm') || id.includes('EditContentCategoryForm')) {
+                return 'app-admin-content-categories';
+              }
+              
+              // 管理员内容核心
+              if (id.includes('admin/content') || id.includes('AdminContent') || id.includes('ContentManagement') ||
+                  id.includes('useContentManagement')) {
+                return 'app-admin-content-core';
               }
               
               // 管理员设置
-              if (id.includes('admin/settings') || id.includes('AdminSettings') || id.includes('SystemSettings')) {
+              if (id.includes('admin/settings') || id.includes('AdminSettings') || id.includes('SystemSettings') ||
+                  id.includes('BasicSettings') || id.includes('ContentSettings') || id.includes('EmailSettings') ||
+                  id.includes('SecuritySettings') || id.includes('ThemeSettings') || id.includes('UserSettings') ||
+                  id.includes('useSystemSettings')) {
                 return 'app-admin-settings';
               }
               
@@ -149,8 +191,28 @@ export default defineConfig({
                 return 'app-admin-performance';
               }
               
+              // 管理员活动管理
+              if (id.includes('AdminActivities') || id.includes('ActivityList') || id.includes('useActivities')) {
+                return 'app-admin-activities';
+              }
+              
+              // 管理员分类管理
+              if (id.includes('AdminCategories') || id.includes('useCategories')) {
+                return 'app-admin-categories';
+              }
+              
+              // 管理员安全和日志
+              if (id.includes('AdminSecurity') || id.includes('AdminLogs')) {
+                return 'app-admin-security';
+              }
+              
+              // 管理员联系人管理
+              if (id.includes('AdminContacts')) {
+                return 'app-admin-contacts';
+              }
+              
               // 管理员核心功能（仪表板、登录等）
-              if (id.includes('AdminDashboard') || id.includes('AdminLogin') || id.includes('AdminLogs') || id.includes('AdminSecurity')) {
+              if (id.includes('AdminDashboard') || id.includes('AdminLogin') || id.includes('useDashboard')) {
                 return 'app-admin-core';
               }
               
@@ -285,7 +347,7 @@ export default defineConfig({
     cssCodeSplit: true,
     sourcemap: process.env.NODE_ENV === 'development',
     // 设置 chunk 大小警告限制 - 调整到更合理的值
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 350,
     // 启用实验性功能
     reportCompressedSize: false,
     // 优化资源内联
