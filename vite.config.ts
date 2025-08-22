@@ -172,22 +172,22 @@ export default defineConfig({
         },
         entryFileNames: 'js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
+          const info = assetInfo.name?.split('.') || [];
           const ext = info[info.length - 1];
-          if (/\.(png|jpe?g|gif|svg|webp|ico)$/i.test(assetInfo.name)) {
+          if (assetInfo.name && /\.(png|jpe?g|gif|svg|webp|ico)$/i.test(assetInfo.name)) {
             return `images/[name]-[hash].${ext}`;
           }
-          if (/\.(css)$/i.test(assetInfo.name)) {
+          if (assetInfo.name && /\.(css)$/i.test(assetInfo.name)) {
             return `css/[name]-[hash].${ext}`;
           }
-          if (/\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name)) {
+          if (assetInfo.name && /\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name)) {
             return `fonts/[name]-[hash].${ext}`;
           }
           return `assets/[name]-[hash].${ext}`;
         }
       }
     },
-    // 启用 Terser 压缩 - 增强配置
+    // 启用 Terser 压缩 - 优化配置
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -211,34 +211,32 @@ export default defineConfig({
         // 优化循环
         loops: true,
         // 移除重复代码
-        hoist_funs: true,
-        // 内联函数
-        inline: 2,
+        hoist_funs: false, // 改为 false，避免潜在的作用域问题
+        // 内联函数 - 使用更保守的设置
+        inline: 1, // 从 2 改为 1，只内联简单函数
         // 优化对象属性访问
         properties: true,
-        // 移除空语句
-        drop_empty: true,
         // 合并变量声明
         join_vars: true,
         // 优化序列表达式
-        sequences: true
+        sequences: true,
+        // 添加 ECMAScript 版本支持
+        ecma: 2020
       },
       mangle: {
-        // 保留类名（可选，根据需要调整）
+        // 保留类名和函数名以便调试
         keep_classnames: false,
         keep_fnames: false,
-        // 混淆属性名
+        // 混淆属性名 - 更安全的配置
         properties: {
-          regex: /^_/
+          regex: /^_private/
         },
         // 保留特定标识符
-        reserved: ['$', 'exports', 'require']
+        reserved: ['$', 'exports', 'require', 'global', 'window']
       },
       format: {
         // 移除注释
-        comments: false,
-        // 保留许可证注释
-        preserve_annotations: false
+        comments: false
       }
     },
     // 构建优化选项
@@ -304,7 +302,7 @@ export default defineConfig({
     // 强制预构建
     force: false,
     // 预构建缓存目录
-    cacheDir: 'node_modules/.vite',
+    // 预构建缓存目录（注意：cacheDir 在新版本 Vite 中已被移除）
     // ESBuild 选项
     esbuildOptions: {
       target: 'es2020',

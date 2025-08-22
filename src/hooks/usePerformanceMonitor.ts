@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { performanceMonitor, PerformanceMetric } from '../services/PerformanceMonitor'
+import { performanceMonitor, PerformanceMetric } from '../services/performanceMonitor';
 
 interface PerformanceStats {
   totalRequests: number
