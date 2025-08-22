@@ -1,4 +1,7 @@
 {
+  "// Configuration Purpose": "This vercel.json is optimized for Hobby plan (12 Serverless Functions limit)",
+  "// Key Strategy": "Single entry point (api/index.ts) handles all API routes to avoid function count limit",
+  "// Important": "Do NOT add .ts/.js files directly in api/ root - they will be treated as separate functions",
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
@@ -14,16 +17,23 @@
       "config": {
         "maxLambdaSize": "50mb",
         "runtime": "nodejs18.x",
-        "includeFiles": "api/**"
+        "includeFiles": "api/**",
+        "excludeFiles": [
+          "api/**/!(index).ts",
+          "api/**/!(index).js",
+          "api/**/*.d.ts"
+        ]
       }
     }
   ],
+  "// Functions Configuration": "Only api/index.ts is configured as a Serverless Function",
   "functions": {
     "api/index.ts": {
       "maxDuration": 30,
       "memory": 512
     }
   },
+  "// Rewrites Configuration": "All /api/* requests are routed to single entry point",
   "rewrites": [
     {
       "source": "/api/(.*)",
