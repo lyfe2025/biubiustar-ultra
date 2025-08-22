@@ -400,9 +400,12 @@ manage_ip_blacklist() {
     echo -e "${YELLOW}请选择操作：${NC}"
     echo "1. 查看被限制的IP列表"
     echo "2. 解除指定IP限制"
-    echo "3. 返回主菜单"
+    echo "3. 清理已过期的IP记录"
+    echo "4. 检查频率限制状态"
+    echo "5. 清除指定IP的频率限制"
+    echo "6. 返回主菜单"
     echo ""
-    echo -n "请输入选项 (1-3): "
+    echo -n "请输入选项 (1-6): "
     
     read -r ip_choice
     
@@ -414,6 +417,15 @@ manage_ip_blacklist() {
             unblock_ip
             ;;
         3)
+            cleanup_expired_ips
+            ;;
+        4)
+            check_rate_limit_status
+            ;;
+        5)
+            clear_ip_rate_limit
+            ;;
+        6)
             return
             ;;
         *)
@@ -435,7 +447,7 @@ show_blocked_ips() {
         return
     fi
     
-    # 直接通过Node.js连接Supabase查询IP黑名单
+    # 直接通过Node.js连接Supabase查询IP黑名单（过滤已过期记录）
     response=$(node --input-type=module -e "
         import dotenv from 'dotenv';
         import { createClient } from '@supabase/supabase-js';
@@ -454,6 +466,9 @@ show_blocked_ips() {
         
         (async () => {
             try {
+                const currentTime = new Date().toISOString();
+                
+                // 查询所有IP黑名单记录
                 const { data, error } = await supabase
                     .from('ip_blacklist')
                     .select('*')
@@ -465,7 +480,17 @@ show_blocked_ips() {
                     return;
                 }
                 
-                console.log(JSON.stringify({ success: true, data: data || [] }));
+                // 过滤掉已过期的记录（blocked_until不为null且小于当前时间）
+                const activeBlacklist = (data || []).filter(item => {
+                    if (!item.blocked_until) {
+                        // 永久封禁
+                        return true;
+                    }
+                    // 检查是否已过期
+                    return new Date(item.blocked_until) > new Date(currentTime);
+                });
+                
+                console.log(JSON.stringify({ success: true, data: activeBlacklist }));
             } catch (err) {
                 console.log(JSON.stringify({ error: '数据库连接失败: ' + err.message }));
             }
@@ -538,7 +563,7 @@ unblock_ip() {
         return
     fi
     
-    # 首先显示当前被限制的IP列表供参考
+    # 首先显示当前被限制的IP列表供参考（过滤已过期记录）
     echo -e "${YELLOW}当前被限制的IP列表：${NC}"
     list_response=$(node --input-type=module -e "
         import dotenv from 'dotenv';
@@ -558,11 +583,13 @@ unblock_ip() {
         
         (async () => {
             try {
+                const currentTime = new Date().toISOString();
+                
                 const { data, error } = await supabase
                     .from('ip_blacklist')
-                    .select('ip_address, reason')
+                    .select('ip_address, reason, blocked_until')
                     .order('created_at', { ascending: false })
-                    .limit(10);
+                    .limit(20);
                 
                 if (error) {
                     console.log('查询失败');
@@ -570,9 +597,21 @@ unblock_ip() {
                 }
                 
                 if (data && data.length > 0) {
-                    data.forEach((item, index) => {
-                        console.log(\`\${index + 1}. \${item.ip_address} (\${item.reason || '未知原因'})\`);
+                    // 过滤掉已过期的记录
+                    const activeBlacklist = data.filter(item => {
+                        if (!item.blocked_until) {
+                            return true; // 永久封禁
+                        }
+                        return new Date(item.blocked_until) > new Date(currentTime);
                     });
+                    
+                    if (activeBlacklist.length > 0) {
+                        activeBlacklist.slice(0, 10).forEach((item, index) => {
+                            console.log(\`\${index + 1}. \${item.ip_address} (\${item.reason || '未知原因'})\`);
+                        });
+                    } else {
+                        console.log('暂无被限制的IP地址');
+                    }
                 } else {
                     console.log('暂无被限制的IP地址');
                 }
@@ -696,6 +735,195 @@ unblock_ip() {
     else
         echo -e "${YELLOW}操作完成，但响应格式异常：${NC}"
         echo "$unblock_response"
+    fi
+    
+    echo ""
+    read -p "按回车键继续..."
+    manage_ip_blacklist
+}
+
+# 清理已过期的IP记录
+cleanup_expired_ips() {
+    echo -e "${YELLOW}正在清理已过期的IP记录...${NC}"
+    
+    # 使用Node.js脚本清理过期记录
+    cleanup_response=$(node -e "
+        const { createClient } = require('@supabase/supabase-js');
+        
+        (async () => {
+            try {
+                const supabaseUrl = process.env.SUPABASE_URL;
+                const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+                
+                if (!supabaseUrl || !supabaseKey) {
+                    console.log(JSON.stringify({ error: 'Supabase配置缺失' }));
+                    return;
+                }
+                
+                const supabase = createClient(supabaseUrl, supabaseKey);
+                const currentTime = new Date().toISOString();
+                
+                // 查询过期的记录
+                const { data: expiredRecords, error: queryError } = await supabase
+                    .from('ip_blacklist')
+                    .select('*')
+                    .not('blocked_until', 'is', null)
+                    .lt('blocked_until', currentTime);
+                
+                if (queryError) {
+                    console.log(JSON.stringify({ error: '查询过期记录失败: ' + queryError.message }));
+                    return;
+                }
+                
+                if (!expiredRecords || expiredRecords.length === 0) {
+                    console.log(JSON.stringify({ success: true, message: '没有找到过期的IP记录', count: 0 }));
+                    return;
+                }
+                
+                // 删除过期记录
+                const { error: deleteError } = await supabase
+                    .from('ip_blacklist')
+                    .delete()
+                    .not('blocked_until', 'is', null)
+                    .lt('blocked_until', currentTime);
+                
+                if (deleteError) {
+                    console.log(JSON.stringify({ error: '删除过期记录失败: ' + deleteError.message }));
+                    return;
+                }
+                
+                // 记录清理操作到安全日志
+                await supabase
+                    .from('security_logs')
+                    .insert({
+                        event_type: 'ip_cleanup',
+                        details: { 
+                            reason: 'Automatic cleanup of expired IP records',
+                            cleaned_count: expiredRecords.length,
+                            cleaned_ips: expiredRecords.map(r => r.ip_address)
+                        },
+                        created_at: new Date().toISOString()
+                    });
+                
+                console.log(JSON.stringify({ 
+                    success: true, 
+                    message: '已清理过期的IP记录', 
+                    count: expiredRecords.length,
+                    cleaned_ips: expiredRecords.map(r => r.ip_address)
+                }));
+            } catch (err) {
+                console.log(JSON.stringify({ error: '清理操作失败: ' + err.message }));
+            }
+        })();
+    " 2>&1 | grep '^{')
+    
+    if [ $? -ne 0 ] || [ -z "$cleanup_response" ]; then
+        echo -e "${RED}错误: 无法执行清理操作，请检查Node.js环境和依赖${NC}"
+        read -p "按回车键继续..."
+        manage_ip_blacklist
+        return
+    fi
+    
+    # 检查响应结果
+    if echo "$cleanup_response" | grep -q '"success":true'; then
+        count=$(echo "$cleanup_response" | grep -o '"count":[0-9]*' | cut -d':' -f2)
+        if [ "$count" = "0" ]; then
+            echo -e "${GREEN}✓ 没有找到需要清理的过期IP记录${NC}"
+        else
+            echo -e "${GREEN}✓ 已成功清理 $count 条过期的IP记录${NC}"
+            # 显示被清理的IP列表
+            cleaned_ips=$(echo "$cleanup_response" | grep -o '"cleaned_ips":\[[^]]*\]' | sed 's/"cleaned_ips":\[//;s/\]//;s/"//g')
+            if [ -n "$cleaned_ips" ]; then
+                echo -e "${BLUE}已清理的IP地址: $cleaned_ips${NC}"
+            fi
+        fi
+    elif echo "$cleanup_response" | grep -q '"error"'; then
+        error_msg=$(echo "$cleanup_response" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
+        echo -e "${RED}清理失败: $error_msg${NC}"
+    else
+        echo -e "${YELLOW}操作完成，但响应格式异常：${NC}"
+        echo "$cleanup_response"
+    fi
+    
+    echo ""
+    read -p "按回车键继续..."
+    manage_ip_blacklist
+}
+
+# 检查频率限制状态
+check_rate_limit_status() {
+    echo -e "${BLUE}=== 检查频率限制状态 ===${NC}"
+    echo ""
+    
+    # 检查.env文件是否存在
+    if [ ! -f ".env" ]; then
+        echo -e "${RED}错误: .env文件不存在，请先创建配置文件${NC}"
+        read -p "按回车键继续..."
+        manage_ip_blacklist
+        return
+    fi
+    
+    echo -e "${YELLOW}正在检查频率限制状态...${NC}"
+    echo -e "${BLUE}这将检查数据库中的IP限制记录和相关信息${NC}"
+    echo ""
+    
+    # 运行检查脚本
+    if [ -f "scripts/check-rate-limit.js" ]; then
+        echo -e "${BLUE}运行频率限制检查脚本...${NC}"
+        node scripts/check-rate-limit.js
+    else
+        echo -e "${RED}错误: 找不到 check-rate-limit.js 脚本${NC}"
+        echo -e "${YELLOW}请确保脚本文件存在于 scripts/ 目录${NC}"
+    fi
+    
+    echo ""
+    read -p "按回车键继续..."
+    manage_ip_blacklist
+}
+
+# 清除指定IP的频率限制
+clear_ip_rate_limit() {
+    echo -e "${BLUE}=== 清除IP频率限制 ===${NC}"
+    echo ""
+    
+    # 检查.env文件是否存在
+    if [ ! -f ".env" ]; then
+        echo -e "${RED}错误: .env文件不存在，请先创建配置文件${NC}"
+        read -p "按回车键继续..."
+        manage_ip_blacklist
+        return
+    fi
+    
+    echo -e "${YELLOW}请输入要清除限制的IP地址:${NC}"
+    echo -e "${BLUE}支持的格式: IPv4 (192.168.1.1), IPv6 (::1), 或 IPv6 地址${NC}"
+    echo ""
+    echo -n "IP地址: "
+    read -r target_ip
+    
+    if [ -z "$target_ip" ]; then
+        echo -e "${YELLOW}操作已取消${NC}"
+        read -p "按回车键继续..."
+        manage_ip_blacklist
+        return
+    fi
+    
+    # 验证IP地址格式
+    if ! echo "$target_ip" | grep -E '^([0-9]{1,3}\.){3}[0-9]{1,3}$|^::1$|^[0-9a-fA-F:]+$' > /dev/null; then
+        echo -e "${RED}错误: IP地址格式不正确${NC}"
+        read -p "按回车键继续..."
+        clear_ip_rate_limit
+        return
+    fi
+    
+    echo -e "${YELLOW}正在清除IP $target_ip 的频率限制...${NC}"
+    
+    # 运行清除脚本
+    if [ -f "scripts/clear-rate-limit.js" ]; then
+        echo -e "${BLUE}运行频率限制清除脚本...${NC}"
+        echo "$target_ip" | node scripts/clear-rate-limit.js
+    else
+        echo -e "${RED}错误: 找不到 clear-rate-limit.js 脚本${NC}"
+        echo -e "${YELLOW}请确保脚本文件存在于 scripts/ 目录${NC}"
     fi
     
     echo ""

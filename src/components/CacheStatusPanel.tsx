@@ -46,12 +46,10 @@ export const CacheStatusPanel: React.FC<CacheStatusPanelProps> = ({
 
           {cacheInfo && (
             <CacheStatusIndicator
-              isCached={cacheInfo.cached}
-              timestamp={cacheInfo.timestamp}
-              onRefresh={onRefresh}
-              isRefreshing={isRefreshing}
-              size="sm"
-              showLabel={false}
+              isCacheHit={cacheInfo.cached}
+              cacheTimestamp={cacheInfo.timestamp}
+              onForceRefresh={onRefresh}
+              showRefreshButton={false}
             />
           )}
         </div>

@@ -1,86 +1,93 @@
-import React from 'react';
-import { RefreshCw, Database, Clock } from 'lucide-react';
+import React from 'react'
+import { Clock, RefreshCw, AlertTriangle } from 'lucide-react'
 
 interface CacheStatusIndicatorProps {
-  isCached?: boolean;
-  timestamp?: string;
-  onRefresh?: () => void;
-  isRefreshing?: boolean;
-  size?: 'sm' | 'md' | 'lg';
-  showLabel?: boolean;
-  className?: string;
+  isCacheHit: boolean
+  cacheTimestamp?: string
+  isCacheExpired?: boolean
+  onForceRefresh?: () => void
+  showRefreshButton?: boolean
+  className?: string
 }
 
-/**
- * 统一的缓存状态指示器组件
- * 显示数据是否来自缓存、时间戳，并提供刷新功能
- */
 export const CacheStatusIndicator: React.FC<CacheStatusIndicatorProps> = ({
-  isCached = false,
-  timestamp,
-  onRefresh,
-  isRefreshing = false,
-  size = 'md',
-  showLabel = true,
+  isCacheHit,
+  cacheTimestamp,
+  isCacheExpired = false,
+  onForceRefresh,
+  showRefreshButton = true,
   className = ''
 }) => {
-  const sizeClasses = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-base'
-  };
-
-  const iconSizes = {
-    sm: 'w-3 h-3',
-    md: 'w-4 h-4',
-    lg: 'w-5 h-5'
-  };
-
-  const formatTimestamp = (ts: string) => {
+  // 格式化时间
+  const formatTime = (timestamp: string) => {
     try {
-      return new Date(ts).toLocaleTimeString('zh-CN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
+      const date = new Date(timestamp)
+      const now = new Date()
+      const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+      
+      if (diffInMinutes < 1) {
+        return '刚刚'
+      } else if (diffInMinutes < 60) {
+        return `${diffInMinutes}分钟前`
+      } else if (diffInMinutes < 1440) {
+        const hours = Math.floor(diffInMinutes / 60)
+        return `${hours}小时前`
+      } else {
+        const days = Math.floor(diffInMinutes / 1440)
+        return `${days}天前`
+      }
     } catch {
-      return ts;
+      return '未知时间'
     }
-  };
+  }
+
+  // 获取缓存状态颜色
+  const getStatusColor = () => {
+    if (!isCacheHit) return 'text-gray-500'
+    if (isCacheExpired) return 'text-orange-600'
+    return 'text-green-600'
+  }
+
+  // 获取缓存状态图标
+  const getStatusIcon = () => {
+    if (!isCacheHit) return null
+    if (isCacheExpired) return <AlertTriangle className="w-4 h-4" />
+    return <Clock className="w-4 h-4" />
+  }
+
+  // 获取缓存状态文本
+  const getStatusText = () => {
+    if (!isCacheHit) return '实时数据'
+    if (isCacheExpired) return '缓存已过期'
+    return '缓存数据'
+  }
 
   return (
-    <div className={`flex items-center space-x-2 ${sizeClasses[size]} ${className}`}>
-      {/* 状态指示器 */}
-      <div className="flex items-center space-x-2">
-        <div className={`w-2 h-2 rounded-full ${isCached ? 'bg-green-500' : 'bg-blue-500'}`} />
-        {showLabel && (
-          <span className="text-gray-600">
-            {isCached ? '缓存数据' : '实时数据'}
-            {timestamp && (
-              <span className="ml-1 text-xs text-gray-400">
-                ({formatTimestamp(timestamp)})
-              </span>
-            )}
+    <div className={`flex items-center space-x-3 text-sm ${className}`}>
+      {/* 缓存状态指示器 */}
+      <div className={`flex items-center space-x-2 ${getStatusColor()}`}>
+        {getStatusIcon()}
+        <span>{getStatusText()}</span>
+        {cacheTimestamp && (
+          <span className="text-gray-500">
+            ({formatTime(cacheTimestamp)})
           </span>
         )}
       </div>
 
-      {/* 刷新按钮 */}
-      {onRefresh && (
+      {/* 强制刷新按钮 */}
+      {showRefreshButton && onForceRefresh && (
         <button
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          className="flex items-center space-x-1 text-purple-600 hover:text-purple-800 px-2 py-1 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50"
-          title={isCached ? '刷新缓存' : '刷新数据'}
+          onClick={onForceRefresh}
+          className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+          title="强制刷新数据"
         >
-          <RefreshCw className={`${iconSizes[size]} ${isRefreshing ? 'animate-spin' : ''}`} />
-          {showLabel && (
-            <span>{isCached ? '刷新缓存' : '刷新'}</span>
-          )}
+          <RefreshCw className="w-4 h-4" />
+          <span>刷新</span>
         </button>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default CacheStatusIndicator;
+export default CacheStatusIndicator

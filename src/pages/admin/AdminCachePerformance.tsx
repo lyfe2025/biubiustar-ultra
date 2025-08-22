@@ -13,8 +13,6 @@ import {
   Play,
   BarChart3,
   Settings,
-  Save,
-  RotateCcw,
   Eye,
   TrendingUp,
   FlameKindling,
@@ -26,6 +24,7 @@ import AdminLayout from '../../components/AdminLayout'
 import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import { useLanguage } from '../../contexts/language'
 import { useCacheMonitor, type CacheStats } from '@/hooks/useCacheMonitor'
+import CacheConfigManager from './CacheConfigManager'
 
 const AdminCachePerformance = () => {
   const { t } = useLanguage()
@@ -47,15 +46,8 @@ const AdminCachePerformance = () => {
   const [clearTarget, setClearTarget] = useState<string | null>(null)
   const [isRunningTest, setIsRunningTest] = useState(false)
   
-  // 缓存配置相关状态
-  const [showCacheConfig, setShowCacheConfig] = useState(false)
-  const [cacheConfigs, setCacheConfigs] = useState<Record<string, any>>({})
-  const [editingConfig, setEditingConfig] = useState<string | null>(null)
-  const [configValues, setConfigValues] = useState<Record<string, any>>({})
-  const [isSavingConfig, setIsSavingConfig] = useState(false)
-
   // 新增功能状态
-  const [activeTab, setActiveTab] = useState<'overview' | 'inspector' | 'hotkeys' | 'benchmark'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'inspector' | 'hotkeys' | 'benchmark' | 'config'>('overview')
   const [inspectorData, setInspectorData] = useState<any>(null)
   const [hotKeysData, setHotKeysData] = useState<any>(null)
   const [benchmarkData, setBenchmarkData] = useState<any>(null)
@@ -105,108 +97,7 @@ const AdminCachePerformance = () => {
     }
   }
 
-  // 获取缓存配置
-  const fetchCacheConfigs = async () => {
-    try {
-      const adminToken = localStorage.getItem('adminToken')
-      if (!adminToken) {
-        throw new Error('未找到认证令牌')
-      }
-      
-      const response = await fetch('/api/admin/settings/cache', {
-        headers: {
-          'Authorization': `Bearer ${adminToken}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-      const result = await response.json()
-      if (result.success) {
-        setCacheConfigs(result.data.cacheTypes.reduce((acc: any, item: any) => {
-          acc[item.type] = item
-          return acc
-        }, {}))
-      }
-    } catch (error) {
-      console.error('获取缓存配置失败:', error)
-      toast.error(t('admin.cache.messages.configFetchFailed') || '获取缓存配置失败')
-    }
-  }
 
-  // 更新缓存配置
-  const updateCacheConfig = async (cacheType: string, config: any) => {
-    setIsSavingConfig(true)
-    try {
-      const adminToken = localStorage.getItem('adminToken')
-      if (!adminToken) {
-        throw new Error('未找到认证令牌')
-      }
-      
-      const response = await fetch('/api/admin/settings/cache', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`
-        },
-        body: JSON.stringify({
-          cacheType,
-          ...config
-        })
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-      
-      const result = await response.json()
-      if (result.success) {
-        toast.success(t('admin.cache.messages.configUpdated', { cacheType }) || `${cacheType} 缓存配置已更新`)
-        await fetchCacheConfigs()
-        await refreshData()
-        setEditingConfig(null)
-        setConfigValues({})
-      } else {
-        throw new Error(result.error || '更新失败')
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : (t('admin.cache.messages.configUpdateFailed') || '更新缓存配置失败')
-      toast.error(message)
-    } finally {
-      setIsSavingConfig(false)
-    }
-  }
-
-  // 开始编辑配置
-  const startEditConfig = (cacheType: string) => {
-    const config = cacheConfigs[cacheType]
-    if (config) {
-      setEditingConfig(cacheType)
-      setConfigValues({
-        maxSize: config.maxSize,
-        defaultTTL: Math.round(config.defaultTTL / 1000), // 转为秒
-        cleanupInterval: Math.round(config.cleanupInterval / 1000) // 转为秒
-      })
-    }
-  }
-
-  // 取消编辑
-  const cancelEditConfig = () => {
-    setEditingConfig(null)
-    setConfigValues({})
-  }
-
-  // 保存配置
-  const saveConfig = async () => {
-    if (!editingConfig) return
-    
-    await updateCacheConfig(editingConfig, {
-      maxSize: parseInt(configValues.maxSize),
-      defaultTTL: parseInt(configValues.defaultTTL) * 1000, // 转为毫秒
-      cleanupInterval: parseInt(configValues.cleanupInterval) * 1000 // 转为毫秒
-    })
-  }
 
   // 加载缓存内容
   const loadCacheContent = async (cacheType: string) => {
@@ -253,7 +144,7 @@ const AdminCachePerformance = () => {
   }
 
   // 标签页切换处理
-  const handleTabChange = (tab: 'overview' | 'inspector' | 'hotkeys' | 'benchmark') => {
+  const handleTabChange = (tab: 'overview' | 'inspector' | 'hotkeys' | 'benchmark' | 'config') => {
     setActiveTab(tab)
     
     // 根据标签页自动加载相应数据
@@ -314,12 +205,9 @@ const AdminCachePerformance = () => {
     return `${Math.round(ms / (60 * 60 * 1000))}h`
   }
 
-  // 初始化加载缓存配置
-  React.useEffect(() => {
-    if (showCacheConfig && Object.keys(cacheConfigs).length === 0) {
-      fetchCacheConfigs()
-    }
-  }, [showCacheConfig])
+  useEffect(() => {
+    refreshData()
+  }, [])
 
   return (
     <AdminLayout>
@@ -374,7 +262,8 @@ const AdminCachePerformance = () => {
               { key: 'overview', label: '概览', icon: BarChart3 },
               { key: 'inspector', label: '内容查看', icon: Eye },
               { key: 'hotkeys', label: '热点分析', icon: TrendingUp },
-              { key: 'benchmark', label: '基准测试', icon: Zap }
+              { key: 'benchmark', label: '基准测试', icon: Zap },
+              { key: 'config', label: '配置管理', icon: Settings }
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -569,190 +458,13 @@ const AdminCachePerformance = () => {
               </div>
             </div>
           )}
-        </div>
 
-        {/* 缓存配置管理 */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <div className="px-4 py-5 sm:px-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Settings className="h-5 w-5 text-indigo-600 mr-2" />
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  {t('admin.cache.config.title') || '缓存配置管理'}
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowCacheConfig(!showCacheConfig)}
-                className="inline-flex items-center px-3 py-2 border border-indigo-300 shadow-sm text-sm leading-4 font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                {showCacheConfig ? (t('admin.cache.config.hideConfig') || '隐藏配置') : (t('admin.cache.config.manageConfig') || '管理配置')}
-              </button>
-            </div>
-          </div>
-          
-          {showCacheConfig && (
-            <div className="px-4 pb-5">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {Object.entries(cacheConfigs).map(([cacheType, config]: [string, any]) => {
-                  const isEditing = editingConfig === cacheType
-                  const currentStats = cacheStats?.[cacheType]
-                  
-                  return (
-                    <div key={cacheType} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-lg font-medium text-gray-900 capitalize flex items-center">
-                          {getHealthStatusIcon(health?.[cacheType as keyof typeof health] || 'unknown')}
-                          <span className="ml-2">{cacheType} {t('admin.cache.config.cacheTypeSuffix') || '缓存'}</span>
-                        </h4>
-                        {!isEditing && (
-                          <button
-                            onClick={() => startEditConfig(cacheType)}
-                            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
-                          >
-                            {t('admin.cache.config.editConfig') || '编辑配置'}
-                          </button>
-                        )}
-                      </div>
-                      
-                      {isEditing ? (
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              {t('admin.cache.config.maxSize') || '最大条目数'} (maxSize)
-                            </label>
-                            <input
-                              type="number"
-                              min="10"
-                              max="10000"
-                              value={configValues.maxSize || ''}
-                              onChange={(e) => setConfigValues(prev => ({ ...prev, maxSize: e.target.value }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                              placeholder={t('admin.cache.config.maxSizePlaceholder') || '输入最大条目数'}
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              {t('admin.cache.config.currentUsage') || '当前使用'}: {currentStats?.size || 0} / {config.maxSize}
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              {t('admin.cache.config.defaultTTL') || '默认过期时间'} ({t('admin.cache.config.seconds') || '秒'})
-                            </label>
-                            <input
-                              type="number"
-                              min="1"
-                              max="86400"
-                              value={configValues.defaultTTL || ''}
-                              onChange={(e) => setConfigValues(prev => ({ ...prev, defaultTTL: e.target.value }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                              placeholder={t('admin.cache.config.ttlPlaceholder') || '输入过期时间（秒）'}
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              {t('admin.cache.config.current') || '当前'}: {formatDurationFromMs(config.defaultTTL)}
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              {t('admin.cache.config.cleanupInterval') || '清理间隔'} ({t('admin.cache.config.seconds') || '秒'})
-                            </label>
-                            <input
-                              type="number"
-                              min="10"
-                              max="3600"
-                              value={configValues.cleanupInterval || ''}
-                              onChange={(e) => setConfigValues(prev => ({ ...prev, cleanupInterval: e.target.value }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                              placeholder={t('admin.cache.config.cleanupPlaceholder') || '输入清理间隔（秒）'}
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              {t('admin.cache.config.current') || '当前'}: {formatDurationFromMs(config.cleanupInterval)}
-                            </p>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2 pt-2">
-                            <button
-                              onClick={saveConfig}
-                              disabled={isSavingConfig}
-                              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <Save className="h-4 w-4 mr-1" />
-                              {isSavingConfig ? (t('admin.cache.config.saving') || '保存中...') : (t('admin.cache.config.save') || '保存')}
-                            </button>
-                            <button
-                              onClick={cancelEditConfig}
-                              disabled={isSavingConfig}
-                              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <RotateCcw className="h-4 w-4 mr-1" />
-                              {t('common.cancel') || '取消'}
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-500">{t('admin.cache.config.maxSize') || '最大条目数'}:</span>
-                              <span className="font-medium ml-2">{config.maxSize}</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-500">{t('admin.cache.config.currentUsage') || '当前使用'}:</span>
-                              <span className="font-medium ml-2">{currentStats?.size || 0}</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-500">{t('admin.cache.config.defaultTTL') || '过期时间'}:</span>
-                              <span className="font-medium ml-2">{formatDurationFromMs(config.defaultTTL)}</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-500">{t('admin.cache.config.cleanupInterval') || '清理间隔'}:</span>
-                              <span className="font-medium ml-2">{formatDurationFromMs(config.cleanupInterval)}</span>
-                            </div>
-                          </div>
-                          
-                          {/* 使用率进度条 */}
-                          <div className="mt-3">
-                            <div className="flex justify-between text-xs text-gray-500 mb-1">
-                              <span>{t('admin.cache.config.capacityUtilization') || '容量使用率'}</span>
-                              <span>{formatPercentage((currentStats?.size || 0) / (config.maxSize || 1))}</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div
-                                className={`h-2 rounded-full ${
-                                  (currentStats?.size || 0) / (config.maxSize || 1) > 0.8 
-                                    ? 'bg-red-600' 
-                                    : (currentStats?.size || 0) / (config.maxSize || 1) > 0.6 
-                                    ? 'bg-yellow-600' 
-                                    : 'bg-green-600'
-                                }`}
-                                style={{ width: `${Math.min(((currentStats?.size || 0) / (config.maxSize || 1)) * 100, 100)}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-              
-              {Object.keys(cacheConfigs).length === 0 && (
-                <div className="text-center text-gray-500 py-8">
-                  <Settings className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <p>{t('admin.cache.config.noConfigData') || '暂无缓存配置数据'}</p>
-                  <button
-                    onClick={fetchCacheConfigs}
-                    className="mt-2 text-indigo-600 hover:text-indigo-500 text-sm font-medium"
-                  >
-                    {t('admin.cache.config.clickRefresh') || '点击刷新'}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-          </>
+         {/* 配置管理 */}
+         {(activeTab as string) === 'config' && (
+           <CacheConfigManager />
+         )}
+         </div>
+           </>
         )}
 
         {/* 缓存内容查看器 */}
@@ -816,7 +528,7 @@ const AdminCachePerformance = () => {
                   {inspectorData.entries && inspectorData.entries.length > 0 ? (
                     <div className="bg-gray-50 rounded-lg p-4">
                       <h4 className="text-sm font-medium text-gray-900 mb-3">缓存条目 (显示前20条)</h4>
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                      <div className="space-y-2 max-h-[600px] overflow-y-auto">
                         {inspectorData.entries.map((entry: any, index: number) => (
                           <div key={index} className="bg-white p-3 rounded border">
                             <div className="flex justify-between items-start mb-2">
