@@ -66,6 +66,20 @@ test_*.json
 eslint.config.js
 nodemon.json
 
+# ⚙️ 配置文件（防止被识别为 Serverless Functions）
+vite.config.ts
+vite.config.js
+tailwind.config.js
+tailwind.config.ts
+postcss.config.js
+postcss.config.ts
+tsconfig.json
+tsconfig.*.json
+
+# 📜 脚本目录（防止被识别为 API 路由）
+scripts/
+scripts/**/*
+
 # 🗄️ 数据库迁移文件（在部署时不需要）
 supabase/migrations
 supabase/.temp
