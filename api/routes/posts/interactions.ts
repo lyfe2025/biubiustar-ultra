@@ -246,6 +246,10 @@ router.post('/:id/share', asyncHandler(async (req: Request, res: Response) => {
       return;
     }
 
+    // 失效相关缓存
+    await invalidatePostCache(id);
+    await invalidateUserCache(user_id);
+
     sendResponse(res, true, null, '分享成功');
 
   } catch (error) {

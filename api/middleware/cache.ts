@@ -4,7 +4,10 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { userCache, contentCache, statsCache, configCache, sessionCache, apiCache } from '../lib/cacheInstances.js';
+import { CacheKeyGenerator, CACHE_TTL } from '../config/cache.js';
 import { EnhancedCacheService } from '../lib/enhancedCache.js';
+import { cacheInvalidationService } from '../services/cacheInvalidation';
 
 interface CacheOptions {
   cacheService: EnhancedCacheService;
@@ -191,3 +194,80 @@ export function createCacheWarmupMiddleware(
     next();
   };
 }
+
+/**
+ * 自动缓存失效中间件
+ * 在响应完成后自动失效相关缓存
+ */
+export function createAutoInvalidationMiddleware(options: {
+  cacheType: 'user' | 'content' | 'stats' | 'config' | 'session' | 'api' | 'all';
+  patterns: string[];
+  cascade?: boolean;
+}) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const originalSend = res.send;
+    
+    res.send = function(data: any) {
+      // 如果响应成功且包含数据，自动失效相关缓存
+      if (res.statusCode >= 200 && res.statusCode < 300 && data) {
+        // 异步执行缓存失效，不阻塞响应
+        setImmediate(async () => {
+          try {
+            const result = await cacheInvalidationService.invalidateByEvent(
+              'cache:invalidate',
+              { patterns: options.patterns, cacheType: options.cacheType, cascade: options.cascade }
+            );
+            
+            if (result.success) {
+              console.log(`自动缓存失效完成: ${result.invalidatedKeys.length}个键失效`);
+            } else {
+              console.warn('自动缓存失效失败:', result.errors);
+            }
+          } catch (error) {
+            console.error('自动缓存失效异常:', error);
+          }
+        });
+      }
+      
+      return originalSend.call(this, data);
+    };
+    
+    next();
+  };
+}
+
+/**
+ * 用户相关操作的自动缓存失效中间件
+ */
+export const userOperationInvalidation = createAutoInvalidationMiddleware({
+  cacheType: 'user',
+  patterns: ['^user:', '^stats:user'],
+  cascade: true
+});
+
+/**
+ * 内容相关操作的自动缓存失效中间件
+ */
+export const contentOperationInvalidation = createAutoInvalidationMiddleware({
+  cacheType: 'content',
+  patterns: ['^posts:', '^activities:', '^comments:', '^categories:'],
+  cascade: true
+});
+
+/**
+ * 统计相关操作的自动缓存失效中间件
+ */
+export const statsOperationInvalidation = createAutoInvalidationMiddleware({
+  cacheType: 'stats',
+  patterns: ['^stats:'],
+  cascade: false
+});
+
+/**
+ * 配置相关操作的自动缓存失效中间件
+ */
+export const configOperationInvalidation = createAutoInvalidationMiddleware({
+  cacheType: 'config',
+  patterns: ['^config:', '^settings:'],
+  cascade: false
+});

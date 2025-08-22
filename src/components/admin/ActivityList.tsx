@@ -21,7 +21,7 @@ interface ActivityListProps {
   onToggleFeatured: (activityId: string, isFeatured: boolean) => void
   onToggleRecommend: (activityId: string, isRecommended: boolean) => void
   onDeleteActivity: (activity: AdminActivity) => void
-  onCreateActivity: () => void
+
 }
 
 const ActivityList: React.FC<ActivityListProps> = ({
@@ -38,7 +38,7 @@ const ActivityList: React.FC<ActivityListProps> = ({
   onToggleFeatured,
   onToggleRecommend,
   onDeleteActivity,
-  onCreateActivity
+
 }) => {
   const { t, language } = useLanguage()
 
@@ -76,15 +76,8 @@ const ActivityList: React.FC<ActivityListProps> = ({
     <>
       {/* 搜索和筛选 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+        <div className="mb-4">
           <h2 className="text-lg font-medium text-gray-900">{t('admin.activities.list.title')}</h2>
-          <button
-            onClick={onCreateActivity}
-            className="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            {t('admin.activities.actions.create')}
-          </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* 搜索框 */}

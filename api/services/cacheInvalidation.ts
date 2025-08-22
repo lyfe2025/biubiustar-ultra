@@ -90,6 +90,25 @@ export class CacheInvalidationService {
       cacheType: 'config',
       cascade: false
     });
+
+    // 联系合作相关失效规则
+    this.addRule('contact:create', {
+      pattern: /^(contact:|admin_contact)/,
+      cacheType: 'api',
+      cascade: false
+    });
+
+    this.addRule('contact:update', {
+      pattern: /^(contact:|admin_contact)/,
+      cacheType: 'api',
+      cascade: false
+    });
+
+    this.addRule('contact:delete', {
+      pattern: /^(contact:|admin_contact)/,
+      cacheType: 'api',
+      cascade: false
+    });
   }
 
   /**
@@ -491,6 +510,13 @@ export class CacheInvalidationService {
   async invalidateContentCache(): Promise<InvalidationResult> {
     return this.invalidateByEvent('content:update');
   }
+
+  /**
+   * 失效联系合作缓存
+   */
+  async invalidateContactCache(contactId?: string): Promise<InvalidationResult> {
+    return this.invalidateByEvent('contact:update', { contactId });
+  }
 }
 
 // 创建默认实例
@@ -514,3 +540,6 @@ export const invalidateConfigCache = () =>
 
 export const invalidateContentCache = () => 
   cacheInvalidationService.invalidateByEvent('content:update');
+
+export const invalidateContactCache = (contactId?: string) => 
+  cacheInvalidationService.invalidateByEvent('contact:update', { contactId });

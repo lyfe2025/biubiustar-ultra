@@ -6,6 +6,8 @@ import path from 'path'
 import fs from 'fs'
 import { UploadSecurity, DEFAULT_UPLOAD_CONFIGS } from '../../utils/uploadSecurity'
 import asyncHandler from '../../middleware/asyncHandler.js'
+import { supabaseAdmin } from '../../lib/supabase.js'
+import { invalidateContentCache } from '../../services/cacheInvalidation.js'
 
 
 const router = Router()
@@ -87,6 +89,9 @@ router.post('/image', (req: Request, res: Response): void => {
       console.log(`图片上传成功: ${safeFilename}, 大小: ${req.file.size} bytes`)
       console.log('安全验证通过: 文件格式和内容验证成功')
       
+      // 失效内容缓存
+      await invalidateContentCache()
+      
       res.json({
         success: true,
         message: '图片上传成功',
@@ -166,6 +171,9 @@ router.post('/activity-image', (req: Request, res: Response): void => {
       
       console.log(`活动图片上传成功: ${safeFilename}, 大小: ${req.file.size} bytes`)
       console.log('安全验证通过: 文件格式和内容验证成功')
+      
+      // 失效内容缓存
+      await invalidateContentCache()
       
       res.json({
         success: true,
@@ -277,6 +285,9 @@ router.post('/site-asset', (req: Request, res: Response): void => {
       console.log(`类型检测结果: ${finalType} (原文件名: ${req.file.originalname})`)
       console.log('安全验证通过: 文件格式和内容验证成功')
       
+      // 失效内容缓存
+      await invalidateContentCache()
+      
       res.json({
         success: true,
         message: `站点${finalType}上传成功`,
@@ -334,6 +345,10 @@ router.delete('/image', asyncHandler(async (req: Request, res: Response): Promis
     
     if (deletedPath) {
       console.log(`文件删除成功: ${filename} (路径: ${deletedPath})`)
+      
+      // 失效内容缓存
+      await invalidateContentCache()
+      
       res.json({ success: true, message: '文件删除成功' })
     } else {
       res.status(404).json({ error: '文件不存在' })

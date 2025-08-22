@@ -5,6 +5,7 @@ import asyncHandler from '../../../middleware/asyncHandler.js'
 import { contentCache } from '../../../lib/cacheInstances.js'
 import { CacheKeyGenerator, CACHE_TTL } from '../../../config/cache.js'
 import { invalidateOnCategoryDataChange } from '../../../utils/activityCacheInvalidation.js'
+import { invalidateContentCache } from '../../../services/cacheInvalidation.js'
 
 const router = Router()
 
@@ -122,8 +123,9 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
       return res.status(500).json({ error: '创建分类失败' })
     }
 
-    // 智能缓存失效
+    // 失效相关缓存
     await invalidateOnCategoryDataChange()
+    await invalidateContentCache()
 
     res.status(201).json(category)
   } catch (error) {
@@ -198,9 +200,12 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
     if (is_active !== undefined) updateData.is_active = is_active
 
     // 更新分类
-    const { data: category, error } = await supabaseAdmin
+    const { data: updatedCategory, error } = await supabaseAdmin
       .from('activity_categories')
-      .update(updateData)
+      .update({
+        ...updateData,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', id)
       .select('*')
       .single()
@@ -213,14 +218,15 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
       return res.status(500).json({ error: '更新分类失败' })
     }
 
-    if (!category) {
+    if (!updatedCategory) {
       return res.status(404).json({ error: '分类不存在' })
     }
 
-    // 智能缓存失效
+    // 失效相关缓存
     await invalidateOnCategoryDataChange()
+    await invalidateContentCache()
 
-    res.json(category)
+    res.json(updatedCategory)
   } catch (error) {
     console.error('更新分类失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
@@ -259,8 +265,9 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
       return res.status(500).json({ error: '删除分类失败' })
     }
 
-    // 智能缓存失效
+    // 失效相关缓存
     await invalidateOnCategoryDataChange()
+    await invalidateContentCache()
 
     res.json({ success: true })
   } catch (error) {

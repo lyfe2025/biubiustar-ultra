@@ -4,7 +4,7 @@
  */
 import { Router, Request, Response } from 'express';
 import asyncHandler from '../../../middleware/asyncHandler.js';
-import { requireAdmin } from '../auth.js';
+import { requireAdmin } from '../auth';
 import { 
   userCache, 
   contentCache, 
@@ -15,6 +15,7 @@ import {
   getAllCacheStats
 } from '../../../lib/cacheInstances.js';
 import { EnhancedCacheService } from '../../../lib/enhancedCache.js';
+import { invalidateConfigCache } from '../../../services/cacheInvalidation.js';
 
 const router = Router();
 
@@ -146,6 +147,9 @@ router.put('/', asyncHandler(async (req: Request, res: Response) => {
       restoredItems: dataToRestore.length,
       droppedItems: oldData.length - dataToRestore.length
     });
+
+    // 失效配置缓存
+    await invalidateConfigCache();
 
     res.json({
       success: true,

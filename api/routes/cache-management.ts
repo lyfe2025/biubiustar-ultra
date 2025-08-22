@@ -10,6 +10,7 @@ import { cacheEnvConfig } from '../lib/CacheEnvConfig';
 import { CacheInstanceType, CACHE_INSTANCE_TYPES } from '../config/cache';
 import { TimeRange, MetricType } from '../lib/CacheAnalytics';
 import multer from 'multer';
+import { invalidateConfigCache } from '../services/cacheInvalidation.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -126,6 +127,9 @@ router.put('/configs/:instanceType', validateInstanceType, async (req: Request, 
       instanceType as CacheInstanceType,
       config
     );
+    
+    // 失效配置缓存
+    await invalidateConfigCache();
     
     res.json({
       success: true,
@@ -784,6 +788,9 @@ router.post('/configs/restore/:backupId', async (req: Request, res: Response) =>
     const { validate = true } = req.body;
     
     const result = await CacheConfigImportExport.getInstance().restoreBackup(backupId);
+    
+    // 失效配置缓存
+    await invalidateConfigCache();
     
     res.json({
       success: true,

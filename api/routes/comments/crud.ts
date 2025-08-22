@@ -5,6 +5,7 @@
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin, createUserClient, verifyAuthToken } from '../../lib/supabase.js';
 import asyncHandler from '../../middleware/asyncHandler.js';
+import { invalidatePostCache, invalidateUserCache } from '../../services/cacheInvalidation';
 
 const router = Router();
 
@@ -99,20 +100,17 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
       .eq('id', user.id)
       .single();
     
-    // 格式化返回数据
-    const formattedComment = {
-      id: newComment.id,
-      content: newComment.content,
-      created_at: newComment.created_at,
-      updated_at: newComment.updated_at,
-      author: {
-        id: user.id,
-        username: authorData?.username || '未知用户',
-        avatar_url: authorData?.avatar_url
-      }
+    // 构建完整的评论数据
+    const commentWithAuthor = {
+      ...newComment,
+      author: authorData || { id: user.id, username: user.email, avatar_url: null }
     };
 
-    sendResponse(res, true, formattedComment, '评论添加成功', 201);
+    // 失效相关缓存
+    await invalidatePostCache(post_id); // 失效帖子缓存
+    await invalidateUserCache(user.id); // 失效用户缓存
+
+    sendResponse(res, true, commentWithAuthor, '评论添加成功');
 
   } catch (error) {
     console.error('添加评论错误:', error);
@@ -144,7 +142,7 @@ router.delete('/:commentId', asyncHandler(async (req: Request, res: Response): P
     // 验证评论是否存在且属于当前用户
     const { data: comment, error: fetchError } = await supabaseAdmin
       .from('comments')
-      .select('id, user_id')
+      .select('id, user_id, post_id')
       .eq('id', commentId)
       .single();
 
@@ -173,6 +171,10 @@ router.delete('/:commentId', asyncHandler(async (req: Request, res: Response): P
       sendResponse(res, false, null, '删除评论失败', 500);
       return;
     }
+
+    // 失效相关缓存
+    await invalidatePostCache(comment.post_id); // 失效帖子缓存
+    await invalidateUserCache(comment.user_id); // 失效用户缓存
 
     sendResponse(res, true, null, '评论删除成功');
 
@@ -217,7 +219,7 @@ router.put('/:commentId', asyncHandler(async (req: Request, res: Response): Prom
     // 验证评论是否存在且属于当前用户
     const { data: comment, error: fetchError } = await supabaseAdmin
       .from('comments')
-      .select('id, user_id')
+      .select('id, user_id, post_id')
       .eq('id', commentId)
       .single();
 
@@ -252,27 +254,11 @@ router.put('/:commentId', asyncHandler(async (req: Request, res: Response): Prom
       return;
     }
 
-    // 🚀 优化：从user_profiles获取作者信息，避免Auth API调用
-    const { data: authorData } = await supabaseAdmin
-      .from('user_profiles')
-      .select('id, username, avatar_url')
-      .eq('id', user.id)
-      .single();
+    // 失效相关缓存
+    await invalidatePostCache(comment.post_id); // 失效帖子缓存
+    await invalidateUserCache(comment.user_id); // 失效用户缓存
 
-    // 格式化返回数据
-    const formattedComment = {
-      id: updatedComment.id,
-      content: updatedComment.content,
-      created_at: updatedComment.created_at,
-      updated_at: updatedComment.updated_at,
-      author: {
-        id: user.id,
-        username: authorData?.username || '未知用户',
-        avatar_url: authorData?.avatar_url
-      }
-    };
-
-    sendResponse(res, true, formattedComment, '评论更新成功');
+    sendResponse(res, true, updatedComment, '评论更新成功');
 
   } catch (error) {
     console.error('更新评论错误:', error);

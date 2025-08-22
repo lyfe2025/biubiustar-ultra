@@ -367,46 +367,10 @@ const AdminActivities = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('admin.activities.title')}</h1>
-            <div className="flex items-center space-x-4 mt-1">
-              <p className="text-sm text-gray-500">{t('admin.activities.description')}</p>
-              {!loading && (
-                <div className="flex items-center space-x-2 text-sm">
-                  <div className={`w-2 h-2 rounded-full ${isCacheHit ? 'bg-green-500' : 'bg-blue-500'}`} />
-                  <span className="text-gray-500">
-                    {isCacheHit ? '缓存数据' : '实时数据'}
-                    {cacheTimestamp && (
-                      <span className="ml-1 text-xs">
-                        ({new Date(cacheTimestamp).toLocaleTimeString()})
-                      </span>
-                    )}
-                  </span>
-                </div>
-              )}
-            </div>
+            <p className="text-sm text-gray-500 mt-1">{t('admin.activities.description')}</p>
           </div>
           
-          <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-            {/* 强制刷新按钮 */}
-            <button
-              onClick={forceRefresh}
-              disabled={isRefreshing || loading}
-              className="flex items-center space-x-2 text-purple-600 hover:text-purple-800 px-3 py-2 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50"
-              title={isCacheHit ? '刷新缓存' : '刷新'}
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>{isCacheHit ? '刷新缓存' : '刷新'}</span>
-            </button>
-            
-            {activeTab === 'activities' && (
-              <button
-                onClick={() => setShowCreateActivityModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <Activity className="h-4 w-4 mr-2" />
-{t('admin.activities.create')}
-              </button>
-            )}
-          </div>
+
         </div>
 
         {/* 标签页导航 */}
@@ -464,7 +428,7 @@ const AdminActivities = () => {
               }}
               onToggleRecommend={handleToggleRecommend}
               onDeleteActivity={handleDeleteActivity}
-              onCreateActivity={() => setShowCreateActivityModal(true)}
+  
             />
 
             {/* 分页组件 */}
@@ -540,35 +504,6 @@ const AdminActivities = () => {
         {/* 分类管理标签页内容 */}
         {activeTab === 'categories' && (
           <div className="space-y-4">
-            {/* 分类缓存状态信息 */}
-            {!loading && (
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm font-medium text-gray-700">分类数据状态:</span>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${categoryCacheHit ? 'bg-green-500' : 'bg-blue-500'}`} />
-                    <span className="text-sm text-gray-600">
-                      {categoryCacheHit ? '缓存数据' : '实时数据'}
-                      {categoryCacheTimestamp && (
-                        <span className="ml-1 text-xs">
-                          ({new Date(categoryCacheTimestamp).toLocaleTimeString()})
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={forceRefreshCategories}
-                  disabled={isRefreshing}
-                  className="flex items-center space-x-2 text-purple-600 hover:text-purple-800 px-3 py-2 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50"
-                  title={categoryCacheHit ? '刷新分类缓存' : '刷新分类'}
-                >
-                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  <span>{categoryCacheHit ? '刷新缓存' : '刷新'}</span>
-                </button>
-              </div>
-            )}
-            
             <CategoryManagement
               categories={categories}
               onCategoriesUpdated={handleCategoriesUpdated}

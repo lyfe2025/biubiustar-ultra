@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase.js'
 import { requireAdmin } from '../auth.js'
 import asyncHandler from '../../../middleware/asyncHandler.js'
+import { invalidateContentCache } from '../../../services/cacheInvalidation.js'
 
 const router = Router()
 
@@ -101,13 +102,13 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
         description_zh_tw: description_zh_tw?.trim() || null,
         description_en: description_en?.trim() || null,
         description_vi: description_vi?.trim() || null,
-        // 其他字段
-        color: color || '#3B82F6',
-        icon: icon || 'tag',
-        is_active: true,
-        sort_order: finalSortOrder
+        color: color || null,
+        icon: icon || null,
+        sort_order: finalSortOrder,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
-      .select('*')
+      .select()
       .single()
 
     if (error) {
@@ -117,6 +118,9 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
       console.error('创建内容分类失败:', error)
       return res.status(500).json({ error: '创建内容分类失败' })
     }
+
+    // 失效内容缓存
+    await invalidateContentCache()
 
     res.status(201).json(category)
   } catch (error) {
@@ -213,11 +217,14 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
     if (sort_order !== undefined) updateData.sort_order = sort_order
 
     // 更新分类
-    const { data: category, error } = await supabaseAdmin
+    const { data: updatedCategory, error } = await supabaseAdmin
       .from('content_categories')
-      .update(updateData)
+      .update({
+        ...updateData,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', id)
-      .select('*')
+      .select()
       .single()
 
     if (error) {
@@ -234,11 +241,14 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Res
       })
     }
 
-    if (!category) {
+    // 失效内容缓存
+    await invalidateContentCache()
+
+    if (!updatedCategory) {
       return res.status(404).json({ error: '分类不存在' })
     }
 
-    res.json(category)
+    res.json(updatedCategory)
   } catch (error) {
     console.error('更新内容分类失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
@@ -277,7 +287,10 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
       return res.status(500).json({ error: '删除内容分类失败' })
     }
 
-    res.json({ success: true })
+    // 失效内容缓存
+    await invalidateContentCache()
+
+    res.status(204).send()
   } catch (error) {
     console.error('删除内容分类失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
@@ -314,6 +327,9 @@ router.put('/:id/toggle', asyncHandler(async (req: Request, res: Response): Prom
       console.error('切换内容分类状态失败:', error)
       return res.status(500).json({ error: '切换内容分类状态失败' })
     }
+
+    // 失效内容缓存
+    await invalidateContentCache()
 
     res.json(updatedCategory)
   } catch (error) {

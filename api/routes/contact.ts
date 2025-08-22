@@ -6,6 +6,7 @@ import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { requireAdmin } from './admin/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
+import { invalidateContactCache } from '../services/cacheInvalidation.js';
 
 const router = Router();
 
@@ -258,6 +259,15 @@ router.put('/submissions/:id/status', requireAdmin, asyncHandler(async (req: Req
       return;
     }
 
+    // 清除联系合作相关缓存
+    try {
+      await invalidateContactCache(id);
+      console.log(`联系合作缓存已清除: ${id}`);
+    } catch (cacheError) {
+      console.error('清除联系合作缓存失败:', cacheError);
+      // 缓存清除失败不影响主要功能，继续返回成功响应
+    }
+
     sendResponse(res, true, data, '状态更新成功');
 }));
 
@@ -290,6 +300,15 @@ router.delete('/submissions/:id', requireAdmin, asyncHandler(async (req: Request
       console.error('Database error:', error);
       sendResponse(res, false, null, '删除失败', 500);
       return;
+    }
+
+    // 清除联系合作相关缓存
+    try {
+      await invalidateContactCache(id);
+      console.log(`联系合作缓存已清除: ${id}`);
+    } catch (cacheError) {
+      console.error('清除联系合作缓存失败:', cacheError);
+      // 缓存清除失败不影响主要功能，继续返回成功响应
     }
 
     sendResponse(res, true, null, '联系提交记录删除成功');
