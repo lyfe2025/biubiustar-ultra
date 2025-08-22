@@ -11,7 +11,7 @@ import { LanguageProvider } from './contexts/language'
 import { Toaster } from 'sonner'
 import { useFavicon } from './hooks/useFavicon'
 import { useCacheWarmup } from './hooks/useCacheWarmup'
-import './services/PerformanceMonitor' // 初始化性能监控
+import './services/performanceMonitor' // 初始化性能监控
 import './utils/debugAuth' // 加载调试工具
 
 // 懒加载页面组件
