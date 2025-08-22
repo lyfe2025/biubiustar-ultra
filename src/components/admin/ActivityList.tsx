@@ -1,7 +1,7 @@
 import React from 'react'
 import { Search, Filter, Eye, Edit2, Star, StarOff, Trash2, Plus } from 'lucide-react'
 import { useLanguage } from '../../contexts/language'
-import { getCategoryName } from '@/utils/categoryUtils'
+import { getCategoryName } from '../../utils/categoryUtils'
 
 import { AdminActivity } from '../../services/AdminService'
 

@@ -6,7 +6,7 @@ import { useLanguage } from '../../contexts/language'
 import { formatJoinDate } from '../../utils/dateFormatter'
 import { UserProfile, UserProfileManagementProps } from './types'
 import { useAuth } from '../../contexts/AuthContext'
-import { generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '@/utils/avatarGenerator'
+import { generateDefaultAvatarUrl, getUserDefaultAvatarUrl } from '../../utils/avatarGenerator'
 
 
 

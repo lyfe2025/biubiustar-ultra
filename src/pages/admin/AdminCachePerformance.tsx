@@ -23,7 +23,7 @@ import {
 import AdminLayout from '../../components/AdminLayout'
 import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import { useLanguage } from '../../contexts/language'
-import { useCacheMonitor, type CacheStats } from '@/hooks/useCacheMonitor'
+import { useCacheMonitor, type CacheStats } from '../../hooks/useCacheMonitor'
 import CacheConfigManager from './CacheConfigManager'
 
 const AdminCachePerformance = () => {
