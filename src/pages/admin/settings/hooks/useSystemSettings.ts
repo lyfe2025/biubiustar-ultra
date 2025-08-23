@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { adminService } from '../../../../services/AdminService'
+import { adminService } from '../../../../services/admin'
 import { settingsService } from '../../../../services/SettingsService'
 import { toast } from 'sonner'
 import { SystemSettings } from '../types'

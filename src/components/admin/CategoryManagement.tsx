@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/language';
-import { adminService } from '../../services/AdminService';
+import { adminService } from '../../services/admin';
 import { toast } from 'sonner';
 
 interface Category {

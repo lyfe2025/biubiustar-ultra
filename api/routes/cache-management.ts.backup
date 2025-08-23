@@ -1,18 +1,19 @@
 import { Router, Request, Response } from 'express';
 import * as path from 'path';
-import { cacheConfigManager } from '../lib/CacheConfigManager';
-import { cacheAnalytics } from '../lib/CacheAnalytics';
-import { cacheMonitor } from '../lib/CacheMonitor';
+import { cacheConfigManager } from '../lib/cache/config';
+import { cacheAnalytics } from '../lib/cache/analytics';
+import { cacheMonitor } from '../lib/cache/monitoring';
 import { cacheEventNotification } from '../lib/CacheEventNotification';
-import { cachePrewarmingBatch } from '../lib/CachePrewarmingBatch';
+import { CachePrewarmingBatch } from '../lib/cache/prewarming';
 import { CacheConfigImportExport, ExportFormat } from '../lib/CacheConfigImportExport';
 import { cacheEnvConfig } from '../lib/CacheEnvConfig';
 import { CacheInstanceType, CACHE_INSTANCE_TYPES } from '../config/cache';
-import { TimeRange, MetricType } from '../lib/CacheAnalytics';
+import { TimeRange, MetricType } from '../lib/cache/analytics/types';
 import multer from 'multer';
 import { invalidateConfigCache } from '../services/cacheInvalidation.js';
 
 const router = Router();
+const cachePrewarmingBatch = new CachePrewarmingBatch();
 const upload = multer({ storage: multer.memoryStorage() });
 
 /**
@@ -301,8 +302,8 @@ router.get('/analytics/trends/:instanceType/:metric', validateInstanceType, asyn
     }
     
     const trend = cacheAnalytics.getPerformanceTrend(
-      metric as MetricType,
       instanceType as CacheInstanceType,
+      metric as MetricType,
       timeRange as TimeRange
     );
     
@@ -537,7 +538,8 @@ router.post('/batch/:operation', async (req: Request, res: Response) => {
             message: 'Keys array is required for batch get operation'
           });
         }
-        result = await cachePrewarmingBatch.batchGet(instanceType, keys, config);
+        // TODO: 实现批量获取操作，该功能已迁移到模块化组件中
+        throw new Error('Batch get operation is not available in the current implementation');
         break;
         
       case 'set':
@@ -560,7 +562,8 @@ router.post('/batch/:operation', async (req: Request, res: Response) => {
           value: values[index],
           ttl: config.ttl
         }));
-        result = await cachePrewarmingBatch.batchSet(instanceType, items, config);
+        // TODO: 实现批量设置操作，该功能已迁移到模块化组件中
+        throw new Error('Batch set operation is not available in the current implementation');
         break;
         
       case 'delete':
@@ -571,7 +574,8 @@ router.post('/batch/:operation', async (req: Request, res: Response) => {
             message: 'Keys array is required for batch delete operation'
           });
         }
-        result = await cachePrewarmingBatch.batchDelete(instanceType, keys, config);
+        // TODO: 实现批量删除操作，该功能已迁移到模块化组件中
+        throw new Error('Batch delete operation is not available in the current implementation');
         break;
         
       default:
@@ -829,7 +833,17 @@ router.get('/configs/environment/template', async (req: Request, res: Response) 
   try {
     const { format = 'env', includeComments = true } = req.query;
     
-    const template = cacheEnvConfig.generateEnvTemplate();
+    // 确保环境配置已初始化
+    cacheEnvConfig.initialize();
+    
+    // 获取环境变量映射
+    const envMappings = cacheEnvConfig.getMappingManager().getMappingMap();
+    
+    // 生成模板
+    const template = cacheEnvConfig.generateEnvTemplate(
+      envMappings,
+      includeComments === 'true' || includeComments === true
+    );
     
     const contentTypes = {
       env: 'text/plain',

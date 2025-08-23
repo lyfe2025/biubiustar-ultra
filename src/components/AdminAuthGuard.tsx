@@ -2,7 +2,7 @@ import React, { useEffect, useState, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, AlertTriangle, LogIn } from 'lucide-react'
 import { useLanguage } from '../contexts/language'
-import { adminService } from '../services/AdminService'
+import { adminService } from '../services/admin'
 import AuthGuardState from '../utils/authGuard'
 
 interface AdminAuthGuardProps {

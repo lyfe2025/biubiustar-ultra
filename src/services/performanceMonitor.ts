@@ -168,6 +168,13 @@ class PerformanceMonitor {
     this.saveMetricsToStorage()
   }
 
+  /**
+   * 检查性能监控是否启用
+   */
+  isEnabled(): boolean {
+    return this.config.enabled
+  }
+
   // 从本地存储加载指标
   private loadMetricsFromStorage() {
     if (!this.config.enableLocalStorage) return
@@ -227,10 +234,7 @@ class PerformanceMonitor {
     console.log('❌ 性能监控已禁用')
   }
 
-  // 获取监控启用状态
-  isEnabled(): boolean {
-    return this.config.enabled
-  }
+  // 获取监控启用状态 - 已在上面定义，删除重复
 
   // 设置监控启用状态
   setEnabled(enabled: boolean) {
@@ -294,37 +298,74 @@ export function createPerformanceMiddleware() {
 }
 
 // 拦截 fetch 请求
-const originalFetch = window.fetch
-window.fetch = async function(...args) {
-  const startTime = performance.now()
-  const url = args[0] as string
-  const options = args[1] as RequestInit
-  const method = options?.method || 'GET'
+if (typeof window !== 'undefined' && window.fetch) {
+  const originalFetch = window.fetch
+  window.fetch = async function(...args) {
+    // 只在性能监控启用时进行拦截
+    if (!performanceMonitor.isEnabled()) {
+      return originalFetch.apply(this, args)
+    }
 
-  try {
-    const response = await originalFetch.apply(this, args)
-    const duration = Math.round(performance.now() - startTime)
+    const startTime = performance.now()
+    let url: string
+    let method: string
 
-    performanceMonitor.recordRequest({
-      url,
-      method,
-      duration,
-      status: response.status
-    })
+    try {
+      // 安全地解析URL和方法
+      if (typeof args[0] === 'string') {
+        url = args[0]
+      } else if (args[0] instanceof Request) {
+        url = args[0].url
+      } else {
+        url = String(args[0])
+      }
 
-    return response
-  } catch (error) {
-    const duration = Math.round(performance.now() - startTime)
-    
-    performanceMonitor.recordRequest({
-      url,
-      method,
-      duration,
-      status: 0,
-      error: error instanceof Error ? error.message : String(error)
-    })
+      const options = args[1] as RequestInit
+      method = options?.method || 'GET'
+    } catch (error) {
+      // 如果解析失败，直接调用原始fetch
+      return originalFetch.apply(this, args)
+    }
 
-    throw error
+    try {
+      const response = await originalFetch.apply(this, args)
+      const duration = Math.round(performance.now() - startTime)
+
+      // 异步记录请求，避免阻塞
+      setTimeout(() => {
+        try {
+          performanceMonitor.recordRequest({
+            url,
+            method,
+            duration,
+            status: response.status
+          })
+        } catch (recordError) {
+          console.warn('记录性能指标失败:', recordError)
+        }
+      }, 0)
+
+      return response
+    } catch (error) {
+      const duration = Math.round(performance.now() - startTime)
+      
+      // 异步记录错误，避免阻塞
+      setTimeout(() => {
+        try {
+          performanceMonitor.recordRequest({
+            url,
+            method,
+            duration,
+            status: 0,
+            error: error instanceof Error ? error.message : String(error)
+          })
+        } catch (recordError) {
+          console.warn('记录性能指标失败:', recordError)
+        }
+      }, 0)
+
+      throw error
+    }
   }
 }
 

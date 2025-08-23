@@ -5,7 +5,7 @@ import { useLanguage } from '../contexts/language'
 import { useSiteInfo } from '../hooks/useSettings'
 import { usePageTitle } from '../hooks/usePageTitle'
 
-import { AdminService } from '../services/AdminService'
+import { AdminService } from '../services/admin'
 import { toast } from 'sonner'
 import {
   LayoutDashboard,

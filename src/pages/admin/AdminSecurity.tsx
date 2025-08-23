@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useLanguage } from '../../contexts/language'
 import { Shield, AlertTriangle, Unlock, Ban, Eye, RefreshCw } from 'lucide-react'
-import { adminService } from '../../services/AdminService'
+import { adminService } from '../../services/admin'
 import { toast } from 'sonner'
 import AdminLayout from '../../components/AdminLayout'
 
@@ -122,7 +122,7 @@ const AdminSecurity: React.FC = () => {
   const loadStats = async () => {
     try {
       const response = await adminService.getSecurityStats()
-      setStats(response)
+      setStats(response.data)
     } catch (error) {
       console.error('加载安全统计失败:', error)
       toast.error('加载安全统计失败')

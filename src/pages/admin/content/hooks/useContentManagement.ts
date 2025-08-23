@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { adminService } from '../../../../services/AdminService'
+import { adminService } from '../../../../services/admin'
 import { toast } from 'sonner'
-import { Post, ContentCategory } from '../types'
+import type { Post, PostStatus, ContentCategory, PaginatedApiResponse } from '@/services/admin/types'
 
 interface PaginationInfo {
   page: number
@@ -45,13 +45,8 @@ export const useContentManagement = () => {
     try {
       setLoading(true)
       const response = await adminService.getPosts(page, limit)
-      setPosts(response.posts)
-      setPagination({
-        page: response.pagination.page,
-        limit: response.pagination.limit,
-        total: response.pagination.total,
-        totalPages: response.pagination.totalPages
-      })
+      setPosts(response.data)
+      setPagination(response.pagination)
     } catch (error) {
       console.error('获取帖子数据失败:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
@@ -69,10 +64,12 @@ export const useContentManagement = () => {
   const fetchContentCategories = async () => {
     try {
       const data = await adminService.getContentCategories()
-      setContentCategories(data)
+      setContentCategories(data.data || [])
     } catch (error) {
       console.error('获取内容分类失败:', error)
       toast.error('获取内容分类失败')
+      // 确保即使API调用失败也设置为空数组
+      setContentCategories([])
     }
   }
 
@@ -97,17 +94,11 @@ export const useContentManagement = () => {
   const filteredPosts = posts
 
   // 过滤分类
-  const filteredCategories = contentCategories.filter(category => {
+  const filteredCategories = (contentCategories || []).filter(category => {
     const searchLower = categorySearchTerm.toLowerCase()
     return (
-      (category.name_zh && category.name_zh.toLowerCase().includes(searchLower)) ||
-      (category.name_zh_tw && category.name_zh_tw.toLowerCase().includes(searchLower)) ||
-      (category.name_en && category.name_en.toLowerCase().includes(searchLower)) ||
-      (category.name_vi && category.name_vi.toLowerCase().includes(searchLower)) ||
-      (category.description_zh && category.description_zh.toLowerCase().includes(searchLower)) ||
-      (category.description_zh_tw && category.description_zh_tw.toLowerCase().includes(searchLower)) ||
-      (category.description_en && category.description_en.toLowerCase().includes(searchLower)) ||
-      (category.description_vi && category.description_vi.toLowerCase().includes(searchLower))
+      (category.name && category.name.toLowerCase().includes(searchLower)) ||
+      (category.description && category.description.toLowerCase().includes(searchLower))
     )
   })
 

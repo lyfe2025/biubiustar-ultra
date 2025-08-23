@@ -19,6 +19,7 @@ export enum CacheEventType {
   MEMORY_WARNING = 'memory_warning',
   MEMORY_CRITICAL = 'memory_critical',
   CACHE_HIT_RATE_LOW = 'cache_hit_rate_low',
+  CACHE_CLEANUP_STARTED = 'cache_cleanup_started',
   CACHE_CLEANUP_COMPLETED = 'cache_cleanup_completed',
   CACHE_STATS_UPDATED = 'cache_stats_updated',
   ERROR_OCCURRED = 'error_occurred',

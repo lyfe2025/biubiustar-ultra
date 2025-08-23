@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, TrendingUp, Clock } from 'lucide-react';
 import { useLanguage } from '../../contexts/language';
-import { adminService, AdminActivity } from '../../services/AdminService';
+import { adminService, AdminActivity } from '../../services/admin';
 
 interface ActivityStatsData {
   totalActivities: number;
@@ -36,7 +36,8 @@ const ActivityStats: React.FC<ActivityStatsProps> = ({ refreshTrigger }) => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const data = await adminService.getStats();
+      const response = await adminService.getStats();
+      const data = (response as any).data || response;
       setStats({
         totalActivities: data.totalActivities || 0,
         activeActivities: data.activeActivities || 0,

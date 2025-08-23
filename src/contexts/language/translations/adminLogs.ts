@@ -59,6 +59,16 @@ export const adminLogsTranslations = {
           pageInfo: '第 {page} 页，共 {totalPages} 页',
           previous: '上一页',
           next: '下一页'
+        },
+        clearLogs: {
+          button: '清除日志',
+          clearing: '清除中...',
+          confirmTitle: '确认清除日志',
+          confirmMessage: '此操作将清除30天前的所有活动日志，近期重要记录将被保留。此操作不可撤销，您确定要继续吗？',
+          confirmButton: '确认清除',
+          cancelButton: '取消',
+          successMessage: '成功清除 {count} 条日志记录',
+          errorMessage: '清除活动日志失败'
         }
       }
     }
@@ -122,6 +132,16 @@ export const adminLogsTranslations = {
           pageInfo: '第 {page} 頁，共 {totalPages} 頁',
           previous: '上一頁',
           next: '下一頁'
+        },
+        clearLogs: {
+          button: '清除日誌',
+          clearing: '清除中...',
+          confirmTitle: '確認清除日誌',
+          confirmMessage: '此操作將清除30天前的所有活動日誌，近期重要記錄將被保留。此操作不可撤銷，您確定要繼續嗎？',
+          confirmButton: '確認清除',
+          cancelButton: '取消',
+          successMessage: '成功清除 {count} 條日誌記錄',
+          errorMessage: '清除活動日誌失敗'
         }
       }
     }
@@ -185,6 +205,16 @@ export const adminLogsTranslations = {
           pageInfo: 'Page {page} of {totalPages}',
           previous: 'Previous',
           next: 'Next'
+        },
+        clearLogs: {
+          button: 'Clear Logs',
+          clearing: 'Clearing...',
+          confirmTitle: 'Confirm Clear Logs',
+          confirmMessage: 'This operation will clear all activity logs older than 30 days. Recent important records will be preserved. This action cannot be undone. Are you sure you want to continue?',
+          confirmButton: 'Confirm Clear',
+          cancelButton: 'Cancel',
+          successMessage: 'Successfully cleared {count} log records',
+          errorMessage: 'Failed to clear activity logs'
         }
       }
     }
@@ -248,6 +278,16 @@ export const adminLogsTranslations = {
           pageInfo: 'Trang {page} trong tổng số {totalPages} trang',
           previous: 'Trang trước',
           next: 'Trang tiếp'
+        },
+        clearLogs: {
+          button: 'Xóa nhật ký',
+          clearing: 'Đang xóa...',
+          confirmTitle: 'Xác nhận xóa nhật ký',
+          confirmMessage: 'Thao tác này sẽ xóa tất cả nhật ký hoạt động cũ hơn 30 ngày. Các bản ghi quan trọng gần đây sẽ được bảo tồn. Thao tác này không thể hoàn tác. Bạn có chắc chắn muốn tiếp tục?',
+          confirmButton: 'Xác nhận xóa',
+          cancelButton: 'Hủy',
+          successMessage: 'Đã xóa thành công {count} bản ghi nhật ký',
+          errorMessage: 'Không thể xóa nhật ký hoạt động'
         }
       }
     }

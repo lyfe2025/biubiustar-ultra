@@ -48,8 +48,8 @@ export const useDashboard = () => {
       }
       
       const [statsResponse, activitiesResponse] = await Promise.all([
-        fetch(`/api/admin/dashboard/stats?${params.toString()}`),
-        fetch(`/api/admin/dashboard/recent-activities?${params.toString()}`)
+        fetch(`/api/admin/stats?${params.toString()}`),
+        fetch(`/api/admin/recent-activities?${params.toString()}`)
       ])
 
       if (statsResponse.ok && activitiesResponse.ok) {

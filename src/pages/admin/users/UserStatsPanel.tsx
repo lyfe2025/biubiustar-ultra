@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Users, UserPlus, TrendingUp, Activity } from 'lucide-react'
 import { toast } from 'sonner'
-import { adminService } from '../../../services/AdminService'
+import { adminService } from '../../../services/admin'
 
 interface UserStats {
   totalUsers: number
@@ -26,7 +26,7 @@ const UserStatsPanel: React.FC = () => {
       setError(null)
       
       const result = await adminService.getUserStats()
-      setStats(result)
+      setStats(result.data)
       setCacheInfo(result._cacheInfo)
     } catch (error) {
       console.error('加载用户统计数据失败:', error)

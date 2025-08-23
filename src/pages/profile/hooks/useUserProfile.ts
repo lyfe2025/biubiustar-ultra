@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '../../../lib/supabase'
-import { socialService } from '../../../lib/socialService'
+import { socialService } from '../../../lib/socialService/index'
 import { User } from '../../../lib/supabase'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ActivityService } from '../../../lib/activityService'

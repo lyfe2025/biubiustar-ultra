@@ -19,7 +19,7 @@ import healthRoutes from './routes/health.js';
 import cacheDebugRoutes from './routes/cache-debug.js';
 import cacheTestRoutes from './routes/cache-test.js';
 import cacheInvalidationTestRoutes from './routes/cache-invalidation-test.js';
-import cacheManagementRoutes from './routes/cache-management.js';
+import cacheManagementRoutes from './routes/cache-management/index.js';
 import { createCacheMonitorMiddleware } from './middleware/cacheMonitor.js';
 
 // 条件导入morgan日志中间件

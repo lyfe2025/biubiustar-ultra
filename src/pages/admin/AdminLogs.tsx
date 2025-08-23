@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/language';
-import { Activity, Search, Filter, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
-import { adminService } from '../../services/AdminService';
+import { Activity, Search, Filter, ChevronLeft, ChevronRight, RefreshCw, Trash } from 'lucide-react';
+import { adminService } from '../../services/admin';
 import { toast } from 'sonner';
 import AdminLayout from '../../components/AdminLayout';
 interface ActivityLog {
@@ -28,6 +28,8 @@ const AdminLogs: React.FC = () => {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAction, setFilterAction] = useState('');
   const [filterResourceType, setFilterResourceType] = useState('');
@@ -52,6 +54,24 @@ const AdminLogs: React.FC = () => {
       toast.error(t('admin.logs.messages.refreshFailed') || '刷新数据失败');
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  // 清除活动日志
+  const handleClearLogs = async () => {
+    setIsClearing(true);
+    try {
+      const response = await adminService.clearActivityLogs(30); // 清除30天前的日志
+      const count = response.data?.deletedCount || 0;
+      toast.success(t('admin.logs.clearLogs.successMessage', { count }) || `成功清除 ${count} 条日志记录`);
+      setShowClearConfirm(false);
+      // 重新加载日志列表
+      await loadLogs(1);
+    } catch (error) {
+      console.error('清除活动日志失败:', error);
+      toast.error(t('admin.logs.clearLogs.errorMessage') || '清除活动日志失败');
+    } finally {
+      setIsClearing(false);
     }
   };
 
@@ -138,14 +158,24 @@ const AdminLogs: React.FC = () => {
                 {t('admin.logs.description') || '查看系统中所有用户活动和操作记录'}
               </p>
           </div>
-          <button
-            onClick={handleRefreshData}
-            disabled={isRefreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? (t('common.actions.loading') || '刷新中...') : (t('common.actions.refresh') || '刷新')}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowClearConfirm(true)}
+              disabled={isClearing}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <Trash className="w-4 h-4" />
+              {isClearing ? (t('admin.logs.clearLogs.clearing') || '清除中...') : (t('admin.logs.clearLogs.button') || '清除日志')}
+            </button>
+            <button
+              onClick={handleRefreshData}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? (t('common.actions.loading') || '刷新中...') : (t('common.actions.refresh') || '刷新')}
+            </button>
+          </div>
         </div>
 
 
@@ -208,18 +238,12 @@ const AdminLogs: React.FC = () => {
               </select>
 
               {/* 操作按钮 */}
-              <div className="flex gap-2">
+              <div className="flex">
                 <button
                   onClick={() => loadLogs(1)}
-                  className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                 >
                   {t('admin.logs.filter.apply') || '应用'}
-                </button>
-                <button
-                  onClick={clearFilters}
-                  className="flex-1 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
-                >
-                  {t('admin.logs.filter.clear') || '清除'}
                 </button>
               </div>
             </div>
@@ -319,6 +343,42 @@ const AdminLogs: React.FC = () => {
           )}
       </div>
       </div>
+
+      {/* 清除确认对话框 */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {t('admin.logs.clearLogs.confirmTitle') || '确认清除日志'}
+                </h3>
+              </div>
+            </div>
+            <p className="text-gray-700 mb-6">
+              {t('admin.logs.clearLogs.confirmMessage') || '此操作将清除30天前的所有活动日志，近期重要记录将被保留。此操作不可撤销，您确定要继续吗？'}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                {t('admin.logs.clearLogs.cancelButton') || '取消'}
+              </button>
+              <button
+                onClick={handleClearLogs}
+                disabled={isClearing}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isClearing ? (t('admin.logs.clearLogs.clearing') || '清除中...') : (t('admin.logs.clearLogs.confirmButton') || '确认清除')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 };

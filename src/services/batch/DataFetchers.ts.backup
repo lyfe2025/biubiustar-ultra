@@ -1,0 +1,825 @@
+/**
+ * 批量数据服务的数据获取器
+ * 负责各种页面和组件的数据获取逻辑
+ */
+
+import { 
+  BatchRequest, 
+  BatchResponse, 
+  HomePageDataResult, 
+  PostDetailDataResult, 
+  ActivitiesPageDataResult,
+  HomePageData,
+  PostDetailData,
+  ActivitiesPageData
+} from './types';
+import { CacheManager } from './CacheManager';
+import { PerformanceMonitor } from './PerformanceMonitor';
+import { FallbackHandler } from './FallbackHandler';
+import { shortTermCache, defaultCache } from '../cacheService';
+import { fallbackService, FallbackResult } from '../fallbackService';
+
+export class DataFetchers {
+  private cacheManager: CacheManager;
+  private performanceMonitor: PerformanceMonitor;
+  private fallbackHandler: FallbackHandler;
+
+  constructor(
+    cacheManager: CacheManager,
+    performanceMonitor: PerformanceMonitor,
+    fallbackHandler: FallbackHandler
+  ) {
+    this.cacheManager = cacheManager;
+    this.performanceMonitor = performanceMonitor;
+    this.fallbackHandler = fallbackHandler;
+  }
+
+  /**
+   * 获取首页数据（帖子 + 活动）
+   * @param options 首页数据选项
+   * @returns 首页数据结果
+   */
+  async getHomePageData(options: {
+    postsLimit?: number;
+    activitiesLimit?: number;
+  } = {}): Promise<HomePageDataResult> {
+    const cacheKey = `home-page-data-${options.postsLimit || 3}-${options.activitiesLimit || 2}`;
+    
+    // 检查缓存
+    const cached = shortTermCache.get<HomePageData>(cacheKey);
+    if (cached) {
+      console.log('🎯 使用缓存的首页数据');
+      return cached as HomePageDataResult;
+    }
+
+    const startTime = performance.now();
+    
+    // 主要操作：批量API
+    const primaryOperation = async (): Promise<HomePageData> => {
+      console.log('🚀 开始批量获取首页数据');
+      const response = await fetch('/api/batch/home-data');
+      if (!response.ok) {
+        throw new Error(`批量API失败: ${response.status}`);
+      }
+      return await response.json();
+    };
+    
+    // 降级操作：独立API调用
+    const fallbackOperation = async (): Promise<HomePageData> => {
+      console.log('🔄 降级到独立API调用');
+      const [postsResponse, activitiesResponse] = await Promise.all([
+        fetch('/api/posts?page=1&limit=3'),
+        fetch('/api/activities/upcoming?limit=2')
+      ]);
+      
+      if (!postsResponse.ok || !activitiesResponse.ok) {
+        throw new Error('独立API调用失败');
+      }
+      
+      const [postsData, activitiesData] = await Promise.all([
+        postsResponse.json(),
+        activitiesResponse.json()
+      ]);
+      
+      return {
+        posts: postsData.posts || postsData,
+        activities: activitiesData
+      };
+    };
+
+    // 使用降级服务执行操作
+    const result: FallbackResult<HomePageData> = await fallbackService.executeWithFallback(
+      primaryOperation,
+      fallbackOperation,
+      {
+        maxRetries: 1,
+        retryDelay: 500,
+        timeout: 8000
+      }
+    );
+    
+    // 记录降级事件
+    fallbackService.logFallbackEvent('getHomePageData', result);
+    
+    if (result.success && result.data) {
+      const endTime = performance.now();
+      console.log(`✅ 首页数据获取成功，耗时: ${endTime - startTime}ms，使用降级: ${result.usedFallback}`);
+      
+      // 缓存结果（降级数据缓存时间较短）
+      const cacheTime = result.usedFallback ? 30 * 1000 : 2 * 60 * 1000;
+      shortTermCache.set(cacheKey, result.data, { ttl: cacheTime });
+      console.log('💾 首页数据已缓存');
+      
+      return result.data;
+    } else {
+      const endTime = performance.now();
+      console.error(`❌ 首页数据获取失败，耗时: ${endTime - startTime}ms`);
+      throw result.error || new Error('首页数据获取失败');
+    }
+  }
+
+  /**
+   * 批量获取首页数据（旧版本兼容）
+   * @param options 首页数据选项
+   * @returns 首页数据结果
+   */
+  async getHomePageDataLegacy(options: {
+    postsLimit?: number;
+    activitiesLimit?: number;
+  } = {}): Promise<{
+    posts: any[];
+    activities: any[];
+    errors?: any;
+  }> {
+    const metricName = 'home_page_data_legacy';
+    const startTime = Date.now();
+    const requestId = this.performanceMonitor.generateRequestId();
+    
+    const cacheKey = `home-data-${options.postsLimit || 3}-${options.activitiesLimit || 2}`;
+    
+    // 检查缓存
+    const cached = this.cacheManager.getFromCache(cacheKey);
+    if (cached) {
+      this.performanceMonitor.recordMetrics({
+        requestId: startTime.toString(),
+        operation: metricName,
+        method: 'GET',
+        startTime: startTime,
+        duration: 0,
+        success: true,
+        cacheHit: true,
+        batchSize: 1,
+        errors: []
+      });
+      const cachedData = cached as HomePageData;
+       return {
+         posts: cachedData.posts || [],
+         activities: cachedData.activities || [],
+         errors: {}
+       };
+    }
+
+    const requestStartTime = Date.now();
+    
+    try {
+      // 使用新的批量API端点
+      const requests: BatchRequest[] = [
+        {
+          id: 'posts',
+          type: 'posts',
+          endpoint: '/api/posts',
+          params: { limit: options.postsLimit || 3 }
+        },
+        {
+          id: 'activities',
+          type: 'activities',
+          endpoint: '/api/activities/upcoming',
+          params: { upcoming: true, limit: options.activitiesLimit || 2 }
+        }
+      ];
+      
+      // 这里需要调用批量处理器的方法
+      // const batchResults = await this.batchProcessor.batchFetch(requests, { useCache: false });
+      
+      const result: HomePageDataResult = {
+        posts: [],
+        activities: [],
+        errors: {}
+      };
+      
+      // 处理批量结果
+      // batchResults.forEach(response => {
+      //   if (response.id === 'posts') {
+      //     if (response.error) {
+      //       result.errors.posts = response.error;
+      //     } else {
+      //       result.posts = response.data || [];
+      //     }
+      //   } else if (response.id === 'activities') {
+      //     if (response.error) {
+      //       result.errors.activities = response.error;
+      //     } else {
+      //       result.activities = response.data || [];
+      //     }
+      //   }
+      // });
+
+      // 缓存结果
+      this.cacheManager.setCache(cacheKey, result, 300000);
+
+      this.performanceMonitor.recordMetrics({
+        requestId: startTime.toString(),
+        operation: metricName,
+        method: 'GET',
+        startTime: startTime,
+        duration: Date.now() - requestStartTime,
+        success: true,
+        cacheHit: false,
+        batchSize: 2,
+        errors: []
+      });
+      
+      return result;
+
+    } catch (error) {
+      this.performanceMonitor.recordMetrics({
+        requestId: startTime.toString(),
+        operation: metricName,
+        method: 'GET',
+        startTime: startTime,
+        duration: Date.now() - requestStartTime,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        cacheHit: false,
+        batchSize: 2,
+        errors: [error instanceof Error ? error.message : 'Unknown error']
+      });
+      
+      // 降级到单独调用
+      return {
+        posts: [],
+        activities: [],
+        errors: { general: error instanceof Error ? error.message : 'Unknown error' }
+      };
+    }
+  }
+
+  /**
+   * 获取帖子详情页数据（帖子详情 + 评论 + 点赞状态 + 分类）
+   * @param postId 帖子ID
+   * @param userId 用户ID（可选）
+   * @returns 帖子详情数据结果
+   */
+  async getPostDetailData(postId: string, userId?: string): Promise<PostDetailDataResult> {
+    const cacheKey = `post-detail-${postId}-${userId || 'anonymous'}`;
+    
+    // 检查缓存
+    const cached = shortTermCache.get<PostDetailData>(cacheKey);
+    if (cached) {
+      console.log('🎯 使用缓存的帖子详情数据');
+      return cached as PostDetailDataResult;
+    }
+
+    const startTime = performance.now();
+    
+    // 主要操作：批量API
+    const primaryOperation = async (): Promise<PostDetailData> => {
+      console.log('🚀 开始批量获取帖子详情数据');
+      const response = await fetch(`/api/batch/post-detail/${postId}?userId=${userId || ''}`);
+      if (!response.ok) {
+        throw new Error(`批量API失败: ${response.status}`);
+      }
+      return await response.json();
+    };
+    
+    // 降级操作：独立API调用
+    const fallbackOperation = async (): Promise<PostDetailData> => {
+      console.log('🔄 降级到独立API调用');
+      const requests = [
+        fetch(`/api/posts/${postId}`),
+        fetch(`/api/posts/${postId}/comments`),
+        fetch(`/api/categories/content`)
+      ];
+      
+      if (userId) {
+        requests.push(fetch(`/api/posts/${postId}/likes/${userId}`));
+      }
+      
+      const responses = await Promise.all(requests);
+      
+      // 检查所有响应是否成功
+      for (const response of responses) {
+        if (!response.ok) {
+          throw new Error(`API调用失败: ${response.status}`);
+        }
+      }
+      
+      const [postData, commentsData, categoriesData, likeData] = await Promise.all(
+        responses.map(r => r.json())
+      );
+      
+      return {
+        post: postData,
+        comments: commentsData,
+        categories: categoriesData,
+        isLiked: likeData?.isLiked || false,
+        likesCount: postData?.likes_count || 0
+      };
+    };
+
+    // 使用降级服务执行操作
+    const result: FallbackResult<PostDetailData> = await fallbackService.executeWithFallback(
+      primaryOperation,
+      fallbackOperation,
+      {
+        maxRetries: 1,
+        retryDelay: 500,
+        timeout: 10000
+      }
+    );
+    
+    // 记录降级事件
+    fallbackService.logFallbackEvent('getPostDetailData', result);
+    
+    if (result.success && result.data) {
+      const endTime = performance.now();
+      console.log(`✅ 帖子详情数据获取成功，耗时: ${endTime - startTime}ms，使用降级: ${result.usedFallback}`);
+      
+      // 缓存结果（降级数据缓存时间较短）
+      const cacheTime = result.usedFallback ? 60 * 1000 : 3 * 60 * 1000;
+      shortTermCache.set(cacheKey, result.data, { ttl: cacheTime });
+      console.log('💾 帖子详情数据已缓存');
+      
+      return result.data;
+    } else {
+      const endTime = performance.now();
+      console.error(`❌ 帖子详情数据获取失败，耗时: ${endTime - startTime}ms`);
+      throw result.error || new Error('帖子详情数据获取失败');
+    }
+  }
+
+  /**
+   * 批量获取帖子详情页数据（旧版本兼容）
+   * @param postId 帖子ID
+   * @param userId 用户ID（可选）
+   * @returns 帖子详情数据结果
+   */
+  async getPostDetailDataLegacy(postId: string, userId?: string): Promise<{
+    post: any;
+    comments: any[];
+    likesCount: number;
+    isLiked: boolean;
+    categories: any[];
+    errors?: any;
+  }> {
+    const metricName = 'post_detail_data_legacy';
+    const startTime = Date.now();
+    const requestId = this.performanceMonitor.generateRequestId();
+    
+    const cacheKey = `post-detail-${postId}-${userId || 'anonymous'}`;
+    
+    // 检查缓存
+    const cached = this.cacheManager.getFromCache(cacheKey);
+    if (cached) {
+      this.performanceMonitor.recordMetrics({
+        requestId: requestId,
+        requestType: 'single',
+        timestamp: Date.now(),
+        operation: metricName,
+        method: 'GET',
+        startTime: startTime,
+        endTime: Date.now(),
+        duration: 0,
+        batchSize: 1,
+        success: true,
+        cacheHit: true
+      });
+      return cached as PostDetailDataResult;
+    }
+
+    const requestStartTime = Date.now();
+
+    try {
+      // 使用新的批量API端点
+      const requests: BatchRequest[] = [
+        {
+          id: 'post-details',
+          type: 'post_details',
+          endpoint: `/api/posts/${postId}`,
+          params: { postId, userId }
+        },
+        {
+          id: 'comments',
+          type: 'comments',
+          endpoint: `/api/posts/${postId}/comments`,
+          params: { postId }
+        },
+        {
+          id: 'categories',
+          type: 'categories',
+          endpoint: '/api/categories/content',
+          params: { type: 'content' }
+        }
+      ];
+      
+      // 这里需要调用批量处理器的方法
+      // const batchResults = await this.batchProcessor.batchFetch(requests, { useCache: false });
+      
+      const result: PostDetailDataResult = {
+        post: null,
+        comments: [],
+        likesCount: 0,
+        isLiked: false,
+        categories: [],
+        errors: {}
+      };
+      
+      // 处理批量结果
+      // batchResults.forEach(response => {
+      //   if (response.id === 'post-details') {
+      //     if (response.error) {
+      //       result.errors.post = response.error;
+      //     } else {
+      //       result.post = response.data?.post || null;
+      //       result.isLiked = response.data?.isLiked || false;
+      //       result.likesCount = response.data?.post?.likes_count || 0;
+      //     }
+      //   } else if (response.id === 'comments') {
+      //     if (response.error) {
+      //       result.errors.comments = response.error;
+      //     } else {
+      //       result.comments = response.data || [];
+      //     }
+      //   } else if (response.id === 'categories') {
+      //     if (response.error) {
+      //       result.errors.categories = response.error;
+      //     } else {
+      //       result.categories = response.data || [];
+      //     }
+      //   }
+      // });
+
+      // 缓存结果
+      this.cacheManager.setCache(cacheKey, result, 300000);
+
+      this.performanceMonitor.recordMetrics({
+        requestId: `home-${requestStartTime}`,
+        requestType: 'batch',
+        timestamp: requestStartTime,
+        operation: metricName,
+        method: 'GET',
+        startTime: requestStartTime,
+        endTime: Date.now(),
+        duration: Date.now() - requestStartTime,
+        batchSize: 2, // posts + activities
+        success: true,
+        cacheHit: false
+      });
+      
+      return result;
+
+    } catch (error) {
+      this.performanceMonitor.recordMetrics({
+        requestId: `home-${requestStartTime}`,
+        requestType: 'batch',
+        timestamp: requestStartTime,
+        operation: metricName,
+        method: 'GET',
+        startTime: requestStartTime,
+        endTime: Date.now(),
+        duration: Date.now() - requestStartTime,
+        batchSize: 2, // posts + activities
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        cacheHit: false
+      });
+      
+      // 降级到单独调用
+      return this.fallbackHandler.fallbackToSeparatePostDetailCalls(postId, userId);
+    }
+  }
+
+  /**
+   * 获取活动页面数据（活动列表 + 分类）
+   * @param options 活动页面选项
+   * @returns 活动页面数据结果
+   */
+  async getActivitiesPageData(options: {
+    page?: number;
+    limit?: number;
+  } = {}): Promise<ActivitiesPageDataResult> {
+    const cacheKey = `activities-page-data-${options.page || 1}-${options.limit || 10}`;
+    
+    // 检查缓存
+    const cached = defaultCache.get<ActivitiesPageData>(cacheKey);
+    if (cached) {
+      console.log('🎯 使用缓存的活动页面数据');
+      return cached as ActivitiesPageDataResult;
+    }
+
+    const startTime = performance.now();
+    
+    // 主要操作：批量API
+    const primaryOperation = async (): Promise<ActivitiesPageData> => {
+      console.log('🚀 开始批量获取活动页面数据');
+      const response = await fetch('/api/batch/activities-data');
+      if (!response.ok) {
+        throw new Error(`批量API失败: ${response.status}`);
+      }
+      return await response.json();
+    };
+    
+    // 降级操作：独立API调用
+    const fallbackOperation = async (): Promise<ActivitiesPageData> => {
+      console.log('🔄 降级到独立API调用');
+      const [activitiesResponse, categoriesResponse] = await Promise.all([
+        fetch('/api/activities'),
+        fetch('/api/categories/activities')
+      ]);
+      
+      if (!activitiesResponse.ok || !categoriesResponse.ok) {
+        throw new Error('独立API调用失败');
+      }
+      
+      const [activitiesData, categoriesData] = await Promise.all([
+        activitiesResponse.json(),
+        categoriesResponse.json()
+      ]);
+      
+      return {
+        activities: activitiesData,
+        categories: categoriesData
+      };
+    };
+
+    // 使用降级服务执行操作
+    const result: FallbackResult<ActivitiesPageData> = await fallbackService.executeWithFallback(
+      primaryOperation,
+      fallbackOperation,
+      {
+        maxRetries: 1,
+        retryDelay: 500,
+        timeout: 8000
+      }
+    );
+    
+    // 记录降级事件
+    fallbackService.logFallbackEvent('getActivitiesPageData', result);
+    
+    if (result.success && result.data) {
+      const endTime = performance.now();
+      console.log(`✅ 活动页面数据获取成功，耗时: ${endTime - startTime}ms，使用降级: ${result.usedFallback}`);
+      
+      // 缓存结果（降级数据缓存时间较短）
+      const cacheTime = result.usedFallback ? 2 * 60 * 1000 : 5 * 60 * 1000;
+      defaultCache.set(cacheKey, result.data, { ttl: cacheTime });
+      console.log('💾 活动页面数据已缓存');
+      
+      return result.data;
+    } else {
+      const endTime = performance.now();
+      console.error(`❌ 活动页面数据获取失败，耗时: ${endTime - startTime}ms`);
+      throw result.error || new Error('活动页面数据获取失败');
+    }
+  }
+
+  /**
+   * 批量获取活动页面数据（旧版本兼容）
+   * @param options 活动页面选项
+   * @returns 活动页面数据结果
+   */
+  async getActivitiesPageDataLegacy(options: {
+    page?: number;
+    limit?: number;
+  } = {}): Promise<{
+    activities: any[];
+    categories: any[];
+    errors?: any;
+  }> {
+    const metricName = 'activities_page_data_legacy';
+    const startTime = Date.now();
+    const requestId = this.performanceMonitor.generateRequestId();
+    
+    const cacheKey = `activities-data-${options.page || 1}-${options.limit || 10}`;
+    
+    // 检查缓存
+    const cached = this.cacheManager.getFromCache(cacheKey);
+    if (cached) {
+      this.performanceMonitor.recordMetrics({
+        requestId: requestId,
+        requestType: 'single',
+        timestamp: Date.now(),
+        operation: metricName,
+        method: 'GET',
+        startTime: startTime,
+        endTime: Date.now(),
+        duration: 0,
+        batchSize: 1,
+        success: true,
+        cacheHit: true
+      });
+      return cached as ActivitiesPageDataResult;
+    }
+
+    const requestStartTime = Date.now();
+
+    try {
+      // 使用新的批量API端点
+      const requests: BatchRequest[] = [
+        {
+          id: 'activities',
+          type: 'activities',
+          endpoint: '/api/activities',
+          params: { page: options.page || 1, limit: options.limit || 10 }
+        },
+        {
+          id: 'categories',
+          type: 'categories',
+          endpoint: '/api/categories/activities',
+          params: { type: 'activity' }
+        }
+      ];
+      
+      // 这里需要调用批量处理器的方法
+      // const batchResults = await this.batchProcessor.batchFetch(requests, { useCache: false });
+      
+      const result: ActivitiesPageDataResult = {
+        activities: [],
+        categories: [],
+        errors: {}
+      };
+      
+      // 处理批量结果
+      // batchResults.forEach(response => {
+      //   if (response.id === 'activities') {
+      //     if (response.error) {
+      //       result.errors.activities = response.error;
+      //     } else {
+      //       result.activities = response.data || [];
+      //     }
+      //   } else if (response.id === 'categories') {
+      //     if (response.error) {
+      //       result.errors.categories = response.error;
+      //     } else {
+      //       result.categories = response.data || [];
+      //     }
+      //   }
+      // });
+
+      // 缓存结果
+      this.cacheManager.setCache(cacheKey, result, 300000);
+
+      this.performanceMonitor.recordMetrics({
+        requestId: `activities-${requestStartTime}`,
+        requestType: 'batch',
+        timestamp: requestStartTime,
+        operation: metricName,
+        method: 'GET',
+        startTime: requestStartTime,
+        endTime: Date.now(),
+        duration: Date.now() - requestStartTime,
+        batchSize: 2, // activities + categories
+        success: true,
+        cacheHit: false
+      });
+      
+      return result;
+
+    } catch (error) {
+      this.performanceMonitor.recordMetrics({
+        requestId: `activities-${requestStartTime}`,
+        requestType: 'batch',
+        timestamp: requestStartTime,
+        operation: metricName,
+        method: 'GET',
+        startTime: requestStartTime,
+        endTime: Date.now(),
+        duration: Date.now() - requestStartTime,
+        batchSize: 2, // activities + categories
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        cacheHit: false
+      });
+      
+      // 降级到单独调用
+      return this.fallbackHandler.fallbackToSeparateActivitiesCalls(options);
+    }
+  }
+
+  /**
+   * 通用数据获取方法
+   * @param endpoint API端点
+   * @param options 请求选项
+   * @returns 数据结果
+   */
+  async fetchData<T>(endpoint: string, options?: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: any;
+    cache?: boolean;
+    cacheKey?: string;
+    cacheTtl?: number;
+  }): Promise<T> {
+    const {
+      method = 'GET',
+      headers = {},
+      body,
+      cache = true,
+      cacheKey,
+      cacheTtl = 5 * 60 * 1000 // 5分钟默认缓存
+    } = options || {};
+
+    const finalCacheKey = cacheKey || `fetch-${endpoint}-${JSON.stringify(options)}`;
+
+    // 检查缓存
+    if (cache) {
+      const cached = this.cacheManager.getFromCache(finalCacheKey);
+      if (cached) {
+        console.log(`🎯 使用缓存数据: ${endpoint}`);
+        return cached as T;
+      }
+    }
+
+    const startTime = performance.now();
+    
+    try {
+      console.log(`🚀 开始获取数据: ${endpoint}`);
+      
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers
+        },
+        body: body ? JSON.stringify(body) : undefined
+      });
+
+      if (!response.ok) {
+        throw new Error(`API调用失败: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const endTime = performance.now();
+      
+      console.log(`✅ 数据获取成功: ${endpoint}，耗时: ${endTime - startTime}ms`);
+
+      // 缓存结果
+      if (cache) {
+        this.cacheManager.setCache(finalCacheKey, data, cacheTtl);
+        console.log(`💾 数据已缓存: ${endpoint}`);
+      }
+
+      return data;
+    } catch (error) {
+      const endTime = performance.now();
+      console.error(`❌ 数据获取失败: ${endpoint}，耗时: ${endTime - startTime}ms`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 批量数据获取方法
+   * @param requests 批量请求数组
+   * @param options 批量请求选项
+   * @returns 批量响应数组
+   */
+  async batchFetchData(requests: {
+    id: string;
+    endpoint: string;
+    options?: any;
+  }[], options?: {
+    useCache?: boolean;
+    parallel?: boolean;
+    timeout?: number;
+  }): Promise<{ id: string; data?: any; error?: string }[]> {
+    const {
+      useCache = true,
+      parallel = true,
+      timeout = 10000
+    } = options || {};
+
+    const results: { id: string; data?: any; error?: string }[] = [];
+
+    if (parallel) {
+      // 并行执行
+      const promises = requests.map(async (request) => {
+        try {
+          const data = await Promise.race([
+            this.fetchData(request.endpoint, {
+              ...request.options,
+              cache: useCache
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('请求超时')), timeout)
+            )
+          ]);
+          return { id: request.id, data };
+        } catch (error) {
+          return {
+            id: request.id,
+            error: error instanceof Error ? error.message : String(error)
+          };
+        }
+      });
+
+      return await Promise.all(promises);
+    } else {
+      // 串行执行
+      for (const request of requests) {
+        try {
+          const data = await this.fetchData(request.endpoint, {
+            ...request.options,
+            cache: useCache
+          });
+          results.push({ id: request.id, data });
+        } catch (error) {
+          results.push({
+            id: request.id,
+            error: error instanceof Error ? error.message : String(error)
+          });
+        }
+      }
+      return results;
+    }
+  }
+}

@@ -10,7 +10,7 @@ import CategoryManagement from '../../components/admin/CategoryManagement'
 import ActivityModal from '../../components/admin/ActivityModal'
 import CreateActivityModal from '../../components/admin/CreateActivityModal'
 import EditActivityModal from '../../components/admin/EditActivityModal'
-import { adminService, AdminActivity, ActivityCategory } from '../../services/AdminService'
+import { adminService, AdminActivity, ActivityCategory } from '../../services/admin'
 
 // 定义Category接口以匹配CategoryManagement组件的期望
 interface Category {
@@ -81,10 +81,13 @@ const AdminActivities = () => {
         setCacheTimestamp('')
       }
       
-      setActivities(response.activities)
+      setActivities(response.data)
       setPagination(response.pagination)
     } catch (error) {
       console.error('Failed to load activities:', error)
+      
+      // 确保activities不会是undefined
+      setActivities([])
       
       // 检查是否为认证失败错误
       if (error instanceof Error && error.name === 'AuthenticationError') {
@@ -133,7 +136,7 @@ const AdminActivities = () => {
         setCacheTimestamp('')
       }
       
-      setActivities(data.activities)
+      setActivities(data.data)
       setPagination(data.pagination)
       toast.success('数据已刷新')
     } catch (error) {
@@ -204,7 +207,7 @@ const AdminActivities = () => {
       const response = await adminService.getCategories()
       
       // 处理分类缓存信息
-      const cacheInfo = response._cacheInfo
+      const cacheInfo = (response as any)._cacheInfo
       if (cacheInfo) {
         setCategoryCacheHit(cacheInfo.cached || false)
         setCategoryCacheTimestamp(cacheInfo.timestamp || '')
@@ -213,8 +216,21 @@ const AdminActivities = () => {
         setCategoryCacheTimestamp('')
       }
       
+      // 处理不同的响应结构
+      let categoriesData: ActivityCategory[] = []
+      if ('activity' in response && 'content' in response) {
+        // 如果返回的是包含activity和content的对象
+        categoriesData = (response as any).activity.data || []
+      } else if ('data' in response) {
+        // 如果返回的是标准的分页响应
+        categoriesData = (response as any).data || []
+      } else {
+        // 如果直接返回数组
+        categoriesData = Array.isArray(response) ? response : []
+      }
+      
       // 将ActivityCategory转换为Category类型
-      const convertedCategories: Category[] = response.categories.map((cat: ActivityCategory) => ({
+      const convertedCategories: Category[] = categoriesData.map((cat: ActivityCategory) => ({
         id: cat.id,
         name: cat.name,
         description: cat.description || '',

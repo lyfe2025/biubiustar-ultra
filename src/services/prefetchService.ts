@@ -1,6 +1,6 @@
 import { batchDataService, BatchRequest } from './batchDataService';
 import { ActivityService } from '../lib/activityService';
-import { socialService } from '../lib/socialService';
+import { socialService } from '../lib/socialService/index';
 
 // 预取策略配置
 interface PrefetchConfig {

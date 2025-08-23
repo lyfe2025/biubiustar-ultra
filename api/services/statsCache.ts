@@ -180,8 +180,8 @@ async function getPostStats() {
     // 获取所有帖子的浏览量数据
     supabaseAdmin
       .from('posts')
-      .select('views')
-      .not('views', 'is', null)
+      .select('views_count')
+      .not('views_count', 'is', null)
   ])
   
   if (totalPostsResult.error) {
@@ -204,7 +204,7 @@ async function getPostStats() {
   let totalViews = 0
   if (viewsResult.data && Array.isArray(viewsResult.data)) {
     totalViews = viewsResult.data.reduce((sum, post) => {
-      const views = post.views || 0
+      const views = post.views_count || 0
       return sum + (typeof views === 'number' ? views : 0)
     }, 0)
   }
@@ -284,7 +284,7 @@ async function getParticipationStats() {
  */
 async function getLikeStats() {
   const { count, error } = await supabaseAdmin
-    .from('post_likes')
+    .from('likes')
     .select('*', { count: 'exact', head: true })
   
   if (error) {

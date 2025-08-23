@@ -4,7 +4,7 @@ import { useLanguage } from '../../contexts/language'
 import { toast } from 'sonner'
 import LazyImage from '../LazyImage'
 
-import { adminService } from '../../services/AdminService'
+import { adminService } from '../../services/admin'
 
 interface CreateActivityModalProps {
   isOpen: boolean

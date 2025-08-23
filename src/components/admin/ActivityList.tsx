@@ -3,7 +3,7 @@ import { Search, Filter, Eye, Edit2, Star, StarOff, Trash2, Plus } from 'lucide-
 import { useLanguage } from '../../contexts/language'
 import { getCategoryName } from '../../utils/categoryUtils'
 
-import { AdminActivity } from '../../services/AdminService'
+import { AdminActivity } from '../../services/admin/types'
 
 // 使用统一的Activity类型定义
 
@@ -62,7 +62,7 @@ const ActivityList: React.FC<ActivityListProps> = ({
     })
   }
 
-  const filteredActivities = activities.filter(activity => {
+  const filteredActivities = (activities && Array.isArray(activities)) ? activities.filter(activity => {
     const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          activity.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          activity.location.toLowerCase().includes(searchTerm.toLowerCase())
@@ -70,7 +70,7 @@ const ActivityList: React.FC<ActivityListProps> = ({
     const matchesCategory = categoryFilter === 'all' || activity.category === categoryFilter
     
     return matchesSearch && matchesStatus && matchesCategory
-  })
+  }) : []
 
   return (
     <>

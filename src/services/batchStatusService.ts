@@ -3,7 +3,7 @@
  * 解决N+1查询问题：批量获取评论数量、用户参与状态、点赞状态、关注状态等
  */
 
-import { socialService } from '../lib/socialService';
+import { socialService } from '../lib/socialService/index';
 import { ActivityService } from '../lib/activityService';
 import { defaultCache } from './cacheService';
 import { performanceMonitor } from './performanceMonitor'

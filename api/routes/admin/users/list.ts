@@ -151,7 +151,7 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
 
     // 构造响应数据
     const responseData = {
-      users: formattedUsers,
+      data: formattedUsers,
       pagination: {
         page,
         limit,

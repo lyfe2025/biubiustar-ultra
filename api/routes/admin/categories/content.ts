@@ -24,7 +24,17 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
       return res.status(500).json({ error: '获取内容分类列表失败' })
     }
 
-    res.json(categories || [])
+    const responseData = categories || []
+    
+    res.json({
+      data: responseData,
+      pagination: {
+        total: responseData.length,
+        page: 1,
+        limit: responseData.length,
+        totalPages: 1
+      }
+    })
   } catch (error) {
     console.error('获取内容分类列表失败:', error)
     res.status(500).json({ error: '服务器内部错误' })

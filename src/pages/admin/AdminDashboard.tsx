@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
 import { useLanguage } from '../../contexts/language'
-import { adminService, type DashboardStats, type RecentActivity } from '../../services/AdminService'
+import { adminService, type DashboardStats, type RecentActivity } from '../../services/admin'
 
 // 接口定义已移至AdminService中
 
@@ -257,7 +257,7 @@ const AdminDashboard = () => {
           adminService.getActivityLogs(1, 5) // 获取前5条活动日志作为最近活动
         ])
         
-        setStats(statsData)
+        setStats((statsData as any).data || statsData)
         // 适配activity_logs表的数据结构
         const formattedActivities = activitiesData.data.map((log: any) => ({
           id: log.id,

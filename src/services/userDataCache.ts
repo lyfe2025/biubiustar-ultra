@@ -3,7 +3,7 @@
  * 在应用层面缓存用户数据，避免重复加载
  */
 
-import { socialService } from '../lib/socialService';
+import { socialService } from '../lib/socialService/index';
 import { ActivityService } from '../lib/activityService';
 import type { Post } from '../pages/admin/content/types';
 import type { Activity } from '../types';

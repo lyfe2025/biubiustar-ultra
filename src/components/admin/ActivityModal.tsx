@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { XCircle, User, MapPin, Calendar, Tag, Users, UserCheck } from 'lucide-react'
-import { AdminActivity } from '../../services/AdminService'
+import { AdminActivity } from '../../services/admin/types'
 import { useLanguage } from '../../contexts/language'
 import { ActivityService, ActivityCategory, ActivityParticipant } from '../../lib/activityService'
 import { getCategoryName } from '../../utils/categoryUtils'

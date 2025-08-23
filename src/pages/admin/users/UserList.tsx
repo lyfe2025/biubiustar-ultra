@@ -105,7 +105,7 @@ const UserList: React.FC<UserListProps> = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+            {users && Array.isArray(users) && users.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-3">
@@ -175,7 +175,7 @@ const UserList: React.FC<UserListProps> = ({
         </table>
       </div>
       
-      {users.length === 0 && (
+      {users && users.length === 0 && (
         <div className="text-center py-12">
           <User className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.users.noUsers')}</h3>

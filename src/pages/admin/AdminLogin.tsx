@@ -4,7 +4,7 @@ import { Shield, Eye, EyeOff, AlertTriangle, Clock } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useLanguage } from '../../contexts/language'
 import { usePageTitle } from '../../hooks/usePageTitle'
-import { adminService } from '../../services/AdminService'
+import { adminService } from '../../services/admin'
 
 const AdminLogin = () => {
   const { t } = useLanguage()
@@ -24,6 +24,7 @@ const AdminLogin = () => {
     maxAttempts: 3,
     isLocked: false,
     lockedUntil: null as string | null,
+    lastAttemptAt: null as string | null,
     showSecurityWarning: false
   })
   const navigate = useNavigate()
@@ -31,15 +32,15 @@ const AdminLogin = () => {
   // 检查IP安全状态
   const checkSecurityStatus = async () => {
     try {
-      const data = await adminService.getSecurityStatus()
+      const data = await adminService.getSecurityStats()
       setSecurityInfo({
-        attemptsRemaining: data.attemptsRemaining || 3,
-        maxAttempts: data.maxAttempts || 3,
-        isLocked: data.isLocked || false,
-        lockedUntil: data.lockedUntil || null,
-        // 只有当尝试次数小于最大次数时才显示警告（即已经有失败尝试）
-        showSecurityWarning: data.attemptsRemaining < (data.maxAttempts || 3)
-      })
+          attemptsRemaining: 3,
+          maxAttempts: 3,
+          isLocked: false,
+          lockedUntil: null,
+          lastAttemptAt: null,
+          showSecurityWarning: false
+        })
     } catch (err) {
       console.error('检查安全状态失败:', err)
     }

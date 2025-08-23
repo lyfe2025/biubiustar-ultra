@@ -3,7 +3,7 @@
  * 解决N+1查询问题：避免每个组件都重复获取分类数据
  */
 
-import { socialService } from '../lib/socialService';
+import { socialService } from '../lib/socialService/index';
 import { ActivityService } from '../lib/activityService';
 import { defaultCache } from './cacheService';
 

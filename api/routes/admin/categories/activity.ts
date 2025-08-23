@@ -24,7 +24,13 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
     const cachedData = await contentCache.get(cacheKey)
     if (cachedData && Array.isArray(cachedData)) {
       return res.json({
-        categories: cachedData,
+        data: cachedData,
+        pagination: {
+          total: cachedData.length,
+          page: 1,
+          limit: cachedData.length,
+          totalPages: 1
+        },
         _cacheInfo: {
           cached: true,
           timestamp: new Date().toISOString()
@@ -49,7 +55,13 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
     await contentCache.set(cacheKey, responseData, CACHE_TTL.LONG)
 
     res.json({
-      categories: responseData,
+      data: responseData,
+      pagination: {
+        total: responseData.length,
+        page: 1,
+        limit: responseData.length,
+        totalPages: 1
+      },
       _cacheInfo: {
         cached: false,
         timestamp: new Date().toISOString()

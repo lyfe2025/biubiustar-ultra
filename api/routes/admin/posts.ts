@@ -187,10 +187,10 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
       }
     }) || []
 
-    // 返回分页数据
+    // 返回分页数据 - 统一格式为 {data: [...], pagination: {...}}
     const totalPages = Math.ceil((totalPosts || 0) / limit)
     const responseData = {
-      posts: formattedPosts,
+      data: formattedPosts,
       pagination: {
         page,
         limit,

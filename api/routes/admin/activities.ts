@@ -141,7 +141,7 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
     // 构建响应数据
     const totalPages = Math.ceil((totalActivities || 0) / limit)
     const responseData = {
-      activities: formattedActivities,
+      data: formattedActivities,
       pagination: {
         page,
         limit,

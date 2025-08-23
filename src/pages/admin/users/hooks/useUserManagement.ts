@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { adminService } from '../../../../services/AdminService'
+import { adminService } from '../../../../services/admin'
 import { toast } from 'sonner'
 import { User, NewUserData } from '../types'
 
@@ -60,10 +60,19 @@ export const useUserManagement = () => {
         setCacheTimestamp('')
       }
       
-      setUsers(response.users)
+      setUsers(response.data)
       setPagination(response.pagination)
     } catch (error) {
       console.error('获取用户数据失败:', error)
+      
+      // 确保在错误情况下users不会变成undefined
+      setUsers([])
+      setPagination({
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0
+      })
       
       if (error instanceof Error && error.name === 'AuthenticationError') {
         toast.error('认证令牌已失效，请重新登录')
@@ -73,6 +82,8 @@ export const useUserManagement = () => {
         }, 1000)
         return
       }
+      
+      toast.error('获取用户数据失败')
     } finally {
       setLoading(false)
     }
@@ -124,11 +135,21 @@ export const useUserManagement = () => {
         setCacheTimestamp('')
       }
       
-      setUsers(data.users)
+      setUsers(data.data)
       setPagination(data.pagination)
       toast.success('数据已刷新')
     } catch (error) {
       console.error('强制刷新失败:', error)
+      
+      // 确保在错误情况下users不会变成undefined
+      setUsers([])
+      setPagination({
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0
+      })
+      
       toast.error('刷新失败')
     } finally {
       setLoading(false)
