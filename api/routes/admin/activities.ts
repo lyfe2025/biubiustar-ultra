@@ -167,7 +167,7 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
 }))
 
 // 更新活动状态
-router.put('/:id/status', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+router.patch('/:id/status', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { id } = req.params
     const { status } = req.body

@@ -92,6 +92,13 @@ export class CacheInvalidationService {
       cascade: false
     });
 
+    // 内容相关失效规则
+    this.addRule('content:update', {
+      pattern: /^(posts:|activities:|categories:)/,
+      cacheType: 'content',
+      cascade: false
+    });
+
     // 联系合作相关失效规则
     this.addRule('contact:create', {
       pattern: /^(contact:|admin_contact)/,

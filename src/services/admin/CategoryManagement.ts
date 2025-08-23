@@ -301,8 +301,8 @@ export class CategoryManagement extends AdminBaseService {
    * @returns Promise<ApiResponse<{ success: boolean }>> 切换结果
    */
   async toggleContentCategoryStatus(id: string): Promise<ApiResponse<{ success: boolean }>> {
-    return this.request<ApiResponse<{ success: boolean }>>(`/admin/categories/content/${id}/toggle-status`, {
-      method: 'PATCH'
+    return this.request<ApiResponse<{ success: boolean }>>(`/admin/categories/content/${id}/toggle`, {
+      method: 'PUT'
     })
   }
 

@@ -93,6 +93,17 @@ export class AdminBaseService {
         throw error
       }
 
+      // 处理204 No Content状态码，避免JSON解析错误
+      if (response.status === 204) {
+        return { success: true } as T
+      }
+      
+      // 检查响应体是否为空
+      const contentLength = response.headers.get('content-length')
+      if (contentLength === '0') {
+        return { success: true } as T
+      }
+      
       const responseData = await response.json()
       
       // 检查响应格式，如果有success和data字段，则返回data字段的内容

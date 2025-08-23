@@ -119,7 +119,7 @@ export const useActivities = () => {
       }
 
       const response = await fetch(`/api/admin/activities/${id}/status`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       })
