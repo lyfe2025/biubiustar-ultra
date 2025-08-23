@@ -255,11 +255,48 @@ export class UserManagement extends AdminBaseService {
    * @returns Promise<{ success: boolean }> 更新结果
    */
   async updateUserPassword(userId: string, newPassword: string): Promise<{ success: boolean }> {
-    const response = await this.request<ApiResponse<{ success: boolean }>>(`/admin/users/${userId}/password`, {
-      method: 'PATCH',
-      body: JSON.stringify({ newPassword })
+    // 详细调试日志：打印请求参数和URL
+    const requestUrl = `/admin/users/${userId}/password`
+    const requestBody = { newPassword }
+    
+    console.log('🔐 [DEBUG] AdminService.updateUserPassword - 请求详情:', {
+      userId,
+      userIdType: typeof userId,
+      userIdValue: JSON.stringify(userId),
+      userIdIsUndefined: userId === undefined,
+      userIdIsNull: userId === null,
+      userIdIsEmpty: userId === '',
+      passwordLength: newPassword?.length,
+      requestUrl,
+      fullUrl: `${this.baseURL}${requestUrl}`,
+      requestBody: { ...requestBody, newPassword: newPassword ? '***' : 'undefined' },
+      method: 'PATCH'
     })
-    return response.data
+    
+    try {
+      const response = await this.request<ApiResponse<{ success: boolean }>>(requestUrl, {
+        method: 'PATCH',
+        body: JSON.stringify(requestBody)
+      })
+      
+      console.log('✅ [DEBUG] AdminService密码更新成功响应:', {
+        response,
+        data: response.data,
+        success: response.data?.success
+      })
+      
+      return response.data
+    } catch (error) {
+      console.error('❌ [DEBUG] AdminService密码更新失败:', {
+        error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        userId,
+        requestUrl,
+        fullUrl: `${this.baseURL}${requestUrl}`,
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      throw error
+    }
   }
 
   /**

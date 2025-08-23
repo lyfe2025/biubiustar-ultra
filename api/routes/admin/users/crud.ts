@@ -57,70 +57,257 @@ async function createUserAtomically(userData: {
   let authUserId: string | undefined
   let profileId: string | undefined
   
+  console.log('🚀 开始创建用户:', {
+    username,
+    email: email ? '***@' + email.split('@')[1] : 'undefined',
+    passwordLength: password?.length,
+    full_name,
+    role,
+    timestamp: new Date().toISOString()
+  })
+  
   try {
     // 1. 检查用户名唯一性
-    const { data: existingProfile } = await supabaseAdmin
+    console.log('🔍 步骤1: 检查用户名唯一性...', { username })
+    const { data: existingProfile, error: usernameCheckError } = await supabaseAdmin
       .from('user_profiles')
       .select('id')
       .eq('username', username)
       .single()
+    
+    console.log('🔍 用户名检查结果:', {
+      username,
+      existingProfile: existingProfile ? { id: existingProfile.id } : null,
+      error: usernameCheckError ? {
+        message: usernameCheckError.message,
+        code: usernameCheckError.code,
+        details: usernameCheckError.details
+      } : null,
+      isUnique: !existingProfile
+    })
     
     if (existingProfile) {
       throw new Error('用户名已存在')
     }
     
     // 2. 检查邮箱唯一性
-    const { data: existingAuth } = await supabaseAdmin.auth.admin.listUsers()
+    console.log('📧 步骤2: 检查邮箱唯一性...', { email: email ? '***@' + email.split('@')[1] : 'undefined' })
+    const { data: existingAuth, error: emailListError } = await supabaseAdmin.auth.admin.listUsers()
+    
+    console.log('📧 邮箱列表查询结果:', {
+      totalUsers: existingAuth?.users?.length || 0,
+      error: emailListError ? {
+        message: emailListError.message,
+        code: emailListError.code
+      } : null
+    })
+    
+    if (emailListError) {
+      throw new Error(`查询邮箱列表失败: ${emailListError.message}`)
+    }
+    
     const emailExists = existingAuth.users.some((user: any) => user.email === email)
     
+    console.log('📧 邮箱唯一性检查结果:', {
+      email: email ? '***@' + email.split('@')[1] : 'undefined',
+      emailExists,
+      isUnique: !emailExists
+    })
+    
     if (emailExists) {
-      throw new Error('邮箱已存在')
+      const friendlyError = new Error('该邮箱地址已被使用过。出于系统安全考虑，每个邮箱只能注册一次，即使之前的账户已被删除也无法重复使用。请使用其他邮箱地址进行注册。')
+      console.error('🚫 邮箱唯一性检查失败:', {
+        email: email ? '***@' + email.split('@')[1] : 'undefined',
+        reason: '邮箱已存在',
+        friendlyMessage: friendlyError.message,
+        timestamp: new Date().toISOString()
+      })
+      throw friendlyError
     }
     
     // 3. 创建认证用户
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
+    console.log('🔐 步骤3: 创建认证用户...', {
+      email: email ? '***@' + email.split('@')[1] : 'undefined',
+      passwordLength: password?.length,
       email_confirm: true
     })
     
-    if (authError || !authData.user) {
-      throw new Error(`创建认证用户失败: ${authError?.message}`)
+    let authData: any
+    let authError: any
+    
+    try {
+      const createUserResult = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true
+      })
+      
+      authData = createUserResult.data
+      authError = createUserResult.error
+      
+      // 详细记录Supabase Admin API的完整响应
+      console.log('🔐 Supabase Admin API 完整响应:', {
+        hasData: !!authData,
+        hasError: !!authError,
+        dataKeys: authData ? Object.keys(authData) : [],
+        errorDetails: authError ? {
+          message: authError.message,
+          status: authError.status,
+          statusCode: authError.statusCode,
+          code: authError.code,
+          name: authError.name,
+          details: authError.details,
+          hint: authError.hint,
+          stack: authError.stack,
+          // 记录完整的错误对象
+          fullError: JSON.stringify(authError, null, 2)
+        } : null,
+        timestamp: new Date().toISOString()
+      })
+      
+    } catch (apiError: any) {
+      // 捕获API调用过程中的异常
+      console.error('🚨 Supabase Admin API 调用异常:', {
+        errorType: typeof apiError,
+        errorName: apiError?.name,
+        errorMessage: apiError?.message,
+        errorCode: apiError?.code,
+        errorStatus: apiError?.status,
+        errorStack: apiError?.stack,
+        fullError: JSON.stringify(apiError, null, 2),
+        timestamp: new Date().toISOString()
+      })
+      
+      throw new Error(`Supabase Admin API 调用失败: ${apiError?.message || 'Unknown API error'}`)
+    }
+    
+    console.log('🔐 认证用户创建结果:', {
+      success: !authError && !!authData?.user,
+      userId: authData?.user?.id,
+      userEmail: authData?.user?.email ? '***@' + authData.user.email.split('@')[1] : 'undefined',
+      error: authError ? {
+        message: authError.message,
+        status: authError.status,
+        code: authError.code,
+        details: authError.details,
+        hint: authError.hint
+      } : null,
+      timestamp: new Date().toISOString()
+    })
+    
+    // 检查Supabase项目配置
+    if (authError) {
+      console.error('🔍 Supabase认证配置检查:', {
+        projectUrl: process.env.SUPABASE_URL ? 'configured' : 'missing',
+        serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'configured' : 'missing',
+        errorSuggestions: [
+          '1. 检查Supabase项目是否启用了用户注册',
+          '2. 验证SERVICE_ROLE_KEY权限是否正确',
+          '3. 确认项目URL和密钥是否匹配',
+          '4. 检查Supabase项目的认证设置'
+        ],
+        possibleCauses: [
+          authError.message?.includes('Database error') ? 'Supabase数据库配置问题' : null,
+          authError.message?.includes('Invalid') ? 'API密钥或配置无效' : null,
+          authError.status === 403 ? '权限不足，检查SERVICE_ROLE_KEY' : null,
+          authError.status === 400 ? '请求参数错误或项目配置问题' : null
+        ].filter(Boolean)
+      })
+      
+      throw new Error(`创建认证用户失败: ${authError.message} (状态码: ${authError.status || 'unknown'})`)
+    }
+    
+    if (!authData?.user) {
+      console.error('🚨 认证用户创建返回空数据:', {
+        authData,
+        hasUser: !!authData?.user,
+        dataStructure: authData ? Object.keys(authData) : 'null'
+      })
+      throw new Error('创建认证用户失败: 返回数据为空')
     }
     
     authUserId = authData.user.id
+    console.log('✅ 认证用户创建成功:', { authUserId })
     
     // 4. 创建或更新用户资料
-    const { data: profileData, error: profileError } = await supabaseAdmin
+    console.log('👤 步骤4: 创建用户资料...', {
+      authUserId,
+      username,
+      full_name: full_name || username,
+      role
+    })
+    
+    const profileData = {
+      id: authUserId,
+      username,
+      full_name: full_name || username,
+      role,
+      status: 'active',
+      followers_count: 0,
+      following_count: 0,
+      posts_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+    
+    console.log('👤 准备插入的用户资料数据:', profileData)
+    
+    const { data: profileResult, error: profileError } = await supabaseAdmin
       .from('user_profiles')
-      .upsert({
-        id: authUserId,
-        username,
-        full_name: full_name || username,
-        role,
-        status: 'active',
-        followers_count: 0,
-        following_count: 0,
-        posts_count: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .upsert(profileData)
       .select()
       .single()
     
-    if (profileError || !profileData) {
+    console.log('👤 用户资料创建结果:', {
+      success: !profileError && !!profileResult,
+      profileId: profileResult?.id,
+      username: profileResult?.username,
+      error: profileError ? {
+        message: profileError.message,
+        code: profileError.code,
+        details: profileError.details,
+        hint: profileError.hint
+      } : null,
+      timestamp: new Date().toISOString()
+    })
+    
+    if (profileError || !profileResult) {
       throw new Error(`创建用户资料失败: ${profileError?.message}`)
     }
     
-    profileId = profileData.id
+    profileId = profileResult.id
+    console.log('✅ 用户资料创建成功:', { profileId })
+    
+    console.log('🎉 用户创建完全成功:', {
+      authUserId,
+      profileId,
+      username,
+      email: email ? '***@' + email.split('@')[1] : 'undefined'
+    })
     
     return {
       authUser: authData.user,
-      profile: profileData
+      profile: profileResult
     }
   } catch (error) {
+    console.error('❌ 用户创建过程中发生错误:', {
+      error: error instanceof Error ? {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      } : error,
+      authUserId,
+      profileId,
+      username,
+      email: email ? '***@' + email.split('@')[1] : 'undefined',
+      timestamp: new Date().toISOString()
+    })
+    
     // 原子化回滚：清理已创建的数据
+    console.log('🔄 开始清理失败的用户创建数据...', { authUserId, profileId })
     await cleanupFailedUserCreation(authUserId, profileId)
+    console.log('🔄 清理完成')
+    
     throw error
   }
 }
@@ -174,11 +361,98 @@ router.post('/', asyncHandler(async (req: Request, res: Response): Promise<Respo
     
     // 根据错误类型返回相应的状态码
     const errorMessage = error instanceof Error ? error.message : String(error)
-    if (errorMessage?.includes('已存在')) {
+    
+    // 检查是否为邮箱或用户名冲突错误
+    if (errorMessage?.includes('已存在') || 
+        errorMessage?.includes('已被使用过') || 
+        errorMessage?.includes('无法重复使用')) {
+      console.log('🚫 返回冲突错误给前端:', {
+        statusCode: 409,
+        errorMessage,
+        timestamp: new Date().toISOString()
+      })
       return res.status(409).json({ error: errorMessage })
     }
     
+    console.log('🚨 返回服务器错误给前端:', {
+      statusCode: 500,
+      errorMessage,
+      timestamp: new Date().toISOString()
+    })
     res.status(500).json({ error: errorMessage || '创建用户失败' })
+  }
+}))
+
+// 更新用户资料
+router.put('/:id', asyncHandler(async (req: Request, res: Response): Promise<Response | void> => {
+  try {
+    const { id } = req.params
+    const { username, full_name, bio, location, website } = req.body
+
+    // 检查用户是否存在
+    const { data: existingUser, error: fetchError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('id, username')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !existingUser) {
+      return res.status(404).json({ error: '用户不存在' })
+    }
+
+    // 如果更新了用户名，检查用户名唯一性
+    if (username && username !== existingUser.username) {
+      const { data: duplicateUser } = await supabaseAdmin
+        .from('user_profiles')
+        .select('id')
+        .eq('username', username)
+        .neq('id', id)
+        .single()
+
+      if (duplicateUser) {
+        return res.status(409).json({ error: '用户名已存在' })
+      }
+    }
+
+    // 构建更新数据
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    }
+
+    if (username !== undefined) updateData.username = username
+    if (full_name !== undefined) updateData.full_name = full_name
+    if (bio !== undefined) updateData.bio = bio
+    if (location !== undefined) updateData.location = location
+    if (website !== undefined) updateData.website = website
+
+    // 更新用户资料
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
+      .from('user_profiles')
+      .update(updateData)
+      .eq('id', id)
+      .select('id, username, full_name, bio, location, website, role, status, created_at, updated_at')
+      .single()
+
+    if (updateError) {
+      console.error('更新用户资料失败:', updateError)
+      return res.status(500).json({ error: '更新用户资料失败' })
+    }
+
+    // 智能缓存失效
+    await invalidateOnUserCreate() // 复用用户创建的缓存失效逻辑
+    
+    // 清除特定用户的缓存
+    const userCacheKey = CacheKeyGenerator.userProfile(id)
+    await userCache.delete(userCacheKey)
+
+    res.json({
+      message: '用户资料更新成功',
+      user: updatedUser
+    })
+  } catch (error: unknown) {
+    console.error('更新用户资料失败:', error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    res.status(500).json({ error: errorMessage || '更新用户资料失败' })
   }
 }))
 

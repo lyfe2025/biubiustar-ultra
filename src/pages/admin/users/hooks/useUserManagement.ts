@@ -247,7 +247,44 @@ export const useUserManagement = () => {
       return true
     } catch (error) {
       console.error('创建用户失败:', error)
-      toast.error('创建用户失败')
+      
+      // 提取具体的错误信息
+      let errorMessage = '创建用户失败'
+      
+      if (error instanceof Error) {
+        // 检查是否包含具体的错误描述
+        if (error.message.includes('用户名已存在')) {
+          errorMessage = '用户名已存在，请使用其他用户名'
+        } else if (error.message.includes('邮箱已存在') || error.message.includes('邮箱已被使用')) {
+          errorMessage = '邮箱已存在，请使用其他邮箱地址'
+        } else if (error.message.includes('邮箱已被使用过且无法重复使用')) {
+          errorMessage = '该邮箱已被使用过，出于安全考虑无法重复使用，请使用其他邮箱地址'
+        } else if (error.message.trim()) {
+          // 如果有其他具体错误信息，显示它
+          errorMessage = error.message
+        }
+      }
+      
+      toast.error(errorMessage)
+      return false
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // 更新用户信息
+  const updateUser = async (userId: string, userData: Partial<User>) => {
+    try {
+      setIsSubmitting(true)
+      await adminService.updateUser(userId, userData)
+      await fetchUsers()
+      setShowUserModal(false)
+      setSelectedUser(null)
+      toast.success('用户信息更新成功')
+      return true
+    } catch (error) {
+      console.error('更新用户信息失败:', error)
+      toast.error('更新用户信息失败')
       return false
     } finally {
       setIsSubmitting(false)
@@ -257,15 +294,53 @@ export const useUserManagement = () => {
   // 更新用户密码
   const updateUserPassword = async (userId: string, password: string) => {
     try {
+      // 详细调试日志：打印userId的完整信息
+      console.log('🔐 [DEBUG] updateUserPassword - 开始更新密码:', {
+        userId,
+        userIdType: typeof userId,
+        userIdValue: JSON.stringify(userId),
+        userIdIsUndefined: userId === undefined,
+        userIdIsNull: userId === null,
+        userIdIsEmpty: userId === '',
+        passwordLength: password?.length,
+        password: password ? '***' : 'undefined',
+        selectedUser: selectedUser ? {
+          id: selectedUser.id,
+          idType: typeof selectedUser.id,
+          username: selectedUser.username,
+          email: selectedUser.email
+        } : 'null'
+      })
+      
       setIsUpdatingPassword(true)
+      
+      if (!password || password.trim() === '') {
+        console.error('❌ 密码为空或未定义')
+        toast.error('密码不能为空')
+        return false
+      }
+      
+      if (!userId || userId === 'undefined' || userId === 'null') {
+        console.error('❌ [DEBUG] userId无效:', { userId, type: typeof userId })
+        toast.error('用户ID无效，无法更新密码')
+        return false
+      }
+      
+      console.log('🚀 [DEBUG] 调用adminService.updateUserPassword:', { userId, userIdType: typeof userId })
       await adminService.updateUserPassword(userId, password)
       setShowPasswordModal(false)
       setSelectedUser(null)
       toast.success('密码更新成功')
       return true
     } catch (error) {
-      console.error('更新密码失败:', error)
-      toast.error('更新密码失败')
+      console.error('❌ [DEBUG] 更新密码失败 - 详细错误信息:', {
+        error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        userId,
+        userIdType: typeof userId,
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      toast.error(`更新密码失败: ${error instanceof Error ? error.message : String(error)}`)
       return false
     } finally {
       setIsUpdatingPassword(false)
@@ -326,6 +401,7 @@ export const useUserManagement = () => {
     // 操作方法
     fetchUsers,
     forceRefresh,
+    updateUser,
     updateUserStatus,
     updateUserRole,
     deleteUser,

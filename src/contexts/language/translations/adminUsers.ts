@@ -74,7 +74,46 @@ export const adminUsersTranslations = {
           emailRequired: '邮箱不能为空',
           passwordRequired: '密码不能为空',
           passwordTooShort: '密码长度至少6位',
-          passwordMismatch: '两次输入的密码不一致'
+          passwordMismatch: '两次输入的密码不一致',
+          passwordTooLong: '密码长度不能超过128位',
+          passwordEmpty: '密码不能为空'
+        },
+        // 密码更新相关
+        passwordUpdate: {
+          success: '密码更新成功',
+          error: '密码更新失败',
+          errors: {
+            invalidPassword: '密码格式无效',
+            passwordTooWeak: '密码强度不足',
+            userNotFound: '用户不存在',
+            rateLimitExceeded: '操作过于频繁',
+            serviceUnavailable: '服务暂时不可用',
+            networkError: '网络连接失败',
+            timeout: '请求超时',
+            authenticationFailed: '认证失败'
+          },
+          details: {
+            invalidPassword: '请检查密码格式，确保密码长度在6-128位之间',
+            passwordTooWeak: '请使用包含字母、数字和特殊字符的复杂密码',
+            userNotFound: '指定的用户可能已被删除或ID无效',
+            rateLimitExceeded: '请稍等片刻后再试',
+            serviceUnavailable: '认证服务暂时不可用，请稍后重试',
+            networkError: '请检查网络连接后重试',
+            timeout: '操作耗时过长，请稍后重试',
+            authenticationFailed: '登录状态已过期，请重新登录'
+          },
+          requirements: {
+            title: '密码要求：',
+            minLength: '密码长度至少6位，建议8位以上',
+            complexity: '包含大小写字母、数字和特殊字符',
+            avoid: '避免使用常见密码和个人信息'
+          },
+          strength: {
+            weak: '密码强度较弱',
+            fair: '密码强度一般',
+            good: '密码强度良好',
+            strong: '密码强度很强'
+          }
         }
       },
       // usersManagement - 为了兼容组件中使用的翻译键格式
@@ -292,7 +331,46 @@ export const adminUsersTranslations = {
           emailRequired: 'Email is required',
           passwordRequired: 'Password is required',
           passwordTooShort: 'Password must be at least 6 characters',
-          passwordMismatch: 'Passwords do not match'
+          passwordMismatch: 'Passwords do not match',
+          passwordTooLong: 'Password cannot exceed 128 characters',
+          passwordEmpty: 'Password cannot be empty'
+        },
+        // Password update related
+        passwordUpdate: {
+          success: 'Password updated successfully',
+          error: 'Password update failed',
+          errors: {
+            invalidPassword: 'Invalid password format',
+            passwordTooWeak: 'Password strength is insufficient',
+            userNotFound: 'User not found',
+            rateLimitExceeded: 'Operation too frequent',
+            serviceUnavailable: 'Service temporarily unavailable',
+            networkError: 'Network connection failed',
+            timeout: 'Request timeout',
+            authenticationFailed: 'Authentication failed'
+          },
+          details: {
+            invalidPassword: 'Please check password format, ensure password length is between 6-128 characters',
+            passwordTooWeak: 'Please use a complex password containing letters, numbers and special characters',
+            userNotFound: 'The specified user may have been deleted or ID is invalid',
+            rateLimitExceeded: 'Please wait a moment and try again',
+            serviceUnavailable: 'Authentication service temporarily unavailable, please try again later',
+            networkError: 'Please check network connection and try again',
+            timeout: 'Operation took too long, please try again later',
+            authenticationFailed: 'Login status has expired, please login again'
+          },
+          requirements: {
+            title: 'Password Requirements:',
+            minLength: 'Password must be at least 6 characters, recommended 8+ characters',
+            complexity: 'Include uppercase and lowercase letters, numbers and special characters',
+            avoid: 'Avoid using common passwords and personal information'
+          },
+          strength: {
+            weak: 'Password strength is weak',
+            fair: 'Password strength is fair',
+            good: 'Password strength is good',
+            strong: 'Password strength is strong'
+          }
         }
       },
       // usersManagement - For compatibility with translation keys used in components

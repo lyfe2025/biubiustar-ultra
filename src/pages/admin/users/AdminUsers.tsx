@@ -37,6 +37,7 @@ const AdminUsers = () => {
     
     // 操作方法
     fetchUsers,
+    updateUser,
     updateUserStatus,
     updateUserRole,
     deleteUser,
@@ -54,9 +55,10 @@ const AdminUsers = () => {
   } = useUserManagement()
 
   const handleSaveUser = async (userData: any) => {
-    // 这里可以添加用户信息更新逻辑
-    console.log('更新用户信息:', userData)
-    closeAllModals()
+    if (selectedUser) {
+      await updateUser(selectedUser.id, userData)
+      closeAllModals()
+    }
   }
 
   const handleDeleteUser = async (user: any) => {
@@ -72,7 +74,19 @@ const AdminUsers = () => {
 
   const handleUpdatePassword = async (password: string) => {
     if (selectedUser) {
+      // 调试日志：打印selectedUser的完整信息
+      console.log('🔍 [DEBUG] handleUpdatePassword - selectedUser:', {
+        fullObject: selectedUser,
+        id: selectedUser.id,
+        idType: typeof selectedUser.id,
+        idValue: JSON.stringify(selectedUser.id),
+        username: selectedUser.username,
+        email: selectedUser.email
+      })
+      
       await updateUserPassword(selectedUser.id, password)
+    } else {
+      console.error('❌ [DEBUG] handleUpdatePassword - selectedUser is null/undefined')
     }
   }
 

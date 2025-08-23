@@ -357,6 +357,17 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // 当模态框打开时重置密码数据
+  useEffect(() => {
+    if (isOpen) {
+      setPasswordData({
+        newPassword: '',
+        confirmPassword: ''
+      })
+      setErrors({})
+    }
+  }, [isOpen])
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
     
@@ -375,8 +386,18 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
   }
 
   const handleSave = () => {
+    console.log('🔐 密码模态框保存:', { 
+      newPassword: passwordData.newPassword ? '***' : 'undefined',
+      newPasswordLength: passwordData.newPassword?.length,
+      confirmPassword: passwordData.confirmPassword ? '***' : 'undefined',
+      confirmPasswordLength: passwordData.confirmPassword?.length
+    })
+    
     if (validateForm()) {
+      console.log('✅ 表单验证通过，调用onSave')
       onSave(passwordData.newPassword)
+    } else {
+      console.log('❌ 表单验证失败:', errors)
     }
   }
 
@@ -411,6 +432,10 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({
               }`}
             />
             {errors.newPassword && <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>}
+            {/* 调试信息 */}
+            <p className="mt-1 text-xs text-gray-500">
+              密码长度: {passwordData.newPassword.length} / 6-128
+            </p>
           </div>
 
           <div>
