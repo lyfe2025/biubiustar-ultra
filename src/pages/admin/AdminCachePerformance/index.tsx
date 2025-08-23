@@ -6,20 +6,22 @@ import {
   Zap,
   Play,
   BarChart3,
-  Settings,
   Eye,
   TrendingUp,
-  Clock
+  Clock,
+  Heart
+  // 已移除 Settings 图标导入
 } from 'lucide-react'
 import AdminLayout from '../../../components/AdminLayout'
 import DeleteConfirmModal from '../../../components/DeleteConfirmModal'
 import { useLanguage } from '../../../contexts/language'
 import { useCacheMonitor } from '../../../hooks/useCacheMonitor'
-import CacheConfigManager from '../CacheConfigManager'
+// 已移除 CacheConfigManager 组件导入
 import OverviewTab from './OverviewTab'
 import InspectorTab from './InspectorTab'
 import HotKeysTab from './HotKeysTab'
 import BenchmarkTab from './BenchmarkTab'
+import HealthTab from './HealthTab'
 import type { TabType, InspectorData, HotKeysData, BenchmarkData } from './types'
 
 const AdminCachePerformance = () => {
@@ -207,7 +209,8 @@ const AdminCachePerformance = () => {
               { key: 'inspector', label: '内容查看', icon: Eye },
               { key: 'hotkeys', label: '热点分析', icon: TrendingUp },
               { key: 'benchmark', label: '基准测试', icon: Zap },
-              { key: 'config', label: '配置管理', icon: Settings }
+              { key: 'health', label: '健康监控', icon: Heart }
+              // 已移除配置管理标签页
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -268,10 +271,14 @@ const AdminCachePerformance = () => {
           />
         )}
 
-        {/* 配置管理 */}
-        {activeTab === 'config' && (
-          <CacheConfigManager />
+        {activeTab === 'health' && (
+          <HealthTab
+            selectedCacheType={selectedCacheType}
+            onCacheTypeChange={setSelectedCacheType}
+          />
         )}
+
+        {/* 已移除配置管理标签页内容 */}
       </div>
 
       {/* 清除缓存确认对话框 */}

@@ -6,6 +6,7 @@
 import { userCache, contentCache, statsCache, configCache, sessionCache, apiCache } from '../lib/cacheInstances.js';
 import { CacheKeyGenerator } from '../config/cache.js';
 import { EnhancedCacheService } from '../lib/enhancedCache.js';
+import { cacheHealthMonitor } from '../lib/CacheHealthMonitor.js';
 
 export interface InvalidationRule {
   pattern: string | RegExp;
@@ -169,6 +170,26 @@ export class CacheInvalidationService {
 
       console.log(`事件 ${event} 缓存失效完成: ${invalidatedKeys.length}个键失效, 耗时${duration}ms`);
 
+      // 自动记录到健康监控系统
+      if (invalidatedKeys.length > 0) {
+        try {
+          // 为每个失效的缓存键记录健康监控数据
+          for (const key of invalidatedKeys) {
+            const reason = this.generateInvalidationReason(event, context);
+            cacheHealthMonitor.recordInvalidation(key, reason);
+          }
+          
+          // 记录整体失效事件到健康监控
+          const eventReason = `event:${event}`;
+          cacheHealthMonitor.recordInvalidation(`bulk:${event}`, eventReason);
+          
+          console.log(`已记录 ${invalidatedKeys.length} 个缓存失效事件到健康监控系统`);
+        } catch (healthError) {
+          console.warn('记录健康监控数据失败:', healthError);
+          // 不影响主流程，只记录警告
+        }
+      }
+
       return {
         success,
         invalidatedKeys,
@@ -221,6 +242,18 @@ export class CacheInvalidationService {
         const cascadeResult = await this.executeCascadeInvalidation(rule, context);
         invalidatedKeys.push(...cascadeResult.invalidatedKeys);
         errors.push(...cascadeResult.errors);
+      }
+
+      // 记录规则执行结果到健康监控
+      if (invalidatedKeys.length > 0) {
+        try {
+          for (const key of invalidatedKeys) {
+            const reason = `rule_execution:${rule.cacheType}`;
+            cacheHealthMonitor.recordInvalidation(key, reason);
+          }
+        } catch (healthError) {
+          console.warn('记录规则执行健康监控数据失败:', healthError);
+        }
       }
 
       return {
@@ -321,6 +354,14 @@ export class CacheInvalidationService {
     for (const cache of caches) {
       if (cache.has(key)) {
         await cache.delete(key);
+        
+        // 记录单个键失效到健康监控
+        try {
+          cacheHealthMonitor.recordInvalidation(key, 'direct_invalidation');
+        } catch (healthError) {
+          console.warn(`记录键 ${key} 失效健康监控数据失败:`, healthError);
+        }
+        
         break;
       }
     }
@@ -386,6 +427,22 @@ export class CacheInvalidationService {
 
       console.log(`批量失效完成: ${invalidatedKeys.length}个键失效, 耗时${duration}ms`);
 
+      // 记录批量失效结果到健康监控
+      if (invalidatedKeys.length > 0) {
+        try {
+          for (const key of invalidatedKeys) {
+            cacheHealthMonitor.recordInvalidation(key, 'batch_invalidation');
+          }
+          
+          // 记录批量失效事件
+          cacheHealthMonitor.recordInvalidation(`batch:${invalidatedKeys.length}`, 'batch_invalidation_event');
+          
+          console.log(`已记录 ${invalidatedKeys.length} 个批量失效事件到健康监控系统`);
+        } catch (healthError) {
+          console.warn('记录批量失效健康监控数据失败:', healthError);
+        }
+      }
+
       return {
         success,
         invalidatedKeys,
@@ -434,6 +491,21 @@ export class CacheInvalidationService {
       const success = errors.length === 0;
 
       console.log(`所有缓存清空完成: ${invalidatedKeys.length}个键失效, 耗时${duration}ms`);
+
+      // 记录清空所有缓存事件到健康监控
+      if (invalidatedKeys.length > 0) {
+        try {
+          // 记录清空事件
+          cacheHealthMonitor.recordInvalidation('clear_all_cache', 'clear_all_event');
+          
+          // 记录清空的键数量
+          cacheHealthMonitor.recordInvalidation(`clear_all_count:${invalidatedKeys.length}`, 'clear_all_count');
+          
+          console.log(`已记录清空所有缓存事件到健康监控系统，共 ${invalidatedKeys.length} 个键`);
+        } catch (healthError) {
+          console.warn('记录清空所有缓存健康监控数据失败:', healthError);
+        }
+      }
 
       return {
         success,
@@ -516,6 +588,43 @@ export class CacheInvalidationService {
    */
   async invalidateContactCache(contactId?: string): Promise<InvalidationResult> {
     return this.invalidateByEvent('contact:update', { contactId });
+  }
+
+  /**
+   * 生成失效原因描述
+   */
+  private generateInvalidationReason(event: string, context?: Record<string, any>): string {
+    const baseReason = event.replace(':', '_');
+    
+    if (!context) {
+      return baseReason;
+    }
+
+    const contextParts: string[] = [];
+    
+    if (context.userId) {
+      contextParts.push(`user_${context.userId}`);
+    }
+    
+    if (context.postId) {
+      contextParts.push(`post_${context.postId}`);
+    }
+    
+    if (context.activityId) {
+      contextParts.push(`activity_${context.activityId}`);
+    }
+    
+    if (context.contactId) {
+      contextParts.push(`contact_${context.contactId}`);
+    }
+    
+    if (context.reason) {
+      contextParts.push(context.reason);
+    }
+    
+    return contextParts.length > 0 
+      ? `${baseReason}:${contextParts.join('_')}`
+      : baseReason;
   }
 }
 

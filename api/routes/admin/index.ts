@@ -10,6 +10,9 @@ import securityRouter from './security'
 import securityStatusRouter from './security-status'
 import logsRouter from './logs'
 import uploadRouter from './upload'
+import debugStatsRouter from './debug-stats'
+import cacheRouter from './cache'
+import debugRouter from './debug/db-test'
 
 const router = Router()
 
@@ -25,5 +28,8 @@ router.use('/settings', settingsRouter)      // 系统设置路由
 router.use('/security', securityRouter)      // 安全管理路由
 router.use('/logs', logsRouter)               // 日志管理路由
 router.use('/upload', uploadRouter)          // 文件上传路由
+router.use('/cache', cacheRouter)            // 缓存管理路由
+router.use('/debug-stats', debugStatsRouter) // 调试统计数据路由
+router.use('/debug', debugRouter)            // 数据库调试路由
 
 export default router

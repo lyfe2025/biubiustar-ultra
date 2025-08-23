@@ -1,4 +1,5 @@
-export type TabType = 'overview' | 'inspector' | 'hotkeys' | 'benchmark' | 'config'
+export type TabType = 'overview' | 'inspector' | 'hotkeys' | 'benchmark' | 'health'
+// 已移除 'config' 类型选项
 
 export interface InspectorData {
   stats?: {

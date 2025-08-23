@@ -93,7 +93,16 @@ export class AdminBaseService {
         throw error
       }
 
-      return response.json()
+      const responseData = await response.json()
+      
+      // 检查响应格式，如果有success和data字段，则返回data字段的内容
+      // 这样可以保持向后兼容性
+      if (responseData && typeof responseData === 'object' && 'success' in responseData && 'data' in responseData) {
+        return responseData.data
+      }
+      
+      // 否则返回原始响应（向后兼容）
+      return responseData
     } catch (error) {
       // 如果是getAuthToken抛出的认证错误，也要处理
       if (error instanceof Error && error.message.includes('未找到有效的认证token')) {

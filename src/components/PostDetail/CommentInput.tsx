@@ -3,7 +3,7 @@ import { getUserDefaultAvatarUrl } from '../../utils/avatarGenerator'
 import type { User, UserProfile } from '../../types'
 
 interface CommentInputProps {
-  user: User | null
+  user: UserProfile | null
   userProfile: UserProfile | null
   newComment: string
   setNewComment: (comment: string) => void
@@ -28,16 +28,16 @@ const CommentInput = ({
       <form onSubmit={onSubmit} className="mb-6">
         <div className="flex space-x-4">
           <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-            {userProfile?.avatar_url || user.user_metadata?.avatar_url ? (
+            {userProfile?.avatar_url || user?.avatar_url ? (
               <img
-                src={userProfile?.avatar_url || user.user_metadata?.avatar_url}
-                alt={userProfile?.username || user.user_metadata?.username || user.email}
+                src={userProfile?.avatar_url || user?.avatar_url}
+                alt={userProfile?.username || user?.username || ''}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
               <img
-                src={getUserDefaultAvatarUrl(userProfile?.username || user.user_metadata?.username || user.email || '')}
-                alt={userProfile?.username || user.user_metadata?.username || user.email}
+                src={getUserDefaultAvatarUrl(userProfile?.username || user?.username || '')}
+                alt={userProfile?.username || user?.username || ''}
                 className="w-full h-full rounded-full object-cover"
               />
             )}

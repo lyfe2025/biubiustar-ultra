@@ -2,12 +2,12 @@ import { MessageCircle, Trash2 } from 'lucide-react'
 import { getUserDefaultAvatarUrl } from '../../utils/avatarGenerator'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN, enUS, vi } from 'date-fns/locale'
-import type { Comment, User } from '../../types'
+import type { Comment, UserProfile } from '../../types'
 
 interface CommentListProps {
   comments: Comment[]
   commentsLoading: boolean
-  user: User | null
+  user: UserProfile | null
   language: string
   onDeleteComment: (commentId: string, commentContent: string) => void
   t: (key: string) => string

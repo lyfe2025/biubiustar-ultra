@@ -16,6 +16,32 @@ export interface User {
   last_login?: string;
   created_at: string;
   updated_at: string;
+  user_metadata?: {
+    username?: string;
+    language?: string;
+    avatar_url?: string;
+    full_name?: string;
+  };
+}
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  email: string;
+  full_name: string;
+  avatar_url?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  followers_count: number;
+  following_count: number;
+  posts_count: number;
+  status: 'active' | 'suspended' | 'banned' | 'pending';
+  role: 'user' | 'moderator' | 'admin';
+  email_verified: boolean;
+  last_login?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface MediaFile {
@@ -93,6 +119,21 @@ export interface Activity {
 }
 
 export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  name_zh: string;
+  name_zh_tw: string;
+  name_en: string;
+  name_vi: string;
+  description_zh?: string;
+  description_zh_tw?: string;
+  description_en?: string;
+  description_vi?: string;
+  created_at: string;
+}
+
+export interface ContentCategory {
   id: string;
   name: string;
   description?: string;

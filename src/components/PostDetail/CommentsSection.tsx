@@ -7,7 +7,7 @@ import type { Comment, User, UserProfile } from '../../types'
 interface CommentsSectionProps {
   comments: Comment[]
   commentsLoading: boolean
-  user: User | null
+  user: UserProfile | null
   userProfile: UserProfile | null
   newComment: string
   setNewComment: (comment: string) => void
@@ -58,7 +58,7 @@ const CommentsSection = ({
           comments={comments}
           commentsLoading={commentsLoading}
           user={user}
-          language={user?.user_metadata?.language || 'zh'}
+          language={'zh'}
           onDeleteComment={onDeleteComment}
           t={t}
         />

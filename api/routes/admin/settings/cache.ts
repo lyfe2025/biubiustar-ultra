@@ -4,7 +4,7 @@
  */
 import { Router, Request, Response } from 'express';
 import asyncHandler from '../../../middleware/asyncHandler.js';
-import { requireAdmin } from '../auth';
+import { requireAdmin } from '../../../middleware/auth.js';
 import { 
   userCache, 
   contentCache, 
@@ -16,12 +16,7 @@ import {
 } from '../../../lib/cacheInstances.js';
 import { EnhancedCacheService } from '../../../lib/enhancedCache.js';
 import { invalidateConfigCache } from '../../../services/cacheInvalidation.js';
-import { createClient } from '@supabase/supabase-js';
-
-// 初始化 Supabase 客户端
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// 移除了 Supabase 相关导入，不再使用数据库
 
 const router = Router();
 
@@ -48,61 +43,9 @@ const cacheInstances = {
   api: apiCache
 };
 
-/**
- * 从数据库加载缓存配置
- */
-async function loadCacheConfigFromDB(): Promise<any> {
-  try {
-    const { data, error } = await supabase
-      .from('cache_configs')
-      .select('cache_type, config_data, enabled')
-      .eq('enabled', true);
+// 移除了 loadCacheConfigFromDB 函数，现在直接使用默认配置
 
-    if (error || !data || data.length === 0) {
-      return defaultCacheConfig;
-    }
-
-    // 转换数据库格式为内存格式
-    const config: any = {};
-    data.forEach(item => {
-      config[item.cache_type] = item.config_data;
-    });
-
-    // 合并默认配置以确保所有类型都存在
-    return { ...defaultCacheConfig, ...config };
-  } catch (error) {
-    console.error('Failed to load cache config from DB:', error);
-    return defaultCacheConfig;
-  }
-}
-
-/**
- * 保存缓存配置到数据库
- */
-async function saveCacheConfigToDB(cacheType: string, config: any): Promise<boolean> {
-  try {
-    const { error } = await supabase
-      .from('cache_configs')
-      .upsert({
-        cache_type: cacheType,
-        config_data: config,
-        enabled: true,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'cache_type'
-      });
-
-    if (error) {
-      console.error('Error saving cache config to DB:', error);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Failed to save cache config to DB:', error);
-    return false;
-  }
-}
+// 移除了 saveCacheConfigToDB 函数，不再保存配置到数据库
 
 /**
  * 获取当前缓存配置
@@ -112,16 +55,16 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
   try {
     console.log('=== 缓存配置API调试开始 ===');
     
-    // 从数据库加载配置
-    const cacheConfig = await loadCacheConfigFromDB();
-    console.log('loadCacheConfigFromDB 返回值:', JSON.stringify(cacheConfig, null, 2));
+    // 直接使用默认配置，不从数据库加载
+    const cacheConfig = defaultCacheConfig;
+    console.log('使用默认配置:', JSON.stringify(cacheConfig, null, 2));
     
     const currentStats = getAllCacheStats();
     console.log('getAllCacheStats 返回值:', JSON.stringify(currentStats, null, 2));
     
-    // 正确处理配置数据：cacheConfig是一个对象，包含各种缓存类型的配置
-    // 需要将其转换为数组格式，每个元素包含类型名称、配置和统计信息
+    // 处理配置数据：将默认配置转换为数组格式
     const cacheTypes = Object.entries(cacheConfig).map(([type, config]) => {
+      console.log('处理缓存类型:', type, '配置:', config);
       const configData = config as Record<string, any> || {};
       const stats = currentStats[type] || null;
       
@@ -216,14 +159,7 @@ router.put('/', asyncHandler(async (req: Request, res: Response) => {
       cleanupInterval: cleanupInterval || 60000
     };
 
-    // 保存配置到数据库
-    const saved = await saveCacheConfigToDB(cacheType, newConfig);
-    if (!saved) {
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to save configuration to database'
-      });
-    }
+    // 注意：配置不再保存到数据库，仅在内存中生效
 
     // 动态重新创建缓存实例
     const oldCache = cacheInstances[cacheType as keyof typeof cacheInstances];
@@ -309,14 +245,7 @@ router.post('/reset', asyncHandler(async (req: Request, res: Response) => {
       });
     }
 
-    // 保存默认配置到数据库
-    const saved = await saveCacheConfigToDB(cacheType, defaultConfig);
-    if (!saved) {
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to save default configuration to database'
-      });
-    }
+    // 注意：配置不再保存到数据库，仅在内存中生效
 
     // 重新创建缓存实例
     const oldCache = cacheInstances[cacheType as keyof typeof cacheInstances];

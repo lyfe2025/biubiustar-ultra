@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
-import AuthService, { User } from '../lib/supabase';
+import AuthService from '../lib/supabase';
+import { UserProfile } from '../types';
 import { toast } from 'sonner';
 
 interface AuthContextType {
   user: SupabaseUser | null;
-  userProfile: User | null;
+  userProfile: UserProfile | null;
   session: Session | null;
   loading: boolean;
   signUp: (email: string, password: string, username?: string) => Promise<void>;
@@ -15,7 +16,7 @@ interface AuthContextType {
   checkSessionExpiry: () => boolean;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
-  updateProfile: (updates: Partial<User>) => Promise<void>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -35,7 +36,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -171,7 +172,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // 更新用户资料
-  const updateProfile = async (updates: Partial<User>) => {
+  const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user) {
       throw new Error('用户未登录');
     }

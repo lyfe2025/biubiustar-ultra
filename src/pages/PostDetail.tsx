@@ -404,7 +404,7 @@ const PostDetail = () => {
         <CommentsSection
           comments={comments}
           commentsLoading={commentsLoading}
-          user={user}
+          user={userProfile}
           userProfile={userProfile}
           newComment={newComment}
           setNewComment={setNewComment}
