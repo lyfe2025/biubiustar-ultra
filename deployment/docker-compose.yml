@@ -2,13 +2,15 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build: 
+      context: ..
+      dockerfile: deployment/Dockerfile
     container_name: biubiustar-app
     ports:
-      - "3000:3000"
+      - "${APP_PORT:-3000}:${APP_PORT:-3000}"
     environment:
-      - NODE_ENV=production
-      - PORT=3000
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${APP_PORT:-3000}
       - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
       - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
@@ -16,53 +18,150 @@ services:
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - MEMORY_LIMIT=${MEMORY_LIMIT:-512}
+      - ENABLE_CACHE=${ENABLE_CACHE:-true}
     volumes:
-      - ./uploads:/app/public/uploads
+      - ./uploads:/app/public/uploads:ro
       - ./logs:/app/logs
+      - ./backups:/app/backups
+      - ./temp:/app/temp
     restart: unless-stopped
+    networks:
+      - biubiustar-network
+    # 单机内存优化配置
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-1G}
+          cpus: '1.0'
+        reservations:
+          memory: ${MEMORY_LIMIT:-512M}
+          cpus: '0.5'
+    # 健康检查
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${HEALTH_CHECK_PORT:-3000}/api/health"]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: ${HEALTH_CHECK_START_PERIOD:-40s}
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE:-10m}
+        max-file: ${LOG_MAX_FILES:-3}
+    # 环境变量优化
+    env_file:
+      - .env
 
   nginx:
     image: nginx:alpine
     container_name: biubiustar-nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./ssl:/etc/nginx/ssl
-      - ./uploads:/var/www/uploads
-      - ./dist:/var/www/dist
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./uploads:/var/www/uploads:ro
+      - ./dist:/var/www/dist:ro
+      - ./logs/nginx:/var/log/nginx
+      - ./temp:/var/www/temp:ro
     depends_on:
       app:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - biubiustar-network
+    # 单机资源优化
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE:-10m}
+        max-file: ${LOG_MAX_FILES:-3}
 
-  # 可选: Redis 缓存服务
-  redis:
-    image: redis:7-alpine
-    container_name: biubiustar-redis
-    ports:
-      - "6379:6379"
+  # 大文件处理服务
+  file-processor:
+    image: alpine:latest
+    container_name: biubiustar-file-processor
     volumes:
-      - redis_data:/data
+      - ./uploads:/uploads:ro
+      - ./temp:/temp
+      - ./logs:/logs
+    command: >
+      sh -c "
+        echo '文件处理服务启动...' &&
+        while true; do
+          # 检查大文件并移动到临时目录
+          find /uploads -type f -size +${LARGE_FILE_THRESHOLD:-50}M -exec mv {} /temp/ \; 2>/dev/null || true &&
+          # 清理临时目录中的旧文件
+          find /temp -type f -mtime +${TEMP_FILE_RETENTION_DAYS:-7} -delete 2>/dev/null || true &&
+          # 记录处理日志
+          echo \"[$$(date)] 文件处理完成\" >> /logs/file-processor.log &&
+          sleep 3600
+        done
+      "
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    networks:
+      - biubiustar-network
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  # 备份服务 (优化版)
+  backup:
+    image: alpine:latest
+    container_name: biubiustar-backup
+    volumes:
+      - ./backups:/backups
+      - ./uploads:/uploads:ro
+      - ./logs:/logs:ro
+      - ./temp:/temp:ro
+    command: >
+      sh -c "
+        echo '开始备份...' &&
+        # 分别备份不同类型的数据
+        tar -czf /backups/uploads-$$(date +%Y%m%d-%H%M%S).tar.gz /uploads &&
+        tar -czf /backups/logs-$$(date +%Y%m%d-%H%M%S).tar.gz /logs &&
+        tar -czf /backups/temp-$$(date +%Y%m%d-%H%M%S).tar.gz /temp &&
+        echo '备份完成' &&
+        # 清理指定天数前的备份文件
+        find /backups -name '*-*.tar.gz' -mtime +${BACKUP_RETENTION_DAYS:-7} -delete &&
+        echo '清理${BACKUP_RETENTION_DAYS:-7}天前的备份文件' &&
+        # 压缩备份文件以节省空间
+        find /backups -name '*.tar.gz' -mtime +1 -exec gzip -${BACKUP_COMPRESSION_LEVEL:-6} {} \;
+      "
+    restart: "no"
     networks:
       - biubiustar-network
 
 volumes:
   uploads:
-  redis_data:
+  temp:
 
 networks:
   biubiustar-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
