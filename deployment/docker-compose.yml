@@ -25,7 +25,6 @@ services:
       - ./uploads:/app/public/uploads:ro
       - ./logs:/app/logs
       - ./backups:/app/backups
-      - ./temp:/app/temp
     restart: unless-stopped
     networks:
       - biubiustar-network
@@ -68,7 +67,6 @@ services:
       - ./uploads:/var/www/uploads:ro
       - ./dist:/var/www/dist:ro
       - ./logs/nginx:/var/log/nginx
-      - ./temp:/var/www/temp:ro
     depends_on:
       app:
         condition: service_healthy
@@ -97,38 +95,7 @@ services:
         max-size: ${LOG_MAX_SIZE:-10m}
         max-file: ${LOG_MAX_FILES:-3}
 
-  # 大文件处理服务
-  file-processor:
-    image: alpine:latest
-    container_name: biubiustar-file-processor
-    volumes:
-      - ./uploads:/uploads:ro
-      - ./temp:/temp
-      - ./logs:/logs
-    command: >
-      sh -c "
-        echo '文件处理服务启动...' &&
-        while true; do
-          # 检查大文件并移动到临时目录
-          find /uploads -type f -size +${LARGE_FILE_THRESHOLD:-50}M -exec mv {} /temp/ \; 2>/dev/null || true &&
-          # 清理临时目录中的旧文件
-          find /temp -type f -mtime +${TEMP_FILE_RETENTION_DAYS:-7} -delete 2>/dev/null || true &&
-          # 记录处理日志
-          echo \"[$$(date)] 文件处理完成\" >> /logs/file-processor.log &&
-          sleep 3600
-        done
-      "
-    restart: unless-stopped
-    networks:
-      - biubiustar-network
-    # 资源限制
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: '0.25'
-
-  # 备份服务 (优化版)
+  # 备份服务 (简化版)
   backup:
     image: alpine:latest
     container_name: biubiustar-backup
@@ -136,14 +103,12 @@ services:
       - ./backups:/backups
       - ./uploads:/uploads:ro
       - ./logs:/logs:ro
-      - ./temp:/temp:ro
     command: >
       sh -c "
         echo '开始备份...' &&
-        # 分别备份不同类型的数据
+        # 备份上传文件和日志
         tar -czf /backups/uploads-$$(date +%Y%m%d-%H%M%S).tar.gz /uploads &&
         tar -czf /backups/logs-$$(date +%Y%m%d-%H%M%S).tar.gz /logs &&
-        tar -czf /backups/temp-$$(date +%Y%m%d-%H%M%S).tar.gz /temp &&
         echo '备份完成' &&
         # 清理指定天数前的备份文件
         find /backups -name '*-*.tar.gz' -mtime +${BACKUP_RETENTION_DAYS:-7} -delete &&
@@ -157,7 +122,6 @@ services:
 
 volumes:
   uploads:
-  temp:
 
 networks:
   biubiustar-network:

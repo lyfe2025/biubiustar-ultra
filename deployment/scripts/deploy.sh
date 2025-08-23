@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Biubiustar Ultra 部署脚本
-# 专注于单机服务器部署方案，支持大文件安全分离
+# 专注于单机服务器部署方案，简化配置
 
 set -e
 
@@ -49,7 +49,7 @@ show_help() {
     echo "用法: $0 [选项]"
     echo ""
     echo "选项:"
-    echo "  -m, --mode MODE     部署模式 (docker|server|monitoring)"
+    echo "  -m, --mode MODE     部署模式 (docker|server)"
     echo "  -e, --env ENV       环境 (dev|staging|prod)"
     echo "  -a, --action ACTION 操作类型 (deploy|update|restart|stop|logs|backup|cleanup)"
     echo "  -h, --help          显示此帮助信息"
@@ -59,8 +59,7 @@ show_help() {
     echo "  $0 -m server -e prod -a deploy     # 传统服务器生产环境部署"
     echo "  $0 -m docker -a update             # 更新 Docker 服务"
     echo "  $0 -m docker -a backup             # 创建备份"
-    echo "  $0 -m docker -a cleanup            # 清理大文件和临时文件"
-    echo "  $0 -m monitoring -a deploy         # 部署监控服务"
+    echo "  $0 -m docker -a cleanup            # 清理环境"
 }
 
 # 默认值
@@ -123,8 +122,6 @@ export NGINX_HTTP_PORT=${NGINX_HTTP_PORT:-80}
 export NGINX_HTTPS_PORT=${NGINX_HTTPS_PORT:-443}
 export HEALTH_CHECK_PORT=${HEALTH_CHECK_PORT:-3000}
 export MEMORY_LIMIT=${MEMORY_LIMIT:-512}
-export LARGE_FILE_THRESHOLD=${LARGE_FILE_THRESHOLD:-50}
-export TEMP_FILE_RETENTION_DAYS=${TEMP_FILE_RETENTION_DAYS:-7}
 export BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
 export BACKUP_COMPRESSION_LEVEL=${BACKUP_COMPRESSION_LEVEL:-6}
 export LOG_MAX_SIZE=${LOG_MAX_SIZE:-10m}
@@ -138,9 +135,6 @@ deploy() {
             ;;
         "server")
             deploy_server
-            ;;
-        "monitoring")
-            deploy_monitoring
             ;;
         *)
             log_error "不支持的部署模式: $DEPLOY_MODE"
@@ -185,7 +179,7 @@ deploy_docker() {
 
 # 完整 Docker 部署
 deploy_docker_full() {
-    log_step "开始 Docker 完整部署 (单机优化版)..."
+    log_step "开始 Docker 完整部署..."
     
     check_command "docker"
     check_command "docker-compose"
@@ -198,10 +192,10 @@ deploy_docker_full() {
     
     # 创建必要的目录
     log_info "创建必要的目录..."
-    mkdir -p uploads logs backups nginx/ssl temp
+    mkdir -p uploads logs backups nginx/ssl
     
     # 设置目录权限
-    chmod 755 uploads logs backups temp
+    chmod 755 uploads logs backups
     chmod 700 nginx/ssl
     
     # 检查 SSL 证书
@@ -241,14 +235,13 @@ deploy_docker_full() {
         log_info "  - 应用: http://localhost:${NGINX_HTTP_PORT}"
         log_info "  - API: http://localhost:${NGINX_HTTP_PORT}/api"
         log_info "  - 健康检查: http://localhost:${NGINX_HTTP_PORT}/health"
-        log_info "  - 大文件: http://localhost:${NGINX_HTTP_PORT}/temp/"
+        log_info "  - 上传文件: http://localhost:${NGINX_HTTP_PORT}/uploads/"
         
-        # 显示大文件处理信息
-        log_info "大文件安全分离配置:"
-        log_info "  - 上传目录: ./uploads/"
-        log_info "  - 临时目录: ./temp/"
-        log_info "  - 大文件阈值: ${LARGE_FILE_THRESHOLD}MB"
-        log_info "  - 自动清理: ${TEMP_FILE_RETENTION_DAYS}天"
+        # 显示配置信息
+        log_info "配置信息:"
+        log_info "  - 应用端口: ${APP_PORT}"
+        log_info "  - Nginx HTTP 端口: ${NGINX_HTTP_PORT}"
+        log_info "  - 内存限制: ${MEMORY_LIMIT}MB"
     else
         log_error "Docker 部署失败"
         docker-compose logs
@@ -309,17 +302,14 @@ create_backup() {
     # 创建备份目录
     mkdir -p $BACKUP_DIR
     
-    # 备份数据 (分别备份不同类型)
+    # 备份数据
     log_info "备份上传文件..."
     tar -czf "$BACKUP_DIR/uploads-$BACKUP_NAME" uploads/
     
     log_info "备份日志文件..."
     tar -czf "$BACKUP_DIR/logs-$BACKUP_NAME" logs/
     
-    log_info "备份临时文件..."
-    tar -czf "$BACKUP_DIR/temp-$BACKUP_NAME" temp/
-    
-    # 清理旧备份 (保留最近指定天数)
+    # 清理旧备份
     find $BACKUP_DIR -name "*-*.tar.gz" -mtime +${BACKUP_RETENTION_DAYS} -delete
     
     log_success "备份创建完成！"
@@ -340,9 +330,8 @@ show_docker_status() {
     echo -e "\n=== 磁盘使用 ==="
     docker system df
     
-    echo -e "\n=== 大文件统计 ==="
+    echo -e "\n=== 文件统计 ==="
     echo "上传目录大小: $(du -sh uploads/ 2>/dev/null || echo 'N/A')"
-    echo "临时目录大小: $(du -sh temp/ 2>/dev/null || echo 'N/A')"
     echo "日志目录大小: $(du -sh logs/ 2>/dev/null || echo 'N/A')"
 }
 
@@ -350,13 +339,8 @@ show_docker_status() {
 cleanup_docker() {
     log_step "清理 Docker 环境..."
     
-    # 清理大文件和临时文件
-    log_info "清理大文件和临时文件..."
-    
-    # 清理临时目录中的旧文件
-    find temp/ -type f -mtime +${TEMP_FILE_RETENTION_DAYS} -delete 2>/dev/null || true
-    
-    # 清理日志文件 (30天)
+    # 清理日志文件
+    log_info "清理日志文件..."
     find logs/ -type f -mtime +30 -delete 2>/dev/null || true
     
     # 清理 Docker 系统
@@ -398,7 +382,7 @@ deploy_server() {
             npm run build
             
             # 创建日志目录
-            mkdir -p logs temp
+            mkdir -p logs
             
             # 启动 PM2 服务
             log_info "启动 PM2 服务..."
@@ -440,33 +424,10 @@ deploy_server() {
             log_info "清理服务环境..."
             # 清理日志文件
             find logs/ -type f -mtime +30 -delete 2>/dev/null || true
-            # 清理临时文件
-            find temp/ -type f -mtime +${TEMP_FILE_RETENTION_DAYS} -delete 2>/dev/null || true
             log_success "清理完成！"
             ;;
         *)
             log_error "不支持的服务器操作: $ACTION"
-            exit 1
-            ;;
-    esac
-}
-
-# 监控服务部署
-deploy_monitoring() {
-    log_step "部署监控服务..."
-    
-    case $ACTION in
-        "deploy")
-            # 部署监控服务
-            docker-compose -f docker-compose.monitoring.yml up -d
-            log_success "监控服务部署完成！"
-            ;;
-        "stop")
-            docker-compose -f docker-compose.monitoring.yml down
-            log_success "监控服务已停止！"
-            ;;
-        *)
-            log_error "不支持的监控操作: $ACTION"
             exit 1
             ;;
     esac
@@ -508,8 +469,6 @@ check_environment() {
     log_info "  - Nginx HTTP 端口: ${NGINX_HTTP_PORT}"
     log_info "  - Nginx HTTPS 端口: ${NGINX_HTTPS_PORT}"
     log_info "  - 内存限制: ${MEMORY_LIMIT}MB"
-    log_info "  - 大文件阈值: ${LARGE_FILE_THRESHOLD}MB"
-    log_info "  - 临时文件保留: ${TEMP_FILE_RETENTION_DAYS}天"
     
     log_success "环境检查完成"
 }
@@ -533,13 +492,6 @@ verify_deployment() {
             else
                 log_warning "部分容器状态异常"
             fi
-            
-            # 检查大文件处理
-            if [[ -d "temp" ]]; then
-                log_success "大文件安全分离目录已创建"
-            else
-                log_warning "大文件安全分离目录未创建"
-            fi
             ;;
         "server")
             # 传统服务器部署验证
@@ -548,10 +500,6 @@ verify_deployment() {
             else
                 log_warning "PM2 服务状态异常"
             fi
-            ;;
-        "monitoring")
-            # 监控服务验证
-            log_info "监控服务部署完成"
             ;;
     esac
 }
