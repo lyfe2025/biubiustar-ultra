@@ -128,9 +128,13 @@ MAX_FILE_SIZE=100
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 真正一键部署 (推荐)
+## 🚀 部署脚本说明
+
+### 🏆 终极一键部署脚本 (强烈推荐)
 
 > **🚀 重要更新**: 我们提供了全新的终极一键部署脚本 `one-click-deploy-ultimate.sh`，这是最可靠、功能最完整的部署方案！
+
+> **🍎 macOS 用户注意**: 如果你在 macOS 环境下遇到 "Bad file descriptor" 错误，请使用专门为 macOS 优化的脚本 `one-click-deploy-macos.sh`
 
 **终极脚本的核心特性:**
 - ✅ **智能环境检测**: 自动检测操作系统类型（Ubuntu/Debian/CentOS/RHEL/Fedora）
@@ -151,13 +155,34 @@ MAX_FILE_SIZE=100
 6. 🐳 **Docker部署**: 构建镜像、启动服务、健康检查
 7. ✅ **部署完成**: 显示访问地址和常用管理命令
 
+### 📋 可用脚本对比
+
+| 脚本名称 | 用途 | 推荐度 | 特点 |
+|---------|------|--------|------|
+| `one-click-deploy-ultimate.sh` | 🏆 **终极一键部署** | ⭐⭐⭐⭐⭐ | 全自动、智能检测、完整流程 |
+| `one-click-deploy-macos.sh` | 🍎 **macOS兼容部署** | ⭐⭐⭐⭐⭐ | 专门针对macOS优化，兼容旧版bash |
+| `deploy.sh` | 🔧 **传统部署管理** | ⭐⭐⭐ | 手动控制、更多操作选项 |
+| `deploy-config.sh` | ⚙️ **配置文件** | ⭐⭐⭐⭐ | 部署配置中心 |
+
+**选择建议:**
+- 🚀 **新用户**: 直接使用 `one-click-deploy-ultimate.sh`
+- 🍎 **macOS用户**: 推荐使用 `one-click-deploy-macos.sh`，避免兼容性问题
+- 🔧 **高级用户**: 使用 `deploy.sh` 进行精细控制
+- ⚙️ **自定义配置**: 编辑 `deploy-config.sh` 调整部署参数
+
 ### 方式一：终极一键部署 (最推荐) 🏆
 ```bash
 # 在全新服务器上执行这一条命令即可
 sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-ultimate.sh)
 ```
 
-### 方式二：自定义配置部署
+### 方式二：macOS兼容部署 (macOS用户推荐) 🍎
+```bash
+# 在 macOS 环境下执行这一条命令即可
+sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-macos.sh)
+```
+
+### 方式三：自定义配置部署
 ```bash
 # 自定义仓库地址和部署目录
 sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-ultimate.sh) \
@@ -165,7 +190,7 @@ sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultr
   -d /home/user/project
 ```
 
-### 方式三：本地脚本部署
+### 方式四：本地脚本部署
 ```bash
 # 1. 下载脚本
 wget https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-ultimate.sh
