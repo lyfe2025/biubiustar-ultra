@@ -1019,6 +1019,7 @@ main() {
             *)
                 echo -e "${RED}无效选项，请重新选择${NC}"
                 sleep 1
+                read -p "按回车键继续..."
                 ;;
         esac
     done
