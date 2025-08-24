@@ -14,6 +14,11 @@ import { FallbackHandler } from './FallbackHandler';
 import { ActivityService } from '../../lib/activityService';
 import { socialService } from '../../lib/socialService/index';
 
+// 验证导入的服务是否可用
+if (!ActivityService) {
+  console.error('❌ BatchRequestProcessor: ActivityService 导入失败，这可能导致运行时错误');
+}
+
 export class BatchRequestProcessor {
   private cacheManager: CacheManager;
   private performanceMonitor: PerformanceMonitor;
@@ -200,6 +205,21 @@ export class BatchRequestProcessor {
   private async batchFetchActivities(requests: BatchRequest[]): Promise<BatchResponse[]> {
     const results: BatchResponse[] = [];
     
+    // 验证 ActivityService 是否可用
+    if (!ActivityService) {
+      console.error('❌ BatchRequestProcessor: ActivityService 未定义，无法获取活动数据');
+      // 返回错误结果而不是抛出异常
+      for (const req of requests) {
+        results.push({ 
+          id: req.id, 
+          type: req.type, 
+          data: null, 
+          error: 'ActivityService 未定义，无法获取活动数据' 
+        });
+      }
+      return results;
+    }
+    
     for (const req of requests) {
       try {
         let data;
@@ -207,11 +227,13 @@ export class BatchRequestProcessor {
         if (req.endpoint?.includes('upcoming') || req.params?.upcoming) {
           data = await ActivityService.getUpcomingActivities(req.params?.limit);
         } else {
+          // 创建 ActivityService 实例来调用实例方法
           const activityService = new ActivityService();
           data = await activityService.getActivities();
         }
         results.push({ id: req.id, type: req.type, data });
       } catch (error) {
+        console.error('❌ BatchRequestProcessor: 获取活动数据失败:', error);
         results.push({ id: req.id, type: req.type, data: null, error: String(error) });
       }
     }
@@ -225,10 +247,26 @@ export class BatchRequestProcessor {
   private async batchFetchCategories(requests: BatchRequest[]): Promise<BatchResponse[]> {
     const results: BatchResponse[] = [];
     
+    // 验证 ActivityService 是否可用
+    if (!ActivityService) {
+      console.error('❌ BatchRequestProcessor: ActivityService 未定义，无法获取活动分类');
+      // 返回错误结果而不是抛出异常
+      for (const req of requests) {
+        results.push({ 
+          id: req.id, 
+          type: req.type, 
+          data: null, 
+          error: 'ActivityService 未定义，无法获取活动分类' 
+        });
+      }
+      return results;
+    }
+    
     for (const req of requests) {
       try {
         let data;
         if (req.params?.type === 'activity') {
+          // 使用静态方法调用
           data = await ActivityService.getActivityCategories(req.params?.language);
         } else {
           // 对于content类型或其他情况，调用socialService.getContentCategories
@@ -236,6 +274,7 @@ export class BatchRequestProcessor {
         }
         results.push({ id: req.id, type: req.type, data });
       } catch (error) {
+        console.error('❌ BatchRequestProcessor: 获取分类数据失败:', error);
         results.push({ id: req.id, type: req.type, data: null, error: String(error) });
       }
     }
