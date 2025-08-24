@@ -5,18 +5,6 @@
 
 set -e
 
-# 加载配置文件
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/../configs/deploy-config.sh"
-
-if [[ -f "$CONFIG_FILE" ]]; then
-    source "$CONFIG_FILE"
-    log_info "配置文件加载成功: $CONFIG_FILE"
-else
-    log_error "配置文件不存在: $CONFIG_FILE"
-    exit 1
-fi
-
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -52,6 +40,18 @@ log_header() {
     echo -e "${CYAN}  $1${NC}"
     echo -e "${CYAN}================================${NC}"
 }
+
+# 加载配置文件
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/../configs/deploy-config.sh"
+
+if [[ -f "$CONFIG_FILE" ]]; then
+    source "$CONFIG_FILE"
+    log_info "配置文件加载成功: $CONFIG_FILE"
+else
+    log_error "配置文件不存在: $CONFIG_FILE"
+    exit 1
+fi
 
 # 显示帮助信息
 show_help() {
