@@ -59,6 +59,37 @@ export class PageDataService {
   }
 
   /**
+   * 确保服务已初始化
+   */
+  private async ensureServicesInitialized(): Promise<void> {
+    if (!this.socialService || !this.ActivityService) {
+      console.log('🔄 服务未初始化，正在初始化...');
+      await this.initializeServices();
+      
+      // 如果仍然没有初始化成功，使用静态导入作为备选方案
+      if (!this.socialService) {
+        try {
+          const { socialService } = await import('../../lib/socialService/index');
+          this.socialService = socialService;
+          console.log('✅ socialService 初始化成功');
+        } catch (error) {
+          console.error('❌ socialService 初始化失败:', error);
+        }
+      }
+      
+      if (!this.ActivityService) {
+        try {
+          const { ActivityService } = await import('../../lib/activityService');
+          this.ActivityService = ActivityService;
+          console.log('✅ ActivityService 初始化成功');
+        } catch (error) {
+          console.error('❌ ActivityService 初始化失败:', error);
+        }
+      }
+    }
+  }
+
+  /**
    * 批量获取数据的主要方法
    * @param requests 批量请求数组
    * @param options 可选配置
@@ -68,6 +99,9 @@ export class PageDataService {
     fallbackToIndividual?: boolean;
     timeout?: number;
   }): Promise<BatchResponse[]> {
+    // 确保服务已初始化
+    await this.ensureServicesInitialized();
+    
     const requestId = this.performanceMonitor.generateRequestId();
     const batchStartTime = Date.now();
     const metrics: PerformanceMetrics = {
@@ -200,7 +234,7 @@ export class PageDataService {
         const page = req.params?.page || 1;
         const limit = req.params?.limit || 10;
         const category = req.params?.category;
-        const data = await socialService.getPosts(page, limit, category);
+        const data = await this.socialService.getPosts(page, limit, category);
         return [{ id: req.id, type: req.type, data }];
       } catch (error) {
         return [{ id: req.id, type: req.type, data: null, error: String(error) }];
@@ -214,7 +248,7 @@ export class PageDataService {
         const page = req.params?.page || 1;
         const limit = req.params?.limit || 10;
         const category = req.params?.category;
-        const data = await socialService.getPosts(page, limit, category);
+        const data = await this.socialService.getPosts(page, limit, category);
         results.push({ id: req.id, type: req.type, data });
       } catch (error) {
         results.push({ id: req.id, type: req.type, data: null, error: String(error) });
@@ -234,9 +268,9 @@ export class PageDataService {
         let data;
         // 检查endpoint是否包含'upcoming'，而不是检查params.upcoming
         if (req.endpoint?.includes('upcoming') || req.params?.upcoming) {
-          data = await ActivityService.getUpcomingActivities(req.params?.limit);
+          data = await this.ActivityService.getUpcomingActivities(req.params?.limit);
         } else {
-          const activityService = new ActivityService();
+          const activityService = new this.ActivityService();
           data = await activityService.getActivities();
         }
         results.push({ id: req.id, type: req.type, data });
@@ -256,18 +290,48 @@ export class PageDataService {
     for (const req of requests) {
       try {
         let data;
+        
         if (req.params?.type === 'content') {
-          // 获取内容分类
-          data = await AdminService.prototype.getCategories();
+          // 获取内容分类 - 使用 socialService 直接获取，避免分页数据格式问题
+          if (this.socialService && typeof this.socialService.getContentCategories === 'function') {
+            const language = req.params?.language || 'zh';
+            data = await this.socialService.getContentCategories(language);
+          } else {
+            // 降级方案：使用 AdminService
+            const adminService = new AdminService();
+            const adminResult = await adminService.getCategories('content');
+            // 提取分页数据中的分类数组
+            data = (adminResult as any)?.data || [];
+          }
         } else if (req.params?.type === 'activity') {
           // 获取活动分类
-          data = await AdminService.prototype.getCategories();
+          if (this.ActivityService && typeof this.ActivityService.getActivityCategories === 'function') {
+            const language = req.params?.language || 'zh';
+            data = await this.ActivityService.getActivityCategories(language);
+          } else {
+            // 降级方案：使用 AdminService
+            const adminService = new AdminService();
+            const adminResult = await adminService.getCategories('activity');
+            // 提取分页数据中的分类数组
+            data = (adminResult as any)?.data || [];
+          }
         } else {
           // 默认获取所有分类
-          data = await AdminService.prototype.getCategories();
+          const adminService = new AdminService();
+          const adminResult = await adminService.getCategories();
+          if (adminResult && typeof adminResult === 'object' && 'activity' in adminResult && 'content' in adminResult) {
+            // 合并活动和内容分类
+            const activityCategories = (adminResult as any).activity?.data || [];
+            const contentCategories = (adminResult as any).content?.data || [];
+            data = [...activityCategories, ...contentCategories];
+          } else {
+            data = (adminResult as any)?.data || [];
+          }
         }
+        
         results.push({ id: req.id, type: req.type, data });
       } catch (error) {
+        console.error('批量获取分类数据失败:', error);
         results.push({ id: req.id, type: req.type, data: null, error: String(error) });
       }
     }
@@ -291,8 +355,8 @@ export class PageDataService {
         
         // 并行获取帖子详情和点赞状态
         const [postData, likeData] = await Promise.all([
-          socialService.getPost(postId),
-          userId ? socialService.isPostLiked(postId, userId) : Promise.resolve(false)
+          this.socialService.getPost(postId),
+          userId ? this.socialService.isPostLiked(postId, userId) : Promise.resolve(false)
         ]);
         
         const data = {
@@ -322,7 +386,7 @@ export class PageDataService {
           throw new Error('缺少必需的 postId 参数');
         }
         
-        const data = await socialService.getPostComments(postId);
+        const data = await this.socialService.getPostComments(postId);
         results.push({ id: req.id, type: req.type, data });
       } catch (error) {
         results.push({ id: req.id, type: req.type, data: null, error: String(error) });
