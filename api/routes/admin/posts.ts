@@ -4,6 +4,7 @@ import { requireAdmin } from './auth'
 import asyncHandler from '../../middleware/asyncHandler.js'
 import { apiCache } from '../../utils/cache.js'
 import { CacheInvalidationService } from '../../services/cacheInvalidation'
+import { clearStatsCache } from '../../services/statsCache.js'
 
 const router = Router()
 
@@ -231,6 +232,7 @@ router.patch('/:id/status', asyncHandler(async (req: Request, res: Response): Pr
 
     // 清除相关缓存
     clearPostsCache()
+    clearStatsCache() // 清除统计数据缓存
     const invalidationService = new CacheInvalidationService()
     await invalidationService.invalidatePostCache(id)
     await invalidationService.invalidateContentCache()
@@ -264,6 +266,7 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
 
     // 清除相关缓存
     clearPostsCache()
+    clearStatsCache() // 清除统计数据缓存
     const invalidationService = new CacheInvalidationService()
     await invalidationService.invalidatePostCache(id)
     await invalidationService.invalidateContentCache()

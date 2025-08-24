@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from "../../contexts/language"
-import { ChevronLeft, ChevronRight, RefreshCw, Activity } from 'lucide-react'
+import { ChevronLeft, ChevronRight, RefreshCw, Activity, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import AdminLayout from '../../components/AdminLayout'
 import ActivityList from '../../components/admin/ActivityList'
@@ -297,6 +297,12 @@ const AdminActivities = () => {
       await loadActivities()
       setShowDeleteModal(false)
       setActivityToDelete(null)
+      
+      // 如果删除的是当前查看的活动，关闭ActivityModal
+      if (selectedActivity && selectedActivity.id === activityToDelete.id) {
+        setSelectedActivity(null)
+        setShowActivityModal(false)
+      }
     } catch (error) {
       console.error('Failed to delete activity:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
@@ -385,8 +391,15 @@ const AdminActivities = () => {
             <h1 className="text-2xl font-bold text-gray-900">{t('admin.activities.title')}</h1>
             <p className="text-sm text-gray-500 mt-1">{t('admin.activities.description')}</p>
           </div>
-          
-
+          <div className="mt-4 sm:mt-0">
+            <button
+              onClick={() => setShowCreateActivityModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              创建活动
+            </button>
+          </div>
         </div>
 
         {/* 标签页导航 */}

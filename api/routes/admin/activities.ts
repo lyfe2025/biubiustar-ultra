@@ -11,6 +11,7 @@ import {
   invalidateOnActivityDelete,
   invalidateOnActivityStatusChange
 } from '../../utils/activityCacheInvalidation.js'
+import { clearStatsCache } from '../../services/statsCache.js'
 
 const router = Router()
 
@@ -516,6 +517,9 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
 
     // 智能缓存失效
     await invalidateOnActivityDelete(id)
+    
+    // 清除统计数据缓存
+    await clearStatsCache()
 
     res.json({ success: true })
   } catch (error) {
