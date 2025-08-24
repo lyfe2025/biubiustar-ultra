@@ -150,6 +150,13 @@ const PostCard = memo(({ post, onLike, onComment, onShare, showFullContent = fal
     }
   }, [categories, post.category, language, t])
 
+  // 监听初始评论数变化，确保父组件更新后能正确显示
+  useEffect(() => {
+    if (initialCommentsCount !== undefined) {
+      setCommentsCount(initialCommentsCount)
+    }
+  }, [initialCommentsCount])
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {

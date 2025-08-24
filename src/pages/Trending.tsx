@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { cn } from '../lib/utils'
 import { socialService } from '../lib/socialService'
 import { batchStatusService } from '../services/batchStatusService'
+import { apiCache } from '../services/apiCache'
 import type { Post } from '../types'
 import PostCard from '../components/PostCard'
 import CommentModal from '../components/CommentModal'
@@ -148,6 +149,36 @@ function TrendingContent() {
       setSelectedPostId(postId)
       setSelectedPostTitle(post.title)
       setIsCommentModalOpen(true)
+    }
+  }
+
+  // 处理评论成功后的状态更新
+  const handleCommentSuccess = async (postId: string) => {
+    try {
+      // 清除相关缓存，确保数据一致性
+      // 清除批量评论数缓存
+      batchStatusService.clearPostBatchCache(postId)
+      
+      // 清除apiCache中的评论数缓存
+      apiCache.invalidatePattern(`post_comments_count:*:${postId}:*`)
+      
+      // 更新对应帖子的评论数
+      const newCommentsCount = await socialService.getPostCommentsCount(postId)
+      setPostStatusMap(prev => {
+        const newMap = new Map(prev)
+        const currentStatus = newMap.get(postId)
+        if (currentStatus) {
+          newMap.set(postId, {
+            ...currentStatus,
+            commentsCount: newCommentsCount
+          })
+        }
+        return newMap
+      })
+      
+      console.log(`✅ 帖子 ${postId} 评论数已更新为: ${newCommentsCount}`)
+    } catch (error) {
+      console.error('更新评论数失败:', error)
     }
   }
 
@@ -392,6 +423,7 @@ function TrendingContent() {
           onClose={() => setIsCommentModalOpen(false)}
           postId={selectedPostId}
           postTitle={selectedPostTitle}
+          onCommentSuccess={handleCommentSuccess}
         />
       )}
     </div>

@@ -9,6 +9,8 @@ import { toast } from 'sonner'
 import AuthModal from '../components/AuthModal'
 import { usePostDetailData } from '../hooks/useOptimizedData'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
+import { batchStatusService } from '../services/batchStatusService'
+import { apiCache } from '../services/apiCache'
 import {
   PostCard,
   CommentsSection,
@@ -259,6 +261,20 @@ const PostDetail = () => {
       })
       setComments(prev => [comment, ...prev])
       setNewComment('')
+      
+      // 清除相关缓存
+      batchStatusService.clearPostBatchCache(id)
+      apiCache.invalidatePattern(`comments_count_${id}`)
+      
+      // 重新获取最新的评论数
+      try {
+        const newCommentsCount = await socialService.getPostCommentsCount(id)
+        setCommentsCount(newCommentsCount)
+      } catch (countError) {
+        console.warn('获取最新评论数失败，使用本地计数:', countError)
+        setCommentsCount(prev => prev + 1)
+      }
+      
       toast.success(t('posts.detail.commentSuccess'))
     } catch (error) {
       console.error('发表评论失败:', error)

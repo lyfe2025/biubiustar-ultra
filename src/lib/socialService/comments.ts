@@ -45,7 +45,21 @@ export class CommentService {
       const data = await response.json();
       
       // 清除相关缓存
-      apiCache.invalidatePattern(`post_comments_count:*:${comment.post_id}:*`);
+      apiCache.invalidatePattern(`post_comments_count:*:${comment.post_id}:*`)
+      
+      // 清除批量评论数缓存
+      try {
+        // 清除可能存在的批量缓存
+        const batchCacheKeys = Object.keys(localStorage).filter(key => 
+          key.includes('comments_count_batch') && key.includes(comment.post_id)
+        )
+        batchCacheKeys.forEach(key => {
+          localStorage.removeItem(key)
+          console.log(`🗑️ 清除批量缓存: ${key}`)
+        })
+      } catch (error) {
+        console.warn('清除批量缓存失败:', error)
+      }
       
       // 后端API返回格式: {success: true, data: formattedComment}
       // 需要返回data.data以获取实际的评论对象

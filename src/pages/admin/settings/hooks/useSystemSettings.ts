@@ -21,6 +21,8 @@ export const useSystemSettings = () => {
       setLoading(true)
       const response = await adminService.getSystemSettings()
       
+      console.log('原始响应数据:', response)
+      
       // 处理缓存信息
       const cacheInfo = response._cacheInfo
       if (cacheInfo) {
@@ -31,7 +33,24 @@ export const useSystemSettings = () => {
         setCacheTimestamp('')
       }
       
-      setSettings(response.data as SystemSettings)
+      // 检查响应数据是否有效
+      if (response && response.data && Object.keys(response.data).length > 0) {
+        setSettings(response.data as SystemSettings)
+        console.log('系统设置获取成功:', response.data)
+      } else if (response && typeof response === 'object' && Object.keys(response).length > 0) {
+        // 如果response本身就是数据对象（没有嵌套的data字段）
+        setSettings(response as unknown as SystemSettings)
+        console.log('系统设置获取成功（直接数据）:', response)
+      } else {
+        console.warn('系统设置响应数据为空或无效:', response)
+        // 如果数据为空，尝试强制刷新
+        if (!isCacheHit) {
+          console.log('尝试强制刷新获取数据...')
+          await forceRefresh()
+        } else {
+          setSettings(response?.data || response || null)
+        }
+      }
     } catch (error) {
       console.error('获取系统设置失败:', error)
       if (error instanceof Error && error.name === 'AuthenticationError') {
@@ -40,6 +59,14 @@ export const useSystemSettings = () => {
         return
       }
       toast.error('获取系统设置失败')
+      
+      // 如果是网络错误或其他可重试错误，尝试重新获取
+      if (error instanceof Error && !error.message.includes('认证')) {
+        console.log('尝试重新获取系统设置...')
+        setTimeout(() => {
+          fetchSettings()
+        }, 2000)
+      }
     } finally {
       setLoading(false)
     }
@@ -74,8 +101,16 @@ export const useSystemSettings = () => {
         setCacheTimestamp('')
       }
       
-      setSettings(data.data as SystemSettings)
-      toast.success('设置数据已刷新')
+      // 检查数据是否有效
+      if (data && data.data && Object.keys(data.data).length > 0) {
+        setSettings(data.data as SystemSettings)
+        console.log('强制刷新设置成功:', data.data)
+        toast.success('设置数据已刷新')
+      } else {
+        console.warn('强制刷新后数据仍为空:', data)
+        setSettings(data?.data || data || null)
+        toast.warning('刷新完成，但未获取到有效数据')
+      }
     } catch (error) {
       console.error('强制刷新设置失败:', error)
       toast.error('刷新设置失败，请重试')
@@ -208,8 +243,20 @@ export const useSystemSettings = () => {
 
   // 初始化
   useEffect(() => {
+    console.log('useSystemSettings: 开始初始化')
     fetchSettings()
   }, [])
+
+  // 添加调试信息
+  useEffect(() => {
+    console.log('useSystemSettings: 状态更新', {
+      settings: settings ? Object.keys(settings).length : 0,
+      loading,
+      saving,
+      isCacheHit,
+      cacheTimestamp
+    })
+  }, [settings, loading, saving, isCacheHit, cacheTimestamp])
 
   return {
     // 数据状态

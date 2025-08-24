@@ -31,6 +31,7 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
   // 编辑状态标记，防止保存后settings更新时覆盖用户输入
   const [isEditing, setIsEditing] = useState(false)
   const [initialLoad, setInitialLoad] = useState(true)
+  const [hasInitialized, setHasInitialized] = useState(false)
 
   // 重置编辑状态的方法
   const resetEditingState = () => {
@@ -44,8 +45,8 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
 
   // 同步父组件传递的设置到本地表单数据
   React.useEffect(() => {
-    if (settings) {
-      setFormData({
+    if (settings && Object.keys(settings).length > 0) {
+      const newFormData = {
         site_name: settings['basic.siteName']?.value ?? '',
         site_description: settings['basic.siteDescription']?.value ?? '',
         site_description_zh: settings['basic.siteDescriptionZh']?.value ?? '',
@@ -57,14 +58,39 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
         contact_email: settings['basic.contactEmail']?.value ?? '',
         site_domain: settings['basic.siteDomain']?.value ?? '',
         default_language: (settings['basic.defaultLanguage']?.value as 'zh' | 'zh-TW' | 'en' | 'vi') ?? 'zh'
-      })
-      // 数据更新后重置编辑状态
-      setIsEditing(false)
+      }
+      
+      // 检查是否有实际数据（不是全部为空）
+      const hasData = Object.values(newFormData).some(value => value !== '' && value !== null && value !== undefined)
+      
+      if (hasData || !hasInitialized) {
+        setFormData(newFormData)
+        setHasInitialized(true)
+        // 只有在非编辑状态下才重置编辑状态
+        if (!isEditing) {
+          setIsEditing(false)
+        }
+      }
+      
       if (initialLoad) {
         setInitialLoad(false)
       }
     }
-  }, [settings])
+  }, [settings, hasInitialized, isEditing])
+
+  // 如果数据为空且不是加载状态，尝试重新获取数据
+  React.useEffect(() => {
+    if (!loading && !hasInitialized && (!settings || Object.keys(settings).length === 0)) {
+      // 延迟一点时间，给父组件机会重新获取数据
+      const timer = setTimeout(() => {
+        if (!settings || Object.keys(settings).length === 0) {
+          console.log('基本设置数据为空，可能需要刷新')
+        }
+      }, 1000)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [loading, settings, hasInitialized])
 
   const handleChange = (field: keyof BasicSettingsData, value: string | undefined) => {
     // 标记为编辑状态，防止useEffect重置表单数据
@@ -243,6 +269,61 @@ const BasicSettings = React.forwardRef<{ resetEditingState: () => void }, Settin
         <div className="h-10 bg-gray-200 rounded"></div>
         <div className="h-4 bg-gray-200 rounded w-1/4"></div>
         <div className="h-24 bg-gray-200 rounded"></div>
+      </div>
+    )
+  }
+
+  // 检查是否有数据
+  const hasData = settings && Object.keys(settings).length > 0
+  const hasBasicData = hasData && Object.keys(settings).some(key => key.startsWith('basic.'))
+
+  // 如果没有数据，显示提示
+  if (!hasData || !hasBasicData) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center space-x-2 mb-6">
+          <Globe className="w-5 h-5 text-purple-600" />
+          <h3 className="text-lg font-semibold text-gray-900">
+            {t('admin.settings.basic.title')}
+          </h3>
+        </div>
+        
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-yellow-800">
+                数据加载提示
+              </h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                <p>当前没有加载到基本设置数据。可能的原因：</p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                  <li>数据库中没有基本设置数据</li>
+                  <li>API接口返回数据为空</li>
+                  <li>缓存机制问题</li>
+                </ul>
+                <p className="mt-2">
+                  建议点击页面顶部的"刷新缓存"按钮来重新获取数据。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* 调试信息 */}
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">调试信息</h4>
+          <div className="text-xs text-gray-600 space-y-1">
+            <p>Settings 对象: {hasData ? '存在' : '不存在'}</p>
+            <p>Settings 键数量: {hasData ? Object.keys(settings).length : 0}</p>
+            <p>基本设置键数量: {hasBasicData ? Object.keys(settings).filter(key => key.startsWith('basic.')).length : 0}</p>
+            <p>当前时间: {new Date().toLocaleString()}</p>
+          </div>
+        </div>
       </div>
     )
   }

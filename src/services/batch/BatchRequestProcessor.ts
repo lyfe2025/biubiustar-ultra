@@ -229,9 +229,10 @@ export class BatchRequestProcessor {
       try {
         let data;
         if (req.params?.type === 'activity') {
-          data = await ActivityService.getActivityCategories();
+          data = await ActivityService.getActivityCategories(req.params?.language);
         } else {
-          data = await socialService.getContentCategories();
+          // 对于content类型或其他情况，调用socialService.getContentCategories
+          data = await socialService.getContentCategories(req.params?.language);
         }
         results.push({ id: req.id, type: req.type, data });
       } catch (error) {

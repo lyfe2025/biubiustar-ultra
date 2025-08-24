@@ -17,9 +17,10 @@ interface CommentModalProps {
   onClose: () => void
   postId: string
   postTitle: string
+  onCommentSuccess?: (postId: string) => void // 新增：评论成功回调
 }
 
-const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps) => {
+const CommentModal = ({ isOpen, onClose, postId, postTitle, onCommentSuccess }: CommentModalProps) => {
   const { user, userProfile } = useAuth()
   const { t, language } = useLanguage()
   const navigate = useNavigate()
@@ -170,6 +171,14 @@ const CommentModal = ({ isOpen, onClose, postId, postTitle }: CommentModalProps)
       setNewComment('')
       setSubmitError('')
       toast.success(t('posts.comments.success'))
+      
+      // 通知父组件评论成功，更新帖子状态
+      if (onCommentSuccess) {
+        console.log(`📝 评论成功，通知父组件更新帖子 ${postId} 的状态`)
+        onCommentSuccess(postId)
+      } else {
+        console.log(`⚠️ 评论成功，但父组件未提供 onCommentSuccess 回调`)
+      }
     } catch (error: any) {
       console.error('评论失败:', error)
       let errorMsg = t('posts.comments.error')

@@ -7,6 +7,7 @@ import { useLanguage } from '../contexts/language'
 
 import { socialService } from '../lib/socialService'
 import { batchStatusService } from '../services/batchStatusService'
+import { apiCache } from '../services/apiCache'
 import type { Post } from '../types'
 import { ActivityService, Activity as ActivityType } from '../lib/activityService'
 import PostCard from '../components/PostCard'
@@ -67,6 +68,30 @@ const Home = () => {
       setSelectedPostId(postId)
       setSelectedPostTitle(post.title)
       setIsCommentModalOpen(true)
+    }
+  }
+
+  // 处理评论成功后的状态更新
+  const handleCommentSuccess = async (postId: string) => {
+    try {
+      // 清除相关缓存，确保数据一致性
+      batchStatusService.clearPostBatchCache(postId)
+      // 清除apiCache中的评论数缓存
+      apiCache.invalidatePattern(`post_comments_count_${postId}`)
+      
+      // 更新对应帖子的评论数
+      const newCommentsCount = await socialService.getPostCommentsCount(postId)
+      setPostStatusMap(prev => ({
+        ...prev,
+        commentsCount: {
+          ...prev.commentsCount,
+          [postId]: newCommentsCount
+        }
+      }))
+      
+      console.log(`✅ 帖子 ${postId} 评论数已更新为: ${newCommentsCount}`)
+    } catch (error) {
+      console.error('更新评论数失败:', error)
     }
   }
 
@@ -427,6 +452,7 @@ const Home = () => {
         onClose={() => setIsCommentModalOpen(false)}
         postId={selectedPostId || ''}
         postTitle={selectedPostTitle}
+        onCommentSuccess={handleCommentSuccess}
       />
       
       <CreatePostModal

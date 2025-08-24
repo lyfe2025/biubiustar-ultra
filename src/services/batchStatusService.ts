@@ -160,6 +160,30 @@ class BatchStatusService {
   }
 
   /**
+   * 清除特定帖子的批量缓存
+   */
+  clearPostBatchCache(postId: string): void {
+    try {
+      // 清除包含该帖子的批量缓存
+      const cacheKeys = Object.keys(localStorage).filter(key => 
+        key.includes('comments_count_batch') && key.includes(postId)
+      )
+      
+      cacheKeys.forEach(key => {
+        localStorage.removeItem(key)
+        console.log(`🗑️ 清除批量缓存: ${key}`)
+      })
+      
+      // 同时清除内存中的缓存
+      defaultCache.delete(`comments_count_batch_${postId}`)
+      
+      console.log(`✅ 帖子 ${postId} 的批量缓存已清除`)
+    } catch (error) {
+      console.warn('清除批量缓存失败:', error)
+    }
+  }
+
+  /**
    * 批量检查用户活动参与状态
    */
   async batchCheckParticipation(activityIds: string[], userId: string): Promise<BatchParticipationResponse> {

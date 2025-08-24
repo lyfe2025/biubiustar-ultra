@@ -2,9 +2,6 @@ import { Router, Request, Response } from 'express'
 import { supabaseAdmin } from '../../../lib/supabase.js'
 import { requireAdmin } from '../auth.js'
 import asyncHandler from '../../../middleware/asyncHandler.js'
-import { configCache } from '../../../lib/cacheInstances.js'
-import { CacheKeyGenerator, CACHE_TTL } from '../../../config/cache.js'
-import { invalidateOnSettingsUpdate } from '../../../utils/settingsCacheInvalidation.js'
 
 const router = Router()
 
@@ -16,22 +13,10 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
   try {
     const { category } = req.query as { category?: string }
     
-    // 生成缓存键
-    const cacheKey = CacheKeyGenerator.systemSettings(category)
+    console.log('直接从数据库获取系统设置数据')
+    console.log('查询参数 category:', category)
 
-    // 尝试从缓存获取数据
-    const cachedData = await configCache.get(cacheKey)
-    if (cachedData && typeof cachedData === 'object') {
-      return res.json({
-        ...cachedData,
-        _cacheInfo: {
-          cached: true,
-          timestamp: new Date().toISOString()
-        }
-      })
-    }
-
-    // 缓存未命中，从数据库获取数据
+    // 直接从数据库获取数据
     let query = supabaseAdmin
       .from('system_settings')
       .select('*')
@@ -44,6 +29,8 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
     
     const { data: settings, error } = await query
     
+    console.log('数据库查询结果:', { settings, error })
+    
     if (error) {
       console.error('获取系统设置失败:', error)
       return res.status(500).json({ error: '获取系统设置失败' })
@@ -53,6 +40,8 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
     const result: Record<string, { value: any; type: string; description: string; is_public: boolean }> = {};
     settings?.forEach(setting => {
       const { category, setting_key, setting_value, setting_type, description, is_public } = setting;
+      
+      console.log('处理设置项:', { category, setting_key, setting_value, setting_type, description, is_public })
       
       // 先尝试解析 setting_value，可能包含嵌套的元数据
       let rawValue = setting_value;
@@ -121,20 +110,16 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
         description: description || `Setting: ${setting_key}`,
         is_public: is_public || false
       };
+      
+      console.log('转换后的设置项:', { fullKey, value: convertedValue, type: setting_type })
     });
+
+    console.log('最终转换结果:', result)
+    console.log('结果对象键数量:', Object.keys(result).length)
 
     const responseData = { success: true, data: result };
 
-    // 缓存数据 (TTL: 1小时，系统设置变化不频繁)
-    await configCache.set(cacheKey, responseData, CACHE_TTL.VERY_LONG)
-
-    res.json({
-      ...responseData,
-      _cacheInfo: {
-        cached: false,
-        timestamp: new Date().toISOString()
-      }
-    });
+    res.json(responseData);
   } catch (error) {
     console.error('获取系统设置失败:', error)
     res.status(500).json({ error: '服务器内部错误' })
@@ -312,28 +297,6 @@ router.put('/', asyncHandler(async (req: Request, res: Response): Promise<Respon
       })
     }
 
-    // 智能缓存失效 - 分析受影响的分类
-    try {
-      const affectedCategories = new Set<string>();
-      
-      // 从更新的设置中提取分类信息
-      for (const [fullKey] of Object.entries(settings)) {
-        if (fullKey.includes('.')) {
-          const [category] = fullKey.split('.');
-          affectedCategories.add(category);
-        } else {
-          // 兼容旧格式，假设为basic分类
-          affectedCategories.add('basic');
-        }
-      }
-
-      await invalidateOnSettingsUpdate(Array.from(affectedCategories));
-      console.log('系统设置缓存失效完成，受影响分类:', Array.from(affectedCategories));
-    } catch (cacheError) {
-      console.error('系统设置缓存失效失败:', cacheError);
-      // 缓存失效失败不应该影响设置保存的成功响应
-    }
-    
     res.json({ success: true, message: '系统设置保存成功' })
   } catch (error) {
     console.error('保存系统设置失败:', error)
