@@ -130,16 +130,18 @@ MAX_FILE_SIZE=100
 
 ## 🚀 真正一键部署 (推荐)
 
+> **⚠️ 重要提示**: 由于原始脚本存在函数定义顺序问题，我们提供了修复版本 `one-click-deploy-fixed.sh`，确保远程部署命令能够正常工作。
+
 ### 方式一：远程一键部署 (最简单)
 ```bash
 # 在全新服务器上执行这一条命令即可
-sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy.sh)
+sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-fixed.sh)
 ```
 
 ### 方式二：自定义配置部署
 ```bash
 # 自定义仓库地址和部署目录
-sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy.sh) \
+sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-fixed.sh) \
   -r https://github.com/your-username/your-repo \
   -d /home/user/project \
   -e prod \
@@ -149,13 +151,13 @@ sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultr
 ### 方式三：本地脚本部署
 ```bash
 # 1. 下载脚本
-wget https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy.sh
+wget https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-fixed.sh
 
 # 2. 给执行权限
-chmod +x one-click-deploy.sh
+chmod +x one-click-deploy-fixed.sh
 
 # 3. 执行部署
-sudo ./one-click-deploy.sh
+sudo ./one-click-deploy-fixed.sh
 ```
 
 ## ⚠️ 重要说明：一键部署的环境变量配置
