@@ -130,18 +130,26 @@ MAX_FILE_SIZE=100
 
 ## 🚀 真正一键部署 (推荐)
 
-> **⚠️ 重要提示**: 由于原始脚本存在函数定义顺序问题，我们提供了修复版本 `one-click-deploy-fixed.sh`，确保远程部署命令能够正常工作。
+> **⚠️ 重要提示**: 为了确保远程部署的可靠性，我们提供了专门用于远程部署的简化脚本 `one-click-deploy-remote.sh`，避免了复杂的配置文件依赖问题。
 
-### 方式一：远程一键部署 (最简单)
+**新脚本的优势:**
+- ✅ **无配置文件依赖**: 所有配置都硬编码在脚本中，避免路径问题
+- ✅ **完整的系统检查**: 自动检测操作系统、内存、磁盘空间
+- ✅ **智能软件安装**: 自动识别包管理器并安装必要软件
+- ✅ **Docker自动安装**: 如果选择Docker模式，自动安装Docker和docker-compose
+- ✅ **Node.js自动安装**: 自动安装Node.js 18.x版本
+- ✅ **错误处理优化**: 更好的错误提示和用户引导
+
+### 方式一：远程一键部署 (最简单) ⭐ 推荐
 ```bash
 # 在全新服务器上执行这一条命令即可
-sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-fixed.sh)
+sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-remote.sh)
 ```
 
 ### 方式二：自定义配置部署
 ```bash
 # 自定义仓库地址和部署目录
-sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-fixed.sh) \
+sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-remote.sh) \
   -r https://github.com/your-username/your-repo \
   -d /home/user/project \
   -e prod \
@@ -151,13 +159,13 @@ sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultr
 ### 方式三：本地脚本部署
 ```bash
 # 1. 下载脚本
-wget https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-fixed.sh
+wget https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-remote.sh
 
 # 2. 给执行权限
-chmod +x one-click-deploy-fixed.sh
+chmod +x one-click-deploy-remote.sh
 
 # 3. 执行部署
-sudo ./one-click-deploy-fixed.sh
+sudo ./one-click-deploy-remote.sh
 ```
 
 ## ⚠️ 重要说明：一键部署的环境变量配置
