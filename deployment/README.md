@@ -130,42 +130,51 @@ MAX_FILE_SIZE=100
 
 ## 🚀 真正一键部署 (推荐)
 
-> **⚠️ 重要提示**: 为了确保远程部署的可靠性，我们提供了专门用于远程部署的简化脚本 `one-click-deploy-remote.sh`，避免了复杂的配置文件依赖问题。
+> **🚀 重要更新**: 我们提供了全新的终极一键部署脚本 `one-click-deploy-ultimate.sh`，这是最可靠、功能最完整的部署方案！
 
-**新脚本的优势:**
-- ✅ **无配置文件依赖**: 所有配置都硬编码在脚本中，避免路径问题
-- ✅ **完整的系统检查**: 自动检测操作系统、内存、磁盘空间
-- ✅ **智能软件安装**: 自动识别包管理器并安装必要软件
-- ✅ **Docker自动安装**: 如果选择Docker模式，自动安装Docker和docker-compose
+**终极脚本的核心特性:**
+- ✅ **智能环境检测**: 自动检测操作系统类型（Ubuntu/Debian/CentOS/RHEL/Fedora）
+- ✅ **自动依赖安装**: 智能识别包管理器，自动安装curl、wget、git、unzip等基础软件
+- ✅ **Docker自动安装**: 根据操作系统自动安装Docker和Docker Compose
 - ✅ **Node.js自动安装**: 自动安装Node.js 18.x版本
-- ✅ **错误处理优化**: 更好的错误提示和用户引导
+- ✅ **环境变量管理**: 自动创建和验证.env文件，确保配置完整性
+- ✅ **Docker服务管理**: 自动构建镜像、启动服务、健康检查
+- ✅ **错误处理机制**: 完整的错误处理和用户引导
+- ✅ **部署状态监控**: 实时监控服务状态和健康状态
 
-### 方式一：远程一键部署 (最简单) ⭐ 推荐
+**完整部署流程:**
+1. 🔍 **系统检测**: 检测操作系统、内存、磁盘空间、CPU核心数
+2. 📦 **软件安装**: 自动安装基础软件包、Docker、Node.js
+3. 📁 **目录创建**: 创建部署目录和必要子目录
+4. 📥 **代码拉取**: 克隆或更新代码仓库
+5. ⚙️ **环境配置**: 创建和验证.env环境变量文件
+6. 🐳 **Docker部署**: 构建镜像、启动服务、健康检查
+7. ✅ **部署完成**: 显示访问地址和常用管理命令
+
+### 方式一：终极一键部署 (最推荐) 🏆
 ```bash
 # 在全新服务器上执行这一条命令即可
-sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-remote.sh)
+sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-ultimate.sh)
 ```
 
 ### 方式二：自定义配置部署
 ```bash
 # 自定义仓库地址和部署目录
-sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-remote.sh) \
+sudo bash <(curl -sSL https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-ultimate.sh) \
   -r https://github.com/your-username/your-repo \
-  -d /home/user/project \
-  -e prod \
-  -m docker
+  -d /home/user/project
 ```
 
 ### 方式三：本地脚本部署
 ```bash
 # 1. 下载脚本
-wget https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-remote.sh
+wget https://raw.githubusercontent.com/lyfe2025/biubiustar-ultra/main/deployment/scripts/one-click-deploy-ultimate.sh
 
 # 2. 给执行权限
-chmod +x one-click-deploy-remote.sh
+chmod +x one-click-deploy-ultimate.sh
 
 # 3. 执行部署
-sudo ./one-click-deploy-remote.sh
+sudo ./one-click-deploy-ultimate.sh
 ```
 
 ## ⚠️ 重要说明：一键部署的环境变量配置
