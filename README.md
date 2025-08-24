@@ -76,7 +76,7 @@ npm install
 ### 环境配置
 1. 复制环境变量文件：
 ```bash
-cp deployment/configs/env.example .env
+cp deploy/env.template .env
 ```
 
 2. 配置 Supabase 连接信息：
@@ -87,6 +87,21 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
 ### 开发模式
+
+**方式一：使用项目管理脚本（推荐）**
+```bash
+# 使用项目管理脚本启动
+./project.sh
+
+# 选择菜单选项：
+# 1) 启动项目 - 自动处理端口冲突，启动前后端服务
+# 2) 停止项目 - 优雅停止所有服务
+# 3) 重启项目 - 重启服务
+# 4) 查看状态 - 显示服务运行状态
+# 5) 查看日志 - 实时查看应用日志
+```
+
+**方式二：使用 npm 脚本**
 ```bash
 # 同时启动前端和后端开发服务器
 npm run dev
@@ -138,7 +153,13 @@ biubiustar-ultra/
 │   ├── routes/            # API 路由
 │   └── server.ts          # 开发服务器入口
 ├── supabase/              # 数据库相关
-├── deployment/            # 部署相关文件
+├── deploy/                # 一键部署系统
+│   ├── deploy.sh          # 主部署脚本
+│   ├── check-env.sh       # 环境检查脚本
+│   ├── health-check.sh    # 健康检查脚本
+│   ├── env.template       # 环境变量模板
+│   └── README.md          # 部署说明文档
+├── project.sh             # 项目管理脚本
 ├── scripts/               # 项目脚本
 └── docs/                  # 项目文档
 ```
@@ -185,24 +206,44 @@ biubiustar-ultra/
 
 ## 🚀 部署
 
-### 快速部署
-我们提供了完整的部署方案，支持多种部署方式：
+### 一键部署系统
+项目提供了完整的一键部署解决方案，位于 `deploy/` 文件夹：
 
-- **🚀 Vercel 部署** (推荐) - 零配置，自动CI/CD，全球CDN
-- **🐳 Docker 部署** - 容器化，适合生产环境，易于扩展
-- **🖥️ 传统服务器部署** - 完全控制，适合企业环境，自定义配置
-
-### 一键部署
+**🚀 快速部署命令**
 ```bash
-# 查看部署文件夹
-cd deployment
+# 克隆项目并进入部署目录
+git clone https://github.com/lyfe2025/biubiustar-ultra.git
+cd biubiustar-ultra/deploy
 
-# Docker 部署
-./scripts/deploy.sh -m docker -e prod
-
-# 传统服务器部署
-./scripts/deploy.sh -m server -e prod
+# 执行一键部署
+./deploy.sh
 ```
+
+**📋 部署流程**
+1. **环境检查** - 自动检查并安装 Git、Node.js、npm、pnpm
+2. **项目克隆** - 从 GitHub 获取最新代码
+3. **配置生成** - 基于模板生成 `.env` 配置文件
+4. **依赖安装** - 自动安装项目依赖
+5. **服务启动** - 使用 `project.sh` 脚本启动服务
+6. **健康检查** - 验证前后端服务状态
+7. **访问信息** - 显示前端和后端访问地址
+
+**🔧 自定义部署选项**
+```bash
+# 指定项目目录
+./deploy.sh --target-dir /path/to/your/project
+
+# 跳过环境检查
+./deploy.sh --skip-env-check
+
+# 使用自定义配置文件
+./deploy.sh --config /path/to/your/.env
+```
+
+### 其他部署方式
+- **🚀 Vercel 部署** - 零配置，自动CI/CD，全球CDN
+- **🐳 Docker 部署** - 容器化，适合生产环境
+- **🖥️ 传统服务器部署** - 完全控制，适合企业环境
 
 ## 📚 项目文档
 
@@ -210,6 +251,7 @@ cd deployment
 
 ### 🎯 核心文档
 - **[项目脚本指南](./docs/PROJECT_SCRIPT_GUIDE.md)** - project.sh 脚本的完整使用说明
+- **[一键部署指南](./deploy/README.md)** - deploy/ 文件夹的完整部署说明
 - **[内存缓存实施方案](./docs/内存缓存实施方案.md)** - 详细的缓存架构设计和实现方案
 - **[网络错误处理解决方案](./docs/网络错误处理解决方案.md)** - 完整的网络错误处理系统
 
@@ -221,12 +263,39 @@ cd deployment
 - **[Vercel优化方案](./docs/vercel-optimization.md)** - Vercel部署优化完整方案
 - **[配置一致性检查报告](./docs/配置一致性检查报告.md)** - 环境配置检查和修正
 
+## 🛠️ 项目管理
+
+### project.sh 脚本功能
+项目提供了强大的管理脚本 `project.sh`，支持完整的项目生命周期管理：
+
+**🚀 核心功能**
+- **智能启动** - 自动检查端口冲突，处理进程管理
+- **优雅停止** - 安全停止所有服务，清理资源
+- **状态监控** - 实时显示服务状态、端口占用、系统资源
+- **日志管理** - 实时日志查看，错误追踪
+- **配置管理** - 自动生成和验证 `.env` 配置
+- **项目清理** - 清理构建文件、缓存、依赖
+- **IP管理** - 黑名单管理，安全防护
+
+**📋 使用方法**
+```bash
+# 启动交互式菜单
+./project.sh
+
+# 直接执行特定操作
+./project.sh start    # 启动项目
+./project.sh stop     # 停止项目
+./project.sh status   # 查看状态
+./project.sh logs     # 查看日志
+./project.sh clean    # 清理项目
+```
+
 ## 🧪 测试和调试
 
 ### 调试工具
-- **Debug 脚本**: 提供多个调试脚本
-- **测试页面**: 提供测试和调试页面
-- **日志系统**: 完整的应用日志记录
+- **Debug 脚本**: 提供多个调试脚本（位于 `scripts/` 目录）
+- **健康检查**: 自动化的服务健康检查
+- **日志系统**: 完整的应用日志记录和分析
 
 ### 缓存测试
 - **缓存功能测试**: 完整的缓存系统功能验证
@@ -256,7 +325,7 @@ cd deployment
 ## 📞 联系我们
 
 - 项目主页：[Biubiustar](https://biubiustar.com)
-- 问题反馈：[GitHub Issues](https://github.com/your-username/biubiustar-ultra/issues)
+- 问题反馈：[GitHub Issues](https://github.com/lyfe2025/biubiustar-ultra/issues)
 - 邮箱：contact@biubiustar.com
 
 ## 🙏 致谢
@@ -269,4 +338,4 @@ cd deployment
 
 **🚀 开始使用**: 选择适合你的部署方式，开始享受 Biubiustar Ultra 的强大功能！
 
-**📈 项目进展**: 2.0版本正在开发中，缓存系统已完成90%，欢迎关注最新功能！
+**📈 项目进展**: 2.0版本正在开发中，缓存系统已完成90%，一键部署系统已完成，欢迎关注最新功能！

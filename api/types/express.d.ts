@@ -1,13 +1,21 @@
 import { Request, Response } from 'express';
 import { User } from '@supabase/supabase-js';
 
+// 登录尝试信息接口
+interface LoginAttemptsInfo {
+  totalAttempts: number;
+  failedAttempts: number;
+  recentFailedAttempts: number;
+  lastAttempt?: string;
+}
+
 declare global {
   namespace Express {
     interface Request {
       user?: User;
       userId?: string;
       clientIP?: string;
-      loginAttempts?: number;
+      loginAttempts?: LoginAttemptsInfo;
     }
   }
 }

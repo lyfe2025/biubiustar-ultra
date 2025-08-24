@@ -564,16 +564,3 @@ export function startSecurityCleanupScheduler(): NodeJS.Timeout {
   
   return intervalId;
 }
-
-// 扩展Request接口以包含安全相关信息
-declare module 'express-serve-static-core' {
-  interface Request {
-    clientIP?: string;
-    loginAttempts?: {
-      totalAttempts: number;
-      failedAttempts: number;
-      recentFailedAttempts: number;
-      lastAttempt?: string;
-    };
-  }
-}
