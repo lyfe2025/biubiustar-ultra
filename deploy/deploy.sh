@@ -318,7 +318,7 @@ step_start_services() {
         chmod +x project.sh
         
         # 使用project.sh启动项目
-        echo "1" | ./project.sh  # 自动选择启动选项
+        ./project.sh start  # 直接启动项目
         
         if [ $? -eq 0 ]; then
             log_success "服务启动成功"
