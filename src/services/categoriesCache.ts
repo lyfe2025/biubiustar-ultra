@@ -7,6 +7,11 @@ import { socialService } from '../lib/socialService/index';
 import { ActivityService } from '../lib/activityService';
 import { defaultCache } from './cacheService';
 
+// 验证导入的服务是否可用
+if (!ActivityService) {
+  console.error('❌ categoriesCache: ActivityService 导入失败，这可能导致运行时错误');
+}
+
 export interface ContentCategory {
   id: string;
   name: string;
@@ -32,19 +37,19 @@ export interface ActivityCategory {
   icon?: string;
 }
 
-class CategoriesCacheService {
-  private static instance: CategoriesCacheService;
+export class CategoriesCache {
+  private static instance: CategoriesCache;
   private readonly CONTENT_CATEGORIES_CACHE_KEY = 'content_categories';
   private readonly ACTIVITY_CATEGORIES_CACHE_KEY = 'activity_categories';
   private readonly CACHE_TTL = 30 * 60 * 1000; // 30分钟缓存
 
   private constructor() {}
 
-  static getInstance(): CategoriesCacheService {
-    if (!CategoriesCacheService.instance) {
-      CategoriesCacheService.instance = new CategoriesCacheService();
+  static getInstance(): CategoriesCache {
+    if (!CategoriesCache.instance) {
+      CategoriesCache.instance = new CategoriesCache();
     }
-    return CategoriesCacheService.instance;
+    return CategoriesCache.instance;
   }
 
   /**
@@ -82,6 +87,13 @@ class CategoriesCacheService {
    */
   async getActivityCategories(language: string = 'zh'): Promise<ActivityCategory[]> {
     const cacheKey = `${this.ACTIVITY_CATEGORIES_CACHE_KEY}_${language}`;
+    
+    // 验证 ActivityService 是否可用
+    if (!ActivityService) {
+      console.error('❌ categoriesCache: ActivityService 未定义，无法获取活动分类');
+      // 返回空数组而不是抛出错误，避免影响页面渲染
+      return [];
+    }
     
     try {
       // 尝试从缓存获取
@@ -195,7 +207,4 @@ class CategoriesCacheService {
 }
 
 // 导出单例实例
-export const categoriesCache = CategoriesCacheService.getInstance();
-
-// 导出类型和工具函数
-export { CategoriesCacheService };
+export const categoriesCache = CategoriesCache.getInstance();

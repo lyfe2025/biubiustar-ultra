@@ -165,6 +165,7 @@ class BatchStatusService {
   clearPostBatchCache(postId: string): void {
     try {
       // 清除包含该帖子的批量缓存
+      // 批量缓存的键格式是: comments_count_batch_${postIds.sort().join(',')}
       const cacheKeys = Object.keys(localStorage).filter(key => 
         key.includes('comments_count_batch') && key.includes(postId)
       )
@@ -175,11 +176,53 @@ class BatchStatusService {
       })
       
       // 同时清除内存中的缓存
-      defaultCache.delete(`comments_count_batch_${postId}`)
+      // 注意：内存缓存可能包含多个不同的批量缓存键，需要遍历清除
+      const memoryCacheKeys = Array.from(defaultCache['memoryCache'].keys()).filter(key => 
+        key.includes('comments_count_batch') && key.includes(postId)
+      )
+      memoryCacheKeys.forEach(key => {
+        defaultCache.delete(key)
+        console.log(`🗑️ 清除内存批量缓存: ${key}`)
+      })
       
       console.log(`✅ 帖子 ${postId} 的批量缓存已清除`)
     } catch (error) {
       console.warn('清除批量缓存失败:', error)
+    }
+  }
+
+  /**
+   * 全面清除帖子相关的所有缓存
+   * 包括批量缓存、单个缓存、API缓存等
+   */
+  clearAllPostCache(postId: string): void {
+    try {
+      console.log(`🧹 开始全面清除帖子 ${postId} 的所有缓存...`)
+      
+      // 1. 清除批量缓存
+      this.clearPostBatchCache(postId)
+      
+      // 2. 清除单个帖子的缓存
+      defaultCache.delete(`post_${postId}`)
+      defaultCache.delete(`post_comments_count_${postId}`)
+      defaultCache.delete(`post_likes_count_${postId}`)
+      
+      // 3. 清除localStorage中的相关缓存
+      const allCacheKeys = Object.keys(localStorage)
+      const postRelatedKeys = allCacheKeys.filter(key => 
+        key.includes(postId) || 
+        (key.includes('comments_count_batch') && key.includes(postId)) ||
+        (key.includes('likes_count_batch') && key.includes(postId))
+      )
+      
+      postRelatedKeys.forEach(key => {
+        localStorage.removeItem(key)
+        console.log(`🗑️ 清除相关缓存: ${key}`)
+      })
+      
+      console.log(`✅ 帖子 ${postId} 的所有缓存已全面清除`)
+    } catch (error) {
+      console.warn('全面清除帖子缓存失败:', error)
     }
   }
 

@@ -19,6 +19,10 @@ if (!ActivityService) {
   console.error('❌ BatchRequestProcessor: ActivityService 导入失败，这可能导致运行时错误');
 }
 
+if (!socialService) {
+  console.error('❌ BatchRequestProcessor: socialService 导入失败，这可能导致运行时错误');
+}
+
 export class BatchRequestProcessor {
   private cacheManager: CacheManager;
   private performanceMonitor: PerformanceMonitor;
@@ -205,16 +209,16 @@ export class BatchRequestProcessor {
   private async batchFetchActivities(requests: BatchRequest[]): Promise<BatchResponse[]> {
     const results: BatchResponse[] = [];
     
-    // 验证 ActivityService 是否可用
-    if (!ActivityService) {
-      console.error('❌ BatchRequestProcessor: ActivityService 未定义，无法获取活动数据');
+    // 验证 ActivityService 及其方法是否可用
+    if (!ActivityService || typeof ActivityService.getUpcomingActivities !== 'function') {
+      console.error('❌ BatchRequestProcessor: ActivityService 或相关方法未定义，无法获取活动数据');
       // 返回错误结果而不是抛出异常
       for (const req of requests) {
         results.push({ 
           id: req.id, 
           type: req.type, 
           data: null, 
-          error: 'ActivityService 未定义，无法获取活动数据' 
+          error: 'ActivityService 或相关方法未定义，无法获取活动数据' 
         });
       }
       return results;
@@ -247,38 +251,71 @@ export class BatchRequestProcessor {
   private async batchFetchCategories(requests: BatchRequest[]): Promise<BatchResponse[]> {
     const results: BatchResponse[] = [];
     
-    // 验证 ActivityService 是否可用
-    if (!ActivityService) {
-      console.error('❌ BatchRequestProcessor: ActivityService 未定义，无法获取活动分类');
-      // 返回错误结果而不是抛出异常
-      for (const req of requests) {
-        results.push({ 
-          id: req.id, 
-          type: req.type, 
-          data: null, 
-          error: 'ActivityService 未定义，无法获取活动分类' 
-        });
-      }
-      return results;
-    }
-    
     for (const req of requests) {
       try {
         let data;
-        if (req.params?.type === 'activity') {
-          // 使用静态方法调用
-          data = await ActivityService.getActivityCategories(req.params?.language);
+        const requestType = req.params?.type;
+        
+        console.log(`[BatchRequestProcessor] Processing categories request: ${req.id}, type: ${requestType}`);
+        
+        // 严格检查请求类型并分别处理
+        if (requestType === 'activity') {
+          // 活动分类请求 - 多重检查确保ActivityService可用
+          if (
+            typeof ActivityService !== 'undefined' && 
+            ActivityService !== null &&
+            typeof ActivityService.getActivityCategories === 'function'
+          ) {
+            console.log(`[BatchRequestProcessor] Using ActivityService.getActivityCategories for request ${req.id}`);
+            data = await ActivityService.getActivityCategories(req.params?.language);
+          } else {
+            console.warn(`[BatchRequestProcessor] ActivityService.getActivityCategories not available for request ${req.id}, using fallback`);
+            // 降级到内容分类
+            if (
+              typeof socialService !== 'undefined' && 
+              socialService !== null &&
+              typeof socialService.getContentCategories === 'function'
+            ) {
+              data = await socialService.getContentCategories(req.params?.language);
+            } else {
+              throw new Error('Both ActivityService and socialService are unavailable');
+            }
+          }
         } else {
-          // 对于content类型或其他情况，调用socialService.getContentCategories
-          data = await socialService.getContentCategories(req.params?.language);
+          // 内容分类请求（默认）
+          console.log(`[BatchRequestProcessor] Using socialService.getContentCategories for request ${req.id}`);
+          if (
+            typeof socialService !== 'undefined' && 
+            socialService !== null &&
+            typeof socialService.getContentCategories === 'function'
+          ) {
+            data = await socialService.getContentCategories(req.params?.language);
+          } else {
+            throw new Error('socialService.getContentCategories is not available');
+          }
         }
-        results.push({ id: req.id, type: req.type, data });
+        
+        console.log(`[BatchRequestProcessor] Successfully fetched categories for request ${req.id}:`, data?.length || 0, 'items');
+        
+        results.push({
+          id: req.id,
+          type: req.type,
+          data: data || []
+        });
       } catch (error) {
-        console.error('❌ BatchRequestProcessor: 获取分类数据失败:', error);
-        results.push({ id: req.id, type: req.type, data: null, error: String(error) });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`[BatchRequestProcessor] Failed to fetch categories for request ${req.id}:`, errorMessage, error);
+        
+        results.push({
+          id: req.id,
+          type: req.type,
+          data: [], // 提供空数组作为降级数据
+          error: errorMessage
+        });
       }
     }
     
+    console.log(`[BatchRequestProcessor] Completed ${results.length} category requests`);
     return results;
   }
 

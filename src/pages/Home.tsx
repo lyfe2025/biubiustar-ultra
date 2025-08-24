@@ -62,6 +62,9 @@ const Home = () => {
     participantCount: Record<string, number>;
   }>({ isParticipating: {}, participantCount: {} })
 
+  // 强制更新状态，用于确保评论数更新后重新渲染
+  const [forceUpdate, setForceUpdate] = useState(0)
+
   const handleComment = (postId: string) => {
     const post = posts.find(p => p.id === postId)
     if (post) {
@@ -74,13 +77,16 @@ const Home = () => {
   // 处理评论成功后的状态更新
   const handleCommentSuccess = async (postId: string) => {
     try {
-      // 清除相关缓存，确保数据一致性
-      batchStatusService.clearPostBatchCache(postId)
+      // 全面清除相关缓存，确保数据一致性
+      batchStatusService.clearAllPostCache(postId)
+      
       // 清除apiCache中的评论数缓存
       apiCache.invalidatePattern(`post_comments_count_${postId}`)
       
       // 更新对应帖子的评论数
       const newCommentsCount = await socialService.getPostCommentsCount(postId)
+      
+      // 立即更新本地状态
       setPostStatusMap(prev => ({
         ...prev,
         commentsCount: {
@@ -89,9 +95,20 @@ const Home = () => {
         }
       }))
       
+      // 强制重新渲染，确保评论数更新
+      setForceUpdate(prev => prev + 1)
+      
       console.log(`✅ 帖子 ${postId} 评论数已更新为: ${newCommentsCount}`)
     } catch (error) {
       console.error('更新评论数失败:', error)
+      // 如果获取失败，使用本地计数 +1 的方式
+      setPostStatusMap(prev => ({
+        ...prev,
+        commentsCount: {
+          ...prev.commentsCount,
+          [postId]: (prev.commentsCount[postId] || 0) + 1
+        }
+      }))
     }
   }
 
@@ -344,10 +361,10 @@ const Home = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
               {posts.map((post, index) => (
                 <div
-                  key={post.id}
+                  key={`${post.id}-${forceUpdate}-${postStatusMap.commentsCount[post.id] || 0}`}
                   className="transform hover:scale-105 transition-all duration-300"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >

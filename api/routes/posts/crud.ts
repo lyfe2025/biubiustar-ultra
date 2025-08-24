@@ -7,6 +7,7 @@ import { createCacheMiddleware, createUserSpecificCacheMiddleware } from '../../
 import { contentCache } from '../../lib/cacheInstances';
 import { invalidatePostCache, invalidateContentCache, invalidateUserCache } from '../../services/cacheInvalidation';
 import { CACHE_TTL } from '../../config/cache';
+import { authenticateToken } from '../../middleware/auth.js';
 
 const router = Router();
 
@@ -457,10 +458,15 @@ router.put('/:id', asyncHandler(async (req: Request, res: Response) => {
 }));
 
 // Delete post
-router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { user_id } = req.body;
+    const userId = req.user?.id; // 从认证中间件获取用户ID
+
+    if (!userId) {
+      sendUnauthorizedError(res, '用户未认证');
+      return;
+    }
 
     // Check if post exists and user has permission
     const { data: existingPost, error: fetchError } = await supabaseAdmin
@@ -479,7 +485,7 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
       return;
     }
 
-    if (existingPost.user_id !== user_id) {
+    if (existingPost.user_id !== userId) {
       sendUnauthorizedError(res, '无权限删除此帖子');
       return;
     }
@@ -509,10 +515,16 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
 }));
 
 // Update post status (admin only)
-router.put('/:id/status', asyncHandler(async (req: Request, res: Response) => {
+router.put('/:id/status', authenticateToken, asyncHandler(async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { status, user_id } = req.body;
+    const { status } = req.body;
+    const userId = req.user?.id; // 从认证中间件获取用户ID
+
+    if (!userId) {
+      sendUnauthorizedError(res, '用户未认证');
+      return;
+    }
 
     if (!validatePostStatus(status)) {
       sendValidationError(res, '无效的帖子状态');
@@ -537,7 +549,7 @@ router.put('/:id/status', asyncHandler(async (req: Request, res: Response) => {
       return;
     }
 
-    if (existingPost.user_id !== user_id) {
+    if (existingPost.user_id !== userId) {
       sendUnauthorizedError(res, '无权限修改此帖子状态');
       return;
     }

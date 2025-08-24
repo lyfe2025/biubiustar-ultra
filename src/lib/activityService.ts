@@ -34,6 +34,19 @@ export interface ActivityCategory {
 }
 
 export class ActivityService {
+  // 静态方法：验证服务是否可用
+  static isAvailable(): boolean {
+    try {
+      // 简化检查逻辑：直接验证ActivityService类是否存在且包含必要的静态方法
+      return ActivityService && 
+             typeof ActivityService.getActivityCategories === 'function' && 
+             typeof ActivityService.getUpcomingActivities === 'function';
+    } catch (error) {
+      console.error('❌ ActivityService.isAvailable() 检查失败:', error);
+      return false;
+    }
+  }
+
   // 获取所有活动
   async getActivities(): Promise<Activity[]> {
     return apiCache.cached(
@@ -336,6 +349,12 @@ export class ActivityService {
 
   // 获取即将到来的活动
   static async getUpcomingActivities(limit = 10): Promise<Activity[]> {
+    // 验证服务是否可用
+    if (!ActivityService.isAvailable()) {
+      console.error('❌ ActivityService: 服务不可用，无法获取即将到来的活动');
+      return [];
+    }
+
     return apiCache.cached(
       `activities:upcoming:${limit}`,
       async () => {
@@ -363,6 +382,12 @@ export class ActivityService {
 
   // 获取活动分类
   static async getActivityCategories(language?: string): Promise<ActivityCategory[]> {
+    // 验证服务是否可用
+    if (!ActivityService.isAvailable()) {
+      console.error('❌ ActivityService: 服务不可用，无法获取活动分类');
+      return [];
+    }
+
     const langParam = language ? language.toLowerCase() : 'default';
     return apiCache.cached(
       `activity:categories:${langParam}`,
